@@ -2,5 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
-.pdf
+*.pdf
 *.DS_Store
+*.CAF2021_parModes_*.txt

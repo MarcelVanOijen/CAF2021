@@ -43,5 +43,5 @@ for (s in 1:nSites) {
   
 # Write the dataframe to txt-file
 write.table( df_parModes,
-			 paste('CAF2014_parModes',format(Sys.time(),"_%H_%M.txt"),sep=""),
+			 paste('CAF2021_parModes',format(Sys.time(),"_%H_%M.txt"),sep=""),
 			 sep="\t", row.names=F )

@@ -2,7 +2,7 @@
 ## MvO, 2021-03-19
 
 ## 1. INITIALISE MCMC ##
-   nChain <- as.integer(100)
+   nChain <- as.integer(120)
    source('BC/BC_CAF2021_MCMC_init_Turrialba_01_E_AC.R')
 
 ## 2. RUNNING THE MCMC ##
