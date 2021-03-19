@@ -1,0 +1,16 @@
+harvDMav_year	2002	365	0.01	10
+harvDMav_year	2003	365	0.55	0.3
+harvDMav_year	2004	365	2.22	0.31
+harvDMav_year	2005	365	2.98	0.3
+harvDMav_year	2006	365	2.11	0.3
+harvDMav_year	2007	365	3.73	0.3
+harvDMav_year	2008	365	1.00	0.3
+harvDMav_year	2009	365	2.41	0.3
+harvDMav_year	2010	365	2.56	0.3
+harvDMav_year	2011	365	1.81	0.3
+harvDMav_year	2012	365	1.92	0.3
+harvDMav_year	2013	365	0.28	0.3
+harvDMav_year	2014	365	1.82	0.3
+harvDMav_year	2015	365	0.05	10
+harvDMav_year	2016	365	0.99	0.3
+harvDMav_year	2017	365	0.69	0.3
