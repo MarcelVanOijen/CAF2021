@@ -1,5 +1,5 @@
 ## BC_CAF2021_Turrialba_01_E_AC.R
-## MvO, 2021-03-19
+## MvO, 2021-03-22
 
 ## 1. INITIALISE MCMC ##
    nChain <- as.integer(120)
