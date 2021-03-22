@@ -30,7 +30,7 @@ geometry: margin=1in
 ```{r, include=FALSE}
   knitr::opts_chunk$set(echo=TRUE,results="asis",warning=FALSE,message=FALSE)
 
-  # 2021-03-22: Integration with Github - 2FA set up
+  # 2021-03-22: In progress: integration with Github where 2FA is now set up
 ```
 
 
