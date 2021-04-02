@@ -1,7 +1,6 @@
 source('initialisation/initialise_CAF2021_Turrialba_01_E_AC.R')
 iH.model    <- which( outputNames=="harvDMav_year" )
  
-load('MCMC_Turrialba_2021-xx-xx.RData')
 idoy1.model <- which(output[,2]>=2003 & output[,3]==1)
 
 params_BC_MAP       <- scparMAP_BC  * sc

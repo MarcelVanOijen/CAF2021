@@ -1,0 +1,82 @@
+---
+title: 'CAF2021: Bayesian calibration of CAF2021'
+subtitle: 'Data from the CATIE long-term experiment in Turrialba, Costa Rica'
+author: MvO
+date: '`r Sys.Date()`'
+output:
+  pdf_document:
+    fig_crop: false
+    fig_caption: yes
+    keep_tex: no
+    number_sections: yes
+    toc: yes
+  word_document:
+    reference_docx: word-styles-reference-01.docx
+  html_document: default
+fontsize: 11pt
+geometry: margin=1in
+---
+
+# Introduction
+
+We report here on progress with calibration of CAF2021. The model was calibrated on data from 18 out of the 20 treatments at the long-term coffee agroforestry experiment in Turrialba. Two of the treatments had two upper-stratum timber tree species (Casha and Terminalia), and that combination cannot be simulated with the current version of the model: the model can simulate at most one "upper" tree species (and at most two lower ones).
+
+The calibration consisted of the following activities:
+1. Assemble, from various sources, calibration data on coffee and tree growth.
+2. Identify CAF2021 parameters that we wanted to calibrate, and assign to them a prior probability distribution to represent our uncertainty about the values of the parameters.
+3. Carry out Bayesian calibration (BC) using Markov Chain Monte Carlo sampling (MCMC), to derive a posterior distribution for the parameters. We used an MCMC chain length of 36,000 iterations, which means that the model was run with 36,000 different parameter vectors. Each parameter vector was applied to each of the 18 treatments, so the total number of CAF2021 runs for this calibration was 18 $\times$ 36,000 = 648,000 model runs.
+4. Analyse the results from the BC to identify any remaining problems with data and model.
+
+We briefly discuss the 6 steps now.
+
+# Results & Discussion
+
+## Data: coffee and tree growth
+
+- We used the most recent files received from Elias (18 June 2020). Annual coffee yields in fanegas/ha were converted to dry matter yields by multiplying with 86 kg/fanega.
+- For coffee yields, the values were mostly closely correlated with the data sets used earlier by Oriana Ovalle.
+- It would be good to have data on tree biomass.
+- For most variables we quantified the uncertainty of each measurement as a coefficient of variation of 30%, with slightly lower values for coffee yield.
+
+## Prior probability distribution
+
+- In the calibration, we included parameters for coffee, soil and the three tree species (Erythrina, Terminalia, Chloroleucon).
+- We only used a subset of the model's parameters for the calibration, and used a fairly uninformative (not too constraining) prior.
+
+## MCMC and Posterior probability distribution
+
+```{r, eval=F}
+## BC_CAF2021_Turrialba_01-10_13-20.R
+## MvO, 2021-03-19
+
+## 1. INITIALISE MCMC ##
+   # nChain <- as.integer(36000)
+   nChain <- as.integer(36)
+   source('BC/BC_CAF2021_MCMC_init_Turrialba_01-10_13-20.R')
+
+## 2. RUNNING THE MCMC ##
+   source('BC/BC_CAF2021_MCMC.R')
+
+## 3. PRINTING AND PLOTTING ##
+   source('BC/BC_export_parModes.R')
+   source('BC/BC_plot_parameters_traceplots.R')
+   source('BC/BC_plot_parameters_priorbeta_histograms.R')
+   source('BC/BC_plot_outputs_data.R')
+```
+
+- For the marginal posterior parameter distributions, see the pdf-file
+  - 'BC_parameters_priorbeta_histograms[].pdf'.
+- For the posterior fit to all the data at each site, see the pdf-file
+  - 'BC_outputs_data[].pdf'.
+
+## Analysis
+
+- Coffee production in the experiment had a biennial pattern the first ten years, then stable production during four years, and then the bienniality started again. CAF2021 does not simulate the interannual variability well. It is able to simulate some initial bienniality, but it does not simulate the late resumption of biennial growth.
+- The average coffee production levels across the 18 treatments are simulated quite well, albeit with some underestimation (see following figure).
+
+```{r, echo=FALSE, out.width="100%", fig.cap="\\label{FigYields}Simulated vs. observed coffee yields over the period 2003-2017. The simulations were carried out using the Maximum A Posteriori (i.e. most probable) parameter vector. Every point represents a different treatment."}
+  # save.image( 'MCMC_Turrialba_2021.RData' )
+  load( 'MCMC_Turrialba_2021.RData' )
+  source('BC/BC_averageYields.R')
+```
+
