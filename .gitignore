@@ -5,3 +5,4 @@
 *.pdf
 *.DS_Store
 CAF2021_parModes_*.txt
+MCMC_*.RData
