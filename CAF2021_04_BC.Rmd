@@ -27,7 +27,7 @@ The calibration consisted of the following activities:
 3. Carry out Bayesian calibration (BC) using Markov Chain Monte Carlo sampling (MCMC), to derive a posterior distribution for the parameters. We used an MCMC chain length of 36,000 iterations, which means that the model was run with 36,000 different parameter vectors. Each parameter vector was applied to each of the 18 treatments, so the total number of CAF2021 runs for this calibration was 18 $\times$ 36,000 = 648,000 model runs.
 4. Analyse the results from the BC to identify any remaining problems with data and model.
 
-We briefly discuss the 6 steps now.
+We briefly discuss these steps now.
 
 # Results & Discussion
 
