@@ -1,4 +1,6 @@
-source('initialisation/initialise_CAF2021_Turrialba_01_E_AC.R')
+# source('initialisation/initialise_CAF2021_Turrialba_01_E_AC.R')
+source('initialisation/initialise_CAF2021_general.R')
+
 iH.model    <- which( outputNames=="harvDMav_year" )
  
 idoy1.model <- which(output[,2]>=2003 & output[,3]==1)

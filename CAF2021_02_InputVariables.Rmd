@@ -1,6 +1,7 @@
 ---
 title: 'CAF2021: Input variables'
-author: MvO
+author:
+- Marcel van Oijen; VanOijenMarcel@gmail.com
 date: '`r Sys.Date()`'
 output:
   pdf_document:
@@ -18,12 +19,20 @@ geometry: margin=1in
 
 # Turrialba (Costa Rica): Long-term coffee agroforestry experiment
 
-Two of the twenty treatments in this experiment had (and have) two upper-stratum timber tree species: Casha and Terminalia. Those treatments cannot be simulated with the current version of the model because the model can simulate at most one "upper" tree species (and at most two lower ones). So data for these two treatments were ignored.
-
 ## Weather
 
 ```{r, echo=FALSE, out.width="100%", fig.cap="\\label{FigWeather}Weather at CATIE 2000-2017."}
-knitr::include_graphics("Weather_Turrialba_2000-2017.png")
+  file_weather <- 'weather/weather_Turrialba_2000_2017.txt'
+  df_weather   <- read.table( file_weather, header=TRUE )
+  Time         <- with( df_weather, year + (doy-0.5)/366 )
+
+  par( mfrow=c(2,3), mar=c(2,4,0,1) )
+  plot( Time, df_weather$GR  , ylab="GR (MJ m-2 d-1)", cex=0.1, xlab="", xaxt="n" )
+  plot( Time, df_weather$TMIN, ylab="TMIN (degC)"    , cex=0.1, xlab="", xaxt="n" )
+  plot( Time, df_weather$TMAX, ylab="TMAX (degC)"    , cex=0.1, xlab="", xaxt="n" )
+  plot( Time, df_weather$VP  , ylab="VP (kPa)"       , cex=0.1, xlab="" )
+  plot( Time, df_weather$WN  , ylab="WN (m s-1)"     , cex=0.1, xlab="" )
+  plot( Time, df_weather$RAIN, ylab="RAIN (mm d-1)"  , cex=0.1, xlab="" )
 ```
 
 - We created a file with daily weather data 2000-2017 for five variables: radiation, temperature, atmospheric vapour pressure, wind speed, rainfall.
@@ -38,5 +47,4 @@ knitr::include_graphics("Weather_Turrialba_2000-2017.png")
 ## Soil and management
 
 - There was large spatial variation on the CATIE site, as we can see from very large differences between the three blocks of the experiment. We ignored this variation and used the same soil property values for all treatments.
-- CAF2021 has simplistic equations for thinning and pruning, which may need to be improved sometime.
 - For the fertilization levels of the AC and MC treatments, we used the values in the Ovalle model initialisation files (AC: 90+90+100 kg N ha-1 y-1; MC: 45+45+60 kg N ha-1 y-1). We assumed that the annual N-additions in the MO treatment were 20% of MC, and were zero in BO.

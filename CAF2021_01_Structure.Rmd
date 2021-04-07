@@ -2,7 +2,7 @@
 title: 'CAF2021: Model structure'
 subtitle: 'Modelling coffee agroforestry systems with up to three shade tree spp.'
 author:
-- Marcel van Oijen; vanoijenmarcel@gmail.com
+- Marcel van Oijen; VanOijenMarcel@gmail.com
 date: '`r Sys.Date()`'
 output:
   pdf_document:
@@ -24,23 +24,33 @@ geometry: margin=1in
 
 # Model structure
 
-We simulate a system with two identical lower-layer tree species, which only differ in their initial planting density.
+CAF2021 simulates a coffee agroforestry system where the coffee plants are shaded by 0, 1, 2 or 3 tree species. The model allows up to two 'lower-layer' tree species, but no more than one 'upper-layer' tree species. The simulated tree species can have different initial planting density and thinning regime.
+
+Many so-called 'model initialisation files' have already been prepared which set up the model for different tree species combinations and environmental conditions. The following single line of code runs a file that prepares the model for a one-tree-species system (coffee plus *Erythrina peoppigiana*) in Turrialba.
 
 ```{r}
   source("initialisation/initialise_CAF2021_Turrialba_01_E_AC.R")
+```
+
+The following code shows how to set the model up as a two-tree-species system, with both species being in the same lower layer. We could have done that by running a two-tree-species initialisation file, but show another way in the code. We continue from the initialisation that we already carried out (with only *E. poeppigiana*) and simply increase the initial planting density of tree species 2 from zero to a positive value.
+
+The code also shows how to copy the value of a parameter (here 'KNFIX') from one species to another.
+
+```{r}
   params[names_params=="TREEDENS0(1)"] <- 0.04
   params[names_params=="TREEDENS0(2)"] <- 0.02
-  params[names_params=="TREEDENS0(3)"] <- 0
-
   params[names_params=="KNFIX(2)"    ] <- params[names_params=="KNFIX(1)"]
-  params[names_params=="THINMULT(3)" ] <- 0.5
 ```
+
+The following table shows all model output variables with their units.
 
 ```{r, echo=FALSE}
   knitr::kable( cbind(1:NOUT,outputNames,outputUnits),
                 col.names=c("","Output variable","Unit"),
                 row.names=FALSE )
 ```
+
+And here is a table with parameters and their values.
 
 ```{r, echo=FALSE}
   NPAR <- length(params) ; names_params <- row.names(df_params)
@@ -51,27 +61,14 @@ We simulate a system with two identical lower-layer tree species, which only dif
                 col.names=c("","Parameter","Value") )
 ```
 
-
-
 # Model running
 
-Fig. \ref{fig:OutputsDefault} shows selected output variables.
+We run the model and show selected output variables in Fig. \ref{fig:OutputsDefault}.
 
 ```{r OutputsDefault, fig.height=3.5, fig.cap="\\label{fig:OutputsDefault}Outputs from CAF2021 using default settings for Turrialba."}
   output <- run_model()
   plot_output( vars=c("Ac(1)","Ac(2)","Ac(3)","Ac(4)","Ac(5)","Ac(6)") )
 ```
-
-## ERROR !
-
-STRANGELY: DESPITE THE HIGHER PLANTING DENSITY FOR TREE SPECIES 1, IT TENDS TO RETURN TO EQUAL VALUES OF GROUND COVER AS SPECIES 2, I.E. BOTH AT 50%. WHY ARE THEIR INITIAL (DIFFERENT) PROPORTIONS NOT PRESERVED? MAYBE AN ERROR IN THE CALCULATION OF SAT(1:2)?
-
-TODO:
-
-1. Temporarily make SAT(1:3) output variables
-2. Check whether the capping of SAT at a maximum of 1 (it can exceed that because of SHADEPROJ=2) is implemented correctly and consistently.
-2a. For example, if before capping SAT(1)=1.2 And SAT(2)=1.0, then after capping both will end up with the same SAT and thus the same Ac, which is wrong.
-2b. SAT-capping is done for the calculation of the initial state constants in CAF2021.f90, but it is not done in the daily loop. There, after calling 'call morphology(CBT_t,CST_t,LAIT_t,treedens_t, SAT_t)', no SAT capping is carried out. That should become apparent when we make SAT(1:3) output variables.
 
 ## Tabular outputs
 
@@ -96,13 +93,66 @@ We make a table with the final output values produced by this model run.
 
 # Outputs demonstrating impacts of management and competition
 
-With our default parameter settings, after about ... years, we see increasing domination of Land Cover Class (LCC) ..., which is coffee shaded by ....
-
-Note that the thinning intensity of the upper-layer trees was set at half that of the two lower-layer tree species.
+We now run the most complex system, with three species.
 
 ```{r}
+  source("initialisation/initialise_CAF2021_Turrialba_15_CE_AC.R")
+  params[names_params=="TREEDENS0(1)"] <- 0.04
+  params[names_params=="TREEDENS0(2)"] <- 0.02
+  params[names_params=="TREEDENS0(3)"] <- 0.01
+  params[names_params=="LUEMAX(1)"]    <- 0.0004
+  params[names_params=="LUEMAX(2)"]    <- 0.0004
+  params[names_params=="LUEMAX(3)"]    <- 0.0012
+  params[names_params=="SLAT(1)"]      <- 20
+  params[names_params=="SLAT(2)"]      <- 20
+  params[names_params=="SLAT(3)"]      <- 20
+
+  output <- run_model()
+```
+
+Ground cover, density and height for the three species are shown in Fig. \ref{fig:OutputsSpecies}.
+
+ERROR FOR SPECIES 3: thinning leads to a jump in height!
+
+```{r OutputsSpecies, echo=F, fig.height=5, fig.cap="\\label{fig:OutputsSpecies}Outputs for the three tree species"}
+  par( mfrow=c(3,1), mar=c(2,5,0,5) )
+
+  Time <- output[,1]
+  i.At <- sapply( 1:3, function(i) {
+    which( outputNames==paste0("At(",i,")") ) } )
+  plot  ( Time, output[,i.At[1]], type="l", ylim=c(0,1),
+          ylab="Ground cover (-)",
+          xlab="", xaxt="n" )
+  points( Time, output[,i.At[2]], type="l", col="blue" )
+  points( Time, output[,i.At[3]], type="l", col="red" )
+  legend( "topleft", col=c("black","blue","red"), lty=1,
+          legend=c("sp. 1 (lower layer)",
+                   "sp. 2 (lower layer)",
+                   "sp. 3 (upper layer)" ) )
+  
+  i.trd <- sapply( 1:3, function(i) {
+    which( outputNames==paste0("treedens_t(",i,")") ) } )
+  yrange <- range( 1.e4 * output[,i.trd] )
+  plot  ( Time, 1.e4 * output[,i.trd[1]], type="l",
+          ylab="Tree density (ha-1)", xlab="", xaxt="n", ylim=yrange )
+  points( Time, 1.e4 * output[,i.trd[2]], type="l", col="blue" )
+  points( Time, 1.e4 * output[,i.trd[3]], type="l", col="red" )
+
+  i.h <- sapply( 1:3, function(i) {
+    which( outputNames==paste0("h_t(",i,")") ) } )
+  yrange <- range( output[,i.h] )
+  plot  ( Time, output[,i.h[3]], type="l", col="red",
+          ylab="Tree height (m)", xlab="", ylim=yrange )
+  points( Time, output[,i.h[1]], type="l" )
+  points( Time, output[,i.h[2]], type="l", col="blue" )
+```
+
+The model distinguishes six different 'land cover classes' and their progression over time is shown in Fig. \ref{fig:OutputsLCC}.
+
+```{r OutputsLCC, echo=F, fig.height=5, fig.cap="\\label{fig:OutputsLCC}Cumulative time series for the six land cover classes (LCC)."}
   par( mfrow=c(1,1) )
   Time <- output[,1]
+  
   i.Ac <- sapply( 1:6, function(i) {
     which( outputNames==paste0("Ac(",i,")") ) } )
   plot  ( Time, output[,i.Ac[1]], type="l", ylim=c(0,1),
@@ -113,77 +163,22 @@ Note that the thinning intensity of the upper-layer trees was set at half that o
   points( Time, rowSums( output[,i.Ac[1:4]] ), type="l", col="red" )
   points( Time, rowSums( output[,i.Ac[1:5]] ), type="l", col="blue" )
   points( Time, rowSums( output[,i.Ac[1:6]] ), type="l", col="black" )
+  legend( "bottomleft", col=c("black","blue","red","green","yellow","black"), cex=0.7, lty=1,
+          legend=c("+ LCC 6: Tree sp. 2+3",
+                   "+ LCC 5: Tree sp. 1+3",
+                   "+ LCC 4: Tree sp. 3",
+                   "+ LCC 3: Tree sp. 2",
+                   "+ LCC 2: Tree sp. 1",
+                   "   LCC 1: Coffee full sun" ) )
 ```
 
-```{r}
-  par( mfrow=c(1,1) )
-  Time <- output[,1]
-  i.At <- sapply( 1:3, function(i) {
-    which( outputNames==paste0("At(",i,")") ) } )
-  plot  ( Time, output[,i.At[1]], type="l", ylim=c(0,1),
-          main="Ground cover by 3 tree spp.",
-          xlab="", ylab="" )
-  points( Time, output[,i.At[2]], type="l", col="blue" )
-  points( Time, output[,i.At[3]], type="l", col="red" )
-  legend( "topleft", col=c("red","black","blue"), lty=1,
-          legend=c("sp. 3 (upper layer)",
-                   "sp. 1 (lower layer)",
-                   "sp. 2 (lower layer)") )
-```
+The coffee yields under those 6 land cover classes are shown in Fig. \ref{fig:OutputsYield}. The top panel shows annual yields and the bottom panel cumulative yields.
 
 ```{r}
-  par( mfrow=c(1,1) )
-  Time <- output[,1]
-  i.trd <- sapply( 1:3, function(i) {
-    which( outputNames==paste0("treedens_t(",i,")") ) } )
-  plot  ( Time, 1e4 * output[,i.trd[1]], type="l",
-          main="Tree density (ha-1)", xlab="", ylab="" )
-  points( Time+0.1, 1e4 * output[,i.trd[2]]+1, type="l", col="blue" )
-  points( Time, 1e4 * output[,i.trd[3]], type="l", col="red" )
-  legend( "bottomleft", col=c("red","black","blue"), lty=1,
-          legend=c("sp. 3 (upper layer)",
-                   "sp. 1 (lower layer)",
-                   "sp. 2 (lower layer)") )
-```
-
-```{r}
-  par( mfrow=c(1,1) )
-  Time <- output[,1]
-  i.h <- sapply( 1:3, function(i) {
-    which( outputNames==paste0("h_t(",i,")") ) } )
-  plot  ( Time, output[,i.h[3]], type="l", col="red",
-          main="Tree height (m)", xlab="", ylab="" )
-  points( Time, output[,i.h[1]], type="l" )
-  points( Time, output[,i.h[2]], type="l", col="blue" )
-  legend( "topleft", col=c("red","blue","black"), lty=1,
-          legend=c("sp. 3 (upper layer)",
-                   "sp. 2 (lower layer)",
-                   "sp. 1 (lower layer)") )
-```
-
-```{r}
-  par( mfrow=c(1,1) )
   Time <- output[,1]
   i.harvCP <- sapply( 1:6, function(i) {
     which( outputNames==paste0("harvCP(",i,")") ) } )
-  plot  ( Time, cumsum(output[,i.harvCP[1]]), type="p", ylim=c(0,0.6),
-          main="Cumulative yield (kg C m-2)",
-          xlab="", ylab="" )
-  points( Time, cumsum(output[,i.harvCP[2]]), type="p", col="yellow" )
-  points( Time, cumsum(output[,i.harvCP[3]]), type="p", col="green" )
-  points( Time, cumsum(output[,i.harvCP[4]]), type="p", col="red" )
-  points( Time, cumsum(output[,i.harvCP[5]]), type="p", col="blue" )
-  points( Time, cumsum(output[,i.harvCP[6]]), type="p", col="black" )
-  legend( "topleft", col=c("black","yellow","green","red","blue","black"),
-          lty=1, lwd=5,
-          legend=c("LCC 1","LCC 2","LCC 3","LCC 4","LCC 5","LCC 6") )
-```
 
-```{r}
-  par( mfrow=c(1,1) )
-  Time <- output[,1] ; TimeFrom0 <- Time - Time[1]
-  i.harvCP <- sapply( 1:6, function(i) {
-    which( outputNames==paste0("harvCP(",i,")") ) } )
   CCONC <- 0.47
   Y1_kgDMm2 <- output[,i.harvCP[1]] / CCONC ; it1 <- which(Y1_kgDMm2>0)
   Time1     <- Time[it1] ; Y1_kgDMm2 <- Y1_kgDMm2[it1]
@@ -197,16 +192,18 @@ Note that the thinning intensity of the upper-layer trees was set at half that o
   Time5     <- Time[it5] ; Y5_kgDMm2 <- Y5_kgDMm2[it5]
   Y6_kgDMm2 <- output[,i.harvCP[6]] / CCONC ; it6 <- which(Y6_kgDMm2>0)
   Time6     <- Time[it6] ; Y6_kgDMm2 <- Y6_kgDMm2[it6]
-  
   Y_kgDMm2 <- Y1_kgDMm2 * output[,i.Ac[1]][it1] +
               Y2_kgDMm2 * output[,i.Ac[2]][it2] +
               Y3_kgDMm2 * output[,i.Ac[3]][it3] +
               Y4_kgDMm2 * output[,i.Ac[4]][it4] +
               Y5_kgDMm2 * output[,i.Ac[5]][it5] +
               Y6_kgDMm2 * output[,i.Ac[6]][it6]
-  
+```
+
+```{r OutputsYield, echo=F, fig.height=5, fig.cap="\\label{fig:OutputsYield}Coffee yield under the six land cover classes in the same field of a three-tree-species agroforestry system."}
+  par( mfrow=c(2,1), mar=c(2,5,0,5) )
   plot  ( Time1, Y1_kgDMm2, type="b", pch="1", ylim=c(0,0.25),
-          main="Yield (kg DM m-2)", xlab="", ylab="" )
+          ylab="Yield (kg DM m-2)", xlab="", xaxt="n" )
   points( Time2, Y2_kgDMm2, type="b", pch="2", col="yellow" )
   points( Time3, Y3_kgDMm2, type="b", pch="3", col="green"  )
   points( Time4, Y4_kgDMm2, type="b", pch="4", col="red"    )
@@ -218,5 +215,16 @@ Note that the thinning intensity of the upper-layer trees was set at half that o
           lty=1, pch=c("",paste(1:6)),
           lwd=c(3,rep(1,6)),
           legend=c("Field","LCC 1","LCC 2","LCC 3","LCC 4","LCC 5","LCC 6") )
+  
+  plot  ( Time, cumsum(output[,i.harvCP[1]]), type="p", ylim=c(0,0.6),
+          ylab="Cumulative yield (kg C m-2)", xlab="" )
+  points( Time, cumsum(output[,i.harvCP[2]]), type="p", col="yellow" )
+  points( Time, cumsum(output[,i.harvCP[3]]), type="p", col="green" )
+  points( Time, cumsum(output[,i.harvCP[4]]), type="p", col="red" )
+  points( Time, cumsum(output[,i.harvCP[5]]), type="p", col="blue" )
+  points( Time, cumsum(output[,i.harvCP[6]]), type="p", col="black" )
+  legend( "topleft", col=c("black","yellow","green","red","blue","black"),
+          lty=1, lwd=5,
+          legend=c("LCC 1","LCC 2","LCC 3","LCC 4","LCC 5","LCC 6") )
 ```
 

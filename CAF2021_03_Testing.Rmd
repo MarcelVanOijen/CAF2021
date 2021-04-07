@@ -1,7 +1,7 @@
 ---
 title: 'CAF2021: Testing'
 author:
-- Marcel van Oijen; vanoijenmarcel@gmail.com
+- Marcel van Oijen; VanOijenMarcel@gmail.com
 date: '`r Sys.Date()`'
 output:
   pdf_document:

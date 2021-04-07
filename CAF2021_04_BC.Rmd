@@ -1,7 +1,8 @@
 ---
 title: 'CAF2021: Bayesian calibration of CAF2021'
 subtitle: 'Data from the CATIE long-term experiment in Turrialba, Costa Rica'
-author: MvO
+author:
+- Marcel van Oijen; VanOijenMarcel@gmail.com
 date: '`r Sys.Date()`'
 output:
   pdf_document:
@@ -24,7 +25,7 @@ We report here on progress with calibration of CAF2021. The model was calibrated
 The calibration consisted of the following activities:
 1. Assemble, from various sources, calibration data on coffee and tree growth.
 2. Identify CAF2021 parameters that we wanted to calibrate, and assign to them a prior probability distribution to represent our uncertainty about the values of the parameters.
-3. Carry out Bayesian calibration (BC) using Markov Chain Monte Carlo sampling (MCMC), to derive a posterior distribution for the parameters. We used an MCMC chain length of 36,000 iterations, which means that the model was run with 36,000 different parameter vectors. Each parameter vector was applied to each of the 18 treatments, so the total number of CAF2021 runs for this calibration was 18 $\times$ 36,000 = 648,000 model runs.
+3. Carry out Bayesian calibration (BC) using Markov Chain Monte Carlo sampling (MCMC), to derive a posterior distribution for the parameters. We used an MCMC chain length of $n$ iterations, which means that the model was run with $n$ different parameter vectors. Each parameter vector was applied to each of the 18 treatments, so the total number of CAF2021 runs for this calibration was $18 \times n$ model runs.
 4. Analyse the results from the BC to identify any remaining problems with data and model.
 
 We briefly discuss these steps now.
@@ -45,13 +46,10 @@ We briefly discuss these steps now.
 
 ## MCMC and Posterior probability distribution
 
-```{r, eval=F}
-## BC_CAF2021_Turrialba_01-10_13-20.R
-## MvO, 2021-03-19
-
+```{r, eval=TRUE}
 ## 1. INITIALISE MCMC ##
    # nChain <- as.integer(36000)
-   nChain <- as.integer(36)
+   nChain <- as.integer(200)
    source('BC/BC_CAF2021_MCMC_init_Turrialba_01-10_13-20.R')
 
 ## 2. RUNNING THE MCMC ##
@@ -74,9 +72,9 @@ We briefly discuss these steps now.
 - Coffee production in the experiment had a biennial pattern the first ten years, then stable production during four years, and then the bienniality started again. CAF2021 does not simulate the interannual variability well. It is able to simulate some initial bienniality, but it does not simulate the late resumption of biennial growth.
 - The average coffee production levels across the 18 treatments are simulated quite well, albeit with some underestimation (see following figure).
 
-```{r, echo=FALSE, out.width="100%", fig.cap="\\label{FigYields}Simulated vs. observed coffee yields over the period 2003-2017. The simulations were carried out using the Maximum A Posteriori (i.e. most probable) parameter vector. Every point represents a different treatment."}
+```{r, echo=TRUE, out.width="100%", fig.cap="\\label{FigYields}Simulated vs. observed coffee yields over the period 2003-2017. The simulations were carried out using the Maximum A Posteriori (i.e. most probable) parameter vector. Every point represents a different treatment."}
   # save.image( 'MCMC_Turrialba_2021.RData' )
-  load( 'MCMC_Turrialba_2021.RData' )
+  # load( 'MCMC_Turrialba_2021.RData' )
   source('BC/BC_averageYields.R')
 ```
 
