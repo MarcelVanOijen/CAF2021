@@ -24,6 +24,8 @@ bibliography: [MvO.bib,Avocado.bib]
   knitr::opts_chunk$set(echo=TRUE,results="asis",warning=FALSE,message=FALSE)
 ```
 
+
+
 # Abbreviations
 
 - AF      = Agroforestry
@@ -31,6 +33,8 @@ bibliography: [MvO.bib,Avocado.bib]
 - CAF2021 = Biogeochemistry model for coffee AFS
 - CC      = Climate change
 - ES      = Ecosystem services
+
+
 
 # Introduction
 
@@ -41,11 +45,31 @@ Publications on earlier versions of the CAF model and its inputs:
 - @vanoijenCoffeeAgroforestrySystems2010
 - @Ovalle-Rivera_2020_Assessing
 
+\clearpage
+
 
 
 # Model structure
 
 CAF2021 simulates a coffee agroforestry system where the coffee plants are shaded by 0, 1, 2 or 3 tree species. The model allows up to two 'lower-layer' tree species, but no more than one 'upper-layer' tree species. The simulated tree species can have different initial planting density and thinning regime.
+
+## 2 tree layers, 3 tree species, 6 land cover classes (LCC) 
+
+- Two tree layers: lower and upper layer. The lower layer is for service and fruit trees, the upper layer for timber trees.
+- Up to three tree spp, usually in code denoted with "t".
+    - t1 = service tree sp. in lower layer
+    - t2 = fruit tree sp. in lower layer
+    - t3 = timber tree sp. in upper layer
+- Up to six Land-Cover-Classes (LCC), usually in code denoted with "c".
+    - c1 = coffee in full sun
+    - c2 = coffee + t1
+    - c3 = coffee + t2
+    - c4 = coffee + t3
+    - c5 = coffee + t1 + t3
+    - c6 = coffee + t2 + t3
+- TX(nt=3,nc=6) has zero's everywhere but ones at TX(i,j) if tree species i is in c(j).
+
+## Initialisation
 
 Many so-called 'model initialisation files' have already been prepared which set up the model for different tree species combinations and environmental conditions. The following single line of code runs a file that prepares the model for a one-tree-species system (coffee plus *Erythrina peoppigiana*) in Turrialba.
 
@@ -82,6 +106,10 @@ And here is a table with parameters and their values.
                 col.names=c("","Parameter","Value") )
 ```
 
+\clearpage
+
+
+
 # Model running
 
 We run the model and show selected output variables in Fig. \ref{fig:OutputsDefault}.
@@ -112,6 +140,10 @@ We make a table with the final output values produced by this model run.
                 col.names=c("Variable","unit","Final value") )
 ```
 
+\clearpage
+
+
+
 # Outputs demonstrating impacts of management and competition
 
 We now run the most complex system, with three species.
@@ -131,9 +163,9 @@ We now run the most complex system, with three species.
   output <- run_model()
 ```
 
-Ground cover, density and height for the three species are shown in Fig. \ref{fig:OutputsSpecies}.
+## ERROR FOR SPECIES 3: thinning leads to a jump in height!
 
-ERROR FOR SPECIES 3: thinning leads to a jump in height!
+Ground cover, density and height for the three species are shown in Fig. \ref{fig:OutputsSpecies}.
 
 ```{r OutputsSpecies, echo=F, fig.height=5, fig.cap="\\label{fig:OutputsSpecies}Outputs for the three tree species"}
   par( mfrow=c(3,1), mar=c(2,5,0,5) )
@@ -167,6 +199,8 @@ ERROR FOR SPECIES 3: thinning leads to a jump in height!
   points( Time, output[,i.h[1]], type="l" )
   points( Time, output[,i.h[2]], type="l", col="blue" )
 ```
+
+## LCC and coffee yields
 
 The model distinguishes six different 'land cover classes' and their progression over time is shown in Fig. \ref{fig:OutputsLCC}.
 
@@ -249,6 +283,8 @@ The coffee yields under those 6 land cover classes are shown in Fig. \ref{fig:Ou
           legend=c("LCC 1","LCC 2","LCC 3","LCC 4","LCC 5","LCC 6") )
 ```
 
+\clearpage
+
 
 
 # Modelling goals
@@ -272,17 +308,34 @@ Stefania likes to compare erosion by CAF2021 with her RUSLE calculations (but no
 
 CAF2021: How does C-loss in runoff relate to erosion?
 
-### CAF2021
+### Improving CAF2021
 
 - Have 'nt' different tree pruning- and thinning calendars.
+- But ignore species-specific fertlisation (such as at the base of tree stems)?
 - Why are the variables T_c(nc) and GR_c(nc) needed while there are no such LCC-vectors for the three other weather variables (WN, VP, RAIN)?
     - Are we ignoring microclimatic variation in WN and VP at the level of the coffee plants?
     - Check how rain interception depends on the tree layers.
 - Make shading a function of tree height. Currently t3 species are assumed to overshadow t1 and t2 species irrespective of their respective heights.
+- Have tree-species specific SHADEPROJ (if that is still in the model??).
 - Make all tree parameters species-scpecific so they can all be calibrated.
     - Currently only 7 of the 36 tree parameters can be assiged tree-sp. specific values and that is done in 'set_params.f90' (i.e. within the FORTRAN-code, not R-code) which precludes BC.
 - Adjust the structure of phenology and C-allocation in the three possible tree spp., such that they represent service trees (t1), fruit trees (t2) and timber trees (t3).
     - Consider keeping the structures the same for the three tree tree types and simulate differences purely through parameter settings. For example, if a tree does not produce harvestable reproductive yield (fruit), have allocation to "CPT" set to zero.
+- Write function for pictorial output (over time?) of height, crown height, crown area (for tree1, tree2, tree3, coffee)
+- Do we need different rooting depths, root 'crown areas', and root length densities to simulate belowground competition more realistically?
+- Poro litter has high N-C ratio and decomposes quickly. Do we need to relate litter and/or root decomposition to N-C ratio?
+- In practice, erosion can be reduced by ground cover by herbaceous plants (grasses, weeds). Maybe add a parameter 'weed control' that if set to zero reduces erosion?
+- 'Competition' for water between drainage and runoff: currently the model gives run-off complete priority over drainage.
+    - Reverse that order of priority?
+    - Have run-off and drainage operate in parallel?
+    - Make infiltration rate (drainage rate) a function of the percentage of bare soil (such that more bare soil leads to more soil 'sealing' and thus less infiltration)?
+    - Also consider the role of mulch as simulated by STICS (see the model documentation pdf-files emailed by Lucie on 4 March 2020).
+- Comment by Olivier Roupsard on paper Ovalle et al. (2020):
+    - "Just for information (and possibilbly suggestion for the future CAF version). Here bienniality is forced. However, it comes automatically  from the equations of Rodriguez et al., 2011 + cohorts. A large C demand by fruits during year 1 induces  a deficit of leaf (nodes) initiation in year 1, given that the leaf compartment  is being allocated after the fruit compartment in the loop  sequence. Since flower bud initiation on year N+1 depends on the number of nodes initiated during year N, an oscillation is created, which, after translation, into cohorts creates bienniality.
+    - Moreover, this creates an infra-annual fluctuation of LAI which mimics the dynamics reported in Taugourdeau et al., 2014.
+    - Finally, the reserves compartment (last position in the loop, but refeeding everyday in parallel to photosynthesis) fluctuates, with a minimum during the bean filling.
+    - These modeling experiences are sometimes beautiful !"
+- Check how the optimum curve for LUE(temperature) is implemented.
 
 
 
@@ -295,11 +348,15 @@ CAF2021: How does C-loss in runoff relate to erosion?
     - Avocado is chosen over citrus. Avocado is especially important in two areas in GTM. It is similarly important as citrus in CRI, but avocado is more prominent in Tarazu.
 - **Locations**. Mainly COSA farms. Perhaps focus on those for which data from both COSAs are available (80/90 in CRI, much smaller fraction in GTM).
 
+\clearpage
 
 
-# Banana
+
+# Banana: dessert banana rather than plantain
 
 Only moderate precision is required for banana and avocado modelling (as discussed with JH on 2021-02-16), so growth data for these species can be limited to average yield and average responsiveness to fertilisation, water and temperature. This information may be available from the literature.
+
+## Specifics to consider
 
 - it = 2 (second lower-stratum tree sp.).
 - Ignore growth cycle: assume mixing of all stages.
@@ -310,32 +367,45 @@ Only moderate precision is required for banana and avocado modelling (as discuss
     - Set maximum to CStree. For example CStreeMAX = 10 kg (check fraction of biomass in mature banana plants)?
     - Or: HMAX?
 
+\clearpage
 
-# Avocado
+
+
+# Avocado: GTM (GTM/MEX) cv. Hass.
 
 As for banana, only moderate precision is required for avocado modelling, as long as average yield levels are well simulated and responsiveness to fertilisation, water and temperature.
 
-- Need for extra parameter; FF allocation to fruit.
-- Search for literature!
-- More seasonal than banana.
-- Citrus harvest in first part of dry season?
-- Avocado flowering triggered by rainfall like coffee?
-
-## Literature review
-
 - Spanish: aguacate
-- Up to 20 m tall (https://en.wikipedia.org/wiki/Avocado_.
 - 3 races: 'West Indian'-lowland, 'Mexico'-highland, 'Guatemala'-highland (Schaffer et al. (Eds) book).
 - Most common cultivar: Hass (https://en.wikipedia.org/wiki/Hass_avocado).
-- Mex and Gtm cvs: fruits 9-20% oil (Schaffer et al.) but low in nutrients?
+
+## Specifics to consider for model structure
+
+- Effect of age (years after planting, YAP) on allocation and yield. No yield in first 3 years, then ramping up over years 4-7 to full productivity. Model this through allocation parameters becoming *functions of YAP*?
+- Need for extra parameter: FF allocation to fruit.
+    - Allocation *parameters* or *functions of DOY*? E.g. FPT increasing up to September? Vegetative fluxes?
+- More seasonal than banana.
+    - http://blog.imperfectfoods.com/blog-1/2019/2/13/when-are-avocados-in-season
+- Avocado flowering triggered by rainfall like coffee?
+- Avocado: shade leads to lower fruit set.
+- Ensure that avocado never provides 100% shade. Introduce a parameter CAtreeMAX?
+- Avocado is a weak competitor for water and N. How to model that?
+- Avocado demands a well-drained soil with still enough water. How to model that?
 - Alternate and/or irregular bearing! (Schaffer et al. Ch. 6, 7, 11, 12)
-- National average yields < 10 t ha-1 y-1. Good growers: 10-20 t ha-1 y-1.
-- Need for well-drained soils.
 - At high planting density: pruning required.
+- Pruning to keep tree height (and not only crown width) in check?
+- Beneficial effect of CO2?
+- Response to El Nino and La Nina.
+- Dynamics of reserves (compare BASGRA).
+- Fruit loss (abscission).
+
+## Specifics to consider for model parameterisation
+
+- Up to 20 m tall (https://en.wikipedia.org/wiki/Avocado_.
+- Mex and Gtm cvs: fruits 9-20% oil (Schaffer et al.) but low in nutrients?
+- National average yields < 10 t ha-1 y-1. Good growers: 10-20 t ha-1 y-1.
 - Climate impacts:  (Schaffer et al. Ch. 5, 6, 7).
 - Environmental and management impacts (Schaffer et al. Ch. 11, 12).
-- Seasonality:
-    - http://blog.imperfectfoods.com/blog-1/2019/2/13/when-are-avocados-in-season
     
 **Elzebroek & Wind (2008)**:
 
@@ -633,4 +703,28 @@ As for banana, only moderate precision is required for avocado modelling, as lon
 ## DRY MATTER ALLOCATION AND DISTRIBUTION & PHENOLOGY
 
 - @Schaffer_1999_Atmospheric: Dry matter distribution within banana cv. Gros Michel: Leaf+petiole : Pseudostem : Root : Rhizome = 0.19 : 0.574 : 0.192 : 0.045. Minor changes (more root) with elevated CO2.
+
+\clearpage
+
+
+
+# APPENDIX 1: Unit conversions
+
+- Noponen, M.R.A. (PhD-thesis 2012): Carbon and economic performance of coffee agroforestry systems in Costa Rica and Nicaragua. [Note 'oro' is known as 'green' coffee in the UK.]
+    - 1 fanega = 258 kg fresh cherries (CR)
+    - 1 fanega = 141 kg fresh cherries (NIC)
+    - 1 quintal = 46 kg 'oro' (CR,NIC)
+    - 1 kg fresh cherries = 46/     258  = 0.178 kg 'oro' (CR)
+    - 1 kg fresh cherries = 46/(2.5*258) = 0.130 kg 'oro' (NIC) ?
+- http://www.thecoffeeguide.org/coffee-guide/world-coffee-trade/conversions-and-statistics/
+    - 1 kg dried cherry = 0.5 kg green bean
+- http://www.thecoffeeguide.org/qa-108/
+    - 1 kg fresh cherry ~ 1/6 kg green bean
     
+## Summary for CAF2021
+- 3 kg fresh = 1 kg dry (= CAF yield) = 0.5 kg green (= oro)
+- 1 CRI-fanega = 258 kg fresh = 86 kg dry (= CAF yield)   
+  
+The conversion of 86 kg (dry) per fanega (fresh) is used to convert the CATIE-Turrialba yields into dry yields for comparison with the CAF model.
+
+

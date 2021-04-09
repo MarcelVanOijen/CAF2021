@@ -21,6 +21,14 @@ geometry: margin=1in
   knitr::opts_chunk$set(echo=FALSE,results="asis",warning=FALSE,message=FALSE)
 ```
 
+# ERROR FOR SPECIES 3: thinning leads to a jump in height!
+
+See 'CAF2021_01_structure.Rmd'
+
+\clearpage
+
+
+
 # Test with 3 tree spp.: ERROR !
 
 ```{r}
@@ -48,7 +56,11 @@ TODO:
 2a. For example, if before capping SAT(1)=1.2 And SAT(2)=1.0, then after capping both will end up with the same SAT and thus the same Ac, which is wrong.
 2b. SAT-capping is done for the calculation of the initial state constants in CAF2021.f90, but it is not done in the daily loop. There, after calling 'call morphology(CBT_t,CST_t,LAIT_t,treedens_t, SAT_t)', no SAT capping is carried out. That should become apparent when we make SAT(1:3) output variables.
 
-## Tabular outputs
+\clearpage
+
+
+
+# Tabular outputs
 
 ```{r}
   output_short <- signif( output, 5 )
@@ -182,6 +194,8 @@ TODO:
 ```
 
 \clearpage
+
+
 
 # APPENDIX: Basic code for testing
 
