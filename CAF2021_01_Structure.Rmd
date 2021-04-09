@@ -16,11 +16,32 @@ output:
   html_document: default
 fontsize: 11pt
 geometry: margin=1in
+csl: environmental-modelling-and-software.csl
+bibliography: [MvO.bib,Avocado.bib]
 ---
 
 ```{r, include=FALSE}
   knitr::opts_chunk$set(echo=TRUE,results="asis",warning=FALSE,message=FALSE)
 ```
+
+# Abbreviations
+
+- AF      = Agroforestry
+- AFS     = AF systems
+- CAF2021 = Biogeochemistry model for coffee AFS
+- CC      = Climate change
+- ES      = Ecosystem services
+
+# Introduction
+
+Publications on earlier versions of the CAF model and its inputs:
+
+- @vanoijenPlotscaleModellingCoffee2009
+- @vanoijenCoffeeAgroforestrySystems2010a
+- @vanoijenCoffeeAgroforestrySystems2010
+- @Ovalle-Rivera_2020_Assessing
+
+
 
 # Model structure
 
@@ -228,3 +249,388 @@ The coffee yields under those 6 land cover classes are shown in Fig. \ref{fig:Ou
           legend=c("LCC 1","LCC 2","LCC 3","LCC 4","LCC 5","LCC 6") )
 ```
 
+
+
+# Modelling goals
+
+- Simulating bienniality well
+- Simulating various tree species
+    - Avocado
+    - Banana
+    - Other spp.
+- Simulating interannual variability well, including effects of El Nino and La Nina.
+
+More generally the question of interest is temporal variance of any kind. CAF2021 should help quantify **resilience to climate variability**. Bienniality is intrinsic to coffee, but there are also external drivers that cause productivity variation over time (three main factors: 1. price affecting management, 2. climate esp. El Nino / La Nina, 3. Disease outbreaks (often partly the consequence of poor management i.e. disease control following low coffee prices). How do external disturbances get amplified by coffee agronomy and physiology?
+
+We want to simulate different levels of shade management. The two standard approaches of either having thinning and pruning regime as input and LAI as output vs. prescribing a goal LAI that the pruning works towards may both be needed. The first approach is currently implemented in CAF and is OK for Erythrina in CRI which typically has total pollarding twice a year. But the second approach may be better for Inga in GTM where typically once a year the farmer prunes (or thins?) to a desired shade level.
+
+Process-based modelling with CAF2021 may help tease out the causal links speculated about by Haggar et al. in their 2021 paper on farm typology.
+
+Conor is mainly interested in C-balance, less in water balance. Also likes to compare his 1%-N2O-emission factor with what CAF2021 produces. Likely: EF too rigid, CAF2021 too variable and perhaps poor average.
+
+Stefania likes to compare erosion by CAF2021 with her RUSLE calculations (but note different spatiotemporal scales: she works at LS-level in monthly time steps). She uses information on rainfall, soil (OM, texture), plant cover to calculate erosion. Further, she is interested in N-retention.
+
+CAF2021: How does C-loss in runoff relate to erosion?
+
+### CAF2021
+
+- Have 'nt' different tree pruning- and thinning calendars.
+- Why are the variables T_c(nc) and GR_c(nc) needed while there are no such LCC-vectors for the three other weather variables (WN, VP, RAIN)?
+    - Are we ignoring microclimatic variation in WN and VP at the level of the coffee plants?
+    - Check how rain interception depends on the tree layers.
+- Make shading a function of tree height. Currently t3 species are assumed to overshadow t1 and t2 species irrespective of their respective heights.
+- Make all tree parameters species-scpecific so they can all be calibrated.
+    - Currently only 7 of the 36 tree parameters can be assiged tree-sp. specific values and that is done in 'set_params.f90' (i.e. within the FORTRAN-code, not R-code) which precludes BC.
+- Adjust the structure of phenology and C-allocation in the three possible tree spp., such that they represent service trees (t1), fruit trees (t2) and timber trees (t3).
+    - Consider keeping the structures the same for the three tree tree types and simulate differences purely through parameter settings. For example, if a tree does not produce harvestable reproductive yield (fruit), have allocation to "CPT" set to zero.
+
+
+
+## Application specifics
+
+- **Time**. Mainly period COSA1 - COSA2. No future decade.
+- **Conditions**.
+    - Impact of CC mainly studied by varying the actual weather in the COSA-period. Of special interest: simulate effects of increased weather variance, for example stronger El Nino and La Nina effects.
+    - Study interactions with farm typology criteria (N-level, shade).
+    - Avocado is chosen over citrus. Avocado is especially important in two areas in GTM. It is similarly important as citrus in CRI, but avocado is more prominent in Tarazu.
+- **Locations**. Mainly COSA farms. Perhaps focus on those for which data from both COSAs are available (80/90 in CRI, much smaller fraction in GTM).
+
+
+
+# Banana
+
+Only moderate precision is required for banana and avocado modelling (as discussed with JH on 2021-02-16), so growth data for these species can be limited to average yield and average responsiveness to fertilisation, water and temperature. This information may be available from the literature.
+
+- it = 2 (second lower-stratum tree sp.).
+- Ignore growth cycle: assume mixing of all stages.
+- Not a true tree, herbaceous, no wood. Still, maybe set WOODDENS = 0.25?? (because DMP fruit is 25%).
+- Repurpouse FB for allocation to bunches? Or for consistency with true fruit tree modelling add a FF parameter?
+- But CA != f(CB), so we must quantify crown area in a different way.
+- How to stop height growth from continuing for ever?
+    - Set maximum to CStree. For example CStreeMAX = 10 kg (check fraction of biomass in mature banana plants)?
+    - Or: HMAX?
+
+
+# Avocado
+
+As for banana, only moderate precision is required for avocado modelling, as long as average yield levels are well simulated and responsiveness to fertilisation, water and temperature.
+
+- Need for extra parameter; FF allocation to fruit.
+- Search for literature!
+- More seasonal than banana.
+- Citrus harvest in first part of dry season?
+- Avocado flowering triggered by rainfall like coffee?
+
+## Literature review
+
+- Spanish: aguacate
+- Up to 20 m tall (https://en.wikipedia.org/wiki/Avocado_.
+- 3 races: 'West Indian'-lowland, 'Mexico'-highland, 'Guatemala'-highland (Schaffer et al. (Eds) book).
+- Most common cultivar: Hass (https://en.wikipedia.org/wiki/Hass_avocado).
+- Mex and Gtm cvs: fruits 9-20% oil (Schaffer et al.) but low in nutrients?
+- Alternate and/or irregular bearing! (Schaffer et al. Ch. 6, 7, 11, 12)
+- National average yields < 10 t ha-1 y-1. Good growers: 10-20 t ha-1 y-1.
+- Need for well-drained soils.
+- At high planting density: pruning required.
+- Climate impacts:  (Schaffer et al. Ch. 5, 6, 7).
+- Environmental and management impacts (Schaffer et al. Ch. 11, 12).
+- Seasonality:
+    - http://blog.imperfectfoods.com/blog-1/2019/2/13/when-are-avocados-in-season
+    
+**Elzebroek & Wind (2008)**:
+
+- tree  diameter: 0.3-0.6 m.
+- optimal T (three races): day 20-35C, night 10-25C. [MvO: cv. Hass is on the cold side, so maybe day 25C, night 15C, 24-h optimum 20C?]
+- Spacing 6-12 m. Presumably in monoculture, so what is density in coffee AFS?
+- Recommended fertilzation 50-100 kg N ha-1 y-1.
+- First harvests after 4 years (vegetatively propagated) to 5-6 yrs (seedlings)
+- Flowering-maturity 6-12 months. Prolonged flowering so fruits of varying maturity on the tree.
+
+**Bender YouTube video**:
+
+- Avocado sheds leaves strongly (*so leaf longevity small?*)
+- Hass: frost damage threshold 29 degF, Fuerte 26 degF, Mexican cvs 24 degF.
+- Not good in clay-like soil, needs good drainage
+- Grows too tall without pruning
+- Shallow rooting, therefore need for mulch to stop soil evaporation
+- Needs full sun and space
+- 10^6 flowers, only 200 reaching fruit set
+- Hass: A flowers, San Diego flowering Feb, fruit set April, harvest Jan-Aug! *So fruits stay on tree for 9-16 months?*
+- Fuerte: B flowers
+- G cvs fruits mature slowly, e.g. fruit set spring 2014, harvest summer 2015!
+- M cvs shorter (< 1 yr)
+- *What about MxG cvs such as Hass?*
+- Mature tree irrigation 100-150 mm month-1, so about 3-5 mm d-1.
+- Mature tree 8-60 gallons water d-1 (winter-summer). *Say 25 m2 tree-1 then that would be 25-200 l d-1 = 1-8 mm d-1.*
+- Irrigation advice is to top up to 110-120% of field capacity. *Why not 100%, as the excess will drain away anyway on well-drained soils?*
+- 80-90% of feeder roots in top 20-25 cm. The roots have few root hairs (not needed in their tropical regions of origin).
+- N-fertilization up to 2 lb N tree-1 y-1, *so with 25 m2 tree-1 this is about 2 x 0.4 x 10000 / 25 = 320 kg N ha-1 y-1*.
+    
+**http://avocadosource.com/tools.htm**:
+
+- Information on water (Kc) and fertilizer requirements of various cultivars, mostly but not all based on information from California.
+    
+**TVAgro (Colombia, commercial)**:
+
+- harvest season in Antioquia (Colombia) can be extended from two periods (peaks in Jan & Aug) of together 17-19 weeks to 50-52 weeks by adding unspecified 'biostimulants'.
+    
+**YouTube Mexico**:
+
+- National average 10,510 kg ha-1 y-1
+- 120-300 g fruit-1
+- 115-180 trees ha-1
+- Natural height growth to 20 m, pruning required to keep the trees to 5 m.
+- First harvest of 50 fruits tree-1 in year 5, ramping up to 150 fr tr-1 (yr 6), 300 fr tr-1 (yr 7), 800 fr tr-1 (yr 8).
+- **So typical production from year 8 with 150 trees ha-1 each producing 800 fruits tree-1 y-1 at 200 g fwt fruit-1 and 25% fruit dry matter = 150 x 800 x 0.2 x 0.25 = 6000 kg fruit DM ha-1 y-1 (and four times that for fresh weight i.e. more than double the national average of 10,510 kg fwt ha-1 y-1).**
+- Topt = 17-24 degC
+- 1000-2000 mm y-1
+- Local (*around tree trunks?*) irrigation during the 'epoca productiva' increases yield by 30%.
+
+**AVOMAN (old DSS fro Australia)**:
+
+- optimum leaf N 2.2-2.6% (for Fuerte 1.6-2.0%) and standard fertilization base rate is 140 kg N ha-1 y-1.
+
+**PowerPoint presentation Ish-Am (2005)**:
+
+- strong competition fruits vs. 'growth' leading to a high fruit abscission rate.
+
+**YouTube: Seminario de Aguacate 2020 - Dia 1 (Yara, Mexico)**:
+
+- Avocado: about 0.1% N in fruit (platano: 0.2%)
+- Irrigation in relation to phenology:
+    - Dec-Jan: flowering (irrigate to prevent flower abortion),
+    - Feb-Mar: flowering & fruit set I (irrigate to prevent fruit abortion and to stimulate cell division),
+    - Apr: fruit set I (irrigate for same reasons as Feb-Mar),
+    - May-June: fruit set II (irrigate to stimulate growth).
+- Soil porosity best above 50%. Soil aeration capacity (= Porosity - FC) above 20%.
+- Mulch needed to keep soil (roots) cool.
+- Requirements during flowering:
+    - T24: 20-25 degC
+    - Tmin: 12-16 degC
+    - Trange: 10-13 degC
+    - To avoid abortion: 12 < T < 30 degC
+    - Daylength > 10 h d-1
+    - RH: 70-81%
+    - Wind: < 6 km h-1 (= 1.7 m s-1)
+- Drought stress causes excessive fruit drop.
+- N fertilisation ramping up: year 1-6: "year x 100 g N plant-1*, from year 7: 800 g N plant-1.
+
+**Barcenes (2003)**:
+
+- [N] leaves 0.8-3.4&, flowers 2.1-3.4%, fruits 1.1-2.9%.
+    - Note that that is a much higher fruit [N] than acc. to the YouTube Seminario !?
+
+**YouTube AgroTV 'Produccion Sostenible de Aguacate Hass en Costa Rica'**:
+
+- Costa Rica: 4000 ha avocado, mainly in Zona de los Santos, with average yield = 7000 kg ha-1 y-1 (ideal would be 20,000 kg ha-1 y-1).
+- Costa Rica imports 80& of its avocado demand.
+- Fertilizacion foliar y al suelo.
+
+**@RodriguezPleguezuelo_2018_Chapter** 2 Avocado Tree and Water Availability:
+
+- The tree is evergreen, but normally it is considered as wintergreen since the leaves do not stay on the tree more than 12 months and the entire canopy is changed during the growth that follows the flowering period.
+- Leaves reach their final size in approximately 30 days (Scora et al., 2002). It has a vegetative preference in its growth pattern, and therefore assimilates preferentially to shoot growth and not to reproductive organs. This behaviour, together with the fast production of leaves and shading areas in the canopy, reduces the number of shoots available for flowering (Carr, 2013).
+- In subtropical latitudes, flowering begins when shoot growth enters the inactive period. Flowering occurs normally during late winter and spring and anthesis lasts from 3 to 8 weeks (Whiley and Schaffer, 1994).
+- A medium-flowering tree can have 1–2 million flowers, but produces only 200–300 fruits. In subtropical latitudes, the fruit load is decreased by leaf shed during approximately the first month after fruit set and then again at the beginning of summer (Schaffer and Whiley, 2002). After flowering, a great number of fruits drop; this period is crucial since resources must be shared between fruit growth and new shoot growth.
+- Avocado has a potential photosynthetic capacity to produce more than 30 t ha-1 of fruits with 17% of oil (Wolstenholme, 1986). However, actual production is determined by high abscission rates of flowers and fruits, so that average avocado world production is 10.0 t ha-1 (Garner and Lovatt, 2008).
+- Fruit and flower abscission has not been associated with tree growth or with other factors such as soil moisture or leaf nutritional status (Garner and Lovatt, 2008). Wolstenholme et al. (1990) suggested that the high need for carbohydrates during the fruit development period coinciding with high temperatures and often with high evaporative demands may be the main cause of fruit abscission.
+- the root distribution of avocado is very shallow, with more than 70% normally growing in the first 0.6 m layer of the soil (Lahav and Whiley, 2002). [..] Therefore the capacity of soil exploitation is limited and as a consequence is highly sensitive to poor water availability periods. Moreover, there are periods where this lack of water availability is critical: flowering, fruit set, or seed development.
+- In addition, during the flowering period, the canopy surface can potentially suffer significant water losses.
+- the peaks of water use (in summer) appear to be between 3 and 5 mm day-1, according to Carr (2013). In agreement with this author, for mature avocado trees, the crop coefficient (Kc) is usually in the range of 0.4 and 0.6, with water use efficiency (WUE) being between 1 and 2 kg m-3.
+
+**@SanchezCampos_2019_Zonificacion**
+
+- p56-57: Coffee cv. Caturra in los Santos (CR): evaluation of growing conditions.
+- p66-67: Avocado cv. Hass in los Santos (CR): evaluation of growing conditions.
+
+**@GarbanzoSolis_2011_Manual** (Costa Rica):
+
+- Varieties for high altitude: Fuerte, Reed, Hass and others. Hass: 1200-1800 m. At lower altitude more pests and diseases.
+- 5-8 m tree height.
+- From flower to fruit: 8-10 months.
+- Fruit harvesting: possible from age 3 yrs.
+- First harvest May - July, Second (more important): Oct - Dec (Feb in some areas).
+- Fruit: 150-400 g fruit-1.
+- Topt: 18-25 degC. Below 17 degC less fruit set. Below 14 degC no fruit set.
+- RH: best < 65%
+- Rain: best < 1500 mm evenly distributed throughout the year.
+- In AFS: no coffee of poro close to the avocado (avocado needs light and air).
+    - Plant the avocado in line with coffee, removing 3 coffee plants.
+    - With coffee: 10 x 10 m (or 10 x 8, 12 x 8), so 100 avocado's ha-1.
+- [N]leaves should be 1.6-2%.
+
+**@Lavaire_2020_Manual** (Honduras):
+
+- Hass: From flower to fruit: 10-14 months.
+- First harvest Aug - Oct, Second (more important): Jan - Apr (depends on altitude).
+
+**https://www.scielo.br/scielo.php?script=sci_arttext&pid=S0034-737X2019000500341**:
+
+- [N]fruit: 6.6 - 9.9 g kg-1 fwt. Median 8.8 g kg-1.
+   - *So this would be about 0.36% of dry matter and six times that of protein content of dry matter, i.e. about 2%.*
+
+**http://www.mag.go.cr/bibliotecavirtual/E70-4284.pdf**:
+
+- Epoca de cosecha
+    - South Africa: June to October
+    - Mexico: todo el año
+    - Peru: mayo-agosto
+    - California: December - October
+    - Chile: julio a abril
+    - Argentina: May - August
+    
+**http://postgrado.fausac.gt/wp-content/uploads/2019/03/Zoila-Monz%C3%B3n.pdf** (Guatemala):
+
+- Epocas de cosecha de aguacate (variedad Hass) en Guatemala: July-Sep & Nov-April (so 9 months in total, i.e. all months except May-June & Oct).
+- Yields in different departments from 4-11.5 t ha-1 y-1, mean 7 t ha-1 y-1.
+
+**Climatic constraints and climate change effects**
+
+- CC impact assessments and zonation:
+    - @DeSousa_2019_future, Central America (avocado et al.) (see also @Foodnavigator-latam.com__Avocado)
+    - @Dubrovina_2014_Analysis, Mexico (Michoacán)
+    - @Howden_2005_Climate, Australia
+    - @Human_1987_Mapping, South Africa
+    - @Lobell_2006_Impacts, California
+    - @Putland_2011_Climate, Australia
+    - @Ramirez-Gil_2019_Current, Americas
+    - @Ramirez-Gil_2018_Potential, Colombia
+    - @Ramirez-Gil_2019_Currenta, avocado diseases in Colombia
+    - @SanchezCampos_2019_Zonificacion, Costa Rica (Los Santos), also soil conditions etc. (and also done for coffee!)
+
+- El Niño (stimulates wilt), La Niña in avocado regions of Colombia: @Ramirez-Gil_2020_Mitigation.
+
+**Avocado and banana in coffee agroforestry**
+
+- @Rice_2011_Fruits: farmers in both Guatemala and Peru ranked Musa and Persea as the first fruit of choice in coffee AFS.
+
+## NITROGEN
+
+- @Lovatt_1996_Nitrogen: N percentage and DMP (dry matter percentage) in fruits and leaves of Hass.
+- For more on N uptake and partitioning, see http://geisseler.ucdavis.edu/Guidelines/N_Avocado.html
+- @Atucha_2012_Groundcover: foliar N and runoff N (and carbon C)
+- @Bar_1987_Seasonal: 'Seasonal changes in nitrogen concentration in avocado leaves associated with leaf age and fertilisation regime'
+- @Barcenas-Ortega_2003_Contenido: "Figura 1. Contenido de nitrógeno en hojas, flor y fruto de aguacate cultivar Hass en Uruapan, Mich"
+- @Dixon_2008_Leaf: comparing [N] recommendations from different references.
+- @Bender_2015_Avocadoa Table 1 on p. 34 (ref. Cutting 2000) gives a high value of 0.54% (dry weight basis) for [N] of leaves.
+- @Mickelbart_2007_Effects: foliar N (Hass on 10 rootstocks in California): 2.1-2.4 % of DM.
+- @Gil_2012_Effect, 4 yr old Hass:
+    - [N]roots: 1.52-2.00 % 
+    - [N]wood: 0.90-1.16 % 
+    - [N]shoots: 2.12-2.26 % 
+    - [N]leaves: 2.58-3.22 % 
+- @Henao-Rojas_2019_Fruit, Hass in Colombia: [N]fruit = 6.6-9.9 g kg-1 (median 8.8)
+- @Hermoso_2003_Comportamiento, Hass on two rootstocks in Spain: [N]leaves = 1.87-1.96 % of DM.
+- @Kaneko_2016_Water, Hass in New Zealand: [N]leaves = 2.78% of DM (control), 2.46% (drought).
+- @Rosecrance_2002_Seasonal and @Rosecrance_2003_Seasonal: DM and N distribution within 20-yr old Hass!
+- @Yumpu.com__MANEJO: N-fertilisation and impact on yield.
+
+## LIGHT EXTINCTION
+
+- @Hadari_2004_ThreeDimensional give curves of fractional light (I/I0) and cumulative LAI with distance (m) from the top of the canopy. Using these to stimate the light extinction coefficient as -ln(I/I0)/LAI leads to values 0.6-0.7.
+
+## DRY MATTER ALLOCATION AND DISTRIBUTION & PHENOLOGY
+
+- @Adar_1999_Annual (also DMP)
+- @Arpaia_1994_Development: California shoot growth mainly in 1/2 flushes (always summer, sometimes spring), root growth more constant through most of the year, but no vegetative growth in winter.
+- @Bonomelli_2019_Effect: 2-yr old tree DM 0.30:0.45:0.25 for roots:wood:shoots.
+- @Cossio-Vargas_2011_Vegetative: Mexico, calendars of flowering and vegetative flushed for Hass & Fuerte.
+- @Cossio-Vargas_2008_Fenologia:
+    - Two commercial ‘Hass’ avocado orchards, Nayarit, México.
+    - "two flushes of vegetative growth: winter (greatest intensity) and summer (lowest intensity)."
+    - "The complete floral development process, from closed pointed bud to anthesis, required 11.5 and 7.5 months for winter and summer shoots, respectively."
+    - "Greatest production of roots occurred in August."
+    - "Fruit growth (length), from set (March) to harvest (November), took eight months."
+- @Gil_2012_Effect: 4 yr old Hass DM %: wood:shoots:leaves:roots = 22:15:30:33.
+- @Howden_2005_Climate: Higher T leads to earlier maturity and smaller fruit. Elevated CO2 benefits fruit set and retention while it changes allocation in favour of trunks.
+- @Rocha-Arroyo_2011_Phenology, Mexico (Michoacán): "Hass avocado showed three vegetative flushes: Winter (higher intensity), Spring and Summer (lower intensity), two root production flushes and three to four flowering flushes."
+- @Rosecrance_2002_Seasonal and @Rosecrance_2003_Seasonal: DM and N distribution within 20-yr old Hass!
+- @Sanclemente_2014_Pruning: DM distribution in 2-yr old Choquette: very roughly L:S:R = 0.4:0.3:0.3
+- @Schaffer_1999_Atmospheric: Hass DM distribution Old leaves : New leaves : Old branches : New Branches : Trunk : Roots = 550 : 900 : 500 : 200 : 550 : 2000 g. Elevated CO2 roots +30%.
+- @Trochoulias_1991_Dry: Distribution of DM in 13-yr old Fuerte tree of 478.5 kg DM at full flowering in 10 different organs. Blossoms 3%, leaves 9%, branches (3 classes) 24%, *Scaffold limbs* 32%, Trunk 11%, Roots (4 classes) 22%.
+    - *Do we count scaffold limbs as B or S? probably B*.
+
+## ROOT GROWTH
+
+- @Atucha_2013_Root: vertical profile (rooting is shallow)
+- @Atucha_2012_Groundcover: root life span first quartile: 110 days (< 0.2 mm), 168 days (> 0.2 mm). Life span shorter in top soil layer.
+
+## SENESCENCE
+
+- @Bernal-Estrada_2020_Dynamics: Leaf turnover 2600 - 7600 kg leaf DM ha-1 y-1, over whole year but rates higher in dry period.
+- @Carr_2014_Advances: Leaves last for 10-12 months.
+
+## MORPHOLOGY
+
+- @Cantuarias-Aviles_2019_Water: Canopy *volume*, calculated as $4/3 \, \pi \, height/2 \, width/2$ was 40 - 115 m3.
+- @Mickelbart_2007_Effects: Hass in California on 10 different rootstocks at age 10 yrs: tree height 5.5 m, tree width 4.3-5.2 m.
+- @Chartzoulakis_2002_Water; SLW (2 yr old Hass in Chania): 8.12 (watered) - 6.17 (stressed) mg cm-2. *SLA in m2 kg-1 Cleaf is 1/SLW x 100/0.45. So for watered this would be 27.4 and for stressed 36.0 m2 kg-1 C.*  *Should SLW not increase (SLA decrease) with drought stress??*
+- @Doupis_2017_Growth: 2 yr old Hass in Chania, Greece: total leaf DM 50 g, total leaf area 0.5 m2. *So SLA is 10 m2 kg-1 DM or about 10/0.45 = 22 m2 kg-1 C*. Both DM and area about 40% less with waterlogging.
+- @Acosta-Rangel_2018_Evaluation:
+    - SLA of Hass was 83.4 cm2 g-1 DM *= 8.34 m2 kg-1 DM or 8.34 / 0.45 = 18.5 m2 kg-1 Cleaf*.
+    - WD (wood density, sapwood only, no bark or phloem) of Hass was 0.32 g cm-3 *= 320 kg m-3 or 320 x 0.45 = 144 kgC m-3*.
+- @Finazzo_1990_Assimilate: 10-yr old cv. Peterson: SLW 9-13 mg cm-2, so slightly larger than the 2 yr old Hass of @Chartzoulakis_2002_Water.
+- @Gil_2012_Effect: (from reported leaf DM and area, and using 0.45 kg C kg-1 DM): SLA 13-29 m2 kg-1 C(variation between soil texture classes).
+- @Schaffer_1987_Effect, 8-yr old cv. 'Booth 7' in Florida [so maybe less relevant!]: lower values of SLW: 3 (leaves on branches with fruit) to 4 (without) mg DM cm-2, i.e. SLA = 33 to 25 m2 kg-1 DM and thus about 70 to 55 m2 kg-1 C.
+- @Mazhawu_2019_Water and @Mazhawu_2020_Water, Hass in South Africa, 4 x 7 m spacing, tree height 3.8 m (5 yrs old) increasing to 7.4 m (12 yrs), with LAI increasing from 2.95 m2 m-2 to 4.75, and ground cover increasing from 43 to 92% (the latter after heavy pruning back to 55%).
+- @Wu_2018_Estimating: 2-yr old trees: 3.6-3.7 m, leaf area 40-42 m2. same trees much larger a year later (3-yr old): 5.0-5.2 m, 102-123 m2.
+
+## YIELD
+
+- @Mickelbart_2007_Effects: Alternate bearing with yield in off-years on average 28% of that in on-years.
+- @CIRAD_2019_Country. Mexico. Production year round (*but what on individual fields?*). Yield ramps up from 0.3-1.6 t ha-1 at age 4 to 12-15 t ha-1 at age 7-8 and older.
+- @GobiernoSalvadoreno_2018_Guia, El Salvador. Hass at 1000 - >2000 m altitude. Harvest months vary with altitude ('low'=1000-1600, 'medium'=1600-2000, 'high'=>2000 m):
+     - Low: Principal: 4-6, Loca: 12-3
+     - Medium: Principal: 11-2, Loca: 7-10
+     - High: Principal: 12-3, Loca: 8-9
+- @Lobell_2006_Impacts, California: Productive life of avocado orchards: 30 years (first harvest at age 3, full production from age 7 yrs).
+- @Whiley_2013_Literature: review of causes of irregular bearing.
+
+## ROOT GROWTH
+
+- @Carr_2014_Advances: Mexico: rooting depth 1.2-1.4 m. 21-42 % in top 20 cm, 65-83% in top 60 cm. Horizontal spread 2.5-3. South Africa: up to about double those Mexican values for depth and spread. More refs discussed.
+
+## WATER RELATIONS
+
+- @Carr_2014_Advances: Stomata start closing at leaf water potential < -0.4 MPa, fully closed at -1.0 - -1.2 MPa.
+- @Holzapfel_2017_Responses: Yield increased when irrigation esnured that water avilability was >= 75% of demand (potential ET) and reduced bienniality (i.e. yield in off years was increased relatively more than that in on years).
+- @Kaneko_2016_Water: "Kc of avocado in summer is generally between 0.4 and 0.6, but it is also location specific (Carr 2013). For example, in summer, standard Kc in California is 0.50-0.55, whereas Kc in Israel is 0.60-0.65 (Lahav et al. 2013)."
+- @Mazhawu_2020_Water, Hass in South Africa: monthly crop water use 20 - 110% of ET0.
+- @Oster_2007_Salinity: drainage of irrigation water.
+
+## SHADING
+
+- @Coelho_2010_Nivel: Coffee (3333 ha-1) AFS with Inga edulis (308 ha-1) and avocado (175 ha-1) in Brazil: Shading 82.3-89.5%, Self-shading coffee 61.4-69.6% (in monoculture more 73.9-95.8%).
+
+## BIOGEOCHEMISTRY
+
+- @Kiggundu_2012_Water, Florida, young trees of cv Simmonds: N-leaching about 10% of fertilization.
+
+
+
+# Banana: agronomy and ecophysiology
+
+- Jeremy: more banana yield towards end of rainy season. But maybe this seasonality is restricted to dry areas in NIC. Commercial farms are in wetter areas and produce year-round.
+- Tixier et al. (2008): banana spatially not synchronized after the first few generations. So trees are in different stages. That may motivate a simple model with fixed allocation parameters.
+- Banana is herbaceous so does not have branches. We could repurpose the FB parameter to mean allocation to bunches (bananas), but would then still have to uncouple crown area from CB
+- Damour et al. (2012):
+    - N < => later flowering, lower [NL], similar yield.
+    - H2O < => Later flowering, yield <.
+- Ripoche et al. 2012:
+    - One cycle ~ 40 weeks (50 if you include the offshoot overlap with its parent's cycle).
+    - Up to 10 kg aboveground DM per plant.
+- Landry et al. (2017).
+    - Duration of reproductive phase ~ 90 d.
+- Chaves et al. (2009): plntain (Musa AAB).
+    - Latin American mean yield is 7.3 t ha-1 y-1 (DM?)
+    - DMP fruits ~ 25%.
+    - Tb = 12.5 degC, Topt = 25 degC, Tmax = 40 degC. Growth stages simulated as GDD. 
+    - Very simple two-stage model (Vegetative-reproductive) with fixed ABG allocation parameters in each. Negative coefficients for leaves and especially for corm in reproductive stage, due to redistribution of DM to bunch.
+    - K very low (0.2817), LAI very high (up to 12.9): both dubious but their product is what matters. LUE=1.63 g MJ-1
+- He et al. (2020).
+    - More allocation coefficients, including for roots.
+    
+## DRY MATTER ALLOCATION AND DISTRIBUTION & PHENOLOGY
+
+- @Schaffer_1999_Atmospheric: Dry matter distribution within banana cv. Gros Michel: Leaf+petiole : Pseudostem : Root : Rhizome = 0.19 : 0.574 : 0.192 : 0.045. Minor changes (more root) with elevated CO2.
+    

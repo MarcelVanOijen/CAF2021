@@ -78,3 +78,8 @@ We briefly discuss these steps now.
   source('BC/BC_averageYields.R')
 ```
 
+## TO DO
+
+- Correct the values used for Nfert in the MO and BO treatments, using Table 2 of Haggar et al. (2011).
+- Ignore bienniality in final 4 years 2014-2017 because that was linked to rust outbreaks which the model does not simulate.
+- But do try to improve i.e. increase the magnitude of the simulated bienniality in the first 10 years.
