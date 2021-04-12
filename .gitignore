@@ -3,8 +3,10 @@
 .RData
 .Ruserdata
 *.pdf
+*.png
 *.DS_Store
 CAF2021_parModes_*.txt
 MCMC_*.RData
 tmp*
 weather/clim_Icafe&IMN_red_train2.csv
+BC/BC_2021-04-10_200000/

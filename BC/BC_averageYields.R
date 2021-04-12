@@ -37,9 +37,11 @@ for (s in 1:nSites) {
 }
 
 par( mfrow=c(1,1), mar=c(5,5,2,2) )
+
 plot( AvYield[,2], AvYield[,3], main="Av. yield coffee (t DM ha-1)",
       xlab="Observed", ylab="Simulated",
-      xlim=c(0,max(AvYield[,2:3])), ylim=c(0,max(AvYield[,2:3])), )
+      xlim=c(0,max(AvYield[,2:3])), ylim=c(0,max(AvYield[,2:3])), type="n" )
+text( AvYield[,2], AvYield[,3], labels=1:18, cex=0.8 )
 abline(0,1,lty=2)
 lm.Y <- lm(AvYield[,3]~AvYield[,2])
 r2   <- signif( summary(lm.Y)$r.squared, 2 )
@@ -48,4 +50,3 @@ legend( "bottomright",
         legend=c("y=x", paste("Regression\nr2= ",as.character(r2)) ),
         col=c("black","blue"), lty=c(2,1), cex=0.7 )
 
-        
