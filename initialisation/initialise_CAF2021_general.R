@@ -1,11 +1,13 @@
 ## initialise_CAF2021_general.R ##
-## MvO, 2021-03-19
+## MvO, 2021-04-12
 
 ################################################################################
 calendar_fert  <- matrix( -1, nrow=100, ncol=3 )
 calendar_prunC <- matrix( -1, nrow=100, ncol=3 )
-calendar_prunT <- matrix( -1, nrow=100, ncol=3 )
-calendar_thinT <- matrix( -1, nrow=100, ncol=3 )
+# calendar_prunT <- matrix( -1, nrow=100, ncol=3 )
+# calendar_thinT <- matrix( -1, nrow=100, ncol=3 )
+calendar_prunT <- array( -1, c(3,100,3) )
+calendar_thinT <- array( -1, c(3,100,3) )
 
 ################################################################################
 ### 1. MODEL LIBRARY FILE & FUNCTION FOR RUNNING THE MODEL

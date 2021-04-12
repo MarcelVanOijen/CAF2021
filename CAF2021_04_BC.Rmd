@@ -84,7 +84,7 @@ For more details on the Turrialba experiment and the data, see 'SEACAF.Rmd'.
 
 ```{r, eval=TRUE}
 ## 1. INITIALISE MCMC ##
-   nChain <- as.integer(2e1)
+   nChain <- as.integer(2e2)
    source('BC/BC_CAF2021_MCMC_init_Turrialba_01-10_13-20.R')
 
 ## 2. RUNNING THE MCMC ##

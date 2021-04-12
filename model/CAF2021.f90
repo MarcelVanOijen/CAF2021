@@ -20,15 +20,23 @@ use tree
 implicit none
 
 ! As long as the total number of parameters stays below 120, the next line need not be changed
-integer, parameter        :: NPAR     = 130
-real                      :: PARAMS(NPAR)
-integer, parameter        :: NWEATHER = 8
-real                      :: MATRIX_WEATHER(NMAXDAYS,NWEATHER)
-real   , dimension(100,3) :: CALENDAR_FERT, CALENDAR_PRUNC, CALENDAR_PRUNT, CALENDAR_THINT
-integer, dimension(100,2) :: DAYS_FERT    , DAYS_PRUNC    , DAYS_PRUNT    , DAYS_THINT
-real   , dimension(100)   ::                FRPRUNC       , FRPRUNT       , FRTHINT
-integer, dimension(100)   :: NFERTV
-real                      :: y(NDAYS,NOUT)
+integer, parameter :: NPAR     = 130
+real               :: PARAMS(NPAR)
+integer, parameter :: NWEATHER = 8
+real               :: MATRIX_WEATHER(NMAXDAYS,NWEATHER)
+
+! real   , dimension(100,3) :: CALENDAR_FERT, CALENDAR_PRUNC, CALENDAR_PRUNT, CALENDAR_THINT
+! integer, dimension(100,2) :: DAYS_FERT    , DAYS_PRUNC    , DAYS_PRUNT    , DAYS_THINT
+! real   , dimension(100)   ::                FRPRUNC       , FRPRUNT       , FRTHINT
+real   , dimension(100,3)   :: CALENDAR_FERT , CALENDAR_PRUNC
+integer, dimension(100,2)   :: DAYS_FERT     , DAYS_PRUNC
+real   , dimension(100)     ::                 FRPRUNC
+real   , dimension(3,100,3) :: CALENDAR_PRUNT, CALENDAR_THINT
+integer, dimension(3,100,2) :: DAYS_PRUNT    , DAYS_THINT
+real   , dimension(3,100)   :: FRPRUNT       , FRTHINT
+
+integer, dimension(100)     :: NFERTV
+real                        :: y(NDAYS,NOUT)
 
 integer :: day, doy, i, ic, it, NDAYS, NOUT, year
 
@@ -80,12 +88,18 @@ RAINI = MATRIX_WEATHER(:,8)
 ! Calendar of management
 DAYS_FERT    = CALENDAR_FERT (:,1:2)
 DAYS_PRUNC   = CALENDAR_PRUNC(:,1:2)
-DAYS_PRUNT   = CALENDAR_PRUNT(:,1:2)
-DAYS_THINT   = CALENDAR_THINT(:,1:2)
 NFERTV       = CALENDAR_FERT (:,3)
 FRPRUNC      = CALENDAR_PRUNC(:,3)
-FRPRUNT      = CALENDAR_PRUNT(:,3)
-FRTHINT      = CALENDAR_THINT(:,3)
+
+! DAYS_PRUNT   = CALENDAR_PRUNT(:,1:2)
+! DAYS_THINT   = CALENDAR_THINT(:,1:2)
+! FRPRUNT      = CALENDAR_PRUNT(:,3)
+! FRTHINT      = CALENDAR_THINT(:,3)
+DAYS_PRUNT   = CALENDAR_PRUNT(:,:,1:2)
+DAYS_THINT   = CALENDAR_THINT(:,:,1:2)
+FRPRUNT      = CALENDAR_PRUNT(:,:,3)
+FRTHINT      = CALENDAR_THINT(:,:,3)
+
 daysinceprun = 0
 
 ! INITIAL STATES

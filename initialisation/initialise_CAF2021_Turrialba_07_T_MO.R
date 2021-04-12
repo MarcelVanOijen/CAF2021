@@ -1,5 +1,5 @@
 ## initialise_CAF2021_Turrialba_07_T_MO.R ##
-## MvO, 2021-03-19
+## MvO, 2021-04-12
 
 ## 1. SITE-SPECIFIC SETTINGS ##
    year_start     <- as.integer(2000)
@@ -23,37 +23,37 @@
    params       <- df_params[,parcol]
    params[names_params=="TREEDENS0(3)"] <- 0.07
 
-   calendar_fert [1:48,1] <- rep( 2002:2017, each=3 )
-   calendar_fert [1:48,2] <- c( 135, 289, 350 )
-   calendar_fert [1:48,3] <- c(  45,  45,  60 ) * 0.2
+   calendar_fert [ 1:48, 1 ] <- rep( 2002:2017, each=3 )
+   calendar_fert [ 1:48, 2 ] <- c( 135, 289, 350 )
+   calendar_fert [ 1:48, 3 ] <- c(  45,  45,  60 ) * 0.2
 
-   calendar_prunC[ 1:14,1] <- 2004:2017
-   calendar_prunC[ 1:14,2] <- 59
-   calendar_prunC[ 1:14,3] <-  0.28
+   calendar_prunC[ 1:14, 1 ] <- 2004:2017
+   calendar_prunC[ 1:14, 2 ] <- 59
+   calendar_prunC[ 1:14, 3 ] <-  0.28
 
-   calendar_prunT[   1, ] <- c( 2003, 158, 0.1  )
-   calendar_prunT[   2, ] <- c( 2004,  49, 0.03 )
-   calendar_prunT[   3, ] <- c( 2004, 175, 0.03 )
-   calendar_prunT[   4, ] <- c( 2004, 320, 0.03 )
-   calendar_prunT[   5, ] <- c( 2005, 220, 0.1  )
-   calendar_prunT[   6, ] <- c( 2006, 220, 0.1  )
-   calendar_prunT[   7, ] <- c( 2007, 220, 0.1  )
-   calendar_prunT[   8, ] <- c( 2008, 220, 0.1  )
-   calendar_prunT[   9, ] <- c( 2010, 220, 0.1  )
-   calendar_prunT[  10, ] <- c( 2011, 220, 0.1  )
-   calendar_prunT[  11, ] <- c( 2012, 250, 0.1  )
-   calendar_prunT[  12, ] <- c( 2013, 226, 0.1  )
-   calendar_prunT[  13, ] <- c( 2014, 226, 0.1  )
-   calendar_prunT[  14, ] <- c( 2015, 226, 0.1  )
-   calendar_prunT[  15, ] <- c( 2016, 226, 0.1  )
-   calendar_prunT[  16, ] <- c( 2017, 226, 0.1  )
+   calendar_prunT[ 3,  1, ] <- c( 2003, 158, 0.1  )
+   calendar_prunT[ 3,  2, ] <- c( 2004,  49, 0.03 )
+   calendar_prunT[ 3,  3, ] <- c( 2004, 175, 0.03 )
+   calendar_prunT[ 3,  4, ] <- c( 2004, 320, 0.03 )
+   calendar_prunT[ 3,  5, ] <- c( 2005, 220, 0.1  )
+   calendar_prunT[ 3,  6, ] <- c( 2006, 220, 0.1  )
+   calendar_prunT[ 3,  7, ] <- c( 2007, 220, 0.1  )
+   calendar_prunT[ 3,  8, ] <- c( 2008, 220, 0.1  )
+   calendar_prunT[ 3,  9, ] <- c( 2010, 220, 0.1  )
+   calendar_prunT[ 3, 10, ] <- c( 2011, 220, 0.1  )
+   calendar_prunT[ 3, 11, ] <- c( 2012, 250, 0.1  )
+   calendar_prunT[ 3, 12, ] <- c( 2013, 226, 0.1  )
+   calendar_prunT[ 3, 13, ] <- c( 2014, 226, 0.1  )
+   calendar_prunT[ 3, 14, ] <- c( 2015, 226, 0.1  )
+   calendar_prunT[ 3, 15, ] <- c( 2016, 226, 0.1  )
+   calendar_prunT[ 3, 16, ] <- c( 2017, 226, 0.1  )
 
-   calendar_thinT[   1, ] <- c( 2007,  75, 0.23 )
-   calendar_thinT[   2, ] <- c( 2008,  74, 0.25 )
-   calendar_thinT[   3, ] <- c( 2009,  89, 0.15 )
-   calendar_thinT[   4, ] <- c( 2011,  75, 0.08 )
-   calendar_thinT[   5, ] <- c( 2012,  75, 0.03 )
-   calendar_thinT[   6, ] <- c( 2013,  80, 0.03 )
+   calendar_thinT[ 3,  1, ] <- c( 2007,  75, 0.23 )
+   calendar_thinT[ 3,  2, ] <- c( 2008,  74, 0.25 )
+   calendar_thinT[ 3,  3, ] <- c( 2009,  89, 0.15 )
+   calendar_thinT[ 3,  4, ] <- c( 2011,  75, 0.08 )
+   calendar_thinT[ 3,  5, ] <- c( 2012,  75, 0.03 )
+   calendar_thinT[ 3,  6, ] <- c( 2013,  80, 0.03 )
 
 ## 5. CREATE EMPTY MATRIX y FOR MODEL OUTPUT ##
    y <- matrix(0,NDAYS,NOUT)

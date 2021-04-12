@@ -1,5 +1,5 @@
 ## initialise_CAF2021_Turrialba_19_PS_AC.R ##
-## MvO, 2021-03-19
+## MvO, 2021-04-12
 
 ## 1. SITE-SPECIFIC SETTINGS ##
    year_start     <- as.integer(2000)
@@ -22,13 +22,13 @@
    names_params <- row.names(df_params)
    params       <- df_params[,parcol]
 
-   calendar_fert [1:48,1] <- rep( 2002:2017, each=3 )
-   calendar_fert [1:48,2] <- c( 135, 289, 350 )
-   calendar_fert [1:48,3] <- c(  90,  90, 100 )
+   calendar_fert [ 1:48, 1 ] <- rep( 2002:2017, each=3 )
+   calendar_fert [ 1:48, 2 ] <- c( 135, 289, 350 )
+   calendar_fert [ 1:48, 3 ] <- c(  90,  90, 100 )
 
-   calendar_prunC[ 1:14,1] <- 2004:2017
-   calendar_prunC[ 1:14,2] <- 59
-   calendar_prunC[ 1:14,3] <-  0.28
+   calendar_prunC[ 1:14, 1 ] <- 2004:2017
+   calendar_prunC[ 1:14, 2 ] <- 59
+   calendar_prunC[ 1:14, 3 ] <-  0.28
 
 ## 5. CREATE EMPTY MATRIX y FOR MODEL OUTPUT ##
    y <- matrix(0,NDAYS,NOUT)

@@ -1,5 +1,5 @@
 ## initialise_CAF2021_Turrialba_01_E_AC.R ##
-## MvO, 2021-03-19
+## MvO, 2021-04-12
 
 ## 1. SITE-SPECIFIC SETTINGS ##
    year_start     <- as.integer(2000)
@@ -23,21 +23,21 @@
    params       <- df_params[,parcol]
    params[names_params=="TREEDENS0(1)"] <- 0.07
 
-   calendar_fert [ 1:48,1] <- rep( 2002:2017, each=3 )
-   calendar_fert [ 1:48,2] <- c( 135,289, 350 )
-   calendar_fert [ 1:48,3] <- c(  90, 90, 100 )
+   calendar_fert [ 1:48, 1 ] <- rep( 2002:2017, each=3 )
+   calendar_fert [ 1:48, 2 ] <- c( 135,289, 350 )
+   calendar_fert [ 1:48, 3 ] <- c(  90, 90, 100 )
 
-   calendar_prunC[ 1:14,1] <- 2004:2017
-   calendar_prunC[ 1:14,2] <- 59
-   calendar_prunC[ 1:14,3] <-  0.28
+   calendar_prunC[ 1:14, 1 ] <- 2004:2017
+   calendar_prunC[ 1:14, 2 ] <- 59
+   calendar_prunC[ 1:14, 3 ] <-  0.28
 
-   calendar_prunT[    1, ] <- c( 2001, 266, 0.8 )
-   calendar_prunT[ 2:33,1] <- rep( 2002:2017, each=2 )
-   calendar_prunT[ 2:33,2] <- c( 140, 350 )
-   calendar_prunT[ 2:33,3] <-  0.6
+   calendar_prunT[ 1, 1   ,   ] <- c( 2001, 266, 0.8 )
+   calendar_prunT[ 1, 2:33, 1 ] <- rep( 2002:2017, each=2 )
+   calendar_prunT[ 1, 2:33, 2 ] <- c( 140, 350 )
+   calendar_prunT[ 1, 2:33, 3 ] <- 0.6
    
-   calendar_thinT[    1, ] <- c( 2007, 124, 0.004 )
-   calendar_thinT[    2, ] <- c( 2010, 124, 0.49  )
+   calendar_thinT[ 1, 1   ,   ] <- c( 2007, 124, 0.004 )
+   calendar_thinT[ 1, 2   ,   ] <- c( 2010, 124, 0.49  )
    
 ## 5. CREATE EMPTY MATRIX y FOR MODEL OUTPUT ##
    y <- matrix(0,NDAYS,NOUT)
