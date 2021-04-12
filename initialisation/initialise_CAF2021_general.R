@@ -64,7 +64,10 @@ outputNames <- c( "Time", "year", "doy",
   paste0( "h_t("       ,1:nt,")" ), paste0( "LAIT_c("  ,1:nc,")" ),
   paste0( "treedens_t(",1:nt,")" ),
   
-  "Csoil_f"                       , "Nsoil_f" )
+  "Csoil_f"                       , "Nsoil_f",
+  
+  paste0( "CST_t(",1:nt,")" )
+)
 
 outputUnits <- c( "(y)", "(y)", "(d)",
 
@@ -78,7 +81,10 @@ outputUnits <- c( "(y)", "(y)", "(d)",
   rep("(m)"       ,nt)          , rep("(m2 m-2 c)" ,nc),
   rep("(m-2)"     ,nt),
   
-  "(tC ha-1)"                   , "(tN ha-1)" )
+  "(tC ha-1)"                   , "(tN ha-1)"          ,
+  
+  rep("(kgC m-2)",nt)
+)
 
 NOUT <- as.integer( length(outputNames) )
 

@@ -3,9 +3,9 @@ Subroutine CAF2021(PARAMS,MATRIX_WEATHER, &
 				   NDAYS,NOUT, &
 				   y)
 !========================================================
-! This is the CAF2021 model, modified.
+! This is the CAF2021 model.
 ! Authors: Marcel van Oijen, David Cameron, Oriana Ovalle
-! Date: 2021-03-19
+! Date: 2021-04-12
 !========================================================
 
 use belowgroundres
@@ -332,6 +332,11 @@ do day = 1, NDAYS
   
   y(day,55) = Csoil_f       ! tC ha-1
   y(day,56) = Nsoil_f       ! tN ha-1
+  
+  y(day,57) = CST_t(1)      ! kgC m-2
+  y(day,58) = CST_t(2)      ! kgC m-2
+  y(day,59) = CST_t(3)      ! kgC m-2
+
 
 ! CALIBRATION VARIABLES IN BC DATA FILES.
 ! NAME IN CAF2021 ! NAME IN BC data files ! Unit
