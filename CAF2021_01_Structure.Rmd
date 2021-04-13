@@ -160,10 +160,13 @@ We now run the most complex system, with three species.
   params[names_params=="SLAT(2)"]      <- 20
   params[names_params=="SLAT(3)"]      <- 20
 
+  calendar_prunT[ 2, , ] <- calendar_prunT[ 1, , ]
+  calendar_thinT[ 2, , ] <- calendar_thinT[ 1, , ]
+
   output <- run_model()
 ```
 
-## ERROR FOR SPECIES 3: thinning leads to a jump in height!
+## Ground cover, density and height
 
 Ground cover, density and height for the three species are shown in Fig. \ref{fig:OutputsSpecies}.
 

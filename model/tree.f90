@@ -50,8 +50,9 @@ Contains
   endwhere
   h_t      = KH  * (CSpertree_t**KHEXP )
   CAtree_t = KAC * (CBpertree_t**KACEXP)
-  SAT_t    = min(1., CAtree_t * treedens_t * SHADEPROJ)
+  SAT_t    = CAtree_t * treedens_t * SHADEPROJ
   SAT_t(1:ntlow) = SAT_t(1:ntlow) / max(1., sum(SAT_t(1:ntlow))) ! sum(SAT_t(1:2)) <= 1
+  SAT_t(3)       = min(1., SAT_t(3))                             ! SAT_t(3)) <= 1
   end Subroutine morphology  
 
   Subroutine PARintT(Ac,Atc,LAIT_tc, PARintT_c,PARintT_t)

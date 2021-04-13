@@ -116,8 +116,11 @@ LAIT_t     = CLT_t * SLAT
 ! Agroforestry system
 call calcTX
 CAtree_t       = KAC * (CBtree0**KACEXP)
-SAT_t          = min(1., CAtree_t * treedens_t * SHADEPROJ)
+! SAT_t          = min(1., CAtree_t * treedens_t * SHADEPROJ)
+! SAT_t(1:ntlow) = SAT_t(1:ntlow) / max(1., sum(SAT_t(1:ntlow)))
+SAT_t          = CAtree_t * treedens_t * SHADEPROJ
 SAT_t(1:ntlow) = SAT_t(1:ntlow) / max(1., sum(SAT_t(1:ntlow)))
+SAT_t(3)       = min(1., SAT_t(3))
 Ac(5:6)        = SAT_t(3) * SAT_t(1:2)
 Ac(4)          = SAT_t(3) * (1-SAT_t(1)-SAT_t(2))
 Ac(2:3)        = (1.-SAT_t(3)) * SAT_t(1:2)
@@ -350,7 +353,7 @@ do day = 1, NDAYS
   y(day,57) = CST_t(1)      ! kgC m-2
   y(day,58) = CST_t(2)      ! kgC m-2
   y(day,59) = CST_t(3)      ! kgC m-2
-
+  y(day,60:62) = SAT_t      ! m2 m-2
 
 ! CALIBRATION VARIABLES IN BC DATA FILES.
 ! NAME IN CAF2021 ! NAME IN BC data files ! Unit
