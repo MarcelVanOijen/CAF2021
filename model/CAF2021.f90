@@ -326,10 +326,10 @@ do day = 1, NDAYS
 ! Nsoil_f         ! Nsoilave              ! t  N     ha-1 field
 ! WC_f            ! WC_F                  ! m3 W     m-3  field
 
-if(day==1) then
-  write(66,*) "day=1    : PARCOFFEE= ", PARCOFFEE
-  write(66,*) "day=1    : KNFIX= "    , KNFIX
-endif
+!if(day==1) then
+!  write(66,*) "day=1    : PARCOFFEE= ", PARCOFFEE
+!  write(66,*) "day=1    : KNFIX= "    , KNFIX
+!endif
 
 !if(day==NDAYS) then
 !  write(66,*) "---------------------------------------------------"
@@ -341,6 +341,6 @@ endif
 
 end do ! end time loop
 
-close(66)
+!close(66)
 
 end  
