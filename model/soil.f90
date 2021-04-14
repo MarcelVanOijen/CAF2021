@@ -1,5 +1,7 @@
 module soil
 
+! Subroutines: water, CNsoil
+
 use declare_parameters
 use environment
 use management

@@ -1,5 +1,7 @@
 module belowgroundres
 
+! Subroutines: PET, water_flux, Nsupply, Nsupplytree
+
 use declare_parameters
 use environment
 use management

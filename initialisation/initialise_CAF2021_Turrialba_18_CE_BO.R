@@ -23,7 +23,8 @@
    params       <- df_params[,parcol]
    params[names_params=="TREEDENS0(1)"] <- 0.0325
    params[names_params=="TREEDENS0(3)"] <- 0.0325
-
+   params[names_params=="KNFIX(3)"    ] <- 0.1
+   
    calendar_fert [ 1:48, 1 ] <- rep( 2002:2017, each=3 )
    calendar_fert [ 1:48, 2 ] <- c( 135, 289, 350 )
    calendar_fert [ 1:48, 3 ] <- c(  45,  45,  60 ) * 0

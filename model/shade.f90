@@ -1,5 +1,7 @@
 Module shade
 
+! Subroutines: CalcShade
+
 use declare_parameters
 use tree
 implicit none

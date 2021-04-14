@@ -18,7 +18,7 @@ geometry: margin=1in
 ---
 
 ```{r, include=FALSE}
-  knitr::opts_chunk$set(echo=FALSE,results="asis",warning=FALSE,message=FALSE)
+  knitr::opts_chunk$set(echo=TRUE,results="asis",warning=FALSE,message=FALSE)
 ```
 
 # Test with 2 tree spp.
@@ -30,8 +30,15 @@ geometry: margin=1in
   params[names_params=="TREEDENS0(2)"] <- 0.02
   params[names_params=="KNFIX(2)"    ] <- params[names_params=="KNFIX(1)"]
 
-  calendar_prunT[ 2, , ] <- calendar_prunT[ 1, , ]
-  calendar_thinT[ 2, , ] <- calendar_thinT[ 1, , ]
+  # We prune tree species 2 half as frequently as species 1
+  # (only the even-numbered times)
+  even <- seq(2,100,2)
+  calendar_prunT[ 2, even , ] <- calendar_prunT[ 1, even , ]
+  
+  # We thin tree species 2 one week after species 1, and add one extra thinning day:
+  calendar_thinT[ 2,    ,   ] <- calendar_thinT[ 1, ,   ]
+  calendar_thinT[ 2,    , 2 ] <- calendar_thinT[ 1, , 2 ] + 7
+  calendar_thinT[ 2, 100,   ] <- c( 2004, 131, 0.9 )
 
   output <- run_model()
 ```
@@ -48,9 +55,10 @@ geometry: margin=1in
 ```
 
 ```{r, eval=F}
-  finalvalues <- tail( output, 1 )
-  knitr::kable( cbind( outputNames, outputUnits, t(finalvalues) ),
-                col.names=c("Variable","Unit","Final value") )
+  initvalues  <- signif( head( output, 1 ), 4 )
+  finalvalues <- signif( tail( output, 1 ), 4 )
+  knitr::kable( cbind( outputNames, outputUnits, t(initvalues), t(finalvalues) ),
+                col.names=c("Variable","Unit","Initial value","Final value") )
 ```
 
 ## Graphical outputs

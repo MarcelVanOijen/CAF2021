@@ -313,15 +313,13 @@ CAF2021: How does C-loss in runoff relate to erosion?
 
 ### Improving CAF2021
 
-- Have 'nt' different tree pruning- and thinning calendars.
-- But ignore species-specific fertlisation (such as at the base of tree stems)?
+- Keep ignoring species-specific fertlisation (such as at the base of tree stems)?
 - Why are the variables T_c(nc) and GR_c(nc) needed while there are no such LCC-vectors for the three other weather variables (WN, VP, RAIN)?
     - Are we ignoring microclimatic variation in WN and VP at the level of the coffee plants?
     - Check how rain interception depends on the tree layers.
 - Make shading a function of tree height. Currently t3 species are assumed to overshadow t1 and t2 species irrespective of their respective heights.
 - Have tree-species specific SHADEPROJ (if that is still in the model??).
 - Make all tree parameters species-scpecific so they can all be calibrated.
-    - Currently only 7 of the 36 tree parameters can be assiged tree-sp. specific values and that is done in 'set_params.f90' (i.e. within the FORTRAN-code, not R-code) which precludes BC.
 - Adjust the structure of phenology and C-allocation in the three possible tree spp., such that they represent service trees (t1), fruit trees (t2) and timber trees (t3).
     - Consider keeping the structures the same for the three tree tree types and simulate differences purely through parameter settings. For example, if a tree does not produce harvestable reproductive yield (fruit), have allocation to "CPT" set to zero.
 - Write function for pictorial output (over time?) of height, crown height, crown area (for tree1, tree2, tree3, coffee)

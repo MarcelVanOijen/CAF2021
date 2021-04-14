@@ -1,5 +1,8 @@
 Module tree
 
+! Subroutines: morphology, PARintT, NPP, allocation, NdemandOrgans, gtreeNupt,
+!              CNtree
+
 use declare_parameters
 use environment
 use management

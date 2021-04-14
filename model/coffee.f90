@@ -1,5 +1,7 @@
 module coffee
 
+! Subroutines: Phenology, Growth, Foliage, Senescence, PrunHarv
+
 use declare_parameters
 use environment
 use management

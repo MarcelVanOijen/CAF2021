@@ -1,5 +1,7 @@
 module environment
 
+! Subroutines: set_weather_day, DDAYL
+
 use declare_parameters
 implicit none
 integer, parameter :: NMAXDAYS = 10000

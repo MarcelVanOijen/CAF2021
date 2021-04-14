@@ -5,7 +5,7 @@ Subroutine CAF2021(PARAMS,MATRIX_WEATHER, &
 !========================================================
 ! This is the CAF2021 model.
 ! Authors: Marcel van Oijen, David Cameron, Oriana Ovalle
-! Date: 2021-04-12
+! Date: 2021-04-14
 !========================================================
 
 use belowgroundres
@@ -25,9 +25,6 @@ real               :: PARAMS(NPAR)
 integer, parameter :: NWEATHER = 8
 real               :: MATRIX_WEATHER(NMAXDAYS,NWEATHER)
 
-! real   , dimension(100,3) :: CALENDAR_FERT, CALENDAR_PRUNC, CALENDAR_PRUNT, CALENDAR_THINT
-! integer, dimension(100,2) :: DAYS_FERT    , DAYS_PRUNC    , DAYS_PRUNT    , DAYS_THINT
-! real   , dimension(100)   ::                FRPRUNC       , FRPRUNT       , FRTHINT
 real   , dimension(100,3)   :: CALENDAR_FERT , CALENDAR_PRUNC
 integer, dimension(100,2)   :: DAYS_FERT     , DAYS_PRUNC
 real   , dimension(100)     ::                 FRPRUNC
@@ -42,8 +39,8 @@ integer :: day, doy, i, ic, it, NDAYS, NOUT, year
 
 ! State variables
 real    :: CBT_t(nt), CLT_t(nt), CRT_t(nt), CST_t(nt), NLT_t(nt)
-real    :: CL(nc), CP(nc), CR(nc), CW(nc), NL(nc), NCL(nc)
-real    :: daysinceprun, DVS(nc), LAI(nc), SENSIT(nc), SINKP(nc)
+real    :: CL(nc)=0, CP(nc)=0, CR(nc)=0, CW(nc)=0, NL(nc)=0
+real    :: daysinceprun, DVS(nc)=0, LAI(nc)=0, SENSIT(nc), SINKP(nc)
 real    :: CLITT(nc), CSOMF(nc), CSOMS(nc)
 real    :: NLITT(nc), NMIN (nc), NSOMF(nc), NSOMS(nc), WA(nc)
 
@@ -90,11 +87,6 @@ DAYS_FERT    = CALENDAR_FERT (:,1:2)
 DAYS_PRUNC   = CALENDAR_PRUNC(:,1:2)
 NFERTV       = CALENDAR_FERT (:,3)
 FRPRUNC      = CALENDAR_PRUNC(:,3)
-
-! DAYS_PRUNT   = CALENDAR_PRUNT(:,1:2)
-! DAYS_THINT   = CALENDAR_THINT(:,1:2)
-! FRPRUNT      = CALENDAR_PRUNT(:,3)
-! FRTHINT      = CALENDAR_THINT(:,3)
 DAYS_PRUNT   = CALENDAR_PRUNT(:,:,1:2)
 DAYS_THINT   = CALENDAR_THINT(:,:,1:2)
 FRPRUNT      = CALENDAR_PRUNT(:,:,3)
@@ -116,8 +108,6 @@ LAIT_t     = CLT_t * SLAT
 ! Agroforestry system
 call calcTX
 CAtree_t       = KAC * (CBtree0**KACEXP)
-! SAT_t          = min(1., CAtree_t * treedens_t * SHADEPROJ)
-! SAT_t(1:ntlow) = SAT_t(1:ntlow) / max(1., sum(SAT_t(1:ntlow)))
 SAT_t          = CAtree_t * treedens_t * SHADEPROJ
 SAT_t(1:ntlow) = SAT_t(1:ntlow) / max(1., sum(SAT_t(1:ntlow)))
 SAT_t(3)       = min(1., SAT_t(3))
@@ -137,18 +127,20 @@ NMIN  = NMIN0
 WA    = 1000 * ROOTD * WCST * FWCFC
 
 ! Coffee
-DVS           = DVS0
-CL            = CL0
-CP            = CP0
-CR            = CR0
-CW            = CW0
-NL            = CL * NCLMAX
-LAI           = CL * SLAMAX
+where (Ac>0.)
+  DVS           = DVS0
+  CL            = CL0
+  CP            = CP0
+  CR            = CR0
+  CW            = CW0
+  NL            = CL * NCLMAX
+  LAI           = CL * SLAMAX
+endwhere
 SENSIT        = 0
 SINKP         = 0
 SINKPMAXnew   = FSINKPMAX0 * SINKPMAX
-PARold        = 0
 harvDMav_year = 0
+PARold        = 0
 
 do day = 1, NDAYS
 
@@ -228,7 +220,7 @@ do day = 1, NDAYS
   SENSIT = SENSIT + dSENSIT
   DVS    = DVS    + dDVS    - rDVS
 
-! Trees (scalars: m-2 field)
+! Trees (arrays: m-2 field)
   where (At>0.)
     LAIT_t = CLT_t * SLAT
     CBT_t  = CBT_t + gCBT_t - dCBT_t
@@ -269,16 +261,16 @@ do day = 1, NDAYS
   Csoil_f  = sum(Ac*Csoil) * 10            ! tC  ha-1 field
   harvDMav = sum(Ac*harvCP) * 10./CCONC    ! tDM ha-1 field
   if (doy==61) then
-	harvDMav_year = 0
+  	harvDMav_year = 0
   else
-	harvDMav_year = harvDMav_year + harvDMav ! tDM ha-1
+	  harvDMav_year = harvDMav_year + harvDMav ! tDM ha-1
   endif
   LAI_f    = sum(Ac*LAI)                   ! m2  m-2 field
   LAIT     = sum(LAIT_t)/sum(At)           ! m2  m-2 shade
   Nsoil    = NLITT + NSOMF + NSOMS + NMIN  ! kgN m-2 c
   Nsoil_f  = sum(Ac*Nsoil) * 10            ! tN  ha-1 field
   WA_f     = sum(Ac*WA)                    ! kgW m-2 field
-  WC_f     = 0.001 * WA_f / ROOTD   	   ! m3W m-3
+  WC_f     = 0.001 * WA_f / ROOTD   	     ! m3W m-3
 
 ! Outputs
 ! The "c1", "c2" etc. in the units below refer to parts of the field with
@@ -289,71 +281,26 @@ do day = 1, NDAYS
 ! c4 = shaded by tree sp. 3     (upper-stratum tree sp.)
 ! c5 = shaded by tree sp. 1 & 3 (lower- and upper-stratum tree spp.)
 ! c6 = shaded by tree sp. 2 & 3 (lower- and upper-stratum tree spp.)
-  y(day, 1) = year + (doy-0.5)/366         ! "Time" = Decimal year (approx.)
-  y(day, 2) = year
-  y(day, 3) = doy
-
-  y(day, 4) = Ac(1)         ! m2 c m-2
-  y(day, 5) = Ac(2)         ! m2 c m-2
-  y(day, 6) = Ac(3)         ! m2 c m-2
-  y(day, 7) = Ac(4)         ! m2 c m-2
-  y(day, 8) = Ac(5)         ! m2 c m-2
-  y(day, 9) = Ac(6)         ! m2 c m-2
-  y(day,10) = At(1)         ! m2 t m-2
-  y(day,11) = At(2)         ! m2 t m-2
-  y(day,12) = At(3)         ! m2 t m-2
-  y(day,13) = fNgrowth(1)   ! -
-  y(day,14) = fNgrowth(2)   ! -
-  y(day,15) = fNgrowth(3)   ! -
-  y(day,16) = fNgrowth(4)   ! -
-  y(day,17) = fNgrowth(5)   ! -
-  y(day,18) = fNgrowth(6)   ! -
-  y(day,19) = fTran(1)      ! -
-  y(day,20) = fTran(2)      ! -
-  y(day,21) = fTran(3)      ! - 
-  y(day,22) = fTran(4)      ! -
-  y(day,23) = fTran(5)      ! -
-  y(day,24) = fTran(6)      ! -
-
-  y(day,25) = Cabg  		! kgC m-2
-  y(day,26) = harvCP(1)     ! kgC m-2 c
-  y(day,27) = harvCP(2)     ! kgC m-2 c
-  y(day,28) = harvCP(3)     ! kgC m-2 c
-  y(day,29) = harvCP(4)     ! kgC m-2 c
-  y(day,30) = harvCP(5)     ! kgC m-2 c
-  y(day,31) = harvCP(6)     ! kgC m-2 c
-  y(day,32) = harvDMav_year ! tDM ha-1
-  y(day,33) = LAI(1)        ! m2 m-2 c
-  y(day,34) = LAI(2)        ! m2 m-2 c
-  y(day,35) = LAI(3)        ! m2 m-2 c
-  y(day,36) = LAI(4)        ! m2 m-2 c
-  y(day,37) = LAI(5)        ! m2 m-2 c
-  y(day,38) = LAI(6)        ! m2 m-2 c
-  
-  y(day,39) = CabgT   		! kgC m-2
-  y(day,40) = CAtree_t(1)   ! m2 tree-1
-  y(day,41) = CAtree_t(2)   ! m2 tree-1
-  y(day,42) = CAtree_t(3)   ! m2 tree-1
-  y(day,43) = h_t(1)        ! m
-  y(day,44) = h_t(2)        ! m
-  y(day,45) = h_t(3)        ! m
-  y(day,46) = LAIT_c(1)     ! m2 m-2 c
-  y(day,47) = LAIT_c(2)     ! m2 m-2 c
-  y(day,48) = LAIT_c(3)     ! m2 m-2 c
-  y(day,49) = LAIT_c(4)     ! m2 m-2 c
-  y(day,50) = LAIT_c(5)     ! m2 m-2 c
-  y(day,51) = LAIT_c(6)     ! m2 m-2 c
-  y(day,52) = treedens_t(1) ! m-2
-  y(day,53) = treedens_t(2) ! m-2
-  y(day,54) = treedens_t(3) ! m-2
-  
-  y(day,55) = Csoil_f       ! tC ha-1
-  y(day,56) = Nsoil_f       ! tN ha-1
-  
-  y(day,57) = CST_t(1)      ! kgC m-2
-  y(day,58) = CST_t(2)      ! kgC m-2
-  y(day,59) = CST_t(3)      ! kgC m-2
-  y(day,60:62) = SAT_t      ! m2 m-2
+  y(day, 1   ) = year + (doy-0.5)/366 ! "Time" = Decimal year (approx.)
+  y(day, 2   ) = year
+  y(day, 3   ) = doy
+  y(day, 4: 9) = Ac                   ! m2 c m-2
+  y(day,10:12) = At                   ! m2 t m-2
+  y(day,13:18) = fNgrowth             ! -
+  y(day,19:24) = fTran                ! -
+  y(day,25   ) = Cabg  		            ! kgC m-2
+  y(day,26:31) = harvCP               ! kgC m-2 c
+  y(day,32   ) = harvDMav_year        ! tDM ha-1
+  y(day,33:38) = LAI                  ! m2 m-2 c
+  y(day,39   ) = CabgT   		          ! kgC m-2
+  y(day,40:42) = CAtree_t             ! m2 tree-1
+  y(day,43:45) = h_t                  ! m
+  y(day,46:51) = LAIT_c               ! m2 m-2 c
+  y(day,52:54) = treedens_t           ! m-2
+  y(day,55   ) = Csoil_f              ! tC ha-1
+  y(day,56   ) = Nsoil_f              ! tN ha-1
+  y(day,57:59) = CST_t                ! kgC m-2
+  y(day,60:62) = SAT_t                ! m2 m-2
 
 ! CALIBRATION VARIABLES IN BC DATA FILES.
 ! NAME IN CAF2021 ! NAME IN BC data files ! Unit
@@ -379,22 +326,21 @@ do day = 1, NDAYS
 ! Nsoil_f         ! Nsoilave              ! t  N     ha-1 field
 ! WC_f            ! WC_F                  ! m3 W     m-3  field
 
-! if(day==1) then
-!	  write(66,*) "day=1    : PARCOFFEE= ", PARCOFFEE
-!	  write(66,*) "day=1    : treedens_t=", treedens_t
-!	  write(66,*) "day=1    : CLT_t=     ", CLT_t
-!	  write(66,*) "day=1    : gCLT_t=    ", gCLT_t
-! endif
-! if(day==NDAYS) then
-!   write(66,*) "---------------------------------------------------"
-!	  write(66,*) "day=NDAYS: PARCOFFEE= ", PARCOFFEE
-!	  write(66,*) "day=NDAYS: treedens_t=", treedens_t
-!	  write(66,*) "day=NDAYS: CLT_t=     ", CLT_t
-!	  write(66,*) "day=NDAYS: gCLT_t=    ", gCLT_t
-! endif
+if(day==1) then
+  write(66,*) "day=1    : PARCOFFEE= ", PARCOFFEE
+  write(66,*) "day=1    : KNFIX= "    , KNFIX
+endif
+
+!if(day==NDAYS) then
+!  write(66,*) "---------------------------------------------------"
+!  write(66,*) "day=NDAYS: PARCOFFEE= ", PARCOFFEE
+!  write(66,*) "day=NDAYS: treedens_t=", treedens_t
+!  write(66,*) "day=NDAYS: CLT_t=     ", CLT_t
+!  write(66,*) "day=NDAYS: gCLT_t=    ", gCLT_t
+!endif
 
 end do ! end time loop
 
-! close(66)
+close(66)
 
 end  

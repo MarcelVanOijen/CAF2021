@@ -1,5 +1,7 @@
 module management
 
+! Subroutines: fert_prune_thin
+
 use declare_parameters
 use environment
 implicit none
