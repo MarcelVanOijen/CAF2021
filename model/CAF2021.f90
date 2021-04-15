@@ -253,6 +253,20 @@ do day = 1, NDAYS
   NSOMS = NSOMS + adjNSOMS + NSOMFsoms  - dNSOMS
   NMIN  = NMIN  + adjNMIN  + Nfert      + Nmineralisation &
                 + NfixT_c  - Nupt       - NuptT_c   - Nleaching - Nemission
+
+! N-balance soil ( NLITT + NSOMF + NSOMS + NMIN )
+
+! Fertilisation               : + Nfert
+! N-fixation trees            : + NfixT_c
+! Senescence + pruning tree   : + dNLT_c + dNBlitt_c + dNRsomf_c 
+! Senescence + pruning coffee : + dNL + prunNL + prunCW*NCW + dCR*NCR
+
+! Leaching from soil          : - Nleaching
+! Emission from soil          : - Nemission
+! Runoff litter + SOMF        : - rNLITT- rNSOMF
+! N-uptake coffee             : - Nupt
+! N-uptake trees              : - NuptT_c
+
 				
 ! Additional output variables
   Cabg     = sum(Ac*(CL+CW+CP))            ! kgC m-2 field

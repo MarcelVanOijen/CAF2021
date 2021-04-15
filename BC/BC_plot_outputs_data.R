@@ -28,27 +28,28 @@ for (s in 1:nSites) {
   params[ip_BC_s] <- params_BC_MaxL     [icol_pChain_s]
   outputMaxL      <- run_model( params, matrix_weather, calendar_fert, calendar_prunC,
 	            	            calendar_prunT, calendar_thinT, NDAYS )
-# Calculate model output for a sample from the posterior
-# Take a sample (of size nSample) from the chain generated using MCMC
-  # nSample         <- 100
-  nSample         <- 10
-  nStep           <- (nChain-nBurnin) / nSample
-  outputSample    <- array( 0, c(nSample,NDAYS,NOUT) )
-  ii              <- 0   
-  for (j in seq(nBurnin+nStep, nChain, nStep)) {
-    ii <- ii+1
-    params_j           <- pChain[j,] * sc
-    params[ip_BC_s]    <- params_j[icol_pChain_s]
-    outputSample[ii,,] <- run_model( params, matrix_weather, calendar_fert, calendar_prunC,
-	            	                 calendar_prunT, calendar_thinT, NDAYS )
-  } # end of sample loop
-# Analyse the posterior output sample: calculate quantiles 5% and 95%
-  q5  <- sapply( 1:NOUT, function(i) sapply(1:NDAYS,function(j)quantile(outputSample[,j,i],0.05)) )
-  q95 <- sapply( 1:NOUT, function(i) sapply(1:NDAYS,function(j)quantile(outputSample[,j,i],0.95)) )
+  
+# # Calculate model output for a sample from the posterior
+# # Take a sample (of size nSample) from the chain generated using MCMC
+#   nSample         <- 100
+#   nStep           <- (nChain-nBurnin) / nSample
+#   outputSample    <- array( 0, c(nSample,NDAYS,NOUT) )
+#   ii              <- 0   
+#   for (j in seq(nBurnin+nStep, nChain, nStep)) {
+#     ii <- ii+1
+#     params_j           <- pChain[j,] * sc
+#     params[ip_BC_s]    <- params_j[icol_pChain_s]
+#     outputSample[ii,,] <- run_model( params, matrix_weather, calendar_fert, calendar_prunC,
+# 	            	                 calendar_prunT, calendar_thinT, NDAYS )
+#   } # end of sample loop
+# # Analyse the posterior output sample: calculate quantiles 5% and 95%
+#   q5  <- sapply( 1:NOUT, function(i) sapply(1:NDAYS,function(j)quantile(outputSample[,j,i],0.05)) )
+#   q95 <- sapply( 1:NOUT, function(i) sapply(1:NDAYS,function(j)quantile(outputSample[,j,i],0.95)) )
 
 # Plot
   # list_runs <- list( outputPriorMode, outputMAP, outputMaxL, q5, q95 )
-  list_runs <- list( outputMAP, outputMaxL, q5, q95 )
+  # list_runs <- list( outputMAP, outputMaxL, q5, q95 )
+  list_runs <- list( outputMAP, outputMaxL )
   plot_outputs_data_s( isite       = s,
                        list_runs   = list_runs,
                        leg_title   = "BC",
@@ -59,6 +60,6 @@ for (s in 1:nSites) {
                        leg         = c( "MAP","MaxL"),
                        cols        = c( "black", "green", "black", "black" ),
                        lwds        = c( 3, 2, 2, 2 ),
-                       ltys        = c( 1, 1, 3, 3 ) )   
+                       ltys        = c( 1, 1, 3, 3 ) )
 }
 dev.off()   

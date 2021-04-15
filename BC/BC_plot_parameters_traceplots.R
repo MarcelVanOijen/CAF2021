@@ -7,13 +7,19 @@
    pdf( paste("BC_parameters_traceplots",format(Sys.time(),"_%H_%M.pdf"),sep=""),
         paper="A4r", width=pagew, height=pageh)
    
+## Thin the parameter chin
+   # nChainThin <- nChain
+   nChainThin <- 1e3
+   iChainThin <- round( seq(1,nChain,length.out=min(nChain,nChainThin)) )
+   pChainThin <- pChain[ iChainThin, ]
+   
 ## Parameter trace plots ##
    nrowsPlots <- ceiling( sqrt((np_BC+1)*pageh/pagew) )
    ncolsPlots <- ceiling( (np_BC+1)/nrowsPlots )
    par( mfrow = c(nrowsPlots,ncolsPlots) )
    par(mar=c(2, 2, 2, 1))
    for (i in seq(1,np_BC)){
-        plot( pChain[,i] * sc[i],
+        plot( pChainThin[,i] * sc[i],
 		      type='l', xlab="", ylab="",
           main=paste(titles[i],parsites_BC[i]), cex.main=1 )
         abline( v=nBurnin, col='red', lwd=2, lty=2 )
