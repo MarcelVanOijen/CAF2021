@@ -68,7 +68,10 @@ outputNames <- c( "Time", "year", "doy",
   
   "Csoil_f"                       , "Nsoil_f",
   
-  paste0( "CST_t(",1:nt,")" )     , paste0( "SAT_t(",1:nt,")" )
+  paste0( "CST_t(",1:nt,")" )     , paste0( "SAT_t(",1:nt,")" ),
+  
+  "Nfert_f"    , "NfixT_f"    , "NsenprunT_f", "Nsenprun_f",
+  "Nleaching_f", "Nemission_f", "Nrunoff_f"  , "Nupt_f"    , "NuptT_f"
 )
 
 outputUnits <- c( "(y)", "(y)", "(d)",
@@ -85,7 +88,8 @@ outputUnits <- c( "(y)", "(y)", "(d)",
   
   "(tC ha-1)"                   , "(tN ha-1)"          ,
   
-  rep("(kgC m-2)",nt)           , rep("(m2 m-2)"   ,nt)
+  rep("(kgC m-2)",nt)           , rep("(m2 m-2)"   ,nt),
+  rep("(kgN m-2 d-1)",9)
 )
 
 NOUT <- as.integer( length(outputNames) )

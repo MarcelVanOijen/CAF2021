@@ -179,6 +179,52 @@ geometry: margin=1in
           legend=c("Field","LCC 1","LCC 2","LCC 3","LCC 4","LCC 5","LCC 6") )
 ```
 
+## N-balance
+
+```{r}
+  NinNames  <- c("Nfert_f", "NfixT_f", "NsenprunT_f", "Nsenprun_f")
+  NoutNames <- c("Nleaching_f", "Nemission_f", "Nrunoff_f", "Nupt_f", "NuptT_f")
+  nNin      <- length(NinNames) ; nNout  <- length(NoutNames)
+  i.Nin     <- rep(NA,nNin)     ; i.Nout <- rep(NA,nNout)
+  for(i in 1:nNin ) {i.Nin [i] <- which( outputNames==NinNames [i] ) }
+  for(i in 1:nNout) {i.Nout[i] <- which( outputNames==NoutNames[i] ) }
+  
+  NinMean   <- colMeans(output[,i.Nin])  * 1.e4 * 365 # kgN ha-1 y-1
+  NoutMean  <- colMeans(output[,i.Nout]) * 1.e4 * 365 # kgN ha-1 y-1
+  
+  par( mfrow=c(1,2), mar=c(5,3,3,5) )
+  y.max <- max( sum(NinMean), sum(NoutMean) )
+
+  leg <- NinNames
+  barplot( as.matrix(NinMean),
+         main="1: N-inputs\n(kg N ha-1 y-1)",
+         beside=F, ylim=c(0,y.max), col=1:length(leg),
+         legend.text=leg, args.legend=list( x="right", inset=c(-0.3,0) ) )
+
+  leg <- NoutNames
+  barplot( as.matrix(NoutMean),
+         main="1: N-outputs\n(kg N ha-1 y-1)",
+         beside=F, ylim=c(0,y.max), col=1:length(leg),
+         legend.text=leg, args.legend=list( x="right", inset=c(-0.3,0) ) )
+```
+
+
+Verify the N-balance.
+
+```{r}
+  Nsoil_f_hay   <- output[ , which( outputNames=="Nsoil_f") ] * 1.e3 # kgN ha-1
+  D_Nsoil_f_hay <- tail(Nsoil_f_hay,1) - head(Nsoil_f_hay,1)         # kgN ha-1
+  
+  NinSum        <- colSums(output[2:NDAYS,i.Nin ])            * 1.e4 # kgN ha-1
+  NoutSum       <- colSums(output[2:NDAYS,i.Nout])            * 1.e4 # kgN ha-1
+  NinMinusNout  <- sum(NinSum) - sum(NoutSum)
+  
+  cat( "VERIFYING THE N-BALANCE FOR THE SOIL (kgN ha-1).",
+        "\nState variable change: ", D_Nsoil_f_hay,
+       "\nInputs minus outputs : ", NinMinusNout )
+```
+
+
 \clearpage
 
 

@@ -68,6 +68,8 @@ real    :: NuptT_c(nc)=0, NfixT_c  (nc)=0
 real 	  :: Cabg, harvDMav_year, LAI_f
 real 	  :: CabgT
 real    :: Csoil(nc), Csoil_f, Nsoil(nc), Nsoil_f, WA_f, WC_f
+real    :: Nfert_f, NfixT_f, NsenprunT_f, Nsenprun_f
+real    :: Nleaching_f, Nemission_f, Nrunoff_f, Nupt_f, NuptT_f
 
 ! PARAMETERS
 call set_params(PARAMS)
@@ -254,20 +256,6 @@ do day = 1, NDAYS
   NMIN  = NMIN  + adjNMIN  + Nfert      + Nmineralisation &
                 + NfixT_c  - Nupt       - NuptT_c   - Nleaching - Nemission
 
-! N-balance soil ( NLITT + NSOMF + NSOMS + NMIN )
-
-! Fertilisation               : + Nfert
-! N-fixation trees            : + NfixT_c
-! Senescence + pruning tree   : + dNLT_c + dNBlitt_c + dNRsomf_c 
-! Senescence + pruning coffee : + dNL + prunNL + prunCW*NCW + dCR*NCR
-
-! Leaching from soil          : - Nleaching
-! Emission from soil          : - Nemission
-! Runoff litter + SOMF        : - rNLITT- rNSOMF
-! N-uptake coffee             : - Nupt
-! N-uptake trees              : - NuptT_c
-
-				
 ! Additional output variables
   Cabg     = sum(Ac*(CL+CW+CP))            ! kgC m-2 field
   CabgT    = sum(CLT_t + CST_t + CBT_t)    ! kgC m-2 field
@@ -285,6 +273,18 @@ do day = 1, NDAYS
   Nsoil_f  = sum(Ac*Nsoil) * 10            ! tN  ha-1 field
   WA_f     = sum(Ac*WA)                    ! kgW m-2 field
   WC_f     = 0.001 * WA_f / ROOTD   	     ! m3W m-3
+! N-balance soil ( changes in NLITT+NSOMF+NSOMS+NMIN, kgN m-2 field d-1 )
+  Nfert_f     = Nfert                      ! Fertilisation
+  NfixT_f     = sum(Ac*NfixT_c)            ! N-fixation trees
+  NsenprunT_f = sum(Ac*(dNLT_c + dNBlitt_c + dNRsomf_c))
+                                           ! Senescence + pruning trees
+  Nsenprun_f  = sum(Ac*(dNL + prunNL + prunCW*NCW + dCR*NCR))
+                                           ! Senescence + pruning coffee
+  Nleaching_f = sum(Ac*Nleaching)          ! Leaching from soil
+  Nemission_f = sum(Ac*Nemission)          ! Emission from soil
+  Nrunoff_f   = sum(Ac*(rNLITT + rNSOMF))  ! Runoff litter + SOMF
+  Nupt_f      = sum(Ac*Nupt)               ! N-uptake coffee
+  NuptT_f     = sum(Ac*NuptT_c)            ! N-uptake trees
 
 ! Outputs
 ! The "c1", "c2" etc. in the units below refer to parts of the field with
@@ -315,6 +315,15 @@ do day = 1, NDAYS
   y(day,56   ) = Nsoil_f              ! tN ha-1
   y(day,57:59) = CST_t                ! kgC m-2
   y(day,60:62) = SAT_t                ! m2 m-2
+  y(day,63   ) = Nfert_f              ! kgN m-2 d-1
+  y(day,64   ) = NfixT_f              ! kgN m-2 d-1
+  y(day,65   ) = NsenprunT_f          ! kgN m-2 d-1
+  y(day,66   ) = Nsenprun_f           ! kgN m-2 d-1
+  y(day,67   ) = Nleaching_f          ! kgN m-2 d-1
+  y(day,68   ) = Nemission_f          ! kgN m-2 d-1
+  y(day,69   ) = Nrunoff_f            ! kgN m-2 d-1
+  y(day,70   ) = Nupt_f               ! kgN m-2 d-1
+  y(day,71   ) = NuptT_f              ! kgN m-2 d-1
 
 ! CALIBRATION VARIABLES IN BC DATA FILES.
 ! NAME IN CAF2021 ! NAME IN BC data files ! Unit
