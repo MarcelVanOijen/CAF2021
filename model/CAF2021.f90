@@ -324,6 +324,10 @@ do day = 1, NDAYS
   y(day,69   ) = Nrunoff_f            ! kgN m-2 d-1
   y(day,70   ) = Nupt_f               ! kgN m-2 d-1
   y(day,71   ) = NuptT_f              ! kgN m-2 d-1
+  y(day,72:77) = CLITT                ! kgC m-2 c
+  y(day,78:83) = NLITT                ! kgN m-2 c
+  y(day,84:86) = harvCSTree_t         ! kgC m-2 d-1
+  y(day,87:89) = harvNSTree_t         ! kgN m-2 d-1
 
 ! CALIBRATION VARIABLES IN BC DATA FILES.
 ! NAME IN CAF2021 ! NAME IN BC data files ! Unit

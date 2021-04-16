@@ -71,7 +71,10 @@ outputNames <- c( "Time", "year", "doy",
   paste0( "CST_t(",1:nt,")" )     , paste0( "SAT_t(",1:nt,")" ),
   
   "Nfert_f"    , "NfixT_f"    , "NsenprunT_f", "Nsenprun_f",
-  "Nleaching_f", "Nemission_f", "Nrunoff_f"  , "Nupt_f"    , "NuptT_f"
+  "Nleaching_f", "Nemission_f", "Nrunoff_f"  , "Nupt_f"    , "NuptT_f",
+  
+  paste0( "CLITT(", 1:nc,")" )      , paste0( "NLITT(", 1:nc,")" ),
+  paste0( "harvCSTree_t(",1:nt,")" ), paste0( "harvNSTree_t(",1:nt,")" )
 )
 
 outputUnits <- c( "(y)", "(y)", "(d)",
@@ -89,7 +92,11 @@ outputUnits <- c( "(y)", "(y)", "(d)",
   "(tC ha-1)"                   , "(tN ha-1)"          ,
   
   rep("(kgC m-2)",nt)           , rep("(m2 m-2)"   ,nt),
-  rep("(kgN m-2 d-1)",9)
+  
+  rep("(kgN m-2 d-1)",9),
+  
+  rep("(kgC m-2 c)"  ,nc)        , rep("(kgN m-2 c)"  ,nc),
+  rep("(kgC m-2 d-1)",nt)        , rep("(kgN m-2 d-1)",nt)
 )
 
 NOUT <- as.integer( length(outputNames) )

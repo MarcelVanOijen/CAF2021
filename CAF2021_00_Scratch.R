@@ -34,6 +34,11 @@ plot_output( vars=c("treedens_t(1)","treedens_t(2)","treedens_t(3)") )
 plot_output( vars=c("h_t(1)","h_t(2)","h_t(3)") )
 plot_output( vars=c("SAT_t(1)","SAT_t(2)","SAT_t(3)") )
 
+plot_output( vars=paste0( "CLITT("       , 1:nc, ")" ) )
+plot_output( vars=paste0( "NLITT("       , 1:nc, ")" ) )
+plot_output( vars=paste0( "harvCSTree_t(", 1:nt, ")" ) )
+plot_output( vars=paste0( "harvNSTree_t(", 1:nt, ")" ) )
+               
 ## Variables around thinning
 
 selecti.t <- function(v){ sapply( 1:3, function(i) {

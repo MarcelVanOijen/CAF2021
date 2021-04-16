@@ -28,7 +28,7 @@ geometry: margin=1in
 
   params[names_params=="TREEDENS0(1)"] <- 0.04
   params[names_params=="TREEDENS0(2)"] <- 0.02
-  params[names_params=="KNFIX(2)"    ] <- params[names_params=="KNFIX(1)"]
+  params[names_params=="KNFIX(2)"    ] <- params[names_params=="KNFIX(1)"] <- 0.1
 
   # We prune tree species 2 half as frequently as species 1
   # (only the even-numbered times)
@@ -199,13 +199,15 @@ geometry: margin=1in
   barplot( as.matrix(NinMean),
          main="1: N-inputs\n(kg N ha-1 y-1)",
          beside=F, ylim=c(0,y.max), col=1:length(leg),
-         legend.text=leg, args.legend=list( x="right", inset=c(-0.3,0) ) )
+         legend.text=leg,
+         args.legend=list( x="right", bg="white", inset=c(-0.3,0) ) )
 
   leg <- NoutNames
   barplot( as.matrix(NoutMean),
          main="1: N-outputs\n(kg N ha-1 y-1)",
          beside=F, ylim=c(0,y.max), col=1:length(leg),
-         legend.text=leg, args.legend=list( x="right", inset=c(-0.3,0) ) )
+         legend.text=leg,
+         args.legend=list( x="right", bg="white", inset=c(-0.3,0) ) )
 ```
 
 
