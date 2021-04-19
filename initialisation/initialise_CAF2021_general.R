@@ -74,7 +74,16 @@ outputNames <- c( "Time", "year", "doy",
   "Nleaching_f", "Nemission_f", "Nrunoff_f"  , "Nupt_f"    , "NuptT_f",
   
   paste0( "CLITT(", 1:nc,")" )      , paste0( "NLITT(", 1:nc,")" ),
-  paste0( "harvCSTree_t(",1:nt,")" ), paste0( "harvNSTree_t(",1:nt,")" )
+  paste0( "harvCSTree_t(",1:nt,")" ), paste0( "harvNSTree_t(",1:nt,")" ),
+  
+  "CsenprunT_f", "Csenprun_f" , "Rsoil_f"    , "Crunoff_f" ,
+  
+  "WA_f"       ,
+  "Rain_f"     , "Drain_f"    , "Runoff_f"   , "Evap_f"    ,
+  "Tran_f"     , "TranT_f"    , "Rainint_f"  , "RainintT_f",
+  
+  "C_f"        , "CT_f"       ,
+  "gC_f"       , "gCT_f"      , "harvC_f"    , "harvCST_f"
 )
 
 outputUnits <- c( "(y)", "(y)", "(d)",
@@ -95,14 +104,31 @@ outputUnits <- c( "(y)", "(y)", "(d)",
   
   rep("(kgN m-2 d-1)",9),
   
-  rep("(kgC m-2 c)"  ,nc)        , rep("(kgN m-2 c)"  ,nc),
-  rep("(kgC m-2 d-1)",nt)        , rep("(kgN m-2 d-1)",nt)
+  rep("(kgC m-2 c)"  ,nc)       , rep("(kgN m-2 c)"  ,nc),
+  rep("(kgC m-2 d-1)",nt)       , rep("(kgN m-2 d-1)",nt),
+  
+  rep("(kgC m-2 d-1)",4)        ,
+
+  "(mm)"                        ,
+  rep("(mm d-1)"     ,8)        ,
+
+  rep("(tC ha-1)"    ,2)        ,
+  rep("(kgC m-2 d-1)",4)
 )
 
 NOUT <- as.integer( length(outputNames) )
 
 ################################################################################
-### 4. FUNCTIONS FOR EXPORTING THE RESULTS TO FILE (pdf with plots, txt with table)
+### 4. FUNCTION FOR CHANGING PARAMETER VALUES
+################################################################################
+set_par <- function( names=names_params[1], vals=params[1] ) {
+  ipar <- match(names,names_params) ; npar <- length(ipar)
+  for (i in 1:npar) { params[ipar[i]] <- vals[i] }
+  return(params)
+}
+
+################################################################################
+### 5. FUNCTIONS FOR EXPORTING THE RESULTS TO FILE (pdf with plots, txt with table)
 ################################################################################
 plot_output <- function(
   list_output = list(output),
@@ -126,8 +152,8 @@ plot_output <- function(
           type='l', col=1, lty=lty[1], lwd=lwd[1], ylim=g_range )
     if (nlist >= 2) {
       for (il in 2:nlist) {
-      points( list_output[[il]][,1], list_output[[il]][,c],
-              col=il, type='l', lty=lty[il], lwd=lwd[il] )
+        points( list_output[[il]][,1], list_output[[il]][,c],
+                col=il, type='l', lty=lty[il], lwd=lwd[il] )
       }
     }
     if ( (iv%%(nrow_plot*ncol_plot-1)==0) || (iv==nvars) ) {
@@ -156,10 +182,10 @@ table_output <- function(
 }
 
 ################################################################################
-### 5. FUNCTIONS FOR ANALYSIS
+### 6. FUNCTIONS FOR ANALYSIS
 
 #######################
-### 5.1 Function 'SA()'
+### 6.1 Function 'SA()'
 #######################
 SA <- function( parname_SA = "KEXT",
                 pmult      = 2^(-1:1),
@@ -193,7 +219,7 @@ SA <- function( parname_SA = "KEXT",
 }
 
 ##############################
-### 5.2 Function 'SA_BC()'
+### 6.2 Function 'SA_BC()'
 ##############################
 SA_BC <- function(
   parname_SA    = "KEXT",

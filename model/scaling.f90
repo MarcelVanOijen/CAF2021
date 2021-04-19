@@ -43,8 +43,9 @@ Contains
   real    :: x_c(nc), At(nt), Atc(nt,nc)
   real    :: x_t(nt)
   integer :: it
+  x_t = 0
   do it=1,nt
-    x_t(it) = sum( Atc(it,:) * x_c(:) ) / At(it)
+    if(At(it)>0) x_t(it) = sum( Atc(it,:) * x_c(:) ) / At(it)
   enddo  
   end Subroutine RescaleInt_c_t
   

@@ -28,7 +28,7 @@ real :: NBdemT_t (nt), NRdemT_t (nt), NSdemT_t (nt)
 real :: fNgrowth_t(nt)=0
 real :: gCBT_t   (nt)=0, gCLT_t (nt)=0, gCRT_t(nt)=0, gCST_t(nt)=0
 real :: gNBT_t   (nt)=0, gNLT_t (nt)=0, gNRT_t(nt)=0, gNST_t(nt)=0, gNLTmax_t(nt)=0
-real :: NCLTnew_t(nt)=0, NdemT_t(nt)=0, NLdemTmax_t(nt), NuptT_t(nt)=0
+real :: NCLTnew_t(nt)=0, NdemT_t(nt)=0, NLdemTmax_t(nt)=0, NuptT_t(nt)=0
 real :: NfixT_t  (nt)=0
 
 ! CNtree

@@ -21,9 +21,11 @@
    df_params      <- read.table( file_params, header=T, sep="\t", row.names=1 )
    names_params   <- row.names(df_params)
    params         <- df_params[,parcol]
-   params[names_params=="TREEDENS0(1)"] <- 0.0325
-   params[names_params=="TREEDENS0(3)"] <- 0.0325
-   params[names_params=="KNFIX(3)"    ] <- 0.1
+   # params[names_params=="TREEDENS0(1)"] <- 0.0325
+   # params[names_params=="TREEDENS0(3)"] <- 0.0325
+   # params[names_params=="KNFIX(3)"    ] <- 0.1
+   params <- set_par(   "TREEDENS0(1)"            ,   0.0325      )
+   params <- set_par( c("TREEDENS0(3)","KNFIX(3)"), c(0.0325,0.1) )
    
    calendar_fert [ 1:48, 1 ] <- rep( 2002:2017, each=3 )
    calendar_fert [ 1:48, 2 ] <- c( 135,289, 350 )

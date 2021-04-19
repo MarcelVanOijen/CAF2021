@@ -179,7 +179,7 @@ geometry: margin=1in
           legend=c("Field","LCC 1","LCC 2","LCC 3","LCC 4","LCC 5","LCC 6") )
 ```
 
-## N-balance
+## N-balance soil
 
 ```{r}
   NinNames  <- c("Nfert_f", "NfixT_f", "NsenprunT_f", "Nsenprun_f")
@@ -197,34 +197,179 @@ geometry: margin=1in
 
   leg <- NinNames
   barplot( as.matrix(NinMean),
-         main="1: N-inputs\n(kg N ha-1 y-1)",
+         main="N-inputs soil\n(kg N ha-1 y-1)",
          beside=F, ylim=c(0,y.max), col=1:length(leg),
          legend.text=leg,
          args.legend=list( x="right", bg="white", inset=c(-0.3,0) ) )
 
   leg <- NoutNames
   barplot( as.matrix(NoutMean),
-         main="1: N-outputs\n(kg N ha-1 y-1)",
+         main="N-outputs soil\n(kg N ha-1 y-1)",
          beside=F, ylim=c(0,y.max), col=1:length(leg),
          legend.text=leg,
          args.legend=list( x="right", bg="white", inset=c(-0.3,0) ) )
 ```
 
-
-Verify the N-balance.
+Verify the soil N-balance:
 
 ```{r}
-  Nsoil_f_hay   <- output[ , which( outputNames=="Nsoil_f") ] * 1.e3 # kgN ha-1
-  D_Nsoil_f_hay <- tail(Nsoil_f_hay,1) - head(Nsoil_f_hay,1)         # kgN ha-1
+  Nsoil_f_kgha   <- output[ , which( outputNames=="Nsoil_f") ] * 1.e3 # kgN ha-1
+  D_Nsoil_f_kgha <- tail(Nsoil_f_kgha,1) - head(Nsoil_f_kgha,1)       # kgN ha-1
   
-  NinSum        <- colSums(output[2:NDAYS,i.Nin ])            * 1.e4 # kgN ha-1
-  NoutSum       <- colSums(output[2:NDAYS,i.Nout])            * 1.e4 # kgN ha-1
-  NinMinusNout  <- sum(NinSum) - sum(NoutSum)
+  NinSum         <- colSums(output[2:NDAYS,i.Nin ])            * 1.e4 # kgN ha-1
+  NoutSum        <- colSums(output[2:NDAYS,i.Nout])            * 1.e4 # kgN ha-1
+  NinMinusNout   <- sum(NinSum) - sum(NoutSum)
   
-  cat( "VERIFYING THE N-BALANCE FOR THE SOIL (kgN ha-1).",
-        "\nState variable change: ", D_Nsoil_f_hay,
+  cat( "VERIFYING THE N-BALANCE FOR THE SOIL (kgN ha-1):",
+       "\nState variable change: ", D_Nsoil_f_kgha,
        "\nInputs minus outputs : ", NinMinusNout )
 ```
+
+## C-balance soil
+
+```{r}
+  CinNames  <- c("CsenprunT_f", "Csenprun_f")
+  CoutNames <- c("Rsoil_f", "Crunoff_f")
+  nCin      <- length(CinNames) ; nCout  <- length(CoutNames)
+  i.Cin     <- rep(NA,nCin)     ; i.Cout <- rep(NA,nCout)
+  for(i in 1:nCin ) {i.Cin [i] <- which( outputNames==CinNames [i] ) }
+  for(i in 1:nCout) {i.Cout[i] <- which( outputNames==CoutNames[i] ) }
+  
+  CinMean   <- colMeans(output[,i.Cin])  * 1.e4 * 365 # kgC ha-1 y-1
+  CoutMean  <- colMeans(output[,i.Cout]) * 1.e4 * 365 # kgC ha-1 y-1
+  
+  par( mfrow=c(1,2), mar=c(5,3,3,5) )
+  y.max <- max( sum(CinMean), sum(CoutMean) )
+
+  leg <- CinNames
+  barplot( as.matrix(CinMean),
+         main="C-inputs soil\n(kg C ha-1 y-1)",
+         beside=F, ylim=c(0,y.max), col=1:length(leg),
+         legend.text=leg,
+         args.legend=list( x="right", bg="white", inset=c(-0.3,0) ) )
+
+  leg <- CoutNames
+  barplot( as.matrix(CoutMean),
+         main="C-outputs soil\n(kg C ha-1 y-1)",
+         beside=F, ylim=c(0,y.max), col=1:length(leg),
+         legend.text=leg,
+         args.legend=list( x="right", bg="white", inset=c(-0.3,0) ) )
+```
+
+Verify the soil C-balance:
+
+```{r}
+  Csoil_f_kgha   <- output[ , which( outputNames=="Csoil_f") ] * 1.e3 # kgC ha-1
+  D_Csoil_f_kgha <- tail(Csoil_f_kgha,1) - head(Csoil_f_kgha,1)       # kgC ha-1
+  
+  CinSum        <- colSums(output[2:NDAYS,i.Cin ])             * 1.e4 # kgC ha-1
+  CoutSum       <- colSums(output[2:NDAYS,i.Cout])             * 1.e4 # kgC ha-1
+  CinMinusCout  <- sum(CinSum) - sum(CoutSum)
+  
+  cat( "VERIFYING THE C-BALANCE FOR THE SOIL (kgC ha-1):",
+       "\nState variable change: ", D_Csoil_f_kgha,
+       "\nInputs minus outputs : ", CinMinusCout )
+```
+
+## H2O-balance soil ("W-balance")
+
+```{r}
+  WinNames  <- c("Rain_f")
+  WoutNames <- c("Drain_f", "Runoff_f" , "Evap_f"    ,"Tran_f" , 
+                 "TranT_f", "Rainint_f", "RainintT_f")
+  nWin      <- length(WinNames) ; nWout  <- length(WoutNames)
+  i.Win     <- rep(NA,nWin)     ; i.Wout <- rep(NA,nWout)
+  for(i in 1:nWin ) {i.Win [i] <- which( outputNames==WinNames [i] ) }
+  for(i in 1:nWout) {i.Wout[i] <- which( outputNames==WoutNames[i] ) }
+  
+  WinMean   <-    mean (output[,i.Win])  # mm d-1
+  WoutMean  <- colMeans(output[,i.Wout]) # mm d-1
+  
+  par( mfrow=c(1,2), mar=c(5,3,3,5) )
+  y.max <- max( sum(WinMean), sum(WoutMean) )
+
+  leg <- WinNames
+  barplot( as.matrix(WinMean),
+         main="H2O-inputs\n(mm d-1)",
+         beside=F, ylim=c(0,y.max), col=1:length(leg),
+         legend.text=leg,
+         args.legend=list( x="right", bg="white", inset=c(-0.3,0) ) )
+
+  leg <- WoutNames
+  barplot( as.matrix(WoutMean),
+         main="H2O-outputs\n(mm d-1)",
+         beside=F, ylim=c(0,y.max), col=1:length(leg),
+         legend.text=leg,
+         args.legend=list( x="right", bg="white", inset=c(-0.3,0) ) )
+```
+
+Verify the H2O-balance.
+
+```{r}
+  WA_f   <- output[ , which( outputNames=="WA_f") ] # mm
+  D_WA_f <- tail(WA_f,1) - head(WA_f,1)             # mm
+  
+  WinSum        <-    sum (output[2:NDAYS,i.Win ])  # mm
+  WoutSum       <- colSums(output[2:NDAYS,i.Wout])  # mm
+  WinMinusWout  <- sum(WinSum) - sum(WoutSum)
+  
+  cat( "VERIFYING THE H2O-BALANCE FOR THE SOIL (mm):",
+       "\nState variable change: ", D_WA_f,
+       "\nInputs minus outputs : ", WinMinusWout )
+```
+
+## C-balance system (soil + coffee + trees)
+
+```{r}
+  CinNames  <- c("gC_f"   , "gCT_f")
+  CoutNames <- c("Rsoil_f", "Crunoff_f", "harvC_f", "harvCST_f")
+  nCin      <- length(CinNames) ; nCout  <- length(CoutNames)
+  i.Cin     <- rep(NA,nCin)     ; i.Cout <- rep(NA,nCout)
+  for(i in 1:nCin ) {i.Cin [i] <- which( outputNames==CinNames [i] ) }
+  for(i in 1:nCout) {i.Cout[i] <- which( outputNames==CoutNames[i] ) }
+  
+  CinMean   <- colMeans(output[,i.Cin])  * 1.e4 * 365 # kgC ha-1 y-1
+  CoutMean  <- colMeans(output[,i.Cout]) * 1.e4 * 365 # kgC ha-1 y-1
+  
+  par( mfrow=c(1,2), mar=c(5,3,3,5) )
+  y.max <- max( sum(CinMean), sum(CoutMean) )
+
+  leg <- CinNames
+  barplot( as.matrix(CinMean),
+         main="C-inputs system\n(kg C ha-1 y-1)",
+         beside=F, ylim=c(0,y.max), col=1:length(leg),
+         legend.text=leg,
+         args.legend=list( x="right", bg="white", inset=c(-0.3,0) ) )
+
+  leg <- CoutNames
+  barplot( as.matrix(CoutMean),
+         main="C-outputs system\n(kg C ha-1 y-1)",
+         beside=F, ylim=c(0,y.max), col=1:length(leg),
+         legend.text=leg,
+         args.legend=list( x="right", bg="white", inset=c(-0.3,0) ) )
+```
+
+Verify the C-balance of the system (coffee + trees + soil):
+
+```{r}
+  C_f_kgha      <- output[ , which( outputNames=="C_f" ) ] * 1.e3 # kgC ha-1
+  CT_f_kgha     <- output[ , which( outputNames=="CT_f") ] * 1.e3 # kgC ha-1
+  Csys_f_kgha   <- C_f_kgha + CT_f_kgha + Csoil_f_kgha            # kgC ha-1
+  D_Csys_f_kgha <- Csys_f_kgha[NDAYS] - Csys_f_kgha[1]            # kgC ha-1
+  # D_Csys_f_kgha <- Csys_f_kgha[1635] - Csys_f_kgha[1]            # kgC ha-1
+  
+  CinSum       <- colSums(output[2:NDAYS,i.Cin ])          * 1.e4 # kgC ha-1
+  CoutSum      <- colSums(output[2:NDAYS,i.Cout])          * 1.e4 # kgC ha-1
+  # CinSum       <- colSums(output[2:1635,i.Cin ])          * 1.e4 # kgC ha-1
+  # CoutSum      <- colSums(output[2:1635,i.Cout])          * 1.e4 # kgC ha-1
+  CinMinusCout <- sum(CinSum) - sum(CoutSum)
+  
+  cat( "VERIFYING THE C-BALANCE FOR THE SYSTEM (kgC ha-1):",
+       "\nState variable change: ", D_Csys_f_kgha,
+       "\nInputs minus outputs : ", CinMinusCout )
+```
+
+
 
 
 \clearpage

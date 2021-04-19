@@ -66,10 +66,15 @@ real    :: NuptT_c(nc)=0, NfixT_c  (nc)=0
 
 ! EXTRA OUTPUT VARIABLES
 real 	  :: Cabg, harvDMav_year, LAI_f
-real 	  :: CabgT
+real 	  :: CabgT, C, CT
 real    :: Csoil(nc), Csoil_f, Nsoil(nc), Nsoil_f, WA_f, WC_f
-real    :: Nfert_f, NfixT_f, NsenprunT_f, Nsenprun_f
-real    :: Nleaching_f, Nemission_f, Nrunoff_f, Nupt_f, NuptT_f
+real    :: Nfert_f    , NfixT_f    , NsenprunT_f, Nsenprun_f
+real    :: Nleaching_f, Nemission_f, Nrunoff_f  , Nupt_f    , NuptT_f
+real    :: CsenprunT_f, Csenprun_f , Rsoil_f    , Crunoff_f
+real    :: Rain_f     , Drain_f    , Runoff_f   , Evap_f
+real    :: Tran_f     , TranT_f    , Rainint_f  , RainintT_f
+real    :: C_f        , CT_f
+real    :: gC_f       , gCT_f      , harvC_f    , harvCST_f
 
 ! PARAMETERS
 call set_params(PARAMS)
@@ -257,10 +262,15 @@ do day = 1, NDAYS
                 + NfixT_c  - Nupt       - NuptT_c   - Nleaching - Nemission
 
 ! Additional output variables
+
   Cabg     = sum(Ac*(CL+CW+CP))            ! kgC m-2 field
   CabgT    = sum(CLT_t + CST_t + CBT_t)    ! kgC m-2 field
   Csoil    = CLITT + CSOMF + CSOMS         ! kgC m-2 c
   Csoil_f  = sum(Ac*Csoil) * 10            ! tC  ha-1 field
+  C        = Cabg  + sum(Ac*CR)            ! kgC m-2 field
+  CT       = CabgT + sum(CRT_t)            ! kgC m-2 field
+  C_f      = sum(Ac*C ) * 10               ! tC  ha-1 field
+  CT_f     = sum(Ac*CT) * 10               ! tC  ha-1 field
   harvDMav = sum(Ac*harvCP) * 10./CCONC    ! tDM ha-1 field
   if (doy==61) then
   	harvDMav_year = 0
@@ -273,7 +283,8 @@ do day = 1, NDAYS
   Nsoil_f  = sum(Ac*Nsoil) * 10            ! tN  ha-1 field
   WA_f     = sum(Ac*WA)                    ! kgW m-2 field
   WC_f     = 0.001 * WA_f / ROOTD   	     ! m3W m-3
-! N-balance soil ( changes in NLITT+NSOMF+NSOMS+NMIN, kgN m-2 field d-1 )
+  
+! N-balance soil (kgN m-2 field d-1): Change in NLITT+NSOMF+NSOMS+NMIN
   Nfert_f     = Nfert                      ! Fertilisation
   NfixT_f     = sum(Ac*NfixT_c)            ! N-fixation trees
   NsenprunT_f = sum(Ac*(dNLT_c + dNBlitt_c + dNRsomf_c))
@@ -285,6 +296,33 @@ do day = 1, NDAYS
   Nrunoff_f   = sum(Ac*(rNLITT + rNSOMF))  ! Runoff litter + SOMF
   Nupt_f      = sum(Ac*Nupt)               ! N-uptake coffee
   NuptT_f     = sum(Ac*NuptT_c)            ! N-uptake trees
+  
+! C-balance soil (kgC m-2 field d-1): Change in CLITT+CSOMF+CSOMS
+  CsenprunT_f = sum(Ac*(dCLT_c + dCBT_c + dCRT_c))
+                                           ! Senescence + pruning trees
+  Csenprun_f  = sum(Ac*(dCL + prunCL + prunCW + dCR))
+                                           ! Senescence + pruning coffee
+  Rsoil_f     = sum(Ac*Rsoil)              ! Soil respiration
+  Crunoff_f   = sum(Ac*(rCLITT + rCSOMF))  ! Runoff litter + SOMF
+  
+! H2O-balance soil (kgW m-2 field d-1 = mm d-1): Change in WA
+  Rain_f      = RAIN
+  Drain_f     = sum(Ac*Drain)
+  Runoff_f    = sum(Ac*Runoff)
+  Evap_f      = sum(Ac*Evap)
+  Tran_f      = sum(Ac*Tran)
+  TranT_f     = sum(Ac*TranT_c)
+  Rainint_f   = sum(Ac*Rainint)
+  RainintT_f  = sum(Ac*RainintT_c)
+  
+! C-balance system (kgC m-2 field d-1):
+!   Change in CL+CW+CR+CP + CBT_t+CLT_t+CRT_t+CST_t + CLITT+CSOMF+CSOMS
+  gC_f        = sum(Ac*gCL) + sum(Ac*gCW) + sum(Ac*gCR) + sum(Ac*gCP)
+  gCT_f       = sum(gCLT_t) + sum(gCBT_t) + sum(gCRT_t) + sum(gCST_t)
+  ! Rsoil_f 
+  ! Crunoff_f
+  harvC_f     = sum(Ac*harvCP)
+  harvCST_f   = sum(harvCSTree_t)
 
 ! Outputs
 ! The "c1", "c2" etc. in the units below refer to parts of the field with
@@ -315,6 +353,7 @@ do day = 1, NDAYS
   y(day,56   ) = Nsoil_f              ! tN ha-1
   y(day,57:59) = CST_t                ! kgC m-2
   y(day,60:62) = SAT_t                ! m2 m-2
+  
   y(day,63   ) = Nfert_f              ! kgN m-2 d-1
   y(day,64   ) = NfixT_f              ! kgN m-2 d-1
   y(day,65   ) = NsenprunT_f          ! kgN m-2 d-1
@@ -324,10 +363,33 @@ do day = 1, NDAYS
   y(day,69   ) = Nrunoff_f            ! kgN m-2 d-1
   y(day,70   ) = Nupt_f               ! kgN m-2 d-1
   y(day,71   ) = NuptT_f              ! kgN m-2 d-1
+  
   y(day,72:77) = CLITT                ! kgC m-2 c
   y(day,78:83) = NLITT                ! kgN m-2 c
   y(day,84:86) = harvCSTree_t         ! kgC m-2 d-1
   y(day,87:89) = harvNSTree_t         ! kgN m-2 d-1
+  
+  y(day,90   ) = CsenprunT_f          ! kgC m-2 d-1
+  y(day,91   ) = Csenprun_f           ! kgC m-2 d-1
+  y(day,92   ) = Rsoil_f              ! kgC m-2 d-1
+  y(day,93   ) = Crunoff_f            ! kgC m-2 d-1
+  
+  y(day,94   ) = WA_f                 ! mm
+  y(day,95   ) = Rain_f               ! mm d-1
+  y(day,96   ) = Drain_f              ! mm d-1
+  y(day,97   ) = Runoff_f             ! mm d-1
+  y(day,98   ) = Evap_f               ! mm d-1
+  y(day,99   ) = Tran_f               ! mm d-1
+  y(day,100  ) = TranT_f              ! mm d-1
+  y(day,101  ) = Rainint_f            ! mm d-1
+  y(day,102  ) = RainintT_f           ! mm d-1
+  
+  y(day,103  ) = C_f                  ! tC ha-1
+  y(day,104  ) = CT_f                 ! tC ha-1
+  y(day,105  ) = gC_f                 ! kgC m-2 d-1
+  y(day,106  ) = gCT_f                ! kgC m-2 d-1
+  y(day,107  ) = harvC_f              ! kgC m-2 d-1
+  y(day,108  ) = harvCST_f            ! kgC m-2 d-1
 
 ! CALIBRATION VARIABLES IN BC DATA FILES.
 ! NAME IN CAF2021 ! NAME IN BC data files ! Unit
@@ -354,20 +416,22 @@ do day = 1, NDAYS
 ! WC_f            ! WC_F                  ! m3 W     m-3  field
 
 !if(day==1) then
-!  write(66,*) "day=1    : PARCOFFEE= ", PARCOFFEE
-!  write(66,*) "day=1    : KNFIX= "    , KNFIX
+!  write(66,*) "day=1    : fTranT_c= ", fTranT_c
+!  write(66,*) "day=1    : At= ", At
+!  write(66,*) "day=1    : Atc= ", Atc
+!  write(66,*) "day=1    : fTranT_t= ", fTranT_t
 !endif
 
-!if(day==NDAYS) then
-!  write(66,*) "---------------------------------------------------"
-!  write(66,*) "day=NDAYS: PARCOFFEE= ", PARCOFFEE
-!  write(66,*) "day=NDAYS: treedens_t=", treedens_t
-!  write(66,*) "day=NDAYS: CLT_t=     ", CLT_t
-!  write(66,*) "day=NDAYS: gCLT_t=    ", gCLT_t
-!endif
+if(day==NDAYS) then
+  write(66,*) "---------------------------------------------------"
+  write(66,*) "day=NDAYS: fTranT_c= ", fTranT_c
+  write(66,*) "day=NDAYS: At= ", At
+  write(66,*) "day=NDAYS: Atc= ", Atc
+  write(66,*) "day=NDAYS: fTranT_t= ", fTranT_t
+endif
 
 end do ! end time loop
 
-!close(66)
+close(66)
 
 end  

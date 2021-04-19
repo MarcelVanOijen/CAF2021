@@ -10,3 +10,4 @@ MCMC_*.RData
 tmp*
 weather/clim_Icafe&IMN_red_train2.csv
 BC/BC_2021-04-10_200000/
+*.66
