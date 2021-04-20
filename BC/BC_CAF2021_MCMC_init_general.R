@@ -34,7 +34,7 @@
      data_sd   [[s]] <- abs(database[[s]][,4]) * database[[s]][,5]
 
 	 ###########################################################################
-#     data_sd_low <- c("harvCP(1)", "harvCP(2)", "harvDMav_year")
+#     data_sd_low <- c("harvCP(1)", "harvCP(2)", "harvDM_f_hay")
 #	 mult_sd_low <- 0.1
 	 ###########################################################################
 #     for (i in 1:ndata[s]) {
@@ -43,8 +43,9 @@
 #	 }
 	 ###########################################################################
      for (i in 1:ndata[s]) {
-       if( data_name[[s]][i] == "harvDMav_year") {
-         data_sd[[s]][i] <- 0.5 * max( 1, sqrt(data_value[[s]][i]) )
+       if( data_name[[s]][i] == "harvDM_f_hay") {
+         # data_sd[[s]][i] <- 0.5 * max( 1, sqrt(data_value[[s]][i]) )
+         data_sd[[s]][i] <- 500 * max( 1, sqrt(data_value[[s]][i]/1000) )
        }
      }
 	 ###########################################################################

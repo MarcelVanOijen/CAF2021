@@ -34,7 +34,7 @@ real :: NfixT_t  (nt)=0
 ! CNtree
 real :: dCBT_t   (nt)=0, dCLT_t(nt)=0, dCRT_t   (nt)=0, dCST_t(nt)=0
 real :: dNBlitt_t(nt)=0, dNLT_t(nt)=0, dNRsomf_t(nt)=0
-real :: harvCSTree_t(nt)=0, harvNSTree_t(nt)=0
+real :: harvCST_t(nt)=0, harvNST_t(nt)=0
 real :: NCLT_t   (nt)
 real :: sCBTman_t(nt)=0, sCLTman_t(nt)=0, sCRTman_t(nt)=0
 real :: sCBTsen_t(nt)=0, sCLTsen_t(nt)=0, sCRTsen_t(nt)=0
@@ -141,8 +141,8 @@ Contains
   dNRsomf_t    = dCRT_t * NCRT
 ! Stem 
   dCST_t       = thinFRT * CST_t
-  harvCStree_t = dCST_t
-  harvNStree_t = dCST_t * NCWT
+  harvCST_t    = dCST_t
+  harvNST_t    = dCST_t * NCWT
 ! Branch
   sCBTman_t    = (thinFRT + prunFRT) * CBT_t
   sCBTsen_t    = CBT_t / TCCBT

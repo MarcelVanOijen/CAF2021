@@ -59,22 +59,22 @@ real    :: fNgrowth(nc)
 real    :: Evap(nc) , fTran    (nc), Nsup(nc)   , Tran(nc) , RWA(nc)
 real    :: PARav(nc), PARint   (nc), Rainint(nc), TCOFFEE(nc)
 real    :: PARMA(nc), PARCOFFEE(nc), PARold(nc,30)
-real    :: harvDMav
+real    :: harvDM_f_ha
 real    :: dCLT_c (nc)=0, dCBT_c   (nc)=0, dCRT_c   (nc)=0
 real    :: dNLT_c (nc)=0, dNBlitt_c(nc)=0, dNRsomf_c(nc)=0
 real    :: NuptT_c(nc)=0, NfixT_c  (nc)=0
 
 ! EXTRA OUTPUT VARIABLES
-real 	  :: Cabg, harvDMav_year, LAI_f
-real 	  :: CabgT, C, CT
-real    :: Csoil(nc), Csoil_f, Nsoil(nc), Nsoil_f, WA_f, WC_f
-real    :: Nfert_f    , NfixT_f    , NsenprunT_f, Nsenprun_f
-real    :: Nleaching_f, Nemission_f, Nrunoff_f  , Nupt_f    , NuptT_f
-real    :: CsenprunT_f, Csenprun_f , Rsoil_f    , Crunoff_f
-real    :: Rain_f     , Drain_f    , Runoff_f   , Evap_f
-real    :: Tran_f     , TranT_f    , Rainint_f  , RainintT_f
+real 	  :: Cabg_f     , harvDM_f_hay, LAI_f
+real 	  :: CabgT_f    , C           , CT
+real    :: Csoil(nc)  , Csoil_f     , Nsoil(nc)  , Nsoil_f   , WA_f   , WC_f
+real    :: Nfert_f    , NfixT_f     , NsenprunT_f, Nsenprun_f
+real    :: Nleaching_f, Nemission_f , Nrunoff_f  , Nupt_f    , NuptT_f
+real    :: CsenprunT_f, Csenprun_f  , Rsoil_f    , Crunoff_f
+real    :: Rain_f     , Drain_f     , Runoff_f   , Evap_f
+real    :: Tran_f     , TranT_f     , Rainint_f  , RainintT_f
 real    :: C_f        , CT_f
-real    :: gC_f       , gCT_f      , harvC_f    , harvCST_f
+real    :: gC_f       , gCT_f       , harvCP_f   , harvCST_f
 
 ! PARAMETERS
 call set_params(PARAMS)
@@ -143,11 +143,11 @@ where (Ac>0.)
   NL            = CL * NCLMAX
   LAI           = CL * SLAMAX
 endwhere
-SENSIT        = 0
-SINKP         = 0
-SINKPMAXnew   = FSINKPMAX0 * SINKPMAX
-harvDMav_year = 0
-PARold        = 0
+SENSIT       = 0
+SINKP        = 0
+SINKPMAXnew  = FSINKPMAX0 * SINKPMAX
+harvDM_f_hay = 0
+PARold       = 0
 
 do day = 1, NDAYS
 
@@ -263,47 +263,47 @@ do day = 1, NDAYS
 
 ! Additional output variables
 
-  Cabg     = sum(Ac*(CL+CW+CP))            ! kgC m-2 field
-  CabgT    = sum(CLT_t + CST_t + CBT_t)    ! kgC m-2 field
-  Csoil    = CLITT + CSOMF + CSOMS         ! kgC m-2 c
-  Csoil_f  = sum(Ac*Csoil) * 10            ! tC  ha-1 field
-  C        = Cabg  + sum(Ac*CR)            ! kgC m-2 field
-  CT       = CabgT + sum(CRT_t)            ! kgC m-2 field
-  C_f      = sum(Ac*C ) * 10               ! tC  ha-1 field
-  CT_f     = sum(Ac*CT) * 10               ! tC  ha-1 field
-  harvDMav = sum(Ac*harvCP) * 10./CCONC    ! tDM ha-1 field
+  Cabg_f      = sum(Ac*(CL+CW+CP))            ! kgC  m-2 field
+  CabgT_f     = sum(CLT_t + CST_t + CBT_t)    ! kgC  m-2 field
+  Csoil       = CLITT + CSOMF + CSOMS         ! kgC  m-2 c
+  Csoil_f     = sum(Ac*Csoil)                 ! kgC  m-2 field
+  C           = Cabg_f  + sum(Ac*CR)          ! kgC  m-2 field
+  CT          = CabgT_f + sum(CRT_t)          ! kgC  m-2 field
+  C_f         = sum(Ac*C )                    ! kgC  m-2 field
+  CT_f        = sum(Ac*CT)                    ! kgC  m-2 field
+  harvDM_f_ha = sum(Ac*harvCP) * 1E4/CCONC    ! kgDM ha-1 field
   if (doy==61) then
-  	harvDMav_year = 0
+  	harvDM_f_hay = 0
   else
-	  harvDMav_year = harvDMav_year + harvDMav ! tDM ha-1
+	  harvDM_f_hay = harvDM_f_hay + harvDM_f_ha ! kgDM m-2 field y-1
   endif
-  LAI_f    = sum(Ac*LAI)                   ! m2  m-2 field
-  LAIT     = sum(LAIT_t)/sum(At)           ! m2  m-2 shade
-  Nsoil    = NLITT + NSOMF + NSOMS + NMIN  ! kgN m-2 c
-  Nsoil_f  = sum(Ac*Nsoil) * 10            ! tN  ha-1 field
-  WA_f     = sum(Ac*WA)                    ! kgW m-2 field
-  WC_f     = 0.001 * WA_f / ROOTD   	     ! m3W m-3
+  LAI_f       = sum(Ac*LAI)                   ! m2   m-2 field
+  LAIT        = sum(LAIT_t)/sum(At)           ! m2   m-2 shade
+  Nsoil       = NLITT + NSOMF + NSOMS + NMIN  ! kgN  m-2 c
+  Nsoil_f     = sum(Ac*Nsoil)                 ! kgN  m-2 field
+  WA_f        = sum(Ac*WA)                    ! kgW  m-2 field
+  WC_f        = 0.001 * WA_f / ROOTD   	      ! m3W  m-3
   
 ! N-balance soil (kgN m-2 field d-1): Change in NLITT+NSOMF+NSOMS+NMIN
-  Nfert_f     = Nfert                      ! Fertilisation
-  NfixT_f     = sum(Ac*NfixT_c)            ! N-fixation trees
+  Nfert_f     = Nfert                         ! Fertilisation
+  NfixT_f     = sum(Ac*NfixT_c)               ! N-fixation trees
   NsenprunT_f = sum(Ac*(dNLT_c + dNBlitt_c + dNRsomf_c))
-                                           ! Senescence + pruning trees
+                                              ! Senescence + pruning trees
   Nsenprun_f  = sum(Ac*(dNL + prunNL + prunCW*NCW + dCR*NCR))
-                                           ! Senescence + pruning coffee
-  Nleaching_f = sum(Ac*Nleaching)          ! Leaching from soil
-  Nemission_f = sum(Ac*Nemission)          ! Emission from soil
-  Nrunoff_f   = sum(Ac*(rNLITT + rNSOMF))  ! Runoff litter + SOMF
-  Nupt_f      = sum(Ac*Nupt)               ! N-uptake coffee
-  NuptT_f     = sum(Ac*NuptT_c)            ! N-uptake trees
+                                              ! Senescence + pruning coffee
+  Nleaching_f = sum(Ac*Nleaching)             ! Leaching from soil
+  Nemission_f = sum(Ac*Nemission)             ! Emission from soil
+  Nrunoff_f   = sum(Ac*(rNLITT + rNSOMF))     ! Runoff litter + SOMF
+  Nupt_f      = sum(Ac*Nupt)                  ! N-uptake coffee
+  NuptT_f     = sum(Ac*NuptT_c)               ! N-uptake trees
   
 ! C-balance soil (kgC m-2 field d-1): Change in CLITT+CSOMF+CSOMS
   CsenprunT_f = sum(Ac*(dCLT_c + dCBT_c + dCRT_c))
-                                           ! Senescence + pruning trees
+                                              ! Senescence + pruning trees
   Csenprun_f  = sum(Ac*(dCL + prunCL + prunCW + dCR))
-                                           ! Senescence + pruning coffee
-  Rsoil_f     = sum(Ac*Rsoil)              ! Soil respiration
-  Crunoff_f   = sum(Ac*(rCLITT + rCSOMF))  ! Runoff litter + SOMF
+                                              ! Senescence + pruning coffee
+  Rsoil_f     = sum(Ac*Rsoil)                 ! Soil respiration
+  Crunoff_f   = sum(Ac*(rCLITT + rCSOMF))     ! Runoff litter + SOMF
   
 ! H2O-balance soil (kgW m-2 field d-1 = mm d-1): Change in WA
   Rain_f      = RAIN
@@ -321,8 +321,8 @@ do day = 1, NDAYS
   gCT_f       = sum(gCLT_t) + sum(gCBT_t) + sum(gCRT_t) + sum(gCST_t)
   ! Rsoil_f 
   ! Crunoff_f
-  harvC_f     = sum(Ac*harvCP)
-  harvCST_f   = sum(harvCSTree_t)
+  harvCP_f    = sum(Ac*harvCP)
+  harvCST_f   = sum(harvCST_t)
 
 ! Outputs
 ! The "c1", "c2" etc. in the units below refer to parts of the field with
@@ -340,80 +340,81 @@ do day = 1, NDAYS
   y(day,10:12) = At                   ! m2 t m-2
   y(day,13:18) = fNgrowth             ! -
   y(day,19:24) = fTran                ! -
-  y(day,25   ) = Cabg  		            ! kgC m-2
-  y(day,26:31) = harvCP               ! kgC m-2 c
-  y(day,32   ) = harvDMav_year        ! tDM ha-1
-  y(day,33:38) = LAI                  ! m2 m-2 c
-  y(day,39   ) = CabgT   		          ! kgC m-2
-  y(day,40:42) = CAtree_t             ! m2 tree-1
+  y(day,25   ) = Cabg_f  		          ! kgC  m-2
+  y(day,26:31) = harvCP               ! kgC  m-2 c
+  y(day,32   ) = harvDM_f_hay         ! kgDM ha-1 y-1
+  y(day,33:38) = LAI                  ! m2   m-2 c
+  y(day,39   ) = CabgT_f 		          ! kgC  m-2
+  y(day,40:42) = CAtree_t             ! m2   tree-1
   y(day,43:45) = h_t                  ! m
-  y(day,46:51) = LAIT_c               ! m2 m-2 c
+  y(day,46:51) = LAIT_c               ! m2   m-2 c
   y(day,52:54) = treedens_t           ! m-2
-  y(day,55   ) = Csoil_f              ! tC ha-1
-  y(day,56   ) = Nsoil_f              ! tN ha-1
-  y(day,57:59) = CST_t                ! kgC m-2
-  y(day,60:62) = SAT_t                ! m2 m-2
+  y(day,55   ) = Csoil_f              ! kgC  m-2
+  y(day,56   ) = Nsoil_f              ! kgN  m-2
+  y(day,57:59) = CST_t                ! kgC  m-2
+  y(day,60:62) = SAT_t                ! m2   m-2
   
-  y(day,63   ) = Nfert_f              ! kgN m-2 d-1
-  y(day,64   ) = NfixT_f              ! kgN m-2 d-1
-  y(day,65   ) = NsenprunT_f          ! kgN m-2 d-1
-  y(day,66   ) = Nsenprun_f           ! kgN m-2 d-1
-  y(day,67   ) = Nleaching_f          ! kgN m-2 d-1
-  y(day,68   ) = Nemission_f          ! kgN m-2 d-1
-  y(day,69   ) = Nrunoff_f            ! kgN m-2 d-1
-  y(day,70   ) = Nupt_f               ! kgN m-2 d-1
-  y(day,71   ) = NuptT_f              ! kgN m-2 d-1
+  y(day,63   ) = Nfert_f              ! kgN  m-2 d-1
+  y(day,64   ) = NfixT_f              ! kgN  m-2 d-1
+  y(day,65   ) = NsenprunT_f          ! kgN  m-2 d-1
+  y(day,66   ) = Nsenprun_f           ! kgN  m-2 d-1
+  y(day,67   ) = Nleaching_f          ! kgN  m-2 d-1
+  y(day,68   ) = Nemission_f          ! kgN  m-2 d-1
+  y(day,69   ) = Nrunoff_f            ! kgN  m-2 d-1
+  y(day,70   ) = Nupt_f               ! kgN  m-2 d-1
+  y(day,71   ) = NuptT_f              ! kgN  m-2 d-1
   
-  y(day,72:77) = CLITT                ! kgC m-2 c
-  y(day,78:83) = NLITT                ! kgN m-2 c
-  y(day,84:86) = harvCSTree_t         ! kgC m-2 d-1
-  y(day,87:89) = harvNSTree_t         ! kgN m-2 d-1
+  y(day,72:77) = CLITT                ! kgC  m-2 c
+  y(day,78:83) = NLITT                ! kgN  m-2 c
+  y(day,84:86) = harvCST_t            ! kgC  m-2 d-1
+  y(day,87:89) = harvNST_t            ! kgN  m-2 d-1
   
-  y(day,90   ) = CsenprunT_f          ! kgC m-2 d-1
-  y(day,91   ) = Csenprun_f           ! kgC m-2 d-1
-  y(day,92   ) = Rsoil_f              ! kgC m-2 d-1
-  y(day,93   ) = Crunoff_f            ! kgC m-2 d-1
+  y(day,90   ) = CsenprunT_f          ! kgC  m-2 d-1
+  y(day,91   ) = Csenprun_f           ! kgC  m-2 d-1
+  y(day,92   ) = Rsoil_f              ! kgC  m-2 d-1
+  y(day,93   ) = Crunoff_f            ! kgC  m-2 d-1
   
   y(day,94   ) = WA_f                 ! mm
-  y(day,95   ) = Rain_f               ! mm d-1
-  y(day,96   ) = Drain_f              ! mm d-1
-  y(day,97   ) = Runoff_f             ! mm d-1
-  y(day,98   ) = Evap_f               ! mm d-1
-  y(day,99   ) = Tran_f               ! mm d-1
-  y(day,100  ) = TranT_f              ! mm d-1
-  y(day,101  ) = Rainint_f            ! mm d-1
-  y(day,102  ) = RainintT_f           ! mm d-1
+  y(day,95   ) = Rain_f               ! mm   d-1
+  y(day,96   ) = Drain_f              ! mm   d-1
+  y(day,97   ) = Runoff_f             ! mm   d-1
+  y(day,98   ) = Evap_f               ! mm   d-1
+  y(day,99   ) = Tran_f               ! mm   d-1
+  y(day,100  ) = TranT_f              ! mm   d-1
+  y(day,101  ) = Rainint_f            ! mm   d-1
+  y(day,102  ) = RainintT_f           ! mm   d-1
   
-  y(day,103  ) = C_f                  ! tC ha-1
-  y(day,104  ) = CT_f                 ! tC ha-1
-  y(day,105  ) = gC_f                 ! kgC m-2 d-1
-  y(day,106  ) = gCT_f                ! kgC m-2 d-1
-  y(day,107  ) = harvC_f              ! kgC m-2 d-1
-  y(day,108  ) = harvCST_f            ! kgC m-2 d-1
+  y(day,103  ) = C_f                  ! kgC  m-2
+  y(day,104  ) = CT_f                 ! kgC  m-2
+  y(day,105  ) = gC_f                 ! kgC  m-2 d-1
+  y(day,106  ) = gCT_f                ! kgC  m-2 d-1
+  y(day,107  ) = harvCP_f             ! kgC  m-2 d-1
+  y(day,108  ) = harvCST_f            ! kgC  m-2 d-1
 
-! CALIBRATION VARIABLES IN BC DATA FILES.
-! NAME IN CAF2021 ! NAME IN BC data files ! Unit
-! (this version)  ! (if different)        !
-! -----------------------------------------------------------
-! 1.-Ac(1)        ! SA                    ! m2 shade m-2  field
-! Cabg            ! CT                    ! kg C     m-2  field
-! CabgT           ! CTT                   ! kg C     m-2  field
-! CAtree_t(1)     ! CAtree                ! m2       tree-1
-! CL(1)           !                       ! kg C     m-2  c1
-! CL(2)           !                       ! kg C     m-2  c2
-! Csoil_f         ! Csoilave              ! t  C     ha-1 field
-! CW(1)           !                       ! kg C     m-2  c1
-! CW(2)           !                       ! kg C     m-2  c2
-! h_t(1)          ! h                     ! m
-! harvCP(1)       !                       ! kg C     m-2  c1
-! harvCP(2)       !                       ! kg C     m-2  c2
-! harvDMav_year   !                       ! t  DM    ha-1 field
-! LAI_f           ! LAIave                ! m2       m-2  field
-! LAI(1)          !                       ! m2       m-2  c1
-! LAI(2)          !                       ! m2       m-2  c2
-! LAIT            !                       ! m2       m-2  shade
-! Nsoil_f         ! Nsoilave              ! t  N     ha-1 field
-! WC_f            ! WC_F                  ! m3 W     m-3  field
+! CALIBRATION VARIABLES IN CAF2021's AND ORIANA's ORIGINAL BC DATA FILES.
+! ------------------------------------------------------------------------
+! NAME in CAF2021 ! NAME in original data files   ! UNIT
+! (this version)  ! (if different)                !
+! ------------------------------------------------------------------------
+! 1.-Ac(1)        ! SA                            ! m2 shade m-2  field
+! Cabg_f          ! CT                            ! kg C     m-2  field
+! CabgT_f         ! CTT                           ! kg C     m-2  field
+! CAtree_t(1)     ! CAtree                        ! m2       tree-1
+! CL(1)           !                               ! kg C     m-2  c1
+! CL(2)           !                               ! kg C     m-2  c2
+! Csoil_f         ! Csoilave      (t C ha-1)      ! kg C     m-2  field
+! CW(1)           !                               ! kg C     m-2  c1
+! CW(2)           !                               ! kg C     m-2  c2
+! h_t(1)          ! h                             ! m
+! harvCP(1)       !                               ! kg C     m-2  c1
+! harvCP(2)       !                               ! kg C     m-2  c2
+! harvDM_f_hay    ! harvDMav_year (t DM ha-1 y-1) ! kg DM    ha-1 field y-1
+! LAI_f           ! LAIave                        ! m2       m-2  field
+! LAI(1)          !                               ! m2       m-2  c1
+! LAI(2)          !                               ! m2       m-2  c2
+! LAIT            !                               ! m2       m-2  shade
+! Nsoil_f         ! Nsoilave       (t N ha-1)     ! kg N     m-2  field
+! WC_f            ! WC_F                          ! m3 W     m-3  field
 
 !if(day==1) then
 !  write(66,*) "day=1    : fTranT_c= ", fTranT_c

@@ -59,10 +59,10 @@ outputNames <- c( "Time", "year", "doy",
   paste0( "Ac("        ,1:nc,")" ), paste0( "At("      ,1:nt,")" ),
   paste0( "fNgrowth("  ,1:nc,")" ), paste0( "fTran("   ,1:nc,")" ),
 
-  "Cabg"                          , paste0( "harvCP("  ,1:nc,")" ),
-  "harvDMav_year"                 , paste0( "LAI("     ,1:nc,")" ),
+  "Cabg_f"                        , paste0( "harvCP("  ,1:nc,")" ),
+  "harvDM_f_hay"                  , paste0( "LAI("     ,1:nc,")" ),
 
-  "CabgT"                         , paste0( "CAtree_t(",1:nt,")" ),
+  "CabgT_f"                       , paste0( "CAtree_t(",1:nt,")" ),
   paste0( "h_t("       ,1:nt,")" ), paste0( "LAIT_c("  ,1:nc,")" ),
   paste0( "treedens_t(",1:nt,")" ),
   
@@ -73,8 +73,8 @@ outputNames <- c( "Time", "year", "doy",
   "Nfert_f"    , "NfixT_f"    , "NsenprunT_f", "Nsenprun_f",
   "Nleaching_f", "Nemission_f", "Nrunoff_f"  , "Nupt_f"    , "NuptT_f",
   
-  paste0( "CLITT(", 1:nc,")" )      , paste0( "NLITT(", 1:nc,")" ),
-  paste0( "harvCSTree_t(",1:nt,")" ), paste0( "harvNSTree_t(",1:nt,")" ),
+  paste0( "CLITT(", 1:nc,")" )   , paste0( "NLITT("    ,1:nc,")" ),
+  paste0( "harvCST_t(",1:nt,")" ), paste0( "harvNST_t(",1:nt,")" ),
   
   "CsenprunT_f", "Csenprun_f" , "Rsoil_f"    , "Crunoff_f" ,
   
@@ -83,7 +83,7 @@ outputNames <- c( "Time", "year", "doy",
   "Tran_f"     , "TranT_f"    , "Rainint_f"  , "RainintT_f",
   
   "C_f"        , "CT_f"       ,
-  "gC_f"       , "gCT_f"      , "harvC_f"    , "harvCST_f"
+  "gC_f"       , "gCT_f"      , "harvCP_f"   , "harvCST_f"
 )
 
 outputUnits <- c( "(y)", "(y)", "(d)",
@@ -92,13 +92,13 @@ outputUnits <- c( "(y)", "(y)", "(d)",
   rep("(-)"       ,nc)          , rep("(-)"        ,nc),
 
   "(kgC m-2)"                   , rep("(kgC m-2 c)",nc),
-  "(tDM ha-1)"                  , rep("(m2 m-2 c)" ,nc),
+  "(kgDM ha-1 y-1)"             , rep("(m2 m-2 c)" ,nc),
 
   "(kgC m-2)"                   , rep("(m2 tree-1)",nt),
   rep("(m)"       ,nt)          , rep("(m2 m-2 c)" ,nc),
   rep("(m-2)"     ,nt),
   
-  "(tC ha-1)"                   , "(tN ha-1)"          ,
+  "(kgC m-2)"                   , "(kgN m-2)"          ,
   
   rep("(kgC m-2)",nt)           , rep("(m2 m-2)"   ,nt),
   
@@ -112,7 +112,7 @@ outputUnits <- c( "(y)", "(y)", "(d)",
   "(mm)"                        ,
   rep("(mm d-1)"     ,8)        ,
 
-  rep("(tC ha-1)"    ,2)        ,
+  rep("(kgC m-2)"    ,2)        ,
   rep("(kgC m-2 d-1)",4)
 )
 

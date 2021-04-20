@@ -6,7 +6,6 @@ use declare_parameters
 use environment
 implicit none
 integer :: PRUN, NOPRUN
-! real    :: Nfert, prunFRC, prunFRT, thinFRT
 real    :: Nfert, prunFRC, prunFRT(nt), thinFRT(nt)
 real    :: treedens_t(nt), thintreedens_t(nt)
 

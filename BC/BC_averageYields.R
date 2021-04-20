@@ -1,7 +1,6 @@
-# source('initialisation/initialise_CAF2021_Turrialba_01_E_AC.R')
 source('initialisation/initialise_CAF2021_general.R')
 
-iH.model    <- which( outputNames=="harvDMav_year" )
+iH.model    <- which( outputNames=="harvDM_f_hay" )
  
 idoy1.model <- which(output[,2]>=2003 & output[,3]==1)
 
@@ -13,7 +12,7 @@ colnames(AvYield) <- c( "Site", "Y.data", "Y.MAP", "Y.ML" )
 AvYield[,1]       <- c(1:10,13:20)
 
 for (s in 1:nSites) {
-  iH.data.s       <- which( data_name[[s]]=="harvDMav_year" )
+  iH.data.s       <- which( data_name[[s]]=="harvDM_f_hay" )
   AvYield[s,2]    <- mean( data_value[[s]][iH.data.s] )
 
   params          <- list_params        [[s]] ; matrix_weather <- list_matrix_weather[[s]]
@@ -38,7 +37,7 @@ for (s in 1:nSites) {
 
 par( mfrow=c(1,1), mar=c(5,5,2,2) )
 
-plot( AvYield[,2], AvYield[,3], main="Av. yield coffee (t DM ha-1)",
+plot( AvYield[,2], AvYield[,3], main="Av. yield coffee (kg DM ha-1)",
       xlab="Observed", ylab="Simulated",
       xlim=c(0,max(AvYield[,2:3])), ylim=c(0,max(AvYield[,2:3])), type="n" )
 text( AvYield[,2], AvYield[,3], labels=1:18, cex=0.8 )

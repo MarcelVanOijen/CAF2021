@@ -173,10 +173,3 @@ Contains
   end Subroutine PrunHarv
 
 end module coffee
-
-
-
-
-
-
-

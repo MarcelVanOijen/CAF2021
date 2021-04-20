@@ -213,15 +213,15 @@ geometry: margin=1in
 Verify the soil N-balance:
 
 ```{r}
-  Nsoil_f_kgha   <- output[ , which( outputNames=="Nsoil_f") ] * 1.e3 # kgN ha-1
-  D_Nsoil_f_kgha <- tail(Nsoil_f_kgha,1) - head(Nsoil_f_kgha,1)       # kgN ha-1
+  Nsoil_f      <- output[ , which( outputNames=="Nsoil_f") ] # kgN m-2
+  D_Nsoil_f    <- tail(Nsoil_f,1) - head(Nsoil_f,1)          # kgN m-2
   
-  NinSum         <- colSums(output[2:NDAYS,i.Nin ])            * 1.e4 # kgN ha-1
-  NoutSum        <- colSums(output[2:NDAYS,i.Nout])            * 1.e4 # kgN ha-1
-  NinMinusNout   <- sum(NinSum) - sum(NoutSum)
+  NinSum       <- colSums(output[2:NDAYS,i.Nin ])            # kgN m-2
+  NoutSum      <- colSums(output[2:NDAYS,i.Nout])            # kgN m-2
+  NinMinusNout <- sum(NinSum) - sum(NoutSum)
   
-  cat( "VERIFYING THE N-BALANCE FOR THE SOIL (kgN ha-1):",
-       "\nState variable change: ", D_Nsoil_f_kgha,
+  cat( "VERIFYING THE N-BALANCE FOR THE SOIL (kgN m-2):",
+       "\nState variable change: ", D_Nsoil_f,
        "\nInputs minus outputs : ", NinMinusNout )
 ```
 
@@ -259,15 +259,15 @@ Verify the soil N-balance:
 Verify the soil C-balance:
 
 ```{r}
-  Csoil_f_kgha   <- output[ , which( outputNames=="Csoil_f") ] * 1.e3 # kgC ha-1
-  D_Csoil_f_kgha <- tail(Csoil_f_kgha,1) - head(Csoil_f_kgha,1)       # kgC ha-1
+  Csoil_f   <- output[ , which( outputNames=="Csoil_f") ] # kgC m-2 
+  D_Csoil_f <- tail(Csoil_f,1) - head(Csoil_f,1)          # kgC m-2
   
-  CinSum        <- colSums(output[2:NDAYS,i.Cin ])             * 1.e4 # kgC ha-1
-  CoutSum       <- colSums(output[2:NDAYS,i.Cout])             * 1.e4 # kgC ha-1
+  CinSum        <- colSums(output[2:NDAYS,i.Cin ])        # kgC m-2
+  CoutSum       <- colSums(output[2:NDAYS,i.Cout])        # kgC m-2
   CinMinusCout  <- sum(CinSum) - sum(CoutSum)
   
-  cat( "VERIFYING THE C-BALANCE FOR THE SOIL (kgC ha-1):",
-       "\nState variable change: ", D_Csoil_f_kgha,
+  cat( "VERIFYING THE C-BALANCE FOR THE SOIL (kgC m-2):",
+       "\nState variable change: ", D_Csoil_f,
        "\nInputs minus outputs : ", CinMinusCout )
 ```
 
@@ -322,7 +322,7 @@ Verify the H2O-balance.
 
 ```{r}
   CinNames  <- c("gC_f"   , "gCT_f")
-  CoutNames <- c("Rsoil_f", "Crunoff_f", "harvC_f", "harvCST_f")
+  CoutNames <- c("Rsoil_f", "Crunoff_f", "harvCP_f", "harvCST_f")
   nCin      <- length(CinNames) ; nCout  <- length(CoutNames)
   i.Cin     <- rep(NA,nCin)     ; i.Cout <- rep(NA,nCout)
   for(i in 1:nCin ) {i.Cin [i] <- which( outputNames==CinNames [i] ) }
@@ -352,20 +352,20 @@ Verify the H2O-balance.
 Verify the C-balance of the system (coffee + trees + soil):
 
 ```{r}
-  C_f_kgha      <- output[ , which( outputNames=="C_f" ) ] * 1.e3 # kgC ha-1
-  CT_f_kgha     <- output[ , which( outputNames=="CT_f") ] * 1.e3 # kgC ha-1
-  Csys_f_kgha   <- C_f_kgha + CT_f_kgha + Csoil_f_kgha            # kgC ha-1
-  D_Csys_f_kgha <- Csys_f_kgha[NDAYS] - Csys_f_kgha[1]            # kgC ha-1
-  # D_Csys_f_kgha <- Csys_f_kgha[1635] - Csys_f_kgha[1]            # kgC ha-1
+  C_f      <- output[ , which( outputNames=="C_f" ) ] # kgC m-2
+  CT_f     <- output[ , which( outputNames=="CT_f") ] # kgC m-2
+  Csys_f   <- C_f + CT_f + Csoil_f                    # kgC m-2
+  D_Csys_f <- Csys_f[NDAYS] - Csys_f[1]               # kgC m-2
+  D_Csys_f <- Csys_f_[1635] - Csys_f[1]               # kgC m-2
   
-  CinSum       <- colSums(output[2:NDAYS,i.Cin ])          * 1.e4 # kgC ha-1
-  CoutSum      <- colSums(output[2:NDAYS,i.Cout])          * 1.e4 # kgC ha-1
-  # CinSum       <- colSums(output[2:1635,i.Cin ])          * 1.e4 # kgC ha-1
-  # CoutSum      <- colSums(output[2:1635,i.Cout])          * 1.e4 # kgC ha-1
+  CinSum       <- colSums(output[2:NDAYS,i.Cin ])     # kgC m-2
+  CoutSum      <- colSums(output[2:NDAYS,i.Cout])     # kgC m-2
+  # CinSum       <- colSums(output[2:1635,i.Cin ])      # kgC m-2
+  # CoutSum      <- colSums(output[2:1635,i.Cout])      # kgC m-2
   CinMinusCout <- sum(CinSum) - sum(CoutSum)
   
-  cat( "VERIFYING THE C-BALANCE FOR THE SYSTEM (kgC ha-1):",
-       "\nState variable change: ", D_Csys_f_kgha,
+  cat( "VERIFYING THE C-BALANCE FOR THE SYSTEM (kgC m-2):",
+       "\nState variable change: ", D_Csys_f,
        "\nInputs minus outputs : ", CinMinusCout )
 ```
 
