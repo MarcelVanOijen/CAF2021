@@ -36,7 +36,7 @@ Contains
     dSENSIT = 0
   endif
   where (DayFill==1) dSENSIT = -SENSIT/DELT  
-! Triggering flowering (CAF2014: minor improvement on CAF2007, further development may be needed)
+! Triggering flowering
   RAINdoy = RAIN * doy
   where ((DVS==0.).and.(RAINdoy>RAINdoyHI))
     DayFl = SENSIT
@@ -63,12 +63,12 @@ Contains
   endwhere
   end Subroutine Phenology
 
-  Subroutine Growth(TINP,PARav,PARint,daysinceprun,fTran,SINKP,Nsup,PARMA,DVS,fNgrowth)
-  real :: TINP(:),PARav(:),PARint(:),daysinceprun,fTran(:),SINKP(:),Nsup(:),DVS(:),fNgrowth(nc)
+  Subroutine Growth(TINP,PARav,PARint,fTran,SINKP,Nsup,PARMA,DVS,fNgrowth)
+  real :: TINP(:),PARav(:),PARint(:),fTran(:),SINKP(:),Nsup(:),DVS(:),fNgrowth(nc)
   real :: EAVCMX,EAKMC,EAKMO,JMUMOL,KC25,KMC25,KMO25,KOKC,O2,R
   real :: CO2I,VCMAX(nc),KMC(nc),KMO(nc),GAMMAX(nc),PMAX(nc),EFF(nc)
   real :: LUECO2(nc),CCass(nc),gSHsource(nc)
-  real :: TV1(nc),TV2(nc),TV3(nc)
+  real :: TV1(nc),TV2(nc)
   real :: PARMA(:),Ndemand(nc)
   real :: FCL(nc),FCW(nc),FCR(nc),FCP(nc),gCLpot(nc),gCWpot(nc),gCRpot(nc)
   real :: gCPpot(nc),gNLpot(nc),gNWpot(nc),gNRpot(nc),gNPpot(nc),gNLmax(nc)
@@ -92,7 +92,7 @@ Contains
   PMAX   = VCMAX * (CO2I-GAMMAX) / (CO2I + KMC * (1+O2/KMO))        ! % (g CO2 m-2 leaf d-1)
   EFF    = 44. * JMUMOL/2.1 * (CO2I-GAMMAX)/ (4.5*CO2I+10.5*GAMMAX) ! % (g CO2 MJ-1 PAR)
   LUECO2 = EFF * PMAX / (EFF*KEXT*PARav + PMAX)                     ! % (g CO2 MJ-1 PAR)
-  CCass  = LUECO2*0.001*(12./44.) * PARint * fTran * NOPRUN 
+  CCass  = LUECO2*0.001*(12./44.) * PARint * fTran
   gSHsource = CCass * YG
   ! Sink strength
   gsink  = (1 - exp(-KSINKPPAR * PARMA)) * DayFl * SINKPMAXnew  
@@ -101,16 +101,11 @@ Contains
   elsewhere
     TV1 = 0.
   endwhere
-  if (daysinceprun==0) then
-    TV2 = 1.
-  else
-    TV2 = (1-prunFRC)
-  endif
-  TV3      = SINKL + SINKW + SINKR * (2 - fTran) + SINKP * TV1 * TV2
-  FCL      = SINKL * NOPRUN / TV3
-  FCW      = SINKW * NOPRUN / TV3
-  FCR      = SINKR * (2 - fTran) * NOPRUN / TV3
-  FCP      = SINKP * TV1 * TV2 * NOPRUN / TV3  
+  TV2      = SINKL + SINKW + SINKR * (2 - fTran) + SINKP * TV1
+  FCL      = SINKL / TV2
+  FCW      = SINKW / TV2
+  FCR      = SINKR * (2 - fTran) / TV2
+  FCP      = SINKP * TV1         / TV2  
   ! N-demand Organs
   gCLpot   = FCL * gSHsource
   gCWpot   = FCW * gSHsource
@@ -158,10 +153,10 @@ Contains
  
   Subroutine PrunHarv(NL,CL,CW,CP,LAI,DVS)
   real NL(:),CL(:),CW(:),CP(:),LAI(:),DVS(:)
-  prunLAI = PRUN * prunFRC * LAI / DELT
-  prunNL  = PRUN * prunFRC * NL  / DELT
-  prunCL  = PRUN * prunFRC * CL  / DELT
-  prunCW  = PRUN * prunFRC * CW  / DELT  
+  prunLAI = prunFRC * LAI / DELT
+  prunNL  = prunFRC * NL  / DELT
+  prunCL  = prunFRC * CL  / DELT
+  prunCW  = prunFRC * CW  / DELT  
   where (DVS>=1.)
    harvCP = CP / DELT
    harvNP = harvCP * NCP  

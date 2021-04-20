@@ -19,7 +19,11 @@ DVS0       = pa(  6) ! % (-)               :
 ! Parameters
 CCONC      = pa(  7) ! % (kg C kg-1 DM)    :
 DAYSPLNOP  = pa(  8) ! % (d)               : 848-1213
+
+!!!!!!!!!!!!!!!!!!!!!!!!!! REMOVE or REPLACE (parameter no longer needed)
 DAYSPRNOP  = pa(  9) ! % (d)               :
+!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 FNCLMIN    = pa( 10) ! % (-)               : 0.3-0.7
 FSLAMIN    = pa( 11) ! % (-)               : 0.55-0.70
 FTCCLMIN   = pa( 12) ! % (-)               :

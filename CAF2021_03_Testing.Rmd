@@ -318,6 +318,56 @@ Verify the H2O-balance.
        "\nInputs minus outputs : ", WinMinusWout )
 ```
 
+## C-balance coffee
+
+```{r}
+  CinNames  <- "gC_f"
+  CoutNames <- c("dC_f", "prunC_f", "harvCP_f")
+  nCin      <- length(CinNames) ; nCout  <- length(CoutNames)
+  i.Cin     <- rep(NA,nCin)     ; i.Cout <- rep(NA,nCout)
+  for(i in 1:nCin ) {i.Cin [i] <- which( outputNames==CinNames [i] ) }
+  for(i in 1:nCout) {i.Cout[i] <- which( outputNames==CoutNames[i] ) }
+  
+  CinMean   <-    mean (output[,i.Cin])  * 1.e4 * 365 # kgC ha-1 y-1
+  CoutMean  <- colMeans(output[,i.Cout]) * 1.e4 * 365 # kgC ha-1 y-1
+  
+  par( mfrow=c(1,2), mar=c(5,3,3,5) )
+  y.max <- max( CinMean, sum(CoutMean) )
+
+  leg <- CinNames
+  barplot( CinMean,
+         main="C-inputs coffee\n(kg C ha-1 y-1)",
+         beside=F, ylim=c(0,y.max), col=1:length(leg),
+         legend.text=leg,
+         args.legend=list( x="right", bg="white", inset=c(-0.3,0) ) )
+
+  leg <- CoutNames
+  barplot( as.matrix(CoutMean),
+         main="C-outputs coffee\n(kg C ha-1 y-1)",
+         beside=F, ylim=c(0,y.max), col=1:length(leg),
+         legend.text=leg,
+         args.legend=list( x="right", bg="white", inset=c(-0.3,0) ) )
+```
+
+Verify the C-balance of coffee:
+
+```{r}
+  # end <- 1855
+  # end <- 1856
+  end <- NDAYS
+
+  C_f          <- output[ , which( outputNames=="C_f" ) ] # kgC m-2
+  D_C_f        <- C_f[end] - C_f[1]                     # kgC m-2
+
+  CinSum       <-    sum (output[2:end,i.Cin ])         # kgC m-2
+  CoutSum      <- colSums(output[2:end,i.Cout])         # kgC m-2
+  CinMinusCout <- sum(CinSum) - sum(CoutSum)
+  
+  cat( "VERIFYING THE C-BALANCE OF COFFEE (kgC m-2):",
+       "\nState variable change: ", D_C_f,
+       "\nInputs minus outputs : ", CinMinusCout )
+```
+
 ## C-balance system (soil + coffee + trees)
 
 ```{r}
@@ -356,12 +406,9 @@ Verify the C-balance of the system (coffee + trees + soil):
   CT_f     <- output[ , which( outputNames=="CT_f") ] # kgC m-2
   Csys_f   <- C_f + CT_f + Csoil_f                    # kgC m-2
   D_Csys_f <- Csys_f[NDAYS] - Csys_f[1]               # kgC m-2
-  D_Csys_f <- Csys_f_[1635] - Csys_f[1]               # kgC m-2
-  
+
   CinSum       <- colSums(output[2:NDAYS,i.Cin ])     # kgC m-2
   CoutSum      <- colSums(output[2:NDAYS,i.Cout])     # kgC m-2
-  # CinSum       <- colSums(output[2:1635,i.Cin ])      # kgC m-2
-  # CoutSum      <- colSums(output[2:1635,i.Cout])      # kgC m-2
   CinMinusCout <- sum(CinSum) - sum(CoutSum)
   
   cat( "VERIFYING THE C-BALANCE FOR THE SYSTEM (kgC m-2):",

@@ -82,8 +82,9 @@ outputNames <- c( "Time", "year", "doy",
   "Rain_f"     , "Drain_f"    , "Runoff_f"   , "Evap_f"    ,
   "Tran_f"     , "TranT_f"    , "Rainint_f"  , "RainintT_f",
   
-  "C_f"        , "CT_f"       ,
-  "gC_f"       , "gCT_f"      , "harvCP_f"   , "harvCST_f"
+  "C_f"        ,  "gC_f"      , "dC_f"       , "prunC_f"   , "harvCP_f", 
+  
+  "CT_f"       , "gCT_f"      , "harvCST_f"
 )
 
 outputUnits <- c( "(y)", "(y)", "(d)",
@@ -112,8 +113,9 @@ outputUnits <- c( "(y)", "(y)", "(d)",
   "(mm)"                        ,
   rep("(mm d-1)"     ,8)        ,
 
-  rep("(kgC m-2)"    ,2)        ,
-  rep("(kgC m-2 d-1)",4)
+  "(kgC m-2)"                   , rep("(kgC m-2 d-1)",4),
+
+  "(kgC m-2)"                   , rep("(kgC m-2 d-1)",2)
 )
 
 NOUT <- as.integer( length(outputNames) )

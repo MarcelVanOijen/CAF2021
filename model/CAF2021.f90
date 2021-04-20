@@ -40,7 +40,7 @@ integer :: day, doy, i, ic, it, NDAYS, NOUT, year
 ! State variables
 real    :: CBT_t(nt), CLT_t(nt), CRT_t(nt), CST_t(nt), NLT_t(nt)
 real    :: CL(nc)=0, CP(nc)=0, CR(nc)=0, CW(nc)=0, NL(nc)=0
-real    :: daysinceprun, DVS(nc)=0, LAI(nc)=0, SENSIT(nc), SINKP(nc)
+real    :: DVS(nc)=0, LAI(nc)=0, SENSIT(nc), SINKP(nc)
 real    :: CLITT(nc), CSOMF(nc), CSOMS(nc)
 real    :: NLITT(nc), NMIN (nc), NSOMF(nc), NSOMS(nc), WA(nc)
 
@@ -73,8 +73,8 @@ real    :: Nleaching_f, Nemission_f , Nrunoff_f  , Nupt_f    , NuptT_f
 real    :: CsenprunT_f, Csenprun_f  , Rsoil_f    , Crunoff_f
 real    :: Rain_f     , Drain_f     , Runoff_f   , Evap_f
 real    :: Tran_f     , TranT_f     , Rainint_f  , RainintT_f
-real    :: C_f        , CT_f
-real    :: gC_f       , gCT_f       , harvCP_f   , harvCST_f
+real    :: C_f        , gC_f        , dC_f       , prunC_f   , harvCP_f
+real    :: CT_f       , gCT_f       , harvCST_f
 
 ! PARAMETERS
 call set_params(PARAMS)
@@ -98,8 +98,6 @@ DAYS_PRUNT   = CALENDAR_PRUNT(:,:,1:2)
 DAYS_THINT   = CALENDAR_THINT(:,:,1:2)
 FRPRUNT      = CALENDAR_PRUNT(:,:,3)
 FRTHINT      = CALENDAR_THINT(:,:,3)
-
-daysinceprun = 0
 
 ! INITIAL STATES
 
@@ -160,7 +158,7 @@ do day = 1, NDAYS
   call morphology(CBT_t,CST_t,LAIT_t,treedens_t, SAT_t)
 
 ! Management
-  call fert_prune_thin(year,doy,DAYS_FERT ,NFERTV ,DAYS_PRUNC,FRPRUNC, &
+  call fert_prun_thin(year,doy,DAYS_FERT ,NFERTV ,DAYS_PRUNC,FRPRUNC, &
                                 DAYS_PRUNT,FRPRUNT,DAYS_THINT,FRTHINT)
   treedens_t = treedens_t - thintreedens_t
   
@@ -199,7 +197,7 @@ do day = 1, NDAYS
   call Nsupply(CR,NMIN,Nsup)
   call abovegroundres(LAI,PARCOFFEE,PARav,PARint)
   call Phenology(Day,doy,DVS,SENSIT,TCOFFEE,SINKP)
-  call growth(TCOFFEE,PARav,PARint,daysinceprun,fTran,SINKP,Nsup,PARMA,DVS,fNgrowth)
+  call growth(TCOFFEE,PARav,PARint,fTran,SINKP,Nsup,PARMA,DVS,fNgrowth)
   call Foliage(fTran)  
   call Senescence(CR,NL,CL,LAI,fTran)
   call PrunHarv(NL,CL,CW,CP,LAI,DVS)
@@ -217,7 +215,6 @@ do day = 1, NDAYS
     SINKP=0
   endwhere
   ! Sun and shade coffee plants pruned at the same time
-  daysinceprun = max( 0., daysinceprun + PRUN - 1/DAYSPRNOP )
   LAI    = LAI    + adjLAI  + gLAI - dLAI - prunLAI
   NL     = NL     + adjNL   + gNL  - dNL  - prunNL
   CL     = CL     + adjCL   + gCL  - dCL  - prunCL  
@@ -315,14 +312,17 @@ do day = 1, NDAYS
   Rainint_f   = sum(Ac*Rainint)
   RainintT_f  = sum(Ac*RainintT_c)
   
+! C-balance coffee (kgC m-2 field d-1)
+  gC_f        = sum(Ac* (gCL + gCW + gCR + gCP)) ! Growth coffee
+  dC_f        = sum(Ac* (dCL + dCR))             ! Senescence coffee
+  prunC_f     = sum(Ac* (prunCL + prunCW))       ! Pruning coffee
+  harvCP_f    = sum(Ac*harvCP)                   ! Harvesting coffee
+  
 ! C-balance system (kgC m-2 field d-1):
-!   Change in CL+CW+CR+CP + CBT_t+CLT_t+CRT_t+CST_t + CLITT+CSOMF+CSOMS
-  gC_f        = sum(Ac*gCL) + sum(Ac*gCW) + sum(Ac*gCR) + sum(Ac*gCP)
-  gCT_f       = sum(gCLT_t) + sum(gCBT_t) + sum(gCRT_t) + sum(gCST_t)
-  ! Rsoil_f 
-  ! Crunoff_f
-  harvCP_f    = sum(Ac*harvCP)
+! Change in CL+CW+CR+CP + CBT_t+CLT_t+CRT_t+CST_t + CLITT+CSOMF+CSOMS
+  gCT_f       = sum(gCLT_t + gCBT_t + gCRT_t + gCST_t)
   harvCST_f   = sum(harvCST_t)
+  ! gC_f, Crunoff_f, harvCP_f, Rsoil_f
 
 ! Outputs
 ! The "c1", "c2" etc. in the units below refer to parts of the field with
@@ -385,12 +385,15 @@ do day = 1, NDAYS
   y(day,102  ) = RainintT_f           ! mm   d-1
   
   y(day,103  ) = C_f                  ! kgC  m-2
-  y(day,104  ) = CT_f                 ! kgC  m-2
-  y(day,105  ) = gC_f                 ! kgC  m-2 d-1
-  y(day,106  ) = gCT_f                ! kgC  m-2 d-1
+  y(day,104  ) = gC_f                 ! kgC  m-2 d-1
+  y(day,105  ) = dC_f                 ! kgC  m-2 d-1
+  y(day,106  ) = prunC_f              ! kgC  m-2 d-1
   y(day,107  ) = harvCP_f             ! kgC  m-2 d-1
-  y(day,108  ) = harvCST_f            ! kgC  m-2 d-1
-
+  
+  y(day,108  ) = CT_f                 ! kgC  m-2
+  y(day,109  ) = gCT_f                ! kgC  m-2 d-1
+  y(day,110  ) = harvCST_f            ! kgC  m-2 d-1
+  
 ! CALIBRATION VARIABLES IN CAF2021's AND ORIANA's ORIGINAL BC DATA FILES.
 ! ------------------------------------------------------------------------
 ! NAME in CAF2021 ! NAME in original data files   ! UNIT
@@ -431,7 +434,7 @@ if(day==NDAYS) then
   write(66,*) "day=NDAYS: fTranT_t= ", fTranT_t
 endif
 
-end do ! end time loop
+enddo ! end time loop
 
 close(66)
 
