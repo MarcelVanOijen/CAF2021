@@ -38,7 +38,7 @@ real                        :: y(NDAYS,NOUT)
 integer :: day, doy, i, ic, it, NDAYS, NOUT, year
 
 ! State variables
-real    :: CBT_t(nt), CLT_t(nt), CRT_t(nt), CST_t(nt), NLT_t(nt)
+real    :: CBT_t(nt), CLT_t(nt), CRT_t(nt), CST_t(nt), CPT_t(nt), NLT_t(nt)
 real    :: CL(nc)=0, CP(nc)=0, CR(nc)=0, CW(nc)=0, NL(nc)=0
 real    :: DVS(nc)=0, LAI(nc)=0, SENSIT(nc), SINKP(nc)
 real    :: CLITT(nc), CSOMF(nc), CSOMS(nc)
@@ -210,9 +210,9 @@ do day = 1, NDAYS
 
 ! Coffee (arrays: [m-2 sun, m-2 shade])
   where(DVS<1.)
-    SINKP = SINKP + gsink
+    SINKP = SINKP + gSINKP
   elsewhere
-    SINKP=0
+    SINKP = 0
   endwhere
   ! Sun and shade coffee plants pruned at the same time
   LAI    = LAI    + adjLAI  + gLAI - dLAI - prunLAI
@@ -231,6 +231,7 @@ do day = 1, NDAYS
     CLT_t  = CLT_t + gCLT_t - dCLT_t
     CRT_t  = CRT_t + gCRT_t - dCRT_t
     CST_t  = CST_t + gCST_t - dCST_t
+    CPT_t  = CPT_t + gCPT_t - dCPT_t
     NLT_t  = NLT_t + gNLT_t - dNLT_t
   endwhere
   
@@ -394,11 +395,19 @@ do day = 1, NDAYS
   y(day,109  ) = gCT_f                ! kgC  m-2 d-1
   y(day,110  ) = harvCST_f            ! kgC  m-2 d-1
   
-  y(day,111:116) = adjCL              ! kgC  m-2 d-1
-  y(day,117:122) = adjCW              ! kgC  m-2 d-1
-  y(day,123:128) = adjCR              ! kgC  m-2 d-1
-  y(day,129:134) = adjCP              ! kgC  m-2 d-1
-  
+  y(day,111:113) = CPT_t              ! kgC  m-2
+
+  y(day,114  ) = DVS(1)               ! -
+  y(day,115  ) = SINKP(1)             ! -
+  y(day,116  ) = SINKPMAXnew(1)       ! -
+  y(day,117  ) = DayFl(1)             ! -
+  y(day,118  ) = PARMA(1)             ! MJ m-2 d-1
+  y(day,119  ) = DVS(2)               ! -
+  y(day,120  ) = SINKP(2)             ! -
+  y(day,121  ) = SINKPMAXnew(2)       ! -
+  y(day,122  ) = DayFl(2)             ! -
+  y(day,123  ) = PARMA(2)             ! MJ m-2 d-1
+
 ! CALIBRATION VARIABLES IN CAF2021's AND ORIANA's ORIGINAL BC DATA FILES.
 ! ------------------------------------------------------------------------
 ! NAME in CAF2021 ! NAME in original data files   ! UNIT

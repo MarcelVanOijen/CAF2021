@@ -8,7 +8,7 @@ use management
 use shade
 implicit none
 
-real :: gCW(nc),gCP(nc),gCL(nc),gNL(nc),gCR(nc),gLAI(nc),gsink(nc)
+real :: gCW(nc),gCP(nc),gCL(nc),gNL(nc),gCR(nc),gLAI(nc),gSINKP(nc)
 real :: dCL(nc),dCR(nc),dLAI(nc),dNL(nc),Nupt(nc)
 real :: prunLAI(nc),prunNL(nc),prunCL(nc),prunCW(nc),harvCP(nc),harvNP(nc)
 real :: dSENSIT(nc),dDVS(nc),rDVS(nc),DayFl(nc)
@@ -57,7 +57,7 @@ Contains
 ! Development-resetting
   where (DVS>=1)
     rDVS        = DVS / DELT
-	SINKPMAXnew = SINKPMAX - KSINKPMAX * SINKP
+	  SINKPMAXnew = SINKPMAX - KSINKPMAX * SINKP
   elsewhere
     rDVS = 0
   endwhere
@@ -68,8 +68,8 @@ Contains
   real :: EAVCMX,EAKMC,EAKMO,JMUMOL,KC25,KMC25,KMO25,KOKC,O2,R
   real :: CO2I,VCMAX(nc),KMC(nc),KMO(nc),GAMMAX(nc),PMAX(nc),EFF(nc)
   real :: LUECO2(nc),CCass(nc),gSHsource(nc)
-  real :: TV1(nc),TV2(nc)
-  real :: PARMA(:),Ndemand(nc)
+  real :: SINKSUM(nc)
+  real :: PARMA(nc),Ndemand(nc)
   real :: FCL(nc),FCW(nc),FCR(nc),FCP(nc),gCLpot(nc),gCWpot(nc),gCRpot(nc)
   real :: gCPpot(nc),gNLpot(nc),gNWpot(nc),gNRpot(nc),gNPpot(nc),gNLmax(nc)
   real :: gNW(nc),gNR(nc),gNP(nc),NCLnew(nc)
@@ -95,17 +95,13 @@ Contains
   CCass  = LUECO2*0.001*(12./44.) * PARint * fTran
   gSHsource = CCass * YG
   ! Sink strength
-  gsink  = (1 - exp(-KSINKPPAR * PARMA)) * DayFl * SINKPMAXnew  
-  where ((DVS>0.).and.(DVS<1.))
-    TV1 = min( 1., 2*DVS )
-  elsewhere
-    TV1 = 0.
-  endwhere
-  TV2      = SINKL + SINKW + SINKR * (2 - fTran) + SINKP * TV1
-  FCL      = SINKL / TV2
-  FCW      = SINKW / TV2
-  FCR      = SINKR * (2 - fTran) / TV2
-  FCP      = SINKP * TV1         / TV2  
+!  gSINKP   = (1 - exp(-KSINKPPAR * PARMA)) * DayFl * SINKPMAXnew * fTran * fNgrowth 
+  gSINKP   = (1 - exp(-KSINKPPAR * PARMA)) * DayFl * SINKPMAXnew
+  SINKSUM  = SINKL + SINKW + SINKR * (2-fTran) + SINKP * min(1.,2*DVS)
+  FCL      = SINKL                 / SINKSUM
+  FCW      = SINKW                 / SINKSUM
+  FCR      = SINKR * (2-fTran)     / SINKSUM
+  FCP      = SINKP * min(1.,2*DVS) / SINKSUM  
   ! N-demand Organs
   gCLpot   = FCL * gSHsource
   gCWpot   = FCW * gSHsource
@@ -143,12 +139,12 @@ Contains
   
   Subroutine Senescence(CR,NL,CL,LAI,fTran)
   real CR(:),NL(:),CL(:),LAI(:),fTran(:) 
-  real TV1(nc)
-  TV1 = max(0.,min(1., 1 / ((fTran+FTCCLMIN*(1.-fTran))*TCCLMAX) ))
+  real KdL(nc)
+  KdL  = max(0.,min(1., 1 / ((fTran+FTCCLMIN*(1.-fTran))*TCCLMAX) ))
+  dNL  = NL  * KdL
+  dCL  = CL  * KdL
+  dLAI = LAI * KdL
   dCR  = CR  / TCCR  
-  dNL  = NL  * TV1
-  dCL  = CL  * TV1
-  dLAI = LAI * TV1
   end Subroutine Senescence  
  
   Subroutine PrunHarv(NL,CL,CW,CP,LAI,DVS)

@@ -412,6 +412,16 @@ Verify the C-balance of the system (coffee + trees + soil):
        "\nInputs minus outputs : ", CinMinusCout )
 ```
 
+```{r}
+  plot_output(vars=c( "fTran(1)", "fNgrowth(1)",
+                      "DVS(1)"  , "SINKP(1)" , "SINKPMAXnew(1)",
+                      "DayFl(1)", "PARMA(1)") )
+  plot_output(vars=c( "fTran(2)", "fNgrowth(2)",
+                      "DVS(2)"  , "SINKP(2)" , "SINKPMAXnew(2)",
+                      "DayFl(2)", "PARMA(2)") )
+
+  # plot_output( vars=c("Ac(1)","Ac(2)","Ac(3)","Ac(4)","Ac(5)","Ac(6)") )
+```
 
 
 \clearpage

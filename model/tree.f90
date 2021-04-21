@@ -18,7 +18,8 @@ real :: GPP_t    (nt)=0, NPPmaxN_t(nt)=0
 real :: PARintT_c(nc)=0, PARintT_t(nt)=0
 
 ! Allocation
-real :: fGILAI_t(nt)=0, fGIN_t(nt)=0, FL_t(nt)=0, FR_t(nt)=0
+real :: fGILAI_t(nt)=0, fGIN_t(nt)=0, FLT_t(nt)=0
+real :: FST_t(nt)=0   , FBT_t(nt)=0 , FRT_t(nt)=0, FPT_t(nt)=0
 
 ! NdemandOrgans 
 real :: gCBmaxN_t(nt), gCLmaxN_t(nt), gCRmaxN_t(nt), gCSmaxN_t(nt)
@@ -26,13 +27,13 @@ real :: NBdemT_t (nt), NRdemT_t (nt), NSdemT_t (nt)
 
 ! gtreeNupt
 real :: fNgrowth_t(nt)=0
-real :: gCBT_t   (nt)=0, gCLT_t (nt)=0, gCRT_t(nt)=0, gCST_t(nt)=0
+real :: gCBT_t   (nt)=0, gCLT_t (nt)=0, gCRT_t(nt)=0, gCST_t(nt)=0, gCPT_t(nt)=0
 real :: gNBT_t   (nt)=0, gNLT_t (nt)=0, gNRT_t(nt)=0, gNST_t(nt)=0, gNLTmax_t(nt)=0
 real :: NCLTnew_t(nt)=0, NdemT_t(nt)=0, NLdemTmax_t(nt)=0, NuptT_t(nt)=0
 real :: NfixT_t  (nt)=0
 
 ! CNtree
-real :: dCBT_t   (nt)=0, dCLT_t(nt)=0, dCRT_t   (nt)=0, dCST_t(nt)=0
+real :: dCBT_t   (nt)=0, dCLT_t(nt)=0, dCRT_t   (nt)=0, dCST_t(nt)=0, dCPT_t(nt)=0
 real :: dNBlitt_t(nt)=0, dNLT_t(nt)=0, dNRsomf_t(nt)=0
 real :: harvCST_t(nt)=0, harvNST_t(nt)=0
 real :: NCLT_t   (nt)
@@ -88,6 +89,7 @@ Contains
 
   Subroutine allocation(At,CLT_t,fTranT_t,LAIT_t,NLT_t)
   real :: At(nt),CLT_t(nt),fTranT_t(nt),LAIT_t(nt),NLT_t(nt)
+  real :: FWT_t(nt),FPRT_t(nt)
   where (At>0) fGILAI_t = max(0., 1. - (LAIT_t/At) / LAIMAXT )  
   where (CLT_t>0.)
     NCLT_t = NLT_t / CLT_t
@@ -95,15 +97,20 @@ Contains
     NCLT_t = 0.     
   endwhere
   fGIN_t   = max(0.,min(1., (NCLT_t/NCLmaxT - fNCLminT)/(1 - fNCLminT) ))
-  FL_t     = FLmax * fGILAI_t * fGIN_t * fTranT_t
-  FR_t     = 1. - FL_t - FB - FS
+  FLT_t    = FLTmax * fGILAI_t * fGIN_t * fTranT_t
+  FWT_t    = (1. - FLT_t) * FWT
+    FST_t  = FWT_t * FST
+    FBT_t  = FWT_t - FST_t
+  FPRT_t   = 1. - FLT_t - FWT_t
+    FPT_t  = FPRT_t * 0.
+    FRT_t  = 1. - FLT_t - FBT_t - FST_t - FPT_t
   end Subroutine allocation
 
   Subroutine NdemandOrgans
-  gCLmaxN_t   = FL_t    * NPPmaxN_t
-  gCBmaxN_t   = FB      * NPPmaxN_t
-  gCSmaxN_t   = FS      * NPPmaxN_t
-  gCRmaxN_t   = FR_t    * NPPmaxN_t
+  gCLmaxN_t   = FLT_t   * NPPmaxN_t
+  gCBmaxN_t   = FBT_t   * NPPmaxN_t
+  gCSmaxN_t   = FST_t   * NPPmaxN_t
+  gCRmaxN_t   = FRT_t   * NPPmaxN_t
   NLdemTmax_t = NCLmaxT * gCLmaxN_t
   NBdemT_t    = NCWT    * gCBmaxN_t
   NSdemT_t    = NCWT    * gCSmaxN_t
@@ -128,7 +135,7 @@ Contains
   gCBT_t    = gNBT_t / NCWT
   gCST_t    = gNST_t / NCWT
   gCRT_t    = (gNRT_t + (gNLTmax_t - gNLT_t)) / NCRT
-  gCLT_t    = min( gNLT_t/NCLTnew_t, FL_t*NPPmaxN_t )
+  gCLT_t    = min( gNLT_t/NCLTnew_t, FLT_t*NPPmaxN_t )
   NfixT_t   = gCRT_t * KNFIX
   end Subroutine gtreeNupt
 

@@ -58,9 +58,9 @@ CRtree0    = pa( 37) ! % (kg C tree-1)     : Gs: 1.28
 CStree0    = pa( 38) ! % (kg C tree-1)     : Gs: 0.81
 ! Parameters
 BETA       = pa( 39) ! % (-)               :
-FB         = pa( 40) ! % (kg C kg-1 C)     :
+FWT        = pa( 40) ! % (kg C kg-1 C)     :
 FNCLMINT   = pa( 41) ! % (-)               : Ca: 0.7(0.6-0.8), Ep: 0.6(0.5-0.7), Gs: 0.6(0.5-0.7)
-FS         = pa( 42) ! % (kg C kg-1 C)     :
+FST        = pa( 42) ! % (kg C kg-1 C)     :
 FTCCLMINT  = pa( 43) ! % (-)               : {Ca,Gs,Ti}: low, Ed: medium, Ep: medium(non-pollarded)-high(poll.)
 GAMMA      = pa( 44) ! % (kg C kg-1 C)     :
 KEXTT      = pa( 45) ! % (m2 m-2)          : Ca: 0.32-0.72, Ed: 0.53-0.64, Ep: 0.50-0.87, Gs: low-0.345, Id: high
@@ -131,7 +131,7 @@ THINMULT   = pa( 94: 96)
 !!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! Parameters
-FLMAX      = pa( 97: 99) ! (kg C kg-1 C)
+FLTMAX     = pa( 97: 99) ! (kg C kg-1 C)
 KAC        = pa(100:102) ! (m2)
 KACEXP     = pa(103:105) ! (-)
 KH         = pa(106:108) ! (m)
