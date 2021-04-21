@@ -30,11 +30,11 @@ Contains
   Achange   = sum( dAc, MASK=dAc>0. )
   dfAfromto = 0
   do i = 1,nc
-     do j = 1,nc
+    do j = 1,nc
 	    if((dAc(i)<0).AND.(dAc(j)>0)) then
-		  dfAfromto(i,j) = -dAc(i) * dAc(j) / Achange / Ac(j)
-		endif
-	 enddo
+		    dfAfromto(i,j) = -dAc(i) * dAc(j) / Achange / Ac(j)
+		  endif
+	  enddo
   enddo
   adjCL    = 0
   adjCP    = 0

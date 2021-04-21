@@ -158,12 +158,12 @@ Contains
   prunCL  = prunFRC * CL  / DELT
   prunCW  = prunFRC * CW  / DELT  
   where (DVS>=1.)
-   harvCP = CP / DELT
-   harvNP = harvCP * NCP  
-   adjCP  = 0.
+    harvCP = CP / DELT
+    harvNP = harvCP * NCP  
+!    adjCP  = 0.
   elsewhere
-   harvCP = 0.
-   harvNP = 0.
+    harvCP = 0.
+    harvNP = 0.
   endwhere
   end Subroutine PrunHarv
 

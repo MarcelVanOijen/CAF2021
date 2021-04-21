@@ -84,7 +84,10 @@ outputNames <- c( "Time", "year", "doy",
   
   "C_f"        ,  "gC_f"      , "dC_f"       , "prunC_f"   , "harvCP_f", 
   
-  "CT_f"       , "gCT_f"      , "harvCST_f"
+  "CT_f"       , "gCT_f"      , "harvCST_f"  ,
+  
+  paste0( "adjCL(", 1:nc,")" ), paste0( "adjCW(", 1:nc,")" ),
+  paste0( "adjCR(", 1:nc,")" ), paste0( "adjCP(", 1:nc,")" )
 )
 
 outputUnits <- c( "(y)", "(y)", "(d)",
@@ -115,7 +118,10 @@ outputUnits <- c( "(y)", "(y)", "(d)",
 
   "(kgC m-2)"                   , rep("(kgC m-2 d-1)",4),
 
-  "(kgC m-2)"                   , rep("(kgC m-2 d-1)",2)
+  "(kgC m-2)"                   , rep("(kgC m-2 d-1)",2),
+
+  rep("(kgC m-2 d-1)",nc)       , rep("(kgC m-2 d-1)",nc),
+  rep("(kgC m-2 d-1)",nc)       , rep("(kgC m-2 d-1)",nc)
 )
 
 NOUT <- as.integer( length(outputNames) )

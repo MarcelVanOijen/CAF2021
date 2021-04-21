@@ -394,6 +394,11 @@ do day = 1, NDAYS
   y(day,109  ) = gCT_f                ! kgC  m-2 d-1
   y(day,110  ) = harvCST_f            ! kgC  m-2 d-1
   
+  y(day,111:116) = adjCL              ! kgC  m-2 d-1
+  y(day,117:122) = adjCW              ! kgC  m-2 d-1
+  y(day,123:128) = adjCR              ! kgC  m-2 d-1
+  y(day,129:134) = adjCP              ! kgC  m-2 d-1
+  
 ! CALIBRATION VARIABLES IN CAF2021's AND ORIANA's ORIGINAL BC DATA FILES.
 ! ------------------------------------------------------------------------
 ! NAME in CAF2021 ! NAME in original data files   ! UNIT

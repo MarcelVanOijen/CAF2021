@@ -214,7 +214,7 @@ Verify the soil N-balance:
 
 ```{r}
   Nsoil_f      <- output[ , which( outputNames=="Nsoil_f") ] # kgN m-2
-  D_Nsoil_f    <- tail(Nsoil_f,1) - head(Nsoil_f,1)          # kgN m-2
+  D_Nsoil_f    <- Nsoil_f[NDAYS] - Nsoil_f[1]                # kgN m-2
   
   NinSum       <- colSums(output[2:NDAYS,i.Nin ])            # kgN m-2
   NoutSum      <- colSums(output[2:NDAYS,i.Nout])            # kgN m-2
@@ -260,7 +260,7 @@ Verify the soil C-balance:
 
 ```{r}
   Csoil_f   <- output[ , which( outputNames=="Csoil_f") ] # kgC m-2 
-  D_Csoil_f <- tail(Csoil_f,1) - head(Csoil_f,1)          # kgC m-2
+  D_Csoil_f <- Csoil_f[NDAYS] - Csoil_f[1]                # kgC m-2
   
   CinSum        <- colSums(output[2:NDAYS,i.Cin ])        # kgC m-2
   CoutSum       <- colSums(output[2:NDAYS,i.Cout])        # kgC m-2
@@ -307,7 +307,7 @@ Verify the H2O-balance.
 
 ```{r}
   WA_f   <- output[ , which( outputNames=="WA_f") ] # mm
-  D_WA_f <- tail(WA_f,1) - head(WA_f,1)             # mm
+  D_WA_f <- WA_f[NDAYS] - WA_f[1]                   # mm
   
   WinSum        <-    sum (output[2:NDAYS,i.Win ])  # mm
   WoutSum       <- colSums(output[2:NDAYS,i.Wout])  # mm
@@ -352,15 +352,11 @@ Verify the H2O-balance.
 Verify the C-balance of coffee:
 
 ```{r}
-  # end <- 1855
-  # end <- 1856
-  end <- NDAYS
-
   C_f          <- output[ , which( outputNames=="C_f" ) ] # kgC m-2
-  D_C_f        <- C_f[end] - C_f[1]                     # kgC m-2
+  D_C_f        <- C_f[NDAYS] - C_f[1]                     # kgC m-2
 
-  CinSum       <-    sum (output[2:end,i.Cin ])         # kgC m-2
-  CoutSum      <- colSums(output[2:end,i.Cout])         # kgC m-2
+  CinSum       <-    sum (output[2:NDAYS,i.Cin ])         # kgC m-2
+  CoutSum      <- colSums(output[2:NDAYS,i.Cout])         # kgC m-2
   CinMinusCout <- sum(CinSum) - sum(CoutSum)
   
   cat( "VERIFYING THE C-BALANCE OF COFFEE (kgC m-2):",
@@ -415,7 +411,6 @@ Verify the C-balance of the system (coffee + trees + soil):
        "\nState variable change: ", D_Csys_f,
        "\nInputs minus outputs : ", CinMinusCout )
 ```
-
 
 
 
