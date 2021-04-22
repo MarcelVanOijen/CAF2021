@@ -95,8 +95,8 @@ Contains
   CCass  = LUECO2*0.001*(12./44.) * PARint * fTran
   gSHsource = CCass * YG
   ! Sink strength
-!  gSINKP   = (1 - exp(-KSINKPPAR * PARMA)) * DayFl * SINKPMAXnew * fTran * fNgrowth 
-  gSINKP   = (1 - exp(-KSINKPPAR * PARMA)) * DayFl * SINKPMAXnew
+  gSINKP   = (1 - exp(-KSINKPPAR * PARMA)) * DayFl * SINKPMAXnew * fTran * fNgrowth 
+!  gSINKP   = (1 - exp(-KSINKPPAR * PARMA)) * DayFl * SINKPMAXnew
   SINKSUM  = SINKL + SINKW + SINKR * (2-fTran) + SINKP * min(1.,2*DVS)
   FCL      = SINKL                 / SINKSUM
   FCW      = SINKW                 / SINKSUM
