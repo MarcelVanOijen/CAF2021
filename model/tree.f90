@@ -22,19 +22,22 @@ real :: fGILAI_t(nt)=0, fGIN_t(nt)=0, FLT_t(nt)=0
 real :: FST_t(nt)=0   , FBT_t(nt)=0 , FRT_t(nt)=0, FPT_t(nt)=0
 
 ! NdemandOrgans 
-real :: gCBmaxN_t(nt), gCLmaxN_t(nt), gCRmaxN_t(nt), gCSmaxN_t(nt)
-real :: NBdemT_t (nt), NRdemT_t (nt), NSdemT_t (nt)
+real :: gCBmaxN_t(nt), gCLmaxN_t(nt)    , gCPmaxN_t(nt), gCRmaxN_t(nt), gCSmaxN_t(nt)
+real :: NBdemT_t (nt), NLdemTmax_t(nt)=0, NPdemT_t (nt), NRdemT_t (nt), NSdemT_t (nt)
 
 ! gtreeNupt
 real :: fNgrowth_t(nt)=0
-real :: gCBT_t   (nt)=0, gCLT_t (nt)=0, gCRT_t(nt)=0, gCST_t(nt)=0, gCPT_t(nt)=0
-real :: gNBT_t   (nt)=0, gNLT_t (nt)=0, gNRT_t(nt)=0, gNST_t(nt)=0, gNLTmax_t(nt)=0
-real :: NCLTnew_t(nt)=0, NdemT_t(nt)=0, NLdemTmax_t(nt)=0, NuptT_t(nt)=0
+real :: gCBT_t   (nt)=0, gCLT_t (nt)=0
+real :: gCRT_t   (nt)=0, gCST_t (nt)=0, gCPT_t   (nt)=0
+real :: gNBT_t   (nt)=0, gNLT_t (nt)=0, gNLTmax_t(nt)=0
+real :: gNPT_t   (nt)=0, gNRT_t (nt)=0, gNST_t   (nt)=0
+real :: NCLTnew_t(nt)=0, NdemT_t(nt)=0, NuptT_t  (nt)=0
 real :: NfixT_t  (nt)=0
 
 ! CNtree
-real :: dCBT_t   (nt)=0, dCLT_t(nt)=0, dCRT_t   (nt)=0, dCST_t(nt)=0, dCPT_t(nt)=0
-real :: dNBlitt_t(nt)=0, dNLT_t(nt)=0, dNRsomf_t(nt)=0
+real :: dCBT_t   (nt)=0, dCLT_t(nt)=0, dCPT_t(nt)=0, dCRT_t(nt)=0, dCST_t(nt)=0
+real :: dNBlitt_t(nt)=0, dNLT_t(nt)=0, dNPT_t(nt)=0, dNRsomf_t(nt)=0
+real :: harvCPT_t(nt)=0, harvNPT_t(nt)=0
 real :: harvCST_t(nt)=0, harvNST_t(nt)=0
 real :: NCLT_t   (nt)
 real :: sCBTman_t(nt)=0, sCLTman_t(nt)=0, sCRTman_t(nt)=0
@@ -87,9 +90,10 @@ Contains
   NPPmaxN_t = GPP_t * (1-GAMMA)
   end Subroutine NPP
 
-  Subroutine allocation(At,CLT_t,fTranT_t,LAIT_t,NLT_t)
-  real :: At(nt),CLT_t(nt),fTranT_t(nt),LAIT_t(nt),NLT_t(nt)
-  real :: FWT_t(nt),FPRT_t(nt)
+  Subroutine allocation(day,At,CLT_t,fTranT_t,LAIT_t,NLT_t)
+  integer :: day
+  real    :: At(nt),CLT_t(nt),fTranT_t(nt),LAIT_t(nt),NLT_t(nt)
+  real    :: FWT_t(nt),FPRT_t(nt)
   where (At>0) fGILAI_t = max(0., 1. - (LAIT_t/At) / LAIMAXT )  
   where (CLT_t>0.)
     NCLT_t = NLT_t / CLT_t
@@ -102,24 +106,27 @@ Contains
     FST_t  = FWT_t  * FST
     FBT_t  = FWT_t  - FST_t
   FPRT_t   = 1. - FLT_t - FWT_t
-    FPT_t  = FPRT_t * FPT
+    FPT_t  = 0
+    if (day>TBEFOREP) FPT_t = FPRT_t * FPT
     FRT_t  = FPRT_t - FPT_t
   end Subroutine allocation
 
   Subroutine NdemandOrgans
   gCLmaxN_t   = FLT_t   * NPPmaxN_t
-  gCBmaxN_t   = FBT_t   * NPPmaxN_t
   gCSmaxN_t   = FST_t   * NPPmaxN_t
+  gCBmaxN_t   = FBT_t   * NPPmaxN_t
+  gCPmaxN_t   = FPT_t   * NPPmaxN_t
   gCRmaxN_t   = FRT_t   * NPPmaxN_t
   NLdemTmax_t = NCLmaxT * gCLmaxN_t
-  NBdemT_t    = NCWT    * gCBmaxN_t
   NSdemT_t    = NCWT    * gCSmaxN_t
+  NBdemT_t    = NCWT    * gCBmaxN_t
+  NPdemT_t    = NCPT    * gCPmaxN_t
   NRdemT_t    = NCRT    * gCRmaxN_t
   end Subroutine NdemandOrgans
 
   Subroutine gtreeNupt(NsupT_t)
   real NsupT_t(nt)
-  NdemT_t = NLdemTmax_t + NBdemT_t + NSdemT_t + NRdemT_t
+  NdemT_t = NLdemTmax_t + NSdemT_t + NBdemT_t + NPdemT_t + NRdemT_t
   NuptT_t = min( NsupT_t, NdemT_t )
   where (NdemT_t>0.)
     fNgrowth_t = max(0.,min(1., NuptT_t/NdemT_t ))
@@ -128,38 +135,45 @@ Contains
   endwhere
   gNLTmax_t = fNgrowth_t * NLdemTmax_t
   gNLT_t    = fNgrowth_t * gNLTmax_t
-  gNBT_t    = fNgrowth_t * NBdemT_t
   gNST_t    = fNgrowth_t * NSdemT_t
+  gNBT_t    = fNgrowth_t * NBdemT_t
+  gNPT_t    = fNgrowth_t * NPdemT_t
   gNRT_t    = fNgrowth_t * NRdemT_t
   NCLTnew_t = ( fNCLminT + fNgrowth_t*(1.-fNCLminT) ) * NCLmaxT 
-  gCBT_t    = gNBT_t / NCWT
-  gCST_t    = gNST_t / NCWT
-  gCRT_t    = (gNRT_t + (gNLTmax_t - gNLT_t)) / NCRT
   gCLT_t    = min( gNLT_t/NCLTnew_t, FLT_t*NPPmaxN_t )
-  NfixT_t   = gCRT_t * KNFIX
+  gCST_t    =  gNST_t / NCWT
+  gCBT_t    =  gNBT_t / NCWT
+  gCPT_t    =  gNPT_t / NCPT
+  gCRT_t    = (gNRT_t + (gNLTmax_t - gNLT_t)) / NCRT
+  NfixT_t   =  gCRT_t * KNFIX
   end Subroutine gtreeNupt
 
-  Subroutine CNtree(fTranT_t,CRT_t,CST_t,CBT_t,CLT_t,NLT_t)
-  real :: CBT_t(nt), CLT_t(nt), CRT_t(nt), CST_t(nt), NLT_t(nt), fTranT_t(nt)
-! Roots  
-  sCRTman_t    = thinFRT * CRT_t
-  sCRTsen_t    = CRT_t / TCCRT
-  dCRT_t       = sCRTman_t + sCRTsen_t
-  dNRsomf_t    = dCRT_t * NCRT
-! Stem 
+  Subroutine CNtree(CBT_t,CLT_t,CPT_t,CRT_t,CST_t,fTranT_t,NLT_t)
+  real :: CBT_t(nt), CLT_t(nt), CPT_t(nt), CRT_t(nt), CST_t(nt)
+  real :: fTranT_t(nt), NLT_t(nt)
+! Leaves
+  sCLTman_t    = (thinFRT + prunFRT) * CLT_t
+  sCLTsen_t    = ( CLT_t / (fTranT_t+FTCLminT*(1-fTranT_t)) ) / TCLmaxT
+  dCLT_t       = sCLTman_t + sCLTsen_t
+  dNLT_t       = dCLT_t * NCLT_t
+! Stems 
   dCST_t       = thinFRT * CST_t
   harvCST_t    = dCST_t
   harvNST_t    = dCST_t * NCWT
-! Branch
+! Branches
   sCBTman_t    = (thinFRT + prunFRT) * CBT_t
-  sCBTsen_t    = CBT_t / TCCBT
+  sCBTsen_t    = CBT_t / TCBT
   dCBT_t       = sCBTman_t + sCBTsen_t
   dNBlitt_t    = dCBT_t * NCWT
-! Leaf C
-  sCLTman_t    = (thinFRT + prunFRT) * CLT_t
-  sCLTsen_t    = ( CLT_t / (fTranT_t+FTCCLminT*(1-fTranT_t)) ) / TCCLmaxT
-  dCLT_t       = sCLTman_t + sCLTsen_t
-  dNLT_t       = dCLT_t * NCLT_t
+! Products (fruit)
+  dCPT_t       = CPT_t / TCPTHARV
+  harvCPT_t    = dCPT_t
+  harvNPT_t    = dCPT_t * NCPT
+! Roots  
+  sCRTman_t    = thinFRT * CRT_t
+  sCRTsen_t    = CRT_t / TCRT
+  dCRT_t       = sCRTman_t + sCRTsen_t
+  dNRsomf_t    = dCRT_t * NCRT
   end Subroutine CNtree
   
 end Module tree 

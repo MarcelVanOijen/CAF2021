@@ -30,7 +30,7 @@ Contains
     DayFill = 0
   endwhere
 ! Making the crop sensitive to rainfall in the beginning of the year
-  if ((doy==365).and.(day>DAYSPLNOP)) then
+  if ((doy==365).and.(day>TBEFOREP)) then
     dSENSIT = 1
   else
     dSENSIT = 0
@@ -140,11 +140,11 @@ Contains
   Subroutine Senescence(CR,NL,CL,LAI,fTran)
   real CR(:),NL(:),CL(:),LAI(:),fTran(:) 
   real KdL(nc)
-  KdL  = max(0.,min(1., 1 / ((fTran+FTCCLMIN*(1.-fTran))*TCCLMAX) ))
+  KdL  = max(0.,min(1., 1 / ((fTran+FTCLMIN*(1.-fTran))*TCLMAX) ))
   dNL  = NL  * KdL
   dCL  = CL  * KdL
   dLAI = LAI * KdL
-  dCR  = CR  / TCCR  
+  dCR  = CR  / TCR  
   end Subroutine Senescence  
  
   Subroutine PrunHarv(NL,CL,CW,CP,LAI,DVS)

@@ -84,9 +84,11 @@ outputNames <- c( "Time", "year", "doy",
   
   "C_f"        ,  "gC_f"      , "dC_f"       , "prunC_f"   , "harvCP_f", 
   
-  "CT_f"       , "gCT_f"      , "harvCST_f"  ,
+  "CT_f"       , "gCT_f"      , "harvCPT_f"  , "harvCST_f" ,
   
-  paste0( "CPT_t(",1:nt,")" ) ,
+  paste0( "CPT_t(",1:nt,")" )     ,
+  paste0( "harvCPT_t(",1:nt,")" ) ,
+  paste0( "harvNPT_t(",1:nt,")" ) ,
   
   "DVS(1)"     , "SINKP(1)"   , "SINKPMAXnew(1)", "DayFl(1)", "PARMA(1)",
   "DVS(2)"     , "SINKP(2)"   , "SINKPMAXnew(2)", "DayFl(2)", "PARMA(2)"
@@ -120,10 +122,12 @@ outputUnits <- c( "(y)", "(y)", "(d)",
 
   "(kgC m-2)"                   , rep("(kgC m-2 d-1)",4),
 
-  "(kgC m-2)"                   , rep("(kgC m-2 d-1)",2),
+  "(kgC m-2)"                   , rep("(kgC m-2 d-1)",3),
   
-  rep("(kgC m-2)",nt)           ,
-
+  rep("(kgC m-2)"    ,nt)       ,
+  rep("(kgC m-2 d-1)",nt)       ,
+  rep("(kgN m-2 d-1)",nt)       ,
+  
   rep("(-)",4)                  , "(MJ m-2 d-1)"        ,
   rep("(-)",4)                  , "(MJ m-2 d-1)"
 )

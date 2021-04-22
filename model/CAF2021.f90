@@ -38,11 +38,11 @@ real                        :: y(NDAYS,NOUT)
 integer :: day, doy, i, ic, it, NDAYS, NOUT, year
 
 ! State variables
-real    :: CBT_t(nt), CLT_t(nt), CRT_t(nt), CST_t(nt), CPT_t(nt), NLT_t(nt)
-real    :: CL(nc)=0, CP(nc)=0, CR(nc)=0, CW(nc)=0, NL(nc)=0
-real    :: DVS(nc)=0, LAI(nc)=0, SENSIT(nc), SINKP(nc)
-real    :: CLITT(nc), CSOMF(nc), CSOMS(nc)
-real    :: NLITT(nc), NMIN (nc), NSOMF(nc), NSOMS(nc), WA(nc)
+real    :: CBT_t(nt)  , CLT_t(nt)  , CPT_t (nt)  , CRT_t(nt)  , CST_t(nt), NLT_t(nt)
+real    :: CL   (nc)=0, CP   (nc)=0, CR    (nc)=0, CW   (nc)=0, NL   (nc)=0
+real    :: DVS  (nc)=0, LAI  (nc)=0, SENSIT(nc)  , SINKP(nc)
+real    :: CLITT(nc)  , CSOMF(nc)  , CSOMS (nc)
+real    :: NLITT(nc)  , NMIN (nc)  , NSOMF (nc)  , NSOMS(nc)  , WA   (nc)
 
 ! Non-state variables
 real    :: T_c(nc), GR_c(nc)
@@ -74,7 +74,7 @@ real    :: CsenprunT_f, Csenprun_f  , Rsoil_f    , Crunoff_f
 real    :: Rain_f     , Drain_f     , Runoff_f   , Evap_f
 real    :: Tran_f     , TranT_f     , Rainint_f  , RainintT_f
 real    :: C_f        , gC_f        , dC_f       , prunC_f   , harvCP_f
-real    :: CT_f       , gCT_f       , harvCST_f
+real    :: CT_f       , gCT_f       , harvCPT_f  , harvCST_f
 
 ! PARAMETERS
 call set_params(PARAMS)
@@ -105,6 +105,7 @@ FRTHINT      = CALENDAR_THINT(:,:,3)
 treedens_t = TREEDENS0
 CBT_t      = CBtree0 * treedens_t
 CLT_t      = CLtree0 * treedens_t
+CPT_t      = 0
 CRT_t      = CRtree0 * treedens_t
 CST_t      = CStree0 * treedens_t
 NLT_t      = CLtree0 * treedens_t * NCLMAXT
@@ -177,11 +178,11 @@ do day = 1, NDAYS
   call NPP(fTranT_t,PARintT_t)
   
   call Nsupplytree(At,Atc,CRT_t,NMIN, NsupT_t)
-  call allocation(At,CLT_t,fTranT_t,LAIT_t,NLT_t)
+  call allocation(day,At,CLT_t,fTranT_t,LAIT_t,NLT_t)
   call NdemandOrgans
   call gtreeNupt(NsupT_t)
-  call CNtree(fTranT_t,CRT_t,CST_t,CBT_t,CLT_t,NLT_t)
-  
+  call CNtree(CBT_t,CLT_t,CPT_t,CRT_t,CST_t,fTranT_t,NLT_t)
+
 ! Environment continued
   call DDAYL(doy)
   
@@ -229,9 +230,9 @@ do day = 1, NDAYS
     LAIT_t = CLT_t * SLAT
     CBT_t  = CBT_t + gCBT_t - dCBT_t
     CLT_t  = CLT_t + gCLT_t - dCLT_t
+    CPT_t  = CPT_t + gCPT_t - dCPT_t
     CRT_t  = CRT_t + gCRT_t - dCRT_t
     CST_t  = CST_t + gCST_t - dCST_t
-    CPT_t  = CPT_t + gCPT_t - dCPT_t
     NLT_t  = NLT_t + gNLT_t - dNLT_t
   endwhere
   
@@ -261,15 +262,15 @@ do day = 1, NDAYS
 
 ! Additional output variables
 
-  Cabg_f      = sum(Ac*(CL+CW+CP))            ! kgC  m-2 field
-  CabgT_f     = sum(CLT_t + CST_t + CBT_t)    ! kgC  m-2 field
-  Csoil       = CLITT + CSOMF + CSOMS         ! kgC  m-2 c
-  Csoil_f     = sum(Ac*Csoil)                 ! kgC  m-2 field
-  C           = Cabg_f  + sum(Ac*CR)          ! kgC  m-2 field
-  CT          = CabgT_f + sum(CRT_t)          ! kgC  m-2 field
-  C_f         = sum(Ac*C )                    ! kgC  m-2 field
-  CT_f        = sum(Ac*CT)                    ! kgC  m-2 field
-  harvDM_f_ha = sum(Ac*harvCP) * 1E4/CCONC    ! kgDM ha-1 field
+  Cabg_f      = sum(Ac*(CL + CW + CP))                ! kgC  m-2 field
+  CabgT_f     = sum(CLT_t + CST_t + CBT_t + CPT_t)    ! kgC  m-2 field
+  Csoil       = CLITT + CSOMF + CSOMS                 ! kgC  m-2 c
+  Csoil_f     = sum(Ac*Csoil)                         ! kgC  m-2 field
+  C           = Cabg_f  + sum(Ac*CR)                  ! kgC  m-2 field
+  CT          = CabgT_f + sum(CRT_t)                  ! kgC  m-2 field
+  C_f         = sum(Ac*C )                            ! kgC  m-2 field
+  CT_f        = sum(Ac*CT)                            ! kgC  m-2 field
+  harvDM_f_ha = sum(Ac*harvCP) * 1E4/CCONC            ! kgDM ha-1 field
   if (doy==61) then
   	harvDM_f_hay = 0
   else
@@ -320,8 +321,9 @@ do day = 1, NDAYS
   harvCP_f    = sum(Ac*harvCP)                   ! Harvesting coffee
   
 ! C-balance system (kgC m-2 field d-1):
-! Change in CL+CW+CR+CP + CBT_t+CLT_t+CRT_t+CST_t + CLITT+CSOMF+CSOMS
-  gCT_f       = sum(gCLT_t + gCBT_t + gCRT_t + gCST_t)
+! Change in CL+CW+CR+CP + CLT_t+CST_t+CBT_t+CPT_t+CRT_t + CLITT+CSOMF+CSOMS
+  gCT_f       = sum(gCLT_t + gCST_t + gCBT_t + gCPT_t + gCRT_t)
+  harvCPT_f   = sum(harvCPT_t)
   harvCST_f   = sum(harvCST_t)
   ! gC_f, Crunoff_f, harvCP_f, Rsoil_f
 
@@ -393,20 +395,23 @@ do day = 1, NDAYS
   
   y(day,108  ) = CT_f                 ! kgC  m-2
   y(day,109  ) = gCT_f                ! kgC  m-2 d-1
-  y(day,110  ) = harvCST_f            ! kgC  m-2 d-1
+  y(day,110  ) = harvCPT_f            ! kgC  m-2 d-1
+  y(day,111  ) = harvCST_f            ! kgC  m-2 d-1
   
-  y(day,111:113) = CPT_t              ! kgC  m-2
-
-  y(day,114  ) = DVS(1)               ! -
-  y(day,115  ) = SINKP(1)             ! -
-  y(day,116  ) = SINKPMAXnew(1)       ! -
-  y(day,117  ) = DayFl(1)             ! -
-  y(day,118  ) = PARMA(1)             ! MJ m-2 d-1
-  y(day,119  ) = DVS(2)               ! -
-  y(day,120  ) = SINKP(2)             ! -
-  y(day,121  ) = SINKPMAXnew(2)       ! -
-  y(day,122  ) = DayFl(2)             ! -
-  y(day,123  ) = PARMA(2)             ! MJ m-2 d-1
+  y(day,112:114) = CPT_t              ! kgC  m-2
+  y(day,115:117) = harvCPT_t          ! kgC  m-2 d-1
+  y(day,118:120) = harvNPT_t          ! kgN  m-2 d-1
+  
+  y(day,121  ) = DVS(1)               ! -
+  y(day,122  ) = SINKP(1)             ! -
+  y(day,123  ) = SINKPMAXnew(1)       ! -
+  y(day,124  ) = DayFl(1)             ! -
+  y(day,125  ) = PARMA(1)             ! MJ m-2 d-1
+  y(day,126  ) = DVS(2)               ! -
+  y(day,127  ) = SINKP(2)             ! -
+  y(day,128  ) = SINKPMAXnew(2)       ! -
+  y(day,129  ) = DayFl(2)             ! -
+  y(day,130  ) = PARMA(2)             ! MJ m-2 d-1
 
 ! CALIBRATION VARIABLES IN CAF2021's AND ORIANA's ORIGINAL BC DATA FILES.
 ! ------------------------------------------------------------------------

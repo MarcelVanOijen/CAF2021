@@ -368,7 +368,7 @@ Verify the C-balance of coffee:
 
 ```{r}
   CinNames  <- c("gC_f"   , "gCT_f")
-  CoutNames <- c("Rsoil_f", "Crunoff_f", "harvCP_f", "harvCST_f")
+  CoutNames <- c("Rsoil_f", "Crunoff_f", "harvCP_f", "harvCPT_f", "harvCST_f")
   nCin      <- length(CinNames) ; nCout  <- length(CoutNames)
   i.Cin     <- rep(NA,nCin)     ; i.Cout <- rep(NA,nCout)
   for(i in 1:nCin ) {i.Cin [i] <- which( outputNames==CinNames [i] ) }
@@ -421,6 +421,11 @@ Verify the C-balance of the system (coffee + trees + soil):
                       "DayFl(2)", "PARMA(2)") )
 
   # plot_output( vars=c("Ac(1)","Ac(2)","Ac(3)","Ac(4)","Ac(5)","Ac(6)") )
+```
+
+```{r}
+  plot_output(vars=c( "harvCPT_t(1)", "harvCPT_t(2)", "harvCPT_t(3)",
+                      "harvNPT_t(1)", "harvNPT_t(2)", "harvNPT_t(3)" ))
 ```
 
 
