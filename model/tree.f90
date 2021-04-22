@@ -107,7 +107,7 @@ Contains
     FBT_t  = FWT_t  - FST_t
   FPRT_t   = 1. - FLT_t - FWT_t
     FPT_t  = 0
-    if (day>TBEFOREP) FPT_t = FPRT_t * FPT
+    if (day>TBEFOREPT) FPT_t = FPRT_t * FPT
     FRT_t  = FPRT_t - FPT_t
   end Subroutine allocation
 

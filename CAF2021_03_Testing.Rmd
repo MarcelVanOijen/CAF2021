@@ -424,6 +424,7 @@ Verify the C-balance of the system (coffee + trees + soil):
 ```
 
 ```{r}
+  plot_output(vars=c( "CPT_t(1)", "CPT_t(2)", "CPT_t(3)" ))
   plot_output(vars=c( "harvCPT_t(1)", "harvCPT_t(2)", "harvCPT_t(3)",
                       "harvNPT_t(1)", "harvNPT_t(2)", "harvNPT_t(3)" ))
 ```
