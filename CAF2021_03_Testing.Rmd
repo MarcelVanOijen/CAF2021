@@ -443,8 +443,8 @@ Verify the C-balance of the system (coffee + trees + soil):
   # Table of selected parameters, with values:
 
   NPAR <- length(params) ; names_params <- row.names(df_params)
-  knitr::kable( cbind( c(1:10,"...",NPAR-1,NPAR),
-                       rbind( head(cbind(names_params,params),n=10),
+  knitr::kable( cbind( c(1:(NPAR-2),"...",NPAR-1,NPAR),
+                       rbind( head(cbind(names_params,params),n=(NPAR-2)),
                               c("...","..."),
                               tail(cbind(names_params,params),n= 2,keepnums=F) ) ),
                 col.names=c("","Parameter","Value") )

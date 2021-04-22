@@ -99,11 +99,11 @@ Contains
   fGIN_t   = max(0.,min(1., (NCLT_t/NCLmaxT - fNCLminT)/(1 - fNCLminT) ))
   FLT_t    = FLTmax * fGILAI_t * fGIN_t * fTranT_t
   FWT_t    = (1. - FLT_t) * FWT
-    FST_t  = FWT_t * FST
-    FBT_t  = FWT_t - FST_t
+    FST_t  = FWT_t  * FST
+    FBT_t  = FWT_t  - FST_t
   FPRT_t   = 1. - FLT_t - FWT_t
-    FPT_t  = FPRT_t * 0.
-    FRT_t  = 1. - FLT_t - FBT_t - FST_t - FPT_t
+    FPT_t  = FPRT_t * FPT
+    FRT_t  = FPRT_t - FPT_t
   end Subroutine allocation
 
   Subroutine NdemandOrgans
