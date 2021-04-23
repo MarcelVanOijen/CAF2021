@@ -43,6 +43,7 @@ real    :: CL   (nc)=0, CP   (nc)=0, CR    (nc)=0, CW   (nc)=0, NL   (nc)=0
 real    :: DVS  (nc)=0, LAI  (nc)=0, SENSIT(nc)  , SINKP(nc)
 real    :: CLITT(nc)  , CSOMF(nc)  , CSOMS (nc)
 real    :: NLITT(nc)  , NMIN (nc)  , NSOMF (nc)  , NSOMS(nc)  , WA   (nc)
+real    :: SINKPMAXnew(nc)
 
 ! Non-state variables
 real    :: T_c(nc), GR_c(nc)
@@ -144,7 +145,7 @@ where (Ac>0.)
 endwhere
 SENSIT       = 0
 SINKP        = 0
-SINKPMAXnew  = FSINKPMAX0 * SINKPMAX
+SINKPMAXnew  = 0
 harvDM_f_hay = 0
 PARold       = 0
 
@@ -197,8 +198,8 @@ do day = 1, NDAYS
   call water_flux(Pevap,Ptran,TRANCO,WA, Evap,fTran,RWA,Tran)
   call Nsupply(CR,NMIN,Nsup)
   call abovegroundres(LAI,PARCOFFEE,PARav,PARint)
-  call Phenology(Day,doy,DVS,SENSIT,TCOFFEE,SINKP)
-  call growth(TCOFFEE,PARav,PARint,fTran,SINKP,Nsup,PARMA,DVS,fNgrowth)
+  call Phenology(Day,doy,DVS,SENSIT,TCOFFEE,SINKP,SINKPMAXnew,fNgrowth,fTran)
+  call growth(TCOFFEE,PARav,PARint,fTran,SINKP,Nsup,PARMA,DVS,fNgrowth,SINKPMAXnew)
   call Foliage(fTran)  
   call Senescence(CR,NL,CL,LAI,fTran)
   call PrunHarv(NL,CL,CW,CP,LAI,DVS)
@@ -222,8 +223,9 @@ do day = 1, NDAYS
   CW     = CW     + adjCW   + gCW         - prunCW
   CR     = CR     + adjCR   + gCR  - dCR
   CP     = CP     + adjCP   + gCP         - harvCP
-  SENSIT = SENSIT + dSENSIT
-  DVS    = DVS    + dDVS    - rDVS
+  SENSIT = SENSIT           + gSENSIT
+  DVS    = DVS              + gDVS - dDVS
+  SINKPMAXnew = SINKPMAXnew + gSINKPMAXnew - dSINKPMAXnew
 
 ! Trees (arrays: m-2 field)
   where (At>0.)
@@ -412,6 +414,11 @@ do day = 1, NDAYS
   y(day,128  ) = SINKPMAXnew(2)       ! -
   y(day,129  ) = DayFl(2)             ! -
   y(day,130  ) = PARMA(2)             ! MJ m-2 d-1
+  
+  y(day,131  ) = gSINKPMAXnew(1)      ! d-1
+  y(day,132  ) = gSINKPMAXnew(2)      ! d-1
+  y(day,133  ) = dSINKPMAXnew(1)      ! d-1
+  y(day,134  ) = dSINKPMAXnew(2)      ! d-1
 
 ! CALIBRATION VARIABLES IN CAF2021's AND ORIANA's ORIGINAL BC DATA FILES.
 ! ------------------------------------------------------------------------

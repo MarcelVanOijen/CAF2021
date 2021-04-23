@@ -11,19 +11,20 @@ implicit none
 real :: gCW(nc),gCP(nc),gCL(nc),gNL(nc),gCR(nc),gLAI(nc),gSINKP(nc)
 real :: dCL(nc),dCR(nc),dLAI(nc),dNL(nc),Nupt(nc)
 real :: prunLAI(nc),prunNL(nc),prunCL(nc),prunCW(nc),harvCP(nc),harvNP(nc)
-real :: dSENSIT(nc),dDVS(nc),rDVS(nc),DayFl(nc)
-real :: SINKPMAXnew(nc)
+real :: gSENSIT(nc),gDVS(nc),dDVS(nc),DayFl(nc)
+real :: gSINKPMAXnew(nc), dSINKPMAXnew(nc)
 
 ! ALTERNATIVE FLOWERING CALCULATION
 real :: RAINdoy
 
 Contains
 
-  Subroutine Phenology(day,doy,DVS,SENSIT,TCOFFEE,SINKP)
+  Subroutine Phenology(day,doy,DVS,SENSIT,TCOFFEE,SINKP,SINKPMAXnew,fNgrowth,fTran)
   integer :: day, doy
   integer :: DayFill(nc)
-  real    :: dDVSMAX(nc)
+  real    :: gDVSMAX(nc)
   real    :: DVS(:), SENSIT(:), TCOFFEE(:), SINKP(:)
+  real    :: SINKPMAXnew(:), fNgrowth(nc), fTran(:)
   where ((DVS>0.).and.(DVS<1.))
     DayFill = 1  
   elsewhere
@@ -31,11 +32,11 @@ Contains
   endwhere
 ! Making the crop sensitive to rainfall in the beginning of the year
   if ((doy==365).and.(day>TBEFOREP)) then
-    dSENSIT = 1
+    gSENSIT = 1
   else
-    dSENSIT = 0
+    gSENSIT = 0
   endif
-  where (DayFill==1) dSENSIT = -SENSIT/DELT  
+  where (DayFill==1) gSENSIT = -SENSIT/DELT  
 ! Triggering flowering
   RAINdoy = RAIN * doy
   where ((DVS==0.).and.(RAINdoy>RAINdoyHI))
@@ -43,28 +44,33 @@ Contains
   elsewhere
     DayFl = 0
   endwhere
+  where( DayFl==1)
+    dSINKPMAXnew = SINKPMAXnew / DELT
+  elsewhere
+    dSINKPMAXnew = 0
+  endwhere
 ! Development rate
   where ((DayFill==1).or.(DayFl==1))
-    dDVSMAX = max(0., min(1., (TCOFFEE - TMATB) / TMATT ) )
+    gDVSMAX = max(0., min(1., (TCOFFEE - TMATB) / TMATT ) )
   elsewhere
-    dDVSMAX = 0
+    gDVSMAX = 0
   endwhere
-  where ((doy>360).and.(dDVSMAX>0))
-    dDVS = (1-DVS) / DELT
+  where ((doy>360).and.(gDVSMAX>0))
+    gDVS = (1-DVS) / DELT
   elsewhere
-    dDVS = dDVSMAX
+    gDVS = gDVSMAX
   endwhere
+  gSINKPMAXnew = gDVS * (SINKPMAX - KSINKPMAX * min(SINKP,SINKPMAX)) * (1+fTran) * (1+fNgrowth)
 ! Development-resetting
   where (DVS>=1)
-    rDVS        = DVS / DELT
-	  SINKPMAXnew = SINKPMAX - KSINKPMAX * SINKP
+    dDVS         = DVS          / DELT
   elsewhere
-    rDVS = 0
+    dDVS = 0
   endwhere
   end Subroutine Phenology
 
-  Subroutine Growth(TINP,PARav,PARint,fTran,SINKP,Nsup,PARMA,DVS,fNgrowth)
-  real :: TINP(:),PARav(:),PARint(:),fTran(:),SINKP(:),Nsup(:),DVS(:),fNgrowth(nc)
+  Subroutine Growth(TINP,PARav,PARint,fTran,SINKP,Nsup,PARMA,DVS,fNgrowth,SINKPMAXnew)
+  real :: TINP(:),PARav(:),PARint(:),fTran(:),SINKP(:),Nsup(:),DVS(:),fNgrowth(nc),SINKPMAXnew(:)
   real :: EAVCMX,EAKMC,EAKMO,JMUMOL,KC25,KMC25,KMO25,KOKC,O2,R
   real :: CO2I,VCMAX(nc),KMC(nc),KMO(nc),GAMMAX(nc),PMAX(nc),EFF(nc)
   real :: LUECO2(nc),CCass(nc),gSHsource(nc)
@@ -95,8 +101,7 @@ Contains
   CCass  = LUECO2*0.001*(12./44.) * PARint * fTran
   gSHsource = CCass * YG
   ! Sink strength
-  gSINKP   = (1 - exp(-KSINKPPAR * PARMA)) * DayFl * SINKPMAXnew * fTran * fNgrowth 
-!  gSINKP   = (1 - exp(-KSINKPPAR * PARMA)) * DayFl * SINKPMAXnew
+  gSINKP   = (1 - exp(-KSINKPPAR * PARMA)) * DayFl * SINKPMAXnew
   SINKSUM  = SINKL + SINKW + SINKR * (2-fTran) + SINKP * min(1.,2*DVS)
   FCL      = SINKL                 / SINKSUM
   FCW      = SINKW                 / SINKSUM
