@@ -421,6 +421,8 @@ The carbon in coffee plants is distributed between roots (CR), woody plant parts
   # source("initialisation/initialise_CAF2021_Turrialba_04_E_BO.R")
   source("initialisation/initialise_CAF2021_Turrialba_15_CE_AC.R")
 
+  # params[names_params=="TCST(3)"] <- 365
+
   output <- run_model()
 
   par( mfrow=c(2,2) )
@@ -462,7 +464,7 @@ The carbon in coffee plants is distributed between roots (CR), woody plant parts
             legend=c("+ CPT: Fruits",
                      "+ CLT: Leaves",
                      "+ CBT: Branches",
-                     "+ CBT: Stems",
+                     "+ CST: Stems",
                      "   CRT: Roots" ) )
   }
 ```
