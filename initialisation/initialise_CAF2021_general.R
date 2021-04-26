@@ -91,7 +91,11 @@ outputNames <- c( "Time", "year", "doy",
   paste0( "harvNPT_t(",1:nt,")" ) ,
   
   "DVS(1)"     , "SINKP(1)"   , "SINKPMAXnew(1)", "DayFl(1)", "PARMA(1)",
-  "DVS(2)"     , "SINKP(2)"   , "SINKPMAXnew(2)", "DayFl(2)", "PARMA(2)"
+  "DVS(2)"     , "SINKP(2)"   , "SINKPMAXnew(2)", "DayFl(2)", "PARMA(2)",
+  
+  "CR_f"       , "CW_f"       , "CL_f"          , "CP_f"    ,
+  paste0( "CRT_t(",1:nt,")" ) , paste0( "CBT_t(",1:nt,")" ) ,
+  paste0( "CLT_t(",1:nt,")" )
 )
 
 outputUnits <- c( "(y)", "(y)", "(d)",
@@ -129,7 +133,11 @@ outputUnits <- c( "(y)", "(y)", "(d)",
   rep("(kgN m-2 d-1)",nt)       ,
   
   rep("(-)",4)                  , "(MJ m-2 d-1)"        ,
-  rep("(-)",4)                  , "(MJ m-2 d-1)"
+  rep("(-)",4)                  , "(MJ m-2 d-1)"        ,
+  
+  rep("(kgC m-2)",4)            ,
+  rep("(kgC m-2)",nt)           , rep("(kgC m-2)",nt)   ,
+  rep("(kgC m-2)",nt)
 )
 
 NOUT <- as.integer( length(outputNames) )

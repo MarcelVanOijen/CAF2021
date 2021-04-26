@@ -62,74 +62,75 @@ NCRT       = pa( 47) ! (kg N kg-1 C)     : Gs: 0.035
 NCWT       = pa( 48) ! (kg N kg-1 C)     : branches: 0.02-0.03, stem (Egran): 0.003
 SHADEPROJ  = pa( 49) ! (m2 m-2)          :
 TBEFOREPT	 = pa( 50) ! (d)               !
-TCBT       = pa( 51) ! (d)               : Gs: 1000, Ca: 7300
-TCLMAXT    = pa( 52) ! (d)               : Ca: 730, Ep: 81+-15, Gs: 100
-TCPTHARV   = pa( 53) !
-TCRT       = pa( 54) ! (d)               : Trop. trees: 3650, Ep: 5200, Ca: 7300
-TDIFFMAX   = pa( 55) ! (degC)            : Ed: 1.5-1.9, Ijin: 3.9, Ti: 2.4-4
-TOPTT      = pa( 56) ! (degC)            :
-TRANCOT    = pa( 57) ! (mm d-1)          :
-TTOLT      = pa( 58) ! (degC)            :
-WOODDENS   = pa( 59) ! (kg C m-3)        : Ca: 215(180-235), Ed: 250(205-315), Ep: 125(115-155), Gs: 225(175-270), Ti: 185(160-200)
+TCLMAXT    = pa( 51) ! (d)               : Ca: 730, Ep: 81+-15, Gs: 100
+TCPTHARV   = pa( 52) !
+TCRT       = pa( 53) ! (d)               : Trop. trees: 3650, Ep: 5200, Ca: 7300
+TDIFFMAX   = pa( 54) ! (degC)            : Ed: 1.5-1.9, Ijin: 3.9, Ti: 2.4-4
+TOPTT      = pa( 55) ! (degC)            :
+TRANCOT    = pa( 56) ! (mm d-1)          :
+TTOLT      = pa( 57) ! (degC)            :
+WOODDENS   = pa( 58) ! (kg C m-3)        : Ca: 215(180-235), Ed: 250(205-315), Ep: 125(115-155), Gs: 225(175-270), Ti: 185(160-200)
 
 !! SOIL
 ! Initial constants
-CLITT0     = pa( 60) ! (kg C m-2)        : Egran: 0.225
-CNLITT0    = pa( 61) ! (kg C kg-1 N)     : Acaciamangium: 19-30, Egran: 31-56, Ep: 12(11-20), Gs: 10-20, Iedul: 14-19
-CNSOMF0    = pa( 62) ! (kg C kg-1 N)     : SOM: 9-14
-CNSOMS0    = pa( 63) ! (kg C kg-1 N)     : SOM: 9-14
-CSOM0      = pa( 64) ! (kg C m-2)        : Variation 50-200%
-FCSOMF0    = pa( 65) ! (-)               : 0.50-0.75
-NMIN0      = pa( 66) ! (kg N m-2)        :
+CLITT0     = pa( 59) ! (kg C m-2)        : Egran: 0.225
+CNLITT0    = pa( 60) ! (kg C kg-1 N)     : Acaciamangium: 19-30, Egran: 31-56, Ep: 12(11-20), Gs: 10-20, Iedul: 14-19
+CNSOMF0    = pa( 61) ! (kg C kg-1 N)     : SOM: 9-14
+CNSOMS0    = pa( 62) ! (kg C kg-1 N)     : SOM: 9-14
+CSOM0      = pa( 63) ! (kg C m-2)        : Variation 50-200%
+FCSOMF0    = pa( 64) ! (-)               : 0.50-0.75
+NMIN0      = pa( 65) ! (kg N m-2)        :
 ! Parameters
-FLITTSOMF  = pa( 67) ! (kg kg-1)         :
-FSOMFSOMS  = pa( 68) ! (kg kg-1)         :
-FWCAD      = pa( 69) ! (-)               : 
-FWCFC      = pa( 70) ! (-)               : 0.65
-FWCWET     = pa( 71) ! (-)               : 0.87
-FWCWP      = pa( 72) ! (-)               : 0.41
-KNEMIT     = pa( 73) ! (kg N kg-1 N d-1) :
-KRUNOFF    = pa( 74)
-RNLEACH    = pa( 75) ! (kg N kg-1 N)     :
-ROOTD      = pa( 76) ! (m)               :
-RRUNBULK   = pa( 77)
-SLOPE      = pa( 78)
-TCLITT     = pa( 79) ! (d)               : CAF: 79, Coffee: ~50, Ep: 80(78-104), Euc: "slow", Gs: 60(33-70), Inga: 388(285-6000+)
-TCSOMF     = pa( 80) ! (d)               : TROP. AFS: 6000-12000
-TCSOMS     = pa( 81) ! (d)               : TROP. AFS: 18000-36500
-WCST       = pa( 82) ! (m3 m-3)          : 0.633(0.62-0.66)
+FLITTSOMF  = pa( 66) ! (kg kg-1)         :
+FSOMFSOMS  = pa( 67) ! (kg kg-1)         :
+FWCAD      = pa( 68) ! (-)               : 
+FWCFC      = pa( 69) ! (-)               : 0.65
+FWCWET     = pa( 70) ! (-)               : 0.87
+FWCWP      = pa( 71) ! (-)               : 0.41
+KNEMIT     = pa( 72) ! (kg N kg-1 N d-1) :
+KRUNOFF    = pa( 73)
+RNLEACH    = pa( 74) ! (kg N kg-1 N)     :
+ROOTD      = pa( 75) ! (m)               :
+RRUNBULK   = pa( 76)
+SLOPE      = pa( 77)
+TCLITT     = pa( 78) ! (d)               : CAF: 79, Coffee: ~50, Ep: 80(78-104), Euc: "slow", Gs: 60(33-70), Inga: 388(285-6000+)
+TCSOMF     = pa( 79) ! (d)               : TROP. AFS: 6000-12000
+TCSOMS     = pa( 80) ! (d)               : TROP. AFS: 18000-36500
+WCST       = pa( 81) ! (m3 m-3)          : 0.633(0.62-0.66)
 
 !! ATMOSPHERE
-CO2A       = pa( 83)
+CO2A       = pa( 82)
 
 !! LOCATION
-LAT        = pa( 84)
+LAT        = pa( 83)
 
 !! MULTIPLIERS FOR SENSITIVITY ANALYSIS
-IOMULT     = pa( 85)
-NFERTMULT  = pa( 86)
-RAINMULT   = pa( 87)
-TPLUS      = pa( 88)
+IOMULT     = pa( 84)
+NFERTMULT  = pa( 85)
+RAINMULT   = pa( 86)
+TPLUS      = pa( 87)
 
 !! COFFEE BIENNIALITY
-FSINKPMAX0 = pa( 89)
-KSINKPMAX  = pa( 90)
+FSINKPMAX0 = pa( 88)
+KSINKPMAX  = pa( 89)
 
 !! TREES: SPECIES-SPECIFIC PARAMETERS
-FLTMAX     = pa( 91: 93) ! (kg C kg-1 C)
-FPT        = pa( 94: 96) ! (kg C kg-1 C)
-FST        = pa( 97: 99) ! (kg C kg-1 C)
-FWT        = pa(100:102) ! (kg C kg-1 C)
-KAC        = pa(103:105) ! (m2)
-KACEXP     = pa(106:108) ! (-)
-KH         = pa(109:111) ! (m)
-KHEXP      = pa(112:114) ! (-)
-KNFIX      = pa(115:117) ! (kg N kg-1 C)
-LAIMAXT    = pa(118:120) ! (m2 m-2)
-LUEMAX     = pa(121:123) ! (kg C MJ-1 PAR)
-NCLMAXT    = pa(124:126) ! (kg N kg-1 C)
-SLAT       = pa(127:129) ! (m2 kg-1 C)\
-TREEDENS0  = pa(130:132) ! (m-2)
+FLTMAX     = pa( 90: 92) ! (kg C kg-1 C)
+FPT        = pa( 93: 95) ! (kg C kg-1 C)
+FST        = pa( 96: 98) ! (kg C kg-1 C)
+FWT        = pa( 99:101) ! (kg C kg-1 C)
+KAC        = pa(102:104) ! (m2)
+KACEXP     = pa(105:107) ! (-)
+KH         = pa(108:110) ! (m)
+KHEXP      = pa(111:113) ! (-)
+KNFIX      = pa(114:116) ! (kg N kg-1 C)
+LAIMAXT    = pa(117:119) ! (m2 m-2)
+LUEMAX     = pa(120:122) ! (kg C MJ-1 PAR)
+NCLMAXT    = pa(123:125) ! (kg N kg-1 C)
+SLAT       = pa(126:128) ! (m2 kg-1 C)
+TCBT       = pa(129:131) ! (d)
+TCST       = pa(132:134) ! (d)
+TREEDENS0  = pa(135:137) ! (m-2)
 
 ! KAC     (1) Ep   : 15.8
 ! KACEXP  (1) Ep   : 0.55
@@ -141,5 +142,7 @@ TREEDENS0  = pa(130:132) ! (m-2)
 ! SLAT    (1) Ep   : 38(31-58)        , Gs: 40-50
 !         (2) Id   : 31-47
 !         (3) Eglob: 13-27            , Egran: 24                , Enit: 5-12
+! TCBT    (1) Gs   : 1000
+!         (3) Ca   : 7300
 
 end Subroutine set_params

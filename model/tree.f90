@@ -36,12 +36,12 @@ real :: NfixT_t  (nt)=0
 
 ! CNtree
 real :: dCBT_t   (nt)=0, dCLT_t(nt)=0, dCPT_t(nt)=0, dCRT_t(nt)=0, dCST_t(nt)=0
-real :: dNBlitt_t(nt)=0, dNLT_t(nt)=0, dNPT_t(nt)=0, dNRsomf_t(nt)=0
+real :: dNBlitt_t(nt)=0, dNSlitt_t(nt)=0, dNLT_t(nt)=0, dNPT_t(nt)=0, dNRsomf_t(nt)=0
 real :: harvCPT_t(nt)=0, harvNPT_t(nt)=0
 real :: harvCST_t(nt)=0, harvNST_t(nt)=0
 real :: NCLT_t   (nt)
-real :: sCBTman_t(nt)=0, sCLTman_t(nt)=0, sCRTman_t(nt)=0
-real :: sCBTsen_t(nt)=0, sCLTsen_t(nt)=0, sCRTsen_t(nt)=0
+real :: sCBTman_t(nt)=0, sCLTman_t(nt)=0, sCRTman_t(nt)=0, sCSTman_t(nt)=0
+real :: sCBTsen_t(nt)=0, sCLTsen_t(nt)=0, sCRTsen_t(nt)=0, sCSTsen_t(nt)=0
 
 Contains
 
@@ -157,9 +157,12 @@ Contains
   dCLT_t       = sCLTman_t + sCLTsen_t
   dNLT_t       = dCLT_t * NCLT_t
 ! Stems 
-  dCST_t       = thinFRT * CST_t
-  harvCST_t    = dCST_t
-  harvNST_t    = dCST_t * NCWT
+  sCSTman_t    = thinFRT * CST_t
+  sCSTsen_t    = CST_t / TCST
+  dCST_t       = sCSTman_t + sCSTsen_t
+  harvCST_t    = sCSTman_t
+  harvNST_t    = sCSTman_t * NCWT
+  dNSlitt_t    = sCSTsen_t * NCWT
 ! Branches
   sCBTman_t    = (thinFRT + prunFRT) * CBT_t
   sCBTsen_t    = CBT_t / TCBT

@@ -412,6 +412,63 @@ Verify the C-balance of the system (coffee + trees + soil):
        "\nInputs minus outputs : ", CinMinusCout )
 ```
 
+## C-distribution within coffee and within each tree species
+
+The carbon in coffee plants is distributed between roots (CR), woody plant parts (CW), leaves (CL) and beans (CP). Their progression over time is shown in Fig. \ref{fig:OutputsCarbonCoffee}.
+
+```{r OutputsCarbonCoffee, echo=F, fig.height=5, fig.cap="\\label{fig:OutputsLCC}Cumulative time series for the carbon in coffee"}
+  source("initialisation/initialise_CAF2021_Turrialba_01_E_AC.R")
+  # source("initialisation/initialise_CAF2021_Turrialba_04_E_BO.R")
+  source("initialisation/initialise_CAF2021_Turrialba_15_CE_AC.R")
+
+  output <- run_model()
+
+  par( mfrow=c(2,2) )
+  Time <- output[,1]
+  
+  i.CP <- which( outputNames=="CP_f" ) ; CP <- output[,i.CP]
+  i.CL <- which( outputNames=="CL_f" ) ; CL <- output[,i.CL]
+  i.CW <- which( outputNames=="CW_f" ) ; CW <- output[,i.CW]
+  i.CR <- which( outputNames=="CR_f" ) ; CR <- output[,i.CR]
+  plot( Time, CR+CW+CL+CP,
+        main="Coffee-carbon (kg C m-2)",
+        xlab="", ylab="", type="l", ylim=c(0,max(CR+CW+CL+CP)) )
+  points( Time, CR+CW+CL, type="l", col="yellow" )
+  points( Time, CR+CW   , type="l", col="green" )
+  points( Time, CR      , type="l", col="red" )
+  legend( "topright", col=c("black","yellow","green","red"), cex=0.7, lty=1,
+          legend=c("+ CP: Beans",
+                   "+ CL: Leaves",
+                   "+ CW: Wood",
+                   "   CR: Roots" ) )
+
+  i.CPT <- sapply( 1:3, function(i){which( outputNames==paste0("CPT_t(",i,")"))} )
+  i.CLT <- sapply( 1:3, function(i){which( outputNames==paste0("CLT_t(",i,")"))} )
+  i.CBT <- sapply( 1:3, function(i){which( outputNames==paste0("CBT_t(",i,")"))} )
+  i.CST <- sapply( 1:3, function(i){which( outputNames==paste0("CST_t(",i,")"))} )
+  i.CRT <- sapply( 1:3, function(i){which( outputNames==paste0("CRT_t(",i,")"))} )
+
+  for(it in 1:3){
+    CPT <- output[,i.CPT[it]] ; CLT <- output[,i.CLT[it]] ; CBT <- output[,i.CBT[it]]
+    CST <- output[,i.CST[it]] ; CRT <- output[,i.CRT[it]]
+    plot( Time, CRT+CST+CBT+CLT+CPT,
+          main=paste0("Carbon in tree species ",it," (kg C m-2)"),
+          xlab="", ylab="", type="l" )
+    points( Time, CRT+CST+CBT+CLT, type="l", col="yellow" )
+    points( Time, CRT+CST+CBT    , type="l", col="green"  )
+    points( Time, CRT+CST        , type="l", col="red"    )
+    points( Time, CRT            , type="l", col="blue"   )
+    legend( "topleft", col=c("black","yellow","green","red","blue"), cex=0.7, lty=1,
+            legend=c("+ CPT: Fruits",
+                     "+ CLT: Leaves",
+                     "+ CBT: Branches",
+                     "+ CBT: Stems",
+                     "   CRT: Roots" ) )
+  }
+```
+
+
+
 ## Checking bienniality and tree production of fruit (CPT, NPT)
 
 ```{r}
@@ -439,7 +496,7 @@ Run this code immediately after carrying a BC
   # After running, for example, "CAF2021_04_BC.Rmd"
   # source('BC/BC_averageYields.R')
 
-  s <- 18 # Choose a site from those for which the BC was carried out
+  s <- 1 # Choose a site from those for which the BC was carried out
   params_BC_MAP   <- scparMAP_BC  * sc
   params          <- list_params        [[s]] ; matrix_weather <- list_matrix_weather[[s]]
   calendar_fert   <- list_calendar_fert [[s]] ; calendar_prunC <- list_calendar_prunC[[s]] 
@@ -457,10 +514,10 @@ Run this code immediately after carrying a BC
                vars       =c( "fTran(1)", "fNgrowth(1)",
                               "DVS(1)"  , "SINKP(1)" , "SINKPMAXnew(1)",
                               "DayFl(1)", "PARMA(1)" , "harvDM_f_hay" ) )
-  # plot_output( list_output=list(outputMAP),
-  #              vars       =c( "fTran(2)", "fNgrowth(2)",
-  #                             "DVS(2)"  , "SINKP(2)" , "SINKPMAXnew(2)",
-  #                             "DayFl(2)", "PARMA(2)" , "harvDM_f_hay" ) )
+  plot_output( list_output=list(outputMAP),
+               vars       =c( "fTran(2)", "fNgrowth(2)",
+                              "DVS(2)"  , "SINKP(2)" , "SINKPMAXnew(2)",
+                              "DayFl(2)", "PARMA(2)" , "harvDM_f_hay" ) )
 ```
 
 
