@@ -18,7 +18,7 @@ geometry: margin=1in
 ---
 
 ```{r, include=FALSE}
-  knitr::opts_chunk$set(echo=TRUE,results="asis",warning=FALSE,message=FALSE)
+  knitr::opts_chunk$set(echo=F,results="asis",warning=FALSE,message=FALSE)
 ```
 
 # Test with 2 tree spp.
@@ -201,7 +201,7 @@ geometry: margin=1in
     barplot( as.matrix(NinMean),
              beside=F, ylim=c(0,y.max), col=1:length(leg),
              legend.text=leg,
-             args.legend=list( title="Inputs (kg ha-1 y-1)", cex=0.9,
+             args.legend=list( title="Inputs (kg ha-1 y-1)", cex=0.8,
                                x="bottom", bg="white", inset=c(-0.3,0) ) )
     title(title1,adj=1)
     par(mar=c(3,0,3,3))
@@ -210,7 +210,7 @@ geometry: margin=1in
              yaxt="n",
              beside=F, ylim=c(0,y.max), col=1:length(leg),
              legend.text=leg,
-             args.legend=list( title="Outputs (kg ha-1 y-1)", cex=0.9,
+             args.legend=list( title="Outputs (kg ha-1 y-1)", cex=0.8,
                                x="bottom", bg="white", inset=c(-0.3,0) ) )
     title(title2,adj=0)
     if(verify) {
@@ -272,7 +272,7 @@ geometry: margin=1in
     barplot( as.matrix(CinMean),
              beside=F, ylim=c(0,y.max), col=1:length(leg),
              legend.text=leg,
-             args.legend=list( title="Inputs (kg ha-1 y-1)", cex=0.9,
+             args.legend=list( title="Inputs (kg ha-1 y-1)", cex=0.8,
                                x="bottom", bg="white", inset=c(-0.3,0) ) )
     title(title1,adj=1)
     par(mar=c(3,0,3,3))
@@ -281,7 +281,7 @@ geometry: margin=1in
              yaxt="n",
              beside=F, ylim=c(0,y.max), col=1:length(leg),
              legend.text=leg,
-             args.legend=list( title="Outputs (kg ha-1 y-1)", cex=0.9,
+             args.legend=list( title="Outputs (kg ha-1 y-1)", cex=0.8,
                                x="bottom", bg="white", inset=c(-0.3,0) ) )
     title(title2,adj=0)
     if(verify) {
@@ -344,7 +344,7 @@ geometry: margin=1in
     barplot( as.matrix(WinMean),
              beside=F, ylim=c(0,y.max), col=1:length(leg),
              legend.text=leg,
-             args.legend=list( title="Inputs (mm d-1)", cex=0.9,
+             args.legend=list( title="Inputs (mm d-1)", cex=0.8,
                                x="bottom", bg="white", inset=c(-0.3,0) ) )
     title(title1,adj=1)
     par(mar=c(3,0,3,3))
@@ -353,7 +353,7 @@ geometry: margin=1in
              yaxt="n",
              beside=F, ylim=c(0,y.max), col=1:length(leg),
              legend.text=leg,
-             args.legend=list( title="Outputs (mm d-1)", cex=0.9,
+             args.legend=list( title="Outputs (mm d-1)", cex=0.8,
                                x="bottom", bg="white", inset=c(-0.3,0) ) )
     title(title2,adj=0)
     if(verify) {
@@ -415,7 +415,7 @@ geometry: margin=1in
     barplot( CinMean,
              beside=F, ylim=c(0,y.max), col=1:length(leg),
              legend.text=leg,
-             args.legend=list( title="Inputs (kg ha-1 y-1)", cex=0.9,
+             args.legend=list( title="Inputs (kg ha-1 y-1)", cex=0.8,
                                x="bottom", bg="white", inset=c(-0.3,0) ) )
     title(title1,adj=1)
     par(mar=c(3,0,3,3))
@@ -424,7 +424,7 @@ geometry: margin=1in
              yaxt="n",
              beside=F, ylim=c(0,y.max), col=1:length(leg),
              legend.text=leg,
-             args.legend=list( title="Outputs (kg ha-1 y-1)", cex=0.9,
+             args.legend=list( title="Outputs (kg ha-1 y-1)", cex=0.8,
                                x="bottom", bg="white", inset=c(-0.3,0) ) )
     title(title2,adj=0)
     if(verify) {
@@ -486,7 +486,7 @@ geometry: margin=1in
     barplot( as.matrix(CinMean),
              beside=F, ylim=c(0,y.max), col=1:length(leg),
              legend.text=leg,
-             args.legend=list( title="Inputs (kg ha-1 y-1)", cex=0.9,
+             args.legend=list( title="Inputs (kg ha-1 y-1)", cex=0.8,
                                x="bottom", bg="white", inset=c(-0.3,0) ) )
     title(title1,adj=1)
     par(mar=c(3,0,3,3))
@@ -495,7 +495,7 @@ geometry: margin=1in
              yaxt="n",
              beside=F, ylim=c(0,y.max), col=1:length(leg),
              legend.text=leg,
-             args.legend=list( title="Outputs (kg ha-1 y-1)", cex=0.9,
+             args.legend=list( title="Outputs (kg ha-1 y-1)", cex=0.8,
                                x="bottom", bg="white", inset=c(-0.3,0) ) )
     title(title2,adj=0)
     if(verify) {
@@ -557,7 +557,7 @@ geometry: margin=1in
 
 The carbon in coffee plants is distributed between roots (CR), woody plant parts (CW), leaves (CL) and beans (CP). Their progression over time is shown in Fig. \ref{fig:OutputsCarbonCoffee}.
 
-```{r OutputsCarbonCoffee, echo=F, fig.height=5, fig.cap="\\label{fig:OutputsLCC}Cumulative time series for the carbon in coffee"}
+```{r OutputsCarbonCoffee, echo=F, fig.height=5, fig.cap="\\label{fig:OutputsCarbonCoffee}Cumulative time series for the carbon in coffee"}
   source("initialisation/initialise_CAF2021_Turrialba_01_E_AC.R")
   # source("initialisation/initialise_CAF2021_Turrialba_04_E_BO.R")
   source("initialisation/initialise_CAF2021_Turrialba_15_CE_AC.R")
@@ -635,7 +635,7 @@ The carbon in coffee plants is distributed between roots (CR), woody plant parts
 
 Run this code immediately after carrying a BC
 
-```{r}
+```{r, eval=F}
   # After running, for example, "CAF2021_04_BC.Rmd"
   # source('BC/BC_averageYields.R')
 
