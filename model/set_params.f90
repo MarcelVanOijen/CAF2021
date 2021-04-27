@@ -2,8 +2,8 @@ Subroutine set_params(pa)
 
 use declare_parameters
 implicit none
-! As long as the total number of parameters stays below 140, the next line need not be changed
-real pa(140)
+! As long as the total number of parameters stays below 150, the next line need not be changed
+real pa(150)
 
 !! COFFEE
 ! Initial constants
@@ -61,76 +61,76 @@ NCPT       = pa( 46) ! (kg N kg-1 C)     :
 NCRT       = pa( 47) ! (kg N kg-1 C)     : Gs: 0.035
 NCWT       = pa( 48) ! (kg N kg-1 C)     : branches: 0.02-0.03, stem (Egran): 0.003
 SHADEPROJ  = pa( 49) ! (m2 m-2)          :
-TBEFOREPT	 = pa( 50) ! (d)               !
-TCLMAXT    = pa( 51) ! (d)               : Ca: 730, Ep: 81+-15, Gs: 100
-TCPTHARV   = pa( 52) !
-TCRT       = pa( 53) ! (d)               : Trop. trees: 3650, Ep: 5200, Ca: 7300
-TDIFFMAX   = pa( 54) ! (degC)            : Ed: 1.5-1.9, Ijin: 3.9, Ti: 2.4-4
-TOPTT      = pa( 55) ! (degC)            :
-TRANCOT    = pa( 56) ! (mm d-1)          :
-TTOLT      = pa( 57) ! (degC)            :
-WOODDENS   = pa( 58) ! (kg C m-3)        : Ca: 215(180-235), Ed: 250(205-315), Ep: 125(115-155), Gs: 225(175-270), Ti: 185(160-200)
+TCLMAXT    = pa( 50) ! (d)               : Ca: 730, Ep: 81+-15, Gs: 100
+TCPTHARV   = pa( 51) !
+TDIFFMAX   = pa( 52) ! (degC)            : Ed: 1.5-1.9, Ijin: 3.9, Ti: 2.4-4
+TOPTT      = pa( 53) ! (degC)            :
+TRANCOT    = pa( 54) ! (mm d-1)          :
+TTOLT      = pa( 55) ! (degC)            :
+WOODDENS   = pa( 56) ! (kg C m-3)        : Ca: 215(180-235), Ed: 250(205-315), Ep: 125(115-155), Gs: 225(175-270), Ti: 185(160-200)
 
 !! SOIL
 ! Initial constants
-CLITT0     = pa( 59) ! (kg C m-2)        : Egran: 0.225
-CNLITT0    = pa( 60) ! (kg C kg-1 N)     : Acaciamangium: 19-30, Egran: 31-56, Ep: 12(11-20), Gs: 10-20, Iedul: 14-19
-CNSOMF0    = pa( 61) ! (kg C kg-1 N)     : SOM: 9-14
-CNSOMS0    = pa( 62) ! (kg C kg-1 N)     : SOM: 9-14
-CSOM0      = pa( 63) ! (kg C m-2)        : Variation 50-200%
-FCSOMF0    = pa( 64) ! (-)               : 0.50-0.75
-NMIN0      = pa( 65) ! (kg N m-2)        :
+CLITT0     = pa( 57) ! (kg C m-2)        : Egran: 0.225
+CNLITT0    = pa( 58) ! (kg C kg-1 N)     : Acaciamangium: 19-30, Egran: 31-56, Ep: 12(11-20), Gs: 10-20, Iedul: 14-19
+CNSOMF0    = pa( 59) ! (kg C kg-1 N)     : SOM: 9-14
+CNSOMS0    = pa( 60) ! (kg C kg-1 N)     : SOM: 9-14
+CSOM0      = pa( 61) ! (kg C m-2)        : Variation 50-200%
+FCSOMF0    = pa( 62) ! (-)               : 0.50-0.75
+NMIN0      = pa( 63) ! (kg N m-2)        :
 ! Parameters
-FLITTSOMF  = pa( 66) ! (kg kg-1)         :
-FSOMFSOMS  = pa( 67) ! (kg kg-1)         :
-FWCAD      = pa( 68) ! (-)               : 
-FWCFC      = pa( 69) ! (-)               : 0.65
-FWCWET     = pa( 70) ! (-)               : 0.87
-FWCWP      = pa( 71) ! (-)               : 0.41
-KNEMIT     = pa( 72) ! (kg N kg-1 N d-1) :
-KRUNOFF    = pa( 73)
-RNLEACH    = pa( 74) ! (kg N kg-1 N)     :
-ROOTD      = pa( 75) ! (m)               :
-RRUNBULK   = pa( 76)
-SLOPE      = pa( 77)
-TCLITT     = pa( 78) ! (d)               : CAF: 79, Coffee: ~50, Ep: 80(78-104), Euc: "slow", Gs: 60(33-70), Inga: 388(285-6000+)
-TCSOMF     = pa( 79) ! (d)               : TROP. AFS: 6000-12000
-TCSOMS     = pa( 80) ! (d)               : TROP. AFS: 18000-36500
-WCST       = pa( 81) ! (m3 m-3)          : 0.633(0.62-0.66)
+FLITTSOMF  = pa( 64) ! (kg kg-1)         :
+FSOMFSOMS  = pa( 65) ! (kg kg-1)         :
+FWCAD      = pa( 66) ! (-)               : 
+FWCFC      = pa( 67) ! (-)               : 0.65
+FWCWET     = pa( 68) ! (-)               : 0.87
+FWCWP      = pa( 69) ! (-)               : 0.41
+KNEMIT     = pa( 70) ! (kg N kg-1 N d-1) :
+KRUNOFF    = pa( 71)
+RNLEACH    = pa( 72) ! (kg N kg-1 N)     :
+ROOTD      = pa( 73) ! (m)               :
+RRUNBULK   = pa( 74)
+SLOPE      = pa( 75)
+TCLITT     = pa( 76) ! (d)               : CAF: 79, Coffee: ~50, Ep: 80(78-104), Euc: "slow", Gs: 60(33-70), Inga: 388(285-6000+)
+TCSOMF     = pa( 77) ! (d)               : TROP. AFS: 6000-12000
+TCSOMS     = pa( 78) ! (d)               : TROP. AFS: 18000-36500
+WCST       = pa( 79) ! (m3 m-3)          : 0.633(0.62-0.66)
 
 !! ATMOSPHERE
-CO2A       = pa( 82)
+CO2A       = pa( 80)
 
 !! LOCATION
-LAT        = pa( 83)
+LAT        = pa( 81)
 
 !! MULTIPLIERS FOR SENSITIVITY ANALYSIS
-IOMULT     = pa( 84)
-NFERTMULT  = pa( 85)
-RAINMULT   = pa( 86)
-TPLUS      = pa( 87)
+IOMULT     = pa( 82)
+NFERTMULT  = pa( 83)
+RAINMULT   = pa( 84)
+TPLUS      = pa( 85)
 
 !! COFFEE BIENNIALITY
-FSINKPMAX0 = pa( 88)
-KSINKPMAX  = pa( 89)
+FSINKPMAX0 = pa( 86)
+KSINKPMAX  = pa( 87)
 
 !! TREES: SPECIES-SPECIFIC PARAMETERS
-FLTMAX     = pa( 90: 92) ! (kg C kg-1 C)
-FPT        = pa( 93: 95) ! (kg C kg-1 C)
-FST        = pa( 96: 98) ! (kg C kg-1 C)
-FWT        = pa( 99:101) ! (kg C kg-1 C)
-KAC        = pa(102:104) ! (m2)
-KACEXP     = pa(105:107) ! (-)
-KH         = pa(108:110) ! (m)
-KHEXP      = pa(111:113) ! (-)
-KNFIX      = pa(114:116) ! (kg N kg-1 C)
-LAIMAXT    = pa(117:119) ! (m2 m-2)
-LUEMAX     = pa(120:122) ! (kg C MJ-1 PAR)
-NCLMAXT    = pa(123:125) ! (kg N kg-1 C)
-SLAT       = pa(126:128) ! (m2 kg-1 C)
-TCBT       = pa(129:131) ! (d)
-TCST       = pa(132:134) ! (d)
-TREEDENS0  = pa(135:137) ! (m-2)
+FLTMAX     = pa( 88: 90) ! (kg C kg-1 C)
+FPT        = pa( 91: 93) ! (kg C kg-1 C)
+FST        = pa( 94: 96) ! (kg C kg-1 C)
+FWT        = pa( 97: 99) ! (kg C kg-1 C)
+KAC        = pa(100:102) ! (m2)
+KACEXP     = pa(103:105) ! (-)
+KH         = pa(106:108) ! (m)
+KHEXP      = pa(109:111) ! (-)
+KNFIX      = pa(112:114) ! (kg N kg-1 C)
+LAIMAXT    = pa(115:117) ! (m2 m-2)
+LUEMAX     = pa(118:120) ! (kg C MJ-1 PAR)
+NCLMAXT    = pa(121:123) ! (kg N kg-1 C)
+SLAT       = pa(124:126) ! (m2 kg-1 C)
+TBEFOREPT	 = pa(127:129) ! (d)
+TCBT       = pa(130:132) ! (d)
+TCRT       = pa(133:135) ! (d)
+TCST       = pa(136:138) ! (d)
+TREEDENS0  = pa(139:141) ! (m-2)
 
 ! KAC     (1) Ep   : 15.8
 ! KACEXP  (1) Ep   : 0.55
@@ -143,6 +143,9 @@ TREEDENS0  = pa(135:137) ! (m-2)
 !         (2) Id   : 31-47
 !         (3) Eglob: 13-27            , Egran: 24                , Enit: 5-12
 ! TCBT    (1) Gs   : 1000
+!         (3) Ca   : 7300
+! TCRT    (-) Trop. trees: 3650
+!         (1) Ep   : 5200
 !         (3) Ca   : 7300
 
 end Subroutine set_params

@@ -101,13 +101,13 @@ Contains
     NCLT_t = 0.     
   endwhere
   fGIN_t   = max(0.,min(1., (NCLT_t/NCLmaxT - fNCLminT)/(1 - fNCLminT) ))
-  FLT_t    = FLTmax * fGILAI_t * fGIN_t * fTranT_t
+  FLT_t    = FLTMAX * fGILAI_t * fGIN_t * fTranT_t
   FWT_t    = (1. - FLT_t) * FWT
     FST_t  = FWT_t  * FST
     FBT_t  = FWT_t  - FST_t
   FPRT_t   = 1. - FLT_t - FWT_t
     FPT_t  = 0
-    if (day>TBEFOREPT) FPT_t = FPRT_t * FPT
+    where (day>TBEFOREPT) FPT_t = FPRT_t * FPT
     FRT_t  = FPRT_t - FPT_t
   end Subroutine allocation
 

@@ -367,6 +367,9 @@ Only moderate precision is required for banana and avocado modelling (as discuss
 - How to stop height growth from continuing for ever?
     - Set maximum to CStree. For example CStreeMAX = 10 kg (check fraction of biomass in mature banana plants)?
     - Or: HMAX?
+    
+- Costa Rica (https://www.bananalink.org.uk/partners/costa-rica/): 
+51,800 hectares under banana producing 2.27 million metric tonnes = 44000 kg ha-1.
 
 \clearpage
 

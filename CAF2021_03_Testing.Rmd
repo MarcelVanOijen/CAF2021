@@ -15,6 +15,8 @@ output:
   html_document: default
 fontsize: 11pt
 geometry: margin=1in
+csl: environmental-modelling-and-software.csl
+bibliography: [Avocado.bib,Banana.bib,MvO.bib]
 ---
 
 ```{r, include=FALSE}
@@ -190,8 +192,8 @@ geometry: margin=1in
     i.Nin     <- rep(NA,nNin)     ; i.Nout <- rep(NA,nNout)
     for(i in 1:nNin ) {i.Nin [i] <- which( outputNames==NinNames [i] ) }
     for(i in 1:nNout) {i.Nout[i] <- which( outputNames==NoutNames[i] ) }
-    NinMean   <- colMeans(output[,i.Nin])  * 1.e4 * 365 # kgN ha-1 y-1
-    NoutMean  <- colMeans(output[,i.Nout]) * 1.e4 * 365 # kgN ha-1 y-1
+    NinMean   <- colMeans(sim[,i.Nin])  * 1.e4 * 365 # kgN ha-1 y-1
+    NoutMean  <- colMeans(sim[,i.Nout]) * 1.e4 * 365 # kgN ha-1 y-1
     if(is.null(ymax)) {
       y.max <- max( sum(NinMean), sum(NoutMean) )
     } else {
@@ -214,10 +216,10 @@ geometry: margin=1in
                                x="bottom", bg="white", inset=c(-0.3,0) ) )
     title(title2,adj=0)
     if(verify) {
-      Nsoil_f      <- output[ , which( outputNames=="Nsoil_f") ] # kgN m-2
+      Nsoil_f      <- sim[ , which( outputNames=="Nsoil_f") ] # kgN m-2
       D_Nsoil_f    <- Nsoil_f[NDAYS] - Nsoil_f[1]                # kgN m-2
-      NinSum       <- colSums(output[2:NDAYS,i.Nin ])            # kgN m-2
-      NoutSum      <- colSums(output[2:NDAYS,i.Nout])            # kgN m-2
+      NinSum       <- colSums(sim[2:NDAYS,i.Nin ])            # kgN m-2
+      NoutSum      <- colSums(sim[2:NDAYS,i.Nout])            # kgN m-2
       NinMinusNout <- sum(NinSum) - sum(NoutSum)
       cat( "VERIFYING THE N-BALANCE FOR THE SOIL (kgN m-2):",
            "\nState variable change: ", D_Nsoil_f,
@@ -261,8 +263,8 @@ geometry: margin=1in
     i.Cin     <- rep(NA,nCin)     ; i.Cout <- rep(NA,nCout)
     for(i in 1:nCin ) {i.Cin [i] <- which( outputNames==CinNames [i] ) }
     for(i in 1:nCout) {i.Cout[i] <- which( outputNames==CoutNames[i] ) }
-    CinMean   <- colMeans(output[,i.Cin])  * 1.e4 * 365 # kgC ha-1 y-1
-    CoutMean  <- colMeans(output[,i.Cout]) * 1.e4 * 365 # kgC ha-1 y-1
+    CinMean   <- colMeans(sim[,i.Cin])  * 1.e4 * 365 # kgC ha-1 y-1
+    CoutMean  <- colMeans(sim[,i.Cout]) * 1.e4 * 365 # kgC ha-1 y-1
     if(is.null(ymax)) {
       y.max <- max( sum(CinMean), sum(CoutMean) )
     } else {
@@ -285,10 +287,10 @@ geometry: margin=1in
                                x="bottom", bg="white", inset=c(-0.3,0) ) )
     title(title2,adj=0)
     if(verify) {
-      Csoil_f   <- output[ , which( outputNames=="Csoil_f") ] # kgC m-2 
+      Csoil_f   <- sim[ , which( outputNames=="Csoil_f") ] # kgC m-2 
       D_Csoil_f <- Csoil_f[NDAYS] - Csoil_f[1]                # kgC m-2
-      CinSum        <- colSums(output[2:NDAYS,i.Cin ])        # kgC m-2
-      CoutSum       <- colSums(output[2:NDAYS,i.Cout])        # kgC m-2
+      CinSum        <- colSums(sim[2:NDAYS,i.Cin ])        # kgC m-2
+      CoutSum       <- colSums(sim[2:NDAYS,i.Cout])        # kgC m-2
       CinMinusCout  <- sum(CinSum) - sum(CoutSum)
       cat( "VERIFYING THE C-BALANCE FOR THE SOIL (kgC m-2):",
            "\nState variable change: ", D_Csoil_f,
@@ -333,8 +335,8 @@ geometry: margin=1in
     i.Win     <- rep(NA,nWin)     ; i.Wout <- rep(NA,nWout)
     for(i in 1:nWin ) {i.Win [i] <- which( outputNames==WinNames [i] ) }
     for(i in 1:nWout) {i.Wout[i] <- which( outputNames==WoutNames[i] ) }
-    WinMean   <-    mean (output[,i.Win])  # mm d-1
-    WoutMean  <- colMeans(output[,i.Wout]) # mm d-1
+    WinMean   <-    mean (sim[,i.Win])  # mm d-1
+    WoutMean  <- colMeans(sim[,i.Wout]) # mm d-1
     if(is.null(ymax)) {
       y.max <- max( sum(WinMean), sum(WoutMean) )
     } else {
@@ -357,10 +359,10 @@ geometry: margin=1in
                                x="bottom", bg="white", inset=c(-0.3,0) ) )
     title(title2,adj=0)
     if(verify) {
-      WA_f   <- output[ , which( outputNames=="WA_f") ] # mm
+      WA_f   <- sim[ , which( outputNames=="WA_f") ] # mm
       D_WA_f <- WA_f[NDAYS] - WA_f[1]                   # mm
-      WinSum        <-    sum (output[2:NDAYS,i.Win ])  # mm
-      WoutSum       <- colSums(output[2:NDAYS,i.Wout])  # mm
+      WinSum        <-    sum (sim[2:NDAYS,i.Win ])  # mm
+      WoutSum       <- colSums(sim[2:NDAYS,i.Wout])  # mm
       WinMinusWout  <- sum(WinSum) - sum(WoutSum)
       cat( "VERIFYING THE H2O-BALANCE FOR THE SOIL (mm):",
            "\nState variable change: ", D_WA_f,
@@ -404,8 +406,8 @@ geometry: margin=1in
     i.Cin     <- rep(NA,nCin)     ; i.Cout <- rep(NA,nCout)
     for(i in 1:nCin ) {i.Cin [i] <- which( outputNames==CinNames [i] ) }
     for(i in 1:nCout) {i.Cout[i] <- which( outputNames==CoutNames[i] ) }
-    CinMean   <-    mean (output[,i.Cin])  * 1.e4 * 365 # kgC ha-1 y-1
-    CoutMean  <- colMeans(output[,i.Cout]) * 1.e4 * 365 # kgC ha-1 y-1
+    CinMean   <-    mean (sim[,i.Cin])  * 1.e4 * 365 # kgC ha-1 y-1
+    CoutMean  <- colMeans(sim[,i.Cout]) * 1.e4 * 365 # kgC ha-1 y-1
     if(is.null(ymax)) {
       y.max <- max( sum(CinMean), sum(CoutMean) )
     } else {
@@ -428,10 +430,10 @@ geometry: margin=1in
                                x="bottom", bg="white", inset=c(-0.3,0) ) )
     title(title2,adj=0)
     if(verify) {
-      C_f          <- output[ , which( outputNames=="C_f" ) ] # kgC m-2
+      C_f          <- sim[ , which( outputNames=="C_f" ) ] # kgC m-2
       D_C_f        <- C_f[NDAYS] - C_f[1]                     # kgC m-2
-      CinSum       <-    sum (output[2:NDAYS,i.Cin ])         # kgC m-2
-      CoutSum      <- colSums(output[2:NDAYS,i.Cout])         # kgC m-2
+      CinSum       <-    sum (sim[2:NDAYS,i.Cin ])         # kgC m-2
+      CoutSum      <- colSums(sim[2:NDAYS,i.Cout])         # kgC m-2
       CinMinusCout <- sum(CinSum) - sum(CoutSum)
       cat( "VERIFYING THE C-BALANCE OF COFFEE (kgC m-2):",
            "\nState variable change: ", D_C_f,
@@ -475,8 +477,8 @@ geometry: margin=1in
     i.Cin     <- rep(NA,nCin)     ; i.Cout <- rep(NA,nCout)
     for(i in 1:nCin ) {i.Cin [i] <- which( outputNames==CinNames [i] ) }
     for(i in 1:nCout) {i.Cout[i] <- which( outputNames==CoutNames[i] ) }
-    CinMean   <- colMeans(output[,i.Cin])  * 1.e4 * 365 # kgC ha-1 y-1
-    CoutMean  <- colMeans(output[,i.Cout]) * 1.e4 * 365 # kgC ha-1 y-1
+    CinMean   <- colMeans(sim[,i.Cin])  * 1.e4 * 365 # kgC ha-1 y-1
+    CoutMean  <- colMeans(sim[,i.Cout]) * 1.e4 * 365 # kgC ha-1 y-1
     if(is.null(ymax)) {
       y.max <- max( sum(CinMean), sum(CoutMean) )
     } else {
@@ -499,13 +501,13 @@ geometry: margin=1in
                                x="bottom", bg="white", inset=c(-0.3,0) ) )
     title(title2,adj=0)
     if(verify) {
-      C_f      <- output[ , which( outputNames=="C_f" )    ] # kgC m-2
-      CT_f     <- output[ , which( outputNames=="CT_f")    ] # kgC m-2
-      Csoil_f  <- output[ , which( outputNames=="Csoil_f") ] # kgC m-2 
+      C_f      <- sim[ , which( outputNames=="C_f" )    ] # kgC m-2
+      CT_f     <- sim[ , which( outputNames=="CT_f")    ] # kgC m-2
+      Csoil_f  <- sim[ , which( outputNames=="Csoil_f") ] # kgC m-2 
       Csys_f   <- C_f + CT_f + Csoil_f                       # kgC m-2
       D_Csys_f <- Csys_f[NDAYS] - Csys_f[1]                  # kgC m-2
-      CinSum       <- colSums(output[2:NDAYS,i.Cin ])        # kgC m-2
-      CoutSum      <- colSums(output[2:NDAYS,i.Cout])        # kgC m-2
+      CinSum       <- colSums(sim[2:NDAYS,i.Cin ])        # kgC m-2
+      CoutSum      <- colSums(sim[2:NDAYS,i.Cout])        # kgC m-2
       CinMinusCout <- sum(CinSum) - sum(CoutSum)
       cat( "VERIFYING THE C-BALANCE FOR THE SYSTEM (kgC m-2):",
            "\nState variable change: ", D_Csys_f,
@@ -557,57 +559,113 @@ geometry: margin=1in
 
 The carbon in coffee plants is distributed between roots (CR), woody plant parts (CW), leaves (CL) and beans (CP). Their progression over time is shown in Fig. \ref{fig:OutputsCarbonCoffee}.
 
+```{r}
+  plot_CdistributionCoffee <- function( sim=output ) {
+    Time <- sim[,1]
+    i.CP <- which( outputNames=="CP_f" ) ; CP <- sim[,i.CP]
+    i.CL <- which( outputNames=="CL_f" ) ; CL <- sim[,i.CL]
+    i.CW <- which( outputNames=="CW_f" ) ; CW <- sim[,i.CW]
+    i.CR <- which( outputNames=="CR_f" ) ; CR <- sim[,i.CR]
+    plot( Time, CR+CW+CL+CP,
+          main="Coffee-carbon (kg C m-2)",
+          xlab="", ylab="", type="l", ylim=c(0,max(CR+CW+CL+CP)) )
+    points( Time, CR+CW+CL, type="l", col="yellow" )
+    points( Time, CR+CW   , type="l", col="green" )
+    points( Time, CR      , type="l", col="red" )
+    legend( "topleft", col=c("black","yellow","green","red"), cex=0.7, lty=1,
+            legend=c("+ CP: Beans",
+                     "+ CL: Leaves",
+                     "+ CW: Wood",
+                     "   CR: Roots" ) )
+  }
+
+  plot_CdistributionTrees <- function( sim=output, it=1:3 ) {
+    Time <- sim[,1]
+    i.CPT <- sapply( 1:3, function(i){which( outputNames==paste0("CPT_t(",i,")"))} )
+    i.CLT <- sapply( 1:3, function(i){which( outputNames==paste0("CLT_t(",i,")"))} )
+    i.CBT <- sapply( 1:3, function(i){which( outputNames==paste0("CBT_t(",i,")"))} )
+    i.CST <- sapply( 1:3, function(i){which( outputNames==paste0("CST_t(",i,")"))} )
+    i.CRT <- sapply( 1:3, function(i){which( outputNames==paste0("CRT_t(",i,")"))} )
+    for(t in it) {
+      CPT   <- sim[,i.CPT[t]] ; CLT <- sim[,i.CLT[t]] ; CBT <- sim[,i.CBT[t]]
+      CST   <- sim[,i.CST[t]] ; CRT <- sim[,i.CRT[t]]
+      y.max <- max(CRT+CST+CBT+CLT+CPT)
+      plot( Time, CRT+CST+CBT+CLT+CPT, ylim=c(0,y.max),
+            main=paste0("Carbon in tree species ",t," (kg C m-2)"),
+            xlab="", ylab="", type="l" )
+      points( Time, CRT+CST+CBT+CLT, type="l", col="yellow" )
+      points( Time, CRT+CST+CBT    , type="l", col="green"  )
+      points( Time, CRT+CST        , type="l", col="red"    )
+      points( Time, CRT            , type="l", col="blue"   )
+      legend( "topleft", col=c("black","yellow","green","red","blue"), cex=0.7, lty=1,
+              legend=c("+ CPT: Fruits",
+                       "+ CLT: Leaves",
+                       "+ CBT: Branches",
+                       "+ CST: Stems",
+                       "   CRT: Roots" ) )
+    }
+  }
+```
+
 ```{r OutputsCarbonCoffee, echo=F, fig.height=5, fig.cap="\\label{fig:OutputsCarbonCoffee}Cumulative time series for the carbon in coffee"}
-  source("initialisation/initialise_CAF2021_Turrialba_01_E_AC.R")
+  # source("initialisation/initialise_CAF2021_Turrialba_01_E_AC.R")
   # source("initialisation/initialise_CAF2021_Turrialba_04_E_BO.R")
   source("initialisation/initialise_CAF2021_Turrialba_15_CE_AC.R")
-
-  # params[names_params=="TCST(3)"] <- 365
-
   output <- run_model()
 
   par( mfrow=c(2,2) )
-  Time <- output[,1]
+  plot_CdistributionCoffee()
+  plot_CdistributionTrees()
+```
+
+## Banana
+
+- Simba model for banana: @Blazy_2010_BANAD.
+- Modelling plantain in Colombia: @ChavesC._2009_Modeling. Very low light extinction coefficient of 0.2817. LUE 1.63 g MJ-1. Plantain typically less then 10 t ha-1 y-1 when grown in coffee. Tbase = 12.5 degC, Topt = 25 degC, Tmax = 40 degC. Implausibly high LAI of 12.9 (with observations even going up to 15), presumably because of an uncommon definition of LAI, as the given unit of 'm' makes no sense. Aboveground allocation during the vegetative stage about equally to leaves, pseudostem and colm (all about 1/3). During the reproductive stage leaves did nor grow anymore, the colm lost mass, pseudostem kept growing somewhat, but majority of allocation went to the fruits. At the end of their experiment, bunch dry matter was 45% of the aboveground total.
+
+To make CAF2021 simulate banana in a coffee plantation, we start by initialising for a full-sun system, then set the density of fruit trees (TREEDENS(2)) to a positive value, and choose parameter settings that are appropriate for banana.
+
+@Bellamy_2013_Banana: 400 banana-plants per hectare in coffee plantation in Costa Rica.
+
+@Cerda_2020_Coffee "identified six coffee agroforestry systems (CAFs) as the most promising ones for reducing losses [by pests and diseases] while simultaneously providing other ecosystem services [e.g. C-sequestration]" in which the density of Musaceae ranged from 0-1400 ha-1 (mean 216 ha-1). Total shade from all tree spp. (service, fruit, timber) did not surpass 35%.
+
+```{r}
+  par( mfrow=c(3,3), mar=c(3,3,3,3) )
+
+  source("initialisation/initialise_CAF2021_Turrialba_19_PS_AC.R")
+  params[names_params=="TREEDENS0(2)"] <- 0.04
+  params[names_params=="CBtree0"     ] <- 1 # 0.003
+  params[names_params=="CLtree0"     ] <- 1 # 0.0003
+  params[names_params=="CRtree0"     ] <- 1 # 0.03
+  params[names_params=="CStree0"     ] <- 1 # 0.013
+  params[names_params=="FWT(2)"      ] <- 0.5
+  params[names_params=="FST(2)"      ] <- 0.5
+  params[names_params=="FPT(2)"      ] <- 0.5
+  params[names_params=="TBEFOREPT(2)"] <- 100
+  params[names_params=="TCBT(2)"     ] <- 365
+  params[names_params=="TCRT(2)"     ] <- 365
+  params[names_params=="TCST(2)"     ] <- 365
+  params[names_params=="KH(2)"       ] <- 4    # 6
+  # params[names_params=="KHEXP(2)"    ] <- 0.35 # 0.35
+  params[names_params=="KAC(2)"      ] <- 6   # 30
+  # params[names_params=="KACEXP(2)"   ] <- 0.5  # 0.5
+  output <- run_model()
+
+  plot_CdistributionCoffee() ; plot_CdistributionTrees(it=2)
   
-  i.CP <- which( outputNames=="CP_f" ) ; CP <- output[,i.CP]
-  i.CL <- which( outputNames=="CL_f" ) ; CL <- output[,i.CL]
-  i.CW <- which( outputNames=="CW_f" ) ; CW <- output[,i.CW]
-  i.CR <- which( outputNames=="CR_f" ) ; CR <- output[,i.CR]
-  plot( Time, CR+CW+CL+CP,
-        main="Coffee-carbon (kg C m-2)",
-        xlab="", ylab="", type="l", ylim=c(0,max(CR+CW+CL+CP)) )
-  points( Time, CR+CW+CL, type="l", col="yellow" )
-  points( Time, CR+CW   , type="l", col="green" )
-  points( Time, CR      , type="l", col="red" )
-  legend( "topright", col=c("black","yellow","green","red"), cex=0.7, lty=1,
-          legend=c("+ CP: Beans",
-                   "+ CL: Leaves",
-                   "+ CW: Wood",
-                   "   CR: Roots" ) )
-
-  i.CPT <- sapply( 1:3, function(i){which( outputNames==paste0("CPT_t(",i,")"))} )
-  i.CLT <- sapply( 1:3, function(i){which( outputNames==paste0("CLT_t(",i,")"))} )
-  i.CBT <- sapply( 1:3, function(i){which( outputNames==paste0("CBT_t(",i,")"))} )
-  i.CST <- sapply( 1:3, function(i){which( outputNames==paste0("CST_t(",i,")"))} )
-  i.CRT <- sapply( 1:3, function(i){which( outputNames==paste0("CRT_t(",i,")"))} )
-
-  for(it in 1:3){
-    CPT <- output[,i.CPT[it]] ; CLT <- output[,i.CLT[it]] ; CBT <- output[,i.CBT[it]]
-    CST <- output[,i.CST[it]] ; CRT <- output[,i.CRT[it]]
-    plot( Time, CRT+CST+CBT+CLT+CPT,
-          main=paste0("Carbon in tree species ",it," (kg C m-2)"),
-          xlab="", ylab="", type="l" )
-    points( Time, CRT+CST+CBT+CLT, type="l", col="yellow" )
-    points( Time, CRT+CST+CBT    , type="l", col="green"  )
-    points( Time, CRT+CST        , type="l", col="red"    )
-    points( Time, CRT            , type="l", col="blue"   )
-    legend( "topleft", col=c("black","yellow","green","red","blue"), cex=0.7, lty=1,
-            legend=c("+ CPT: Fruits",
-                     "+ CLT: Leaves",
-                     "+ CBT: Branches",
-                     "+ CST: Stems",
-                     "   CRT: Roots" ) )
-  }
+  Time <- output[,1]
+    i.ht2    <- which( outputNames=="h_t(2)" )       ; h_t2      <- output[,i.ht2]
+    i.Ac1    <- which( outputNames=="Ac(1)" )        ; Ac1       <- output[,i.Ac1]
+    i.CAt2   <- which( outputNames=="CAtree_t(2)" )  ; CAtree2   <- output[,i.CAt2]
+    i.Ycf    <- which( outputNames=="harvDM_f_hay" ) ; YcoffeeDM <- output[,i.Ycf]
+    i.CPT    <- which( outputNames=="harvCPT_f" )    ; harvCPT_f <- output[,i.CPT]
+    YtreesDM <- harvCPT_f * 1e4 * 365 / 0.45
+    
+  plot( Time, h_t2     , type="l", ylab="", main="Tree height (m)" )
+  plot( Time, CAtree2  , type="l", ylab="", main="Crown area (m2 tree-1)" )
+  plot( Time, 1-Ac1    , type="l", ylab="", main="Shade (-)" )
+  plot( Time, YcoffeeDM, type="l", ylab="", main="Yield coffee (kg DM ha-1)" )
+  plot( Time, YtreesDM , type="l", ylab="", main="Yield trees  (kg DM ha-1)" )
 ```
 
 
@@ -854,3 +912,5 @@ Run this code immediately after carrying a BC
           lty=1, lwd=5,
           legend=c("LCC 1","LCC 2","LCC 3","LCC 4","LCC 5","LCC 6") )
 ```
+
+# References
