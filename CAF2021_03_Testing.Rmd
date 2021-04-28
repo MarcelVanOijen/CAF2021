@@ -622,6 +622,7 @@ The carbon in coffee plants is distributed between roots (CR), woody plant parts
   plot_CdistributionTrees()
 ```
 
+<<<<<<< HEAD
 # Modelling fruit trees
 
 Banana (not really trees but we keep model structure) and avocado. Separate management calendars. 
@@ -640,6 +641,22 @@ Banana (not really trees but we keep model structure) and avocado. Separate mana
 
 - @Landry_2017_foliar simulate growth of banana and expansion of Black leaf streak disease caused by *Mycosphaerella fijiensis*. The banana submodel focuses on leaf number and position.
 
+=======
+## Banana modelling
+
+- Simba: complex model for banana:
+  - @Blazy_2010_BANAD 
+  - @Damour_2012_Simulation: Tbase = 14 degC, SLA = 0.018 m2 g-1 (corresponds well to our 40 m2 kg-1 leaf C), KEXTT = 0.7 (more realistic than Chaves' value!), LAI up to 3.5. Leaf N-content 3-4% of DM (so NC ratio 0.07-0.09. In CAF2021 it can vary 0.05-0.12 with FNCLMINT=0.4 and NCLTMAX=12).
+  - @Ripoche_2012_Modeling.
+  - @Tixier_2008_SIMBA.
+
+- Modelling plantain in Colombia: @ChavesC._2009_Modeling. Very low light extinction coefficient of 0.2817. LUE 1.63 g MJ-1. Plantain typically less then 10 t ha-1 y-1 when grown in coffee. Tbase = 12.5 degC, Topt = 25 degC, Tmax = 40 degC. Implausibly high LAI of 12.9 (with observations even going up to 15), presumably because of an uncommon definition of LAI, as the given unit of 'm' makes no sense. Aboveground allocation during the vegetative stage about equally to leaves, pseudostem and corm (all about 1/3). During the reproductive stage leaves did nor grow anymore, the colm lost mass, pseudostem kept growing somewhat, but majority of allocation went to the fruits. At the end of their experiment, bunch dry matter was 45% of the aboveground total.
+
+- @VanDenBergh_2012_Climate. Empirical temperature- and rainfall-dependent banana model based on EcoCrop. Critical monthly tempreatures: Tkill = 0 degC, Tmin = 12 degC, Tmax = 33 degC, Topt = 17.5 to 26.3 degC.
+
+- @Landry_2017_foliar simulate growth of banana and expansion of Black leaf streak disease caused by *Mycosphaerella fijiensis*. The banana submodel focuses on leaf number and position.
+
+>>>>>>> 6d5ff67e687903815adc3a5cc03b6c768f108aac
 ## Banana literature
 
 - @Bellamy_2013_Banana: 400 banana-plants per hectare in coffee plantation in Costa Rica.
@@ -653,6 +670,13 @@ Banana (not really trees but we keep model structure) and avocado. Separate mana
 - @GalvisR._2013_Effect. SLA from initially high values of 150 decreasing to 100 m2 g-1 (unit must be wrong).
 
 - @Jullien_2001_Withinbunch: Pulp DMP reaches asymptotically about 30%. 
+<<<<<<< HEAD
+
+- @MartinezAcosta_2011_Dinamica. Final DM per tree, bunch:leaves:pseudostem+corm: 3000:1200:1800 g DM. With 0.45 gC g-1 DM this becomes 1350:540:810 g C per tree.
+
+- @Mustaffa_2012_Banana: leaf N content about 3% of DM.
+
+- @Rice_2011_Fruits: Guatemalan coffee farmers most often mentioned banana as their primary fruit tree in coffee fields (36% of respondents), followed by avocado (26%).
 
 - @MartinezAcosta_2011_Dinamica. Final DM per tree, bunch:leaves:pseudostem+corm: 3000:1200:1800 g DM. With 0.45 gC g-1 DM this becomes 1350:540:810 g C per tree.
 
@@ -693,7 +717,11 @@ To make CAF2021 simulate banana in a coffee plantation, we start by initialising
     i.Ycf    <- which( outputNames=="harvDM_f_hay" ) ; YcoffeeDM <- output[,i.Ycf]
     i.CPT    <- which( outputNames=="harvCPT_f" )    ; harvCPT_f <- output[,i.CPT]
     YtreesDM <- harvCPT_f * 1e4 * 365 / 0.45
+<<<<<<< HEAD
   plot( Time, h_t2     , type="l", ylab="", main="Banana height (m)" )
+=======
+  plot( Time, h_t2     , type="l", ylab="", main="Tree height (m)" )
+>>>>>>> 6d5ff67e687903815adc3a5cc03b6c768f108aac
   plot( Time, CAtree2  , type="l", ylab="", main="Crown area (m2 tree-1)" )
   plot( Time, 1-Ac1    , type="l", ylab="", main="Banana shade (-)" )
   plot( Time, YcoffeeDM, type="l", ylab="", main="Coffee yield (kg DM ha-1)" )
