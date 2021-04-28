@@ -463,16 +463,16 @@ do day = 1, NDAYS
 !  write(66,*) "day=1    : fTranT_t= ", fTranT_t
 !endif
 
-if(day==NDAYS) then
-  write(66,*) "---------------------------------------------------"
-  write(66,*) "day=NDAYS: fTranT_c= ", fTranT_c
-  write(66,*) "day=NDAYS: At= ", At
-  write(66,*) "day=NDAYS: Atc= ", Atc
-  write(66,*) "day=NDAYS: fTranT_t= ", fTranT_t
-endif
+!if(day==NDAYS) then
+!  write(66,*) "---------------------------------------------------"
+!  write(66,*) "day=NDAYS: fTranT_c= ", fTranT_c
+!  write(66,*) "day=NDAYS: At= ", At
+!  write(66,*) "day=NDAYS: Atc= ", Atc
+!  write(66,*) "day=NDAYS: fTranT_t= ", fTranT_t
+!endif
 
 enddo ! end time loop
 
-close(66)
+!close(66)
 
 end  

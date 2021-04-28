@@ -23,6 +23,10 @@ bibliography: [Avocado.bib,Banana.bib,MvO.bib]
   knitr::opts_chunk$set(echo=F,results="asis",warning=FALSE,message=FALSE)
 ```
 
+# Notes on CAF2021
+
+Height not used in calculating overshadowing. Note that in banana the height of the top leaf exceeds that of the top of the pseudostem.
+
 # Test with 2 tree spp.
 
 ```{r}
@@ -567,7 +571,7 @@ The carbon in coffee plants is distributed between roots (CR), woody plant parts
     i.CW <- which( outputNames=="CW_f" ) ; CW <- sim[,i.CW]
     i.CR <- which( outputNames=="CR_f" ) ; CR <- sim[,i.CR]
     plot( Time, CR+CW+CL+CP,
-          main="Coffee-carbon (kg C m-2)",
+          main="Carbon in coffee (kg C m-2)",
           xlab="", ylab="", type="l", ylim=c(0,max(CR+CW+CL+CP)) )
     points( Time, CR+CW+CL, type="l", col="yellow" )
     points( Time, CR+CW   , type="l", col="green" )
@@ -591,7 +595,7 @@ The carbon in coffee plants is distributed between roots (CR), woody plant parts
       CST   <- sim[,i.CST[t]] ; CRT <- sim[,i.CRT[t]]
       y.max <- max(CRT+CST+CBT+CLT+CPT)
       plot( Time, CRT+CST+CBT+CLT+CPT, ylim=c(0,y.max),
-            main=paste0("Carbon in tree species ",t," (kg C m-2)"),
+            main=paste0("Carbon in tree sp. ",it," (kg C m-2)"),
             xlab="", ylab="", type="l" )
       points( Time, CRT+CST+CBT+CLT, type="l", col="yellow" )
       points( Time, CRT+CST+CBT    , type="l", col="green"  )
@@ -618,39 +622,68 @@ The carbon in coffee plants is distributed between roots (CR), woody plant parts
   plot_CdistributionTrees()
 ```
 
-## Banana
+# Modelling fruit trees
 
-- Simba model for banana: @Blazy_2010_BANAD.
-- Modelling plantain in Colombia: @ChavesC._2009_Modeling. Very low light extinction coefficient of 0.2817. LUE 1.63 g MJ-1. Plantain typically less then 10 t ha-1 y-1 when grown in coffee. Tbase = 12.5 degC, Topt = 25 degC, Tmax = 40 degC. Implausibly high LAI of 12.9 (with observations even going up to 15), presumably because of an uncommon definition of LAI, as the given unit of 'm' makes no sense. Aboveground allocation during the vegetative stage about equally to leaves, pseudostem and colm (all about 1/3). During the reproductive stage leaves did nor grow anymore, the colm lost mass, pseudostem kept growing somewhat, but majority of allocation went to the fruits. At the end of their experiment, bunch dry matter was 45% of the aboveground total.
+Banana (not really trees but we keep model structure) and avocado. Separate management calendars. 
+
+## Banana modelling
+
+- Simba: complex model for banana:
+  - @Blazy_2010_BANAD 
+  - @Damour_2012_Simulation: Tbase = 14 degC, SLA = 0.018 m2 g-1 (corresponds well to our 40 m2 kg-1 leaf C), KEXTT = 0.7 (more realistic than Chaves' value!), LAI up to 3.5. Leaf N-content 3-4% of DM (so NC ratio 0.07-0.09. In CAF2021 it can vary 0.05-0.12 with FNCLMINT=0.4 and NCLTMAX=12).
+  - @Ripoche_2012_Modeling.
+  - @Tixier_2008_SIMBA.
+
+- Modelling plantain in Colombia: @ChavesC._2009_Modeling. Very low light extinction coefficient of 0.2817. LUE 1.63 g MJ-1. Plantain typically less then 10 t ha-1 y-1 when grown in coffee. Tbase = 12.5 degC, Topt = 25 degC, Tmax = 40 degC. Implausibly high LAI of 12.9 (with observations even going up to 15), presumably because of an uncommon definition of LAI, as the given unit of 'm' makes no sense. Aboveground allocation during the vegetative stage about equally to leaves, pseudostem and corm (all about 1/3). During the reproductive stage leaves did nor grow anymore, the colm lost mass, pseudostem kept growing somewhat, but majority of allocation went to the fruits. At the end of their experiment, bunch dry matter was 45% of the aboveground total.
+
+- @VanDenBergh_2012_Climate. Empirical temperature- and rainfall-dependent banana model based on EcoCrop. Critical monthly tempreatures: Tkill = 0 degC, Tmin = 12 degC, Tmax = 33 degC, Topt = 17.5 to 26.3 degC.
+
+- @Landry_2017_foliar simulate growth of banana and expansion of Black leaf streak disease caused by *Mycosphaerella fijiensis*. The banana submodel focuses on leaf number and position.
+
+## Banana literature
+
+- @Bellamy_2013_Banana: 400 banana-plants per hectare in coffee plantation in Costa Rica.
+
+- @Cerda_2020_Coffee "identified six coffee agroforestry systems (CAFs) as the most promising ones for reducing losses [by pests and diseases] while simultaneously providing other ecosystem services [e.g. C-sequestration]" in which the density of Musaceae ranged from 0-1400 ha-1 (mean 216 ha-1). Total shade from all tree spp. (service, fruit, timber) did not surpass 35%.
+
+- @Dold_2007_Musa Musa in Shaded Coffee in Costa Rica. Interviews with farmers in Turrialba region: most common AFS: Coffee + Poro (E.p.) + Banana/plantain (most common at 30% banana 'Gros Michel') + Laurel (Cordia alliodora). Typical tree densities: Poro 162 ha-1, Banana/plantain 179 ha-1, Laurel 37 ha-1. Cites literature where poro is 130-208 ha-1, banana 149-343 ha-1. Banana from 120 ha-1 too much coffee yield reducing.
+
+- @Dold_2010_Improving. "In [Central] Costa Rica mean plant density is 4244 coffee ha-1, 341 trees ha-1, and 579 bananas ha-1. In [Northern] Nicaragua mean plant density is 4852 coffee plants ha-1, 185 trees ha-1, and 358 bananas ha-1. Thirteen different banana cultivars were identified, of which 91% are from subgroup AAA Gros Michel and AAA Cavendish in Costa Rica, and 97% are from AAA Gros Michel and AAA Red Subgroup in Nicaragua.
+
+- @GalvisR._2013_Effect. SLA from initially high values of 150 decreasing to 100 m2 g-1 (unit must be wrong).
+
+- @Jullien_2001_Withinbunch: Pulp DMP reaches asymptotically about 30%. 
+
+- @MartinezAcosta_2011_Dinamica. Final DM per tree, bunch:leaves:pseudostem+corm: 3000:1200:1800 g DM. With 0.45 gC g-1 DM this becomes 1350:540:810 g C per tree.
+
+- @Mustaffa_2012_Banana: leaf N content about 3% of DM.
+
+- @Rice_2011_Fruits: Guatemalan coffee farmers most often mentioned banana as their primary fruit tree in coffee fields (36% of respondents), followed by avocado (26%).
+
+- @Schaffer_1999_Atmospheric give DM-partitioning of 6-month old vegetative banana (cv. 'Gros Michel'): leaves:pseudostem+rhizome:roots =  19:64:19%.
+
+- @Staver_2013_Intercropping inventoried the presence of banana in coffee agroforestry systems in Central America and Peru. 'Gros Michel' was the most-used banana cv. Banana planting density ranged from 300 to 600 ha-1, and trees (mainly poro and Inga) 150-550 ha-1.
+
+- @TorresB._2014_Accumulation found that DM-partitioning of cv. 'Williams' in Colombia was not affected strongly by the level of N-fertilization (0 to 483 kg N ha-1), but fruit yields increased from 9 to 12 kg DM. At harvest after 161 kg N ha-1 fertilization: corm+pseudostem/leaves/fruits = 6/1.5/3.5 kg DM per plant. Total plant N-concentration was 1-1.5% of DM.
+
+- @Turner_2007_Environmental: LAI ranges from 2 to 5 m2 m-2.
+
+## Banana simulation in CAF2021
 
 To make CAF2021 simulate banana in a coffee plantation, we start by initialising for a full-sun system, then set the density of fruit trees (TREEDENS(2)) to a positive value, and choose parameter settings that are appropriate for banana.
 
-@Bellamy_2013_Banana: 400 banana-plants per hectare in coffee plantation in Costa Rica.
-
-@Cerda_2020_Coffee "identified six coffee agroforestry systems (CAFs) as the most promising ones for reducing losses [by pests and diseases] while simultaneously providing other ecosystem services [e.g. C-sequestration]" in which the density of Musaceae ranged from 0-1400 ha-1 (mean 216 ha-1). Total shade from all tree spp. (service, fruit, timber) did not surpass 35%.
-
 ```{r}
-  par( mfrow=c(3,3), mar=c(3,3,3,3) )
-
   source("initialisation/initialise_CAF2021_Turrialba_19_PS_AC.R")
-  params[names_params=="TREEDENS0(2)"] <- 0.04
-  params[names_params=="CBtree0"     ] <- 1 # 0.003
-  params[names_params=="CLtree0"     ] <- 1 # 0.0003
-  params[names_params=="CRtree0"     ] <- 1 # 0.03
-  params[names_params=="CStree0"     ] <- 1 # 0.013
-  params[names_params=="FWT(2)"      ] <- 0.5
-  params[names_params=="FST(2)"      ] <- 0.5
-  params[names_params=="FPT(2)"      ] <- 0.5
-  params[names_params=="TBEFOREPT(2)"] <- 100
-  params[names_params=="TCBT(2)"     ] <- 365
-  params[names_params=="TCRT(2)"     ] <- 365
-  params[names_params=="TCST(2)"     ] <- 365
-  params[names_params=="KH(2)"       ] <- 4    # 6
-  # params[names_params=="KHEXP(2)"    ] <- 0.35 # 0.35
-  params[names_params=="KAC(2)"      ] <- 6   # 30
-  # params[names_params=="KACEXP(2)"   ] <- 0.5  # 0.5
+  params <- set_par( "TREEDENS0(2)"                            , 0.04       )
+  params <- set_par( c("CBtree0","CLtree0","CRtree0","CStree0"), rep(1,4)   )
+  params <- set_par( c("FWT(2)","FST(2)","FPT(2)")             , rep(0.5,3) )
+  params <- set_par( "TBEFOREPT(2)"                            , 100        )
+  params <- set_par( c("TCBT(2)","TCRT(2)","TCST(2)")          , rep(365,3) )
+  params <- set_par( c("KH(2)","KAC(2)")                       , c(4,6)     )
   output <- run_model()
 
+  par( mfrow=c(3,3), mar=c(3,3,3,3) )
+  
   plot_CdistributionCoffee() ; plot_CdistributionTrees(it=2)
   
   Time <- output[,1]
@@ -660,17 +693,58 @@ To make CAF2021 simulate banana in a coffee plantation, we start by initialising
     i.Ycf    <- which( outputNames=="harvDM_f_hay" ) ; YcoffeeDM <- output[,i.Ycf]
     i.CPT    <- which( outputNames=="harvCPT_f" )    ; harvCPT_f <- output[,i.CPT]
     YtreesDM <- harvCPT_f * 1e4 * 365 / 0.45
-    
-  plot( Time, h_t2     , type="l", ylab="", main="Tree height (m)" )
+  plot( Time, h_t2     , type="l", ylab="", main="Banana height (m)" )
   plot( Time, CAtree2  , type="l", ylab="", main="Crown area (m2 tree-1)" )
-  plot( Time, 1-Ac1    , type="l", ylab="", main="Shade (-)" )
-  plot( Time, YcoffeeDM, type="l", ylab="", main="Yield coffee (kg DM ha-1)" )
-  plot( Time, YtreesDM , type="l", ylab="", main="Yield trees  (kg DM ha-1)" )
+  plot( Time, 1-Ac1    , type="l", ylab="", main="Banana shade (-)" )
+  plot( Time, YcoffeeDM, type="l", ylab="", main="Coffee yield (kg DM ha-1)" )
+  plot( Time, YtreesDM , type="l", ylab="", main="Banana yield (kg DM ha-1)" )
 ```
 
+## Avocado modelling
 
+## Avocado literature
 
-## Checking bienniality and tree production of fruit (CPT, NPT)
+## Avocado simulation in CAF2021
+
+To make CAF2021 simulate avocado in a coffee plantation, we proceed as for banana. So we start by initialising for a full-sun system, then set the density of fruit trees (TREEDENS(2)) to a positive value, and choose parameter settings that are appropriate for avocado.
+
+Compared with banana:
+
+- Lower planting density of 200 ha-1. CAF2021-parameter TREEDENS0(2) = 0.02.
+- Considerable delay (4-7 years) to first fruit production. CAF2021-parameter TBEFOREPT = 1825.
+- Similarly small trees. CAF2021-parameters KH(2) = 4, KAC(2) = 6.
+- True tree with woody plant parts and roots that senesce much more slowly than the pseudostem and roots of banana. Some stem senescence is still simulated to mimic the common practice of pruning avocado to keep its height within convenient levels for harvesting. CAF2021-parameters TCRT(2) = TCST(2) = TCBT(2) = 1000.
+- Similar allocation pattern (but with true stems and branches instead of rhizomes and pseudostems). CAF2021-parameters FWT(2) = 0.5, FST(2) = 0.5, FPT(2) = 0.5.
+- More seasonal than banana (but much less than coffee). Often two to three vegetative flushes and long harvest periods. But the harvesting occurs throughout the year which we simulate as for banana as a constant low-intensity harvesting. This allows us to keep CAF2021 simple without the need for simulateing flowering and fruit set phenology for any trees.
+
+```{r}
+  source("initialisation/initialise_CAF2021_Turrialba_19_PS_AC.R")
+  params <- set_par( "TREEDENS0(2)"                            , 0.02       )
+  params <- set_par( c("FWT(2)","FST(2)","FPT(2)")             , rep(0.5,3) )
+  params <- set_par( "TBEFOREPT(2)"                            , 1825       )
+  params <- set_par( c("TCBT(2)","TCRT(2)","TCST(2)")          , c(1000,1000,1000) )
+  params <- set_par( c("KH(2)","KAC(2)")                       , c(4,6)     )
+  output <- run_model()
+
+  par( mfrow=c(3,3), mar=c(3,3,3,3) )
+  
+  plot_CdistributionCoffee() ; plot_CdistributionTrees(it=2)
+  
+  Time <- output[,1]
+    i.ht2    <- which( outputNames=="h_t(2)" )       ; h_t2      <- output[,i.ht2]
+    i.Ac1    <- which( outputNames=="Ac(1)" )        ; Ac1       <- output[,i.Ac1]
+    i.CAt2   <- which( outputNames=="CAtree_t(2)" )  ; CAtree2   <- output[,i.CAt2]
+    i.Ycf    <- which( outputNames=="harvDM_f_hay" ) ; YcoffeeDM <- output[,i.Ycf]
+    i.CPT    <- which( outputNames=="harvCPT_f" )    ; harvCPT_f <- output[,i.CPT]
+    YtreesDM <- harvCPT_f * 1e4 * 365 / 0.45
+  plot( Time, h_t2     , type="l", ylab="", main="Avocado height (m)" )
+  plot( Time, CAtree2  , type="l", ylab="", main="Crown area (m2 tree-1)" )
+  plot( Time, 1-Ac1    , type="l", ylab="", main="Avocado shade (-)" )
+  plot( Time, YcoffeeDM, type="l", ylab="", main="Coffee yield (kg DM ha-1)" )
+  plot( Time, YtreesDM , type="l", ylab="", main="Avocado yield (kg DM ha-1)" )
+```
+
+# Checking bienniality and tree production of fruit (CPT, NPT)
 
 ```{r}
   plot_output(vars=c( "fTran(1)", "fNgrowth(1)",
@@ -689,15 +763,16 @@ To make CAF2021 simulate banana in a coffee plantation, we start by initialising
                       "harvNPT_t(1)", "harvNPT_t(2)", "harvNPT_t(3)" ))
 ```
 
-## Output of a MAP generated by BC
+# Output of a MAP generated by BC
 
 Run this code immediately after carrying a BC
 
 ```{r, eval=F}
-  # After running, for example, "CAF2021_04_BC.Rmd"
-  # source('BC/BC_averageYields.R')
-
+  # After running a BC
+  load('BC_Turrialba_2021.RData')
+  
   s <- 1 # Choose a site from those for which the BC was carried out
+  
   params_BC_MAP   <- scparMAP_BC  * sc
   params          <- list_params        [[s]] ; matrix_weather <- list_matrix_weather[[s]]
   calendar_fert   <- list_calendar_fert [[s]] ; calendar_prunC <- list_calendar_prunC[[s]] 
@@ -707,18 +782,33 @@ Run this code immediately after carrying a BC
   icol_pChain_s   <- icol_pChain_site   [[s]]
 # Calculate model output for the MAP parameter vector
   params[ip_BC_s] <- params_BC_MAP      [icol_pChain_s]
+  params.MAP         <- params
+  matrix_weather.MAP <- matrix_weather
+  calendar_fert.MAP  <- calendar_fert
+  calendar_prunC.MAP <- calendar_prunC
+  calendar_prunT.MAP <- calendar_prunT
+  calendar_thinT.MAP <- calendar_thinT
+  NDAYS.MAP          <- NDAYS
   
-  # params    <- set_par( c("CNLITT0","CNSOMF0","CNSOMS0"), c(30,30,30) )
-  outputMAP <- run_model( params, matrix_weather, calendar_fert, calendar_prunC,
-                                calendar_prunT, calendar_thinT, NDAYS )
-  plot_output( list_output=list(outputMAP),
-               vars       =c( "fTran(1)", "fNgrowth(1)",
-                              "DVS(1)"  , "SINKP(1)" , "SINKPMAXnew(1)",
-                              "DayFl(1)", "PARMA(1)" , "harvDM_f_hay" ) )
-  plot_output( list_output=list(outputMAP),
-               vars       =c( "fTran(2)", "fNgrowth(2)",
-                              "DVS(2)"  , "SINKP(2)" , "SINKPMAXnew(2)",
-                              "DayFl(2)", "PARMA(2)" , "harvDM_f_hay" ) )
+  source('initialisation/initialise_CAF2021_Turrialba_20_PS_MC.R')
+  output <- run_model( params, matrix_weather, calendar_fert, calendar_prunC,
+                     calendar_prunT, calendar_thinT, NDAYS )
+
+  output.MAP <- run_model( params.MAP, matrix_weather.MAP,
+                           calendar_fert.MAP, calendar_prunC.MAP,
+                           calendar_prunT.MAP, calendar_thinT.MAP, NDAYS.MAP )
+  plot_output( list_output=list(output.MAP),
+               vars       =c( "fTran(1)"    , "fNgrowth(1)", "DVS(1)"  ,
+                              "SINKP(1)"    , "DayFl(1)"   , "PARMA(1)" ,
+                              "harvDM_f_hay", "CT_f" ) )
+  plot_output( list_output=list(output.MAP),
+               vars       =c( "fTran(2)"    , "fNgrowth(2)", "DVS(2)"  ,
+                              "SINKP(2)"    , "DayFl(2)"   , "PARMA(1)" ,
+                              "harvDM_f_hay", "CT_f" ) )
+```
+
+```{r, eval=F}  
+  source('BC/BC_averageYields.R')
 ```
 
 
