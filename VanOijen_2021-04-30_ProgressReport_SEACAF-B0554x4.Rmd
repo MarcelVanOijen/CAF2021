@@ -1,0 +1,771 @@
+---
+title: 'Modelling Coffee Agroforestry in Central America with CAF2021'
+subtitle: 'Progress Report for project SEACAF, contract B0554x4'
+author:
+- Marcel van Oijen^[Independent researcher, Edinburgh, UK - VanOijenMarcel@gmail.com]
+date: '`r Sys.Date()`'
+output:
+  pdf_document:
+    fig_crop: false
+    fig_caption: yes
+    keep_tex: no
+    number_sections: yes
+    toc: yes
+  word_document:
+    reference_docx: word-styles-reference-01.docx
+  html_document: default
+fontsize: 11pt
+geometry: margin=1in
+csl: environmental-modelling-and-software.csl
+bibliography: [Avocado.bib,Banana.bib,MvO.bib]
+---
+
+```{r, include=FALSE}
+  knitr::opts_chunk$set(echo=F,results="asis",warning=FALSE,message=FALSE)
+```
+
+# Introduction
+
+This report describes progress with process-based modelling of coffee agroforestry systems in Central America. We present the model CAF2021 which is an extension of the earlier models CAF2007 [@vanoijenPlotscaleModellingCoffee2009; @vanoijenCoffeeAgroforestrySystems2010a; @vanoijenCoffeeAgroforestrySystems2010] and CAF2014 [@Ovalle-Rivera_2020_Assessing]. Development and application of this model is part of project SEACAF under sub-contract B0554x4 which started at 17 March 2021. 
+
+We shall not describe the structure of the model in great detail, but focus on how it differs from the earlier model versions including its capacity to simulate fruit trees and bienniality of coffee production. We reviewed the literature on banana and avocado which are commonly used in Central America to produce fruits within coffee plantations. The literature review was intended to support parameterization of CAF2021 and we present key results and preliminary model outputs.
+
+So far, CAF2021 has only been calibrated against 18 different treatments from the long-term coffee agroforestry experiment by CATIE in Turrialba, Costa Rica. Some results from this calibration will be shown to illustrate the variety of shade tree compositions and output variables that the new model can simulate.
+
+The report ends with a brief discussion of the next steps in CAF2021-modelling to be carried out in project SEACAF.
+
+# CAF2021 structure
+
+The model simulates the biogeochemistry - flows of carbon, nitrogen and water - of a coffee agroforestry system. Up to 3 shade tree species can be simulated. One of these can be an upper-layer timber tree, and two can be lower-layer service and/or fruit trees. The model simulates the height growth for each of the tree species but does not use that information to calculate shading patterns: upper-layer trees are always assumed to overshadow lower-layer trees, and all trees overshadow coffee.
+
+The model uses a daily time step of and therefore requires daily weather data (light, temperature, rain, wind, humidity) as input. Further required inputs are atmospheric [CO$_2$] soil properties (water retention parameters, initial contents of C and N) and management calendars for fertilisation, pruning and thinning. The calendars can be specified separately for each plant species.
+
+The model produces a wide variety of output variables, and a small selection is shown in the following table. They are the *land-cover variables Ac and At* from a simulation of a system with just one shade tree species, a service tree.
+
+```{r}
+  source("initialisation/initialise_CAF2021_Turrialba_01_E_AC.R")
+  params <- set_par("TREEDENS0(1)",0.0325)
+  output <- run_model()
+
+  output_short <- signif( output, 3 )
+  icols        <- 2:12
+  knitr::kable( rbind( head(output_short[,icols],n=2),
+                       rep("...",length(icols)),
+                       tail(output_short[,icols],n=2,keepnums=F) ),
+                col.names=outputNames[icols] )
+```
+
+The simulation ran from day 214 in year 2000 to day 365 in 2017, but we only show results for the first two days and the last two.
+
+The variables At(1) .. At(3) show fractional field coverage by the different tree species. We only have one tree species in this system so the values for At(2) and At(3) are all zeroes.
+
+The variables Ac(1) .. Ac(6) show the coverage by six different types of land-cover class within the field, each representing a different combination of tree species. Ac(1) is the fraction of the field where the coffee is not shaded at all, and Ac(2) is the fraction of the field exclusively shaded by tree species 1 (so without any upper-layer tree species above it). In this simple system, Ac(1) = 1 - Ac(2) = 1 - At(1).
+
+The dynamics of shading becomes more complex the more tree species are being simulated. The next table shows what happens when we add an upper-layer tree species to the system.
+
+```{r}
+  source("initialisation/initialise_CAF2021_Turrialba_15_CE_AC.R")
+  output <- run_model()
+
+  output_short <- signif( output, 3 )
+  icols        <- 2:12
+  knitr::kable( rbind( head(output_short[,icols],n=2),
+                       rep("...",length(icols)),
+                       tail(output_short[,icols],n=2,keepnums=F) ),
+                col.names=outputNames[icols] )
+```
+
+The table now shows positive entries for At(1) representing the lower-layer service tree species, and At(3) representing the upper-layer timber tree. At(2) remains zero because we do not have a second lower-layer tree species.
+
+There are four different combinations of shade tree presence covering this field: Ac(1) without trees, Ac(2) with only the lower-layer tree species, Ac(4) with only the upper-layer tree species, and Ac(5) with both tree species. If we would add a second lower-layer tree species, such as a fruit tree, we would also see positive vaues for Ac(3) representing coverage by that fruit tree species, and Ac(6) representing fruit + timber trees. An example of that is shown in Fig. \ref{fig:OutputsLCC}.
+
+```{r OutputsLCC, fig.height=3.5, fig.cap="\\label{fig:OutputsLCC}Cumulative time series for the six land cover classes (LCC) in a coffee agroforestry system with three tree species."}
+  source("initialisation/initialise_CAF2021_Turrialba_01_E_AC.R")
+  params <- set_par(c("TREEDENS0(1)","TREEDENS0(2)","TREEDENS0(3)"),
+                    c(0.01         ,0.0005         ,0.001         ) )
+  output <- run_model()
+
+  par( mfrow=c(1,1) )
+  Time <- output[,1]
+  i.Ac <- sapply( 1:6, function(i) {
+    which( outputNames==paste0("Ac(",i,")") ) } )
+  plot  ( Time, output[,i.Ac[1]], type="l", ylim=c(0,1),
+          main="Cumulative ground cover of six LCC (-)",
+          xlab="", ylab="" )
+  points( Time, rowSums( output[,i.Ac[1:2]] ), type="l", col="yellow" )
+  points( Time, rowSums( output[,i.Ac[1:3]] ), type="l", col="green" )
+  points( Time, rowSums( output[,i.Ac[1:4]] ), type="l", col="red" )
+  points( Time, rowSums( output[,i.Ac[1:5]] ), type="l", col="blue" )
+  points( Time, rowSums( output[,i.Ac[1:6]] ), type="l", col="black" )
+  legend( "bottomleft", cex=0.7, lty=1, bg="white",
+          col=c("black","blue","red","green","yellow","black"),
+          legend=c("+ LCC 6: Tree sp. 2+3",
+                   "+ LCC 5: Tree sp. 1+3",
+                   "+ LCC 4: Tree sp. 3",
+                   "+ LCC 3: Tree sp. 2",
+                   "+ LCC 2: Tree sp. 1",
+                   "   LCC 1: Coffee full sun" ) )
+```
+
+## Model output variables
+
+After each run of the model, all outputs are collected in a large matrix. The number of rows of the output-matrix equals the number of days in the simulated time period, and there as many columns as there are output variables. So for each output variable, the full time series can be analysed and plotted. We show some examples in Fig. \ref{fig:Outputs}.
+
+```{r Outputs, fig.height=5, fig.cap="\\label{fig:Outputs}Selected outputs from CAF2021. Left: C in coffee, trees, soil. Right: Yield of beans and fruit."}
+  source("initialisation/initialise_CAF2021_Turrialba_01_E_AC.R")
+  params <- set_par(c("TREEDENS0(1)","TREEDENS0(2)","TREEDENS0(3)"),
+                    c(0.01         ,0.0005         ,0.001         ) )
+  output <- run_model()
+  plot_output( vars=c("C_f"    , "harvDM_f_hay",
+                      "CT_f"   , "harvCPT_f",
+                      "Csoil_f" ) )
+```
+
+## Carbon-, nitrogen- and water-balances
+
+For efficient post-processing of model output, we developed a suite of R-functions that calculate and plot biogeochemical balances, to assess whether the agroforestry system is a net source or sink of carbon, nitrogen and water.
+
+```{r}
+  plot_NbalanceSoil <- function( sim=output, title1="", title2=title1,
+                                 ymax=NULL, verify=F ) {
+    NinNames  <- c("Nfert_f", "NfixT_f", "NsenprunT_f", "Nsenprun_f")
+    NoutNames <- c("Nleaching_f", "Nemission_f", "Nrunoff_f", "Nupt_f", "NuptT_f")
+    nNin      <- length(NinNames) ; nNout  <- length(NoutNames)
+    i.Nin     <- rep(NA,nNin)     ; i.Nout <- rep(NA,nNout)
+    for(i in 1:nNin ) {i.Nin [i] <- which( outputNames==NinNames [i] ) }
+    for(i in 1:nNout) {i.Nout[i] <- which( outputNames==NoutNames[i] ) }
+    NinMean   <- colMeans(sim[,i.Nin])  * 1.e4 * 365 # kgN ha-1 y-1
+    NoutMean  <- colMeans(sim[,i.Nout]) * 1.e4 * 365 # kgN ha-1 y-1
+    if(is.null(ymax)) {
+      y.max <- max( sum(NinMean), sum(NoutMean) )
+    } else {
+      y.max = ymax
+    }
+    leg <- NinNames
+    barplot( as.matrix(NinMean),
+             beside=F, ylim=c(0,y.max), col=1:length(leg),
+             legend.text=leg,
+             args.legend=list( title="Inputs (kg ha-1 y-1)", cex=0.8,
+                               x="bottom", bg="white", inset=c(-0.3,0) ) )
+    title(title1,adj=1)
+    par(mar=c(3,0,3,3))
+    leg <- NoutNames
+    barplot( as.matrix(NoutMean),
+             yaxt="n",
+             beside=F, ylim=c(0,y.max), col=1:length(leg),
+             legend.text=leg,
+             args.legend=list( title="Outputs (kg ha-1 y-1)", cex=0.8,
+                               x="bottom", bg="white", inset=c(-0.3,0) ) )
+    title(title2,adj=0)
+    if(verify) {
+      Nsoil_f      <- sim[ , which( outputNames=="Nsoil_f") ] # kgN m-2
+      D_Nsoil_f    <- Nsoil_f[NDAYS] - Nsoil_f[1]                # kgN m-2
+      NinSum       <- colSums(sim[2:NDAYS,i.Nin ])            # kgN m-2
+      NoutSum      <- colSums(sim[2:NDAYS,i.Nout])            # kgN m-2
+      NinMinusNout <- sum(NinSum) - sum(NoutSum)
+      cat( "VERIFYING THE N-BALANCE FOR THE SOIL (kgN m-2):",
+           "\nState variable change: ", D_Nsoil_f,
+           "\nInputs minus outputs : ", NinMinusNout )
+    }
+  }
+```
+
+```{r}
+  plot_CbalanceSoil <- function( sim=output, title1="", title2=title1,
+                                 ymax=NULL, verify=F ) {
+    CinNames  <- c("CsenprunT_f", "Csenprun_f")
+    CoutNames <- c("Rsoil_f", "Crunoff_f")
+    nCin      <- length(CinNames) ; nCout  <- length(CoutNames)
+    i.Cin     <- rep(NA,nCin)     ; i.Cout <- rep(NA,nCout)
+    for(i in 1:nCin ) {i.Cin [i] <- which( outputNames==CinNames [i] ) }
+    for(i in 1:nCout) {i.Cout[i] <- which( outputNames==CoutNames[i] ) }
+    CinMean   <- colMeans(sim[,i.Cin])  * 1.e4 * 365 # kgC ha-1 y-1
+    CoutMean  <- colMeans(sim[,i.Cout]) * 1.e4 * 365 # kgC ha-1 y-1
+    if(is.null(ymax)) {
+      y.max <- max( sum(CinMean), sum(CoutMean) )
+    } else {
+      y.max = ymax
+    }
+    leg <- CinNames
+    barplot( as.matrix(CinMean),
+             beside=F, ylim=c(0,y.max), col=1:length(leg),
+             legend.text=leg,
+             args.legend=list( title="Inputs (kg ha-1 y-1)", cex=0.8,
+                               x="bottom", bg="white", inset=c(-0.3,0) ) )
+    title(title1,adj=1)
+    par(mar=c(3,0,3,3))
+    leg <- CoutNames
+    barplot( as.matrix(CoutMean),
+             yaxt="n",
+             beside=F, ylim=c(0,y.max), col=1:length(leg),
+             legend.text=leg,
+             args.legend=list( title="Outputs (kg ha-1 y-1)", cex=0.8,
+                               x="bottom", bg="white", inset=c(-0.3,0) ) )
+    title(title2,adj=0)
+    if(verify) {
+      Csoil_f   <- sim[ , which( outputNames=="Csoil_f") ] # kgC m-2 
+      D_Csoil_f <- Csoil_f[NDAYS] - Csoil_f[1]                # kgC m-2
+      CinSum        <- colSums(sim[2:NDAYS,i.Cin ])        # kgC m-2
+      CoutSum       <- colSums(sim[2:NDAYS,i.Cout])        # kgC m-2
+      CinMinusCout  <- sum(CinSum) - sum(CoutSum)
+      cat( "VERIFYING THE C-BALANCE FOR THE SOIL (kgC m-2):",
+           "\nState variable change: ", D_Csoil_f,
+           "\nInputs minus outputs : ", CinMinusCout )
+    }
+  }
+```
+
+```{r, eval=F}
+  par( mfrow=c(2,4) )
+  par(mar=c(3,3,3,0))
+  source("initialisation/initialise_CAF2021_Turrialba_01_E_AC.R")
+  output <- run_model()
+  plot_CbalanceSoil(output, title1="Soil C-balance: ", title2="Treatment 1", ymax=7500)
+  par(mar=c(3,3,3,0))
+  source("initialisation/initialise_CAF2021_Turrialba_02_E_MC.R")
+  output <- run_model()
+  plot_CbalanceSoil(output, title1="Soil C-balance: ", title2="Treatment 2", ymax=7500)
+  par(mar=c(3,3,3,0))
+  source("initialisation/initialise_CAF2021_Turrialba_03_E_MO.R")
+  output <- run_model()
+  plot_CbalanceSoil(output, title1="Soil C-balance: ", title2="Treatment 3", ymax=7500)
+  par(mar=c(3,3,3,0))
+  source("initialisation/initialise_CAF2021_Turrialba_04_E_BO.R")
+  output <- run_model()
+  plot_CbalanceSoil(output, title1="Soil C-balance: ", title2="Treatment 4", ymax=7500)
+```
+
+```{r}
+  plot_H2ObalanceSoil <- function( sim=output, title1="", title2=title1,
+                                   ymax=NULL, verify=F ) {
+    WinNames  <- c("Rain_f")
+    WoutNames <- c("Drain_f", "Runoff_f" , "Evap_f"    ,"Tran_f" , 
+                   "TranT_f", "Rainint_f", "RainintT_f")
+    nWin      <- length(WinNames) ; nWout  <- length(WoutNames)
+    i.Win     <- rep(NA,nWin)     ; i.Wout <- rep(NA,nWout)
+    for(i in 1:nWin ) {i.Win [i] <- which( outputNames==WinNames [i] ) }
+    for(i in 1:nWout) {i.Wout[i] <- which( outputNames==WoutNames[i] ) }
+    WinMean   <-    mean (sim[,i.Win])  # mm d-1
+    WoutMean  <- colMeans(sim[,i.Wout]) # mm d-1
+    if(is.null(ymax)) {
+      y.max <- max( sum(WinMean), sum(WoutMean) )
+    } else {
+      y.max = ymax
+    }
+    leg <- WinNames
+    barplot( as.matrix(WinMean),
+             beside=F, ylim=c(0,y.max), col=1:length(leg),
+             legend.text=leg,
+             args.legend=list( title="Inputs (mm d-1)", cex=0.8,
+                               x="bottom", bg="white", inset=c(-0.3,0) ) )
+    title(title1,adj=1)
+    par(mar=c(3,0,3,3))
+    leg <- WoutNames
+    barplot( as.matrix(WoutMean),
+             yaxt="n",
+             beside=F, ylim=c(0,y.max), col=1:length(leg),
+             legend.text=leg,
+             args.legend=list( title="Outputs (mm d-1)", cex=0.8,
+                               x="bottom", bg="white", inset=c(-0.3,0) ) )
+    title(title2,adj=0)
+    if(verify) {
+      WA_f   <- sim[ , which( outputNames=="WA_f") ] # mm
+      D_WA_f <- WA_f[NDAYS] - WA_f[1]                   # mm
+      WinSum        <-    sum (sim[2:NDAYS,i.Win ])  # mm
+      WoutSum       <- colSums(sim[2:NDAYS,i.Wout])  # mm
+      WinMinusWout  <- sum(WinSum) - sum(WoutSum)
+      cat( "VERIFYING THE H2O-BALANCE FOR THE SOIL (mm):",
+           "\nState variable change: ", D_WA_f,
+           "\nInputs minus outputs : ", WinMinusWout )
+    }
+  }
+```
+
+```{r, eval=F}
+  par( mfrow=c(2,4) )
+  par(mar=c(3,3,3,0))
+  source("initialisation/initialise_CAF2021_Turrialba_01_E_AC.R")
+  output <- run_model()
+  plot_H2ObalanceSoil(output, title1="Soil H2O-balance: ", title2="Treatment 1", ymax=8)
+  par(mar=c(3,3,3,0))
+  source("initialisation/initialise_CAF2021_Turrialba_02_E_MC.R")
+  output <- run_model()
+  plot_H2ObalanceSoil(output, title1="Soil H2O-balance: ", title2="Treatment 2", ymax=8)
+  par(mar=c(3,3,3,0))
+  source("initialisation/initialise_CAF2021_Turrialba_03_E_MO.R")
+  output <- run_model()
+  plot_H2ObalanceSoil(output, title1="Soil H2O-balance: ", title2="Treatment 3", ymax=8)
+  par(mar=c(3,3,3,0))
+  source("initialisation/initialise_CAF2021_Turrialba_04_E_BO.R")
+  output <- run_model()
+  plot_H2ObalanceSoil(output, title1="Soil H2O-balance: ", title2="Treatment 4", ymax=8)
+```
+
+```{r}
+  plot_CbalanceCoffee <- function( sim=output, title1="", title2=title1,
+                                   ymax=NULL, verify=F ) {
+    CinNames  <- "gC_f"
+    CoutNames <- c("dC_f", "prunC_f", "harvCP_f")
+    nCin      <- length(CinNames) ; nCout  <- length(CoutNames)
+    i.Cin     <- rep(NA,nCin)     ; i.Cout <- rep(NA,nCout)
+    for(i in 1:nCin ) {i.Cin [i] <- which( outputNames==CinNames [i] ) }
+    for(i in 1:nCout) {i.Cout[i] <- which( outputNames==CoutNames[i] ) }
+    CinMean   <-    mean (sim[,i.Cin])  * 1.e4 * 365 # kgC ha-1 y-1
+    CoutMean  <- colMeans(sim[,i.Cout]) * 1.e4 * 365 # kgC ha-1 y-1
+    if(is.null(ymax)) {
+      y.max <- max( sum(CinMean), sum(CoutMean) )
+    } else {
+      y.max = ymax
+    }
+    leg <- CinNames
+    barplot( CinMean,
+             beside=F, ylim=c(0,y.max), col=1:length(leg),
+             legend.text=leg,
+             args.legend=list( title="Inputs (kg ha-1 y-1)", cex=0.8,
+                               x="bottom", bg="white", inset=c(-0.3,0) ) )
+    title(title1,adj=1)
+    par(mar=c(3,0,3,3))
+    leg <- CoutNames
+    barplot( as.matrix(CoutMean),
+             yaxt="n",
+             beside=F, ylim=c(0,y.max), col=1:length(leg),
+             legend.text=leg,
+             args.legend=list( title="Outputs (kg ha-1 y-1)", cex=0.8,
+                               x="bottom", bg="white", inset=c(-0.3,0) ) )
+    title(title2,adj=0)
+    if(verify) {
+      C_f          <- sim[ , which( outputNames=="C_f" ) ] # kgC m-2
+      D_C_f        <- C_f[NDAYS] - C_f[1]                     # kgC m-2
+      CinSum       <-    sum (sim[2:NDAYS,i.Cin ])         # kgC m-2
+      CoutSum      <- colSums(sim[2:NDAYS,i.Cout])         # kgC m-2
+      CinMinusCout <- sum(CinSum) - sum(CoutSum)
+      cat( "VERIFYING THE C-BALANCE OF COFFEE (kgC m-2):",
+           "\nState variable change: ", D_C_f,
+           "\nInputs minus outputs : ", CinMinusCout )
+    }
+  }
+```
+
+```{r, eval=F}
+  par( mfrow=c(2,4) )
+  par(mar=c(3,3,3,0))
+  source("initialisation/initialise_CAF2021_Turrialba_01_E_AC.R")
+  output <- run_model()
+  plot_CbalanceCoffee( output, title1="Coffee C-balance: ", title2="Treatment 1", ymax=6000)
+  par(mar=c(3,3,3,0))
+  source("initialisation/initialise_CAF2021_Turrialba_02_E_MC.R")
+  output <- run_model()
+  plot_CbalanceCoffee( output, title1="Coffee C-balance: ", title2="Treatment 2", ymax=6000)
+  par(mar=c(3,3,3,0))
+  source("initialisation/initialise_CAF2021_Turrialba_03_E_MO.R")
+  output <- run_model()
+  plot_CbalanceCoffee( output, title1="Coffee C-balance: ", title2="Treatment 3", ymax=6000)
+  par(mar=c(3,3,3,0))
+  source("initialisation/initialise_CAF2021_Turrialba_04_E_BO.R")
+  output <- run_model()
+  plot_CbalanceCoffee( output, title1="Coffee C-balance: ", title2="Treatment 4", ymax=6000)
+```
+
+```{r}
+  plot_CbalanceSystem <- function( sim=output, title1="", title2=title1,
+                                   ymax=NULL, verify=F ) {
+    CinNames  <- c("gC_f"   , "gCT_f")
+    CoutNames <- c("Rsoil_f", "Crunoff_f", "harvCP_f", "harvCPT_f", "harvCST_f")
+    nCin      <- length(CinNames) ; nCout  <- length(CoutNames)
+    i.Cin     <- rep(NA,nCin)     ; i.Cout <- rep(NA,nCout)
+    for(i in 1:nCin ) {i.Cin [i] <- which( outputNames==CinNames [i] ) }
+    for(i in 1:nCout) {i.Cout[i] <- which( outputNames==CoutNames[i] ) }
+    CinMean   <- colMeans(sim[,i.Cin])  * 1.e4 * 365 # kgC ha-1 y-1
+    CoutMean  <- colMeans(sim[,i.Cout]) * 1.e4 * 365 # kgC ha-1 y-1
+    if(is.null(ymax)) {
+      y.max <- max( sum(CinMean), sum(CoutMean) )
+    } else {
+      y.max = ymax
+    }
+    leg <- CinNames
+    barplot( as.matrix(CinMean),
+             beside=F, ylim=c(0,y.max), col=1:length(leg),
+             legend.text=leg,
+             args.legend=list( title="Inputs (kg ha-1 y-1)", cex=0.8,
+                               x="bottom", bg="white", inset=c(-0.3,0) ) )
+    title(title1,adj=1)
+    par(mar=c(3,0,3,3))
+    leg <- CoutNames
+    barplot( as.matrix(CoutMean),
+             yaxt="n",
+             beside=F, ylim=c(0,y.max), col=1:length(leg),
+             legend.text=leg,
+             args.legend=list( title="Outputs (kg ha-1 y-1)", cex=0.8,
+                               x="bottom", bg="white", inset=c(-0.3,0) ) )
+    title(title2,adj=0)
+    if(verify) {
+      C_f      <- sim[ , which( outputNames=="C_f" )    ] # kgC m-2
+      CT_f     <- sim[ , which( outputNames=="CT_f")    ] # kgC m-2
+      Csoil_f  <- sim[ , which( outputNames=="Csoil_f") ] # kgC m-2 
+      Csys_f   <- C_f + CT_f + Csoil_f                       # kgC m-2
+      D_Csys_f <- Csys_f[NDAYS] - Csys_f[1]                  # kgC m-2
+      CinSum       <- colSums(sim[2:NDAYS,i.Cin ])        # kgC m-2
+      CoutSum      <- colSums(sim[2:NDAYS,i.Cout])        # kgC m-2
+      CinMinusCout <- sum(CinSum) - sum(CoutSum)
+      cat( "VERIFYING THE C-BALANCE FOR THE SYSTEM (kgC m-2):",
+           "\nState variable change: ", D_Csys_f,
+           "\nInputs minus outputs : ", CinMinusCout )
+    }
+  }
+```
+
+```{r, eval=F}
+  par( mfrow=c(2,4) )
+  par( mar=c(3,3,3,0) )
+  source("initialisation/initialise_CAF2021_Turrialba_01_E_AC.R")
+  output <- run_model()
+  plot_CbalanceSystem(output, title1="System C-balance: ", title2="Treatment 1", ymax=11000)
+  par( mar=c(3,3,3,0) )
+  source("initialisation/initialise_CAF2021_Turrialba_02_E_MC.R")
+  output <- run_model()
+  plot_CbalanceSystem(output, title1="System C-balance: ", title2="Treatment 2", ymax=11000)
+  par( mar=c(3,3,3,0) )
+  source("initialisation/initialise_CAF2021_Turrialba_03_E_MO.R")
+  output <- run_model()
+  plot_CbalanceSystem(output, title1="System C-balance: ", title2="Treatment 3", ymax=11000)
+  par( mar=c(3,3,3,0) )
+  source("initialisation/initialise_CAF2021_Turrialba_04_E_BO.R")
+  output <- run_model()
+  plot_CbalanceSystem(output, title1="System C-balance: ", title2="Treatment 4", ymax=11000)
+```
+
+Biogeochemical balances can be calculated for the soil, the coffee plants, the trees, or the whole system. Four examples are shown in Fig. \ref{fig:Balances}.
+
+```{r Balances, fig.height=5, fig.cap="\\label{fig:Balances}Biogeochemical balances."}
+  source("initialisation/initialise_CAF2021_Turrialba_01_E_AC.R")
+  output <- run_model()
+  par( mar=c(3,3,3,0), mfrow=c(2,4) )
+  plot_NbalanceSoil  (output, title1="Soil N-balance"  , title2="")
+  par( mar=c(3,3,3,0) )
+  plot_CbalanceSoil  (output, title1="Soil C-balance"  , title2="")
+  par( mar=c(3,3,3,0) )
+  plot_H2ObalanceSoil(output, title1="Soil H2O-balance", title2="")
+  par( mar=c(3,3,3,0) )
+  plot_CbalanceSystem(output, title1="System C-balance", title2="")
+```
+
+We see in in Fig. \ref{fig:Balances} ...
+
+Balances useful for ... See Fig. \ref{fig:Nbalance4Nlevels} ...
+
+```{r Nbalance4Nlevels, fig.height=5, fig.cap="\\label{fig:Nbalance4Nlevels}Biogeochemical balances."}
+  par( mfrow=c(2,4) )
+  par(mar=c(3,3,3,0))
+  source("initialisation/initialise_CAF2021_Turrialba_01_E_AC.R")
+  output <- run_model()
+  plot_NbalanceSoil(output, title1="Soil N-balance: ", title2="Treatment 1", ymax=800)
+  par(mar=c(3,3,3,0))
+  source("initialisation/initialise_CAF2021_Turrialba_02_E_MC.R")
+  output <- run_model()
+  plot_NbalanceSoil(output, title1="Soil N-balance: ", title2="Treatment 2", ymax=800)
+  par(mar=c(3,3,3,0))
+  source("initialisation/initialise_CAF2021_Turrialba_03_E_MO.R")
+  output <- run_model()
+  plot_NbalanceSoil(output, title1="Soil N-balance: ", title2="Treatment 3", ymax=800)
+  par(mar=c(3,3,3,0))
+  source("initialisation/initialise_CAF2021_Turrialba_04_E_BO.R")
+  output <- run_model()
+  plot_NbalanceSoil(output, title1="Soil N-balance: ", title2="Treatment 4", ymax=800)
+```
+
+## C-distribution within coffee and within each tree species
+
+The carbon in coffee plants is distributed between roots (CR), woody plant parts (CW), leaves (CL) and beans (CP). Their progression over time is shown in Fig. \ref{fig:OutputsCarbonCoffee}.
+
+```{r}
+  plot_CdistributionCoffee <- function( sim=output ) {
+    Time <- sim[,1]
+    i.CP <- which( outputNames=="CP_f" ) ; CP <- sim[,i.CP]
+    i.CL <- which( outputNames=="CL_f" ) ; CL <- sim[,i.CL]
+    i.CW <- which( outputNames=="CW_f" ) ; CW <- sim[,i.CW]
+    i.CR <- which( outputNames=="CR_f" ) ; CR <- sim[,i.CR]
+    plot( Time, CR+CW+CL+CP,
+          main="Carbon in coffee (kg C m-2)",
+          xlab="", ylab="", type="l", ylim=c(0,max(CR+CW+CL+CP)) )
+    points( Time, CR+CW+CL, type="l", col="yellow" )
+    points( Time, CR+CW   , type="l", col="green" )
+    points( Time, CR      , type="l", col="red" )
+    legend( "topleft", col=c("black","yellow","green","red"), cex=0.7, lty=1,
+            legend=c("+ CP: Beans",
+                     "+ CL: Leaves",
+                     "+ CW: Wood",
+                     "   CR: Roots" ) )
+  }
+
+  plot_CdistributionTrees <- function( sim=output, it=1:3 ) {
+    Time <- sim[,1]
+    i.CPT <- sapply( 1:3, function(i){which( outputNames==paste0("CPT_t(",i,")"))} )
+    i.CLT <- sapply( 1:3, function(i){which( outputNames==paste0("CLT_t(",i,")"))} )
+    i.CBT <- sapply( 1:3, function(i){which( outputNames==paste0("CBT_t(",i,")"))} )
+    i.CST <- sapply( 1:3, function(i){which( outputNames==paste0("CST_t(",i,")"))} )
+    i.CRT <- sapply( 1:3, function(i){which( outputNames==paste0("CRT_t(",i,")"))} )
+    for(t in it) {
+      CPT   <- sim[,i.CPT[t]] ; CLT <- sim[,i.CLT[t]] ; CBT <- sim[,i.CBT[t]]
+      CST   <- sim[,i.CST[t]] ; CRT <- sim[,i.CRT[t]]
+      y.max <- max(CRT+CST+CBT+CLT+CPT)
+      plot( Time, CRT+CST+CBT+CLT+CPT, ylim=c(0,y.max),
+            main=paste0("Carbon in tree sp. ",it," (kg C m-2)"),
+            xlab="", ylab="", type="l" )
+      points( Time, CRT+CST+CBT+CLT, type="l", col="yellow" )
+      points( Time, CRT+CST+CBT    , type="l", col="green"  )
+      points( Time, CRT+CST        , type="l", col="red"    )
+      points( Time, CRT            , type="l", col="blue"   )
+      legend( "topleft", col=c("black","yellow","green","red","blue"), cex=0.7, lty=1,
+              legend=c("+ CPT: Fruits",
+                       "+ CLT: Leaves",
+                       "+ CBT: Branches",
+                       "+ CST: Stems",
+                       "   CRT: Roots" ) )
+    }
+  }
+```
+
+```{r OutputsCarbonCoffee, echo=F, fig.height=5, fig.cap="\\label{fig:OutputsCarbonCoffee}Cumulative time series for the carbon in coffee"}
+  # source("initialisation/initialise_CAF2021_Turrialba_01_E_AC.R")
+  # source("initialisation/initialise_CAF2021_Turrialba_04_E_BO.R")
+  source("initialisation/initialise_CAF2021_Turrialba_15_CE_AC.R")
+  output <- run_model()
+
+  par( mfrow=c(2,2) )
+  plot_CdistributionCoffee()
+  plot_CdistributionTrees()
+```
+
+# Bayesian calibration for Turrialba
+
+```{r}
+  # After running a BC
+  load('BC_04_56.RData')
+  
+  s <- 1 # Choose a site from those for which the BC was carried out
+  
+  params_BC_MAP   <- scparMAP_BC  * sc
+  params          <- list_params        [[s]] ; matrix_weather <- list_matrix_weather[[s]]
+  calendar_fert   <- list_calendar_fert [[s]] ; calendar_prunC <- list_calendar_prunC[[s]] 
+  calendar_prunT  <- list_calendar_prunT[[s]] ; calendar_thinT <- list_calendar_thinT[[s]]  
+  NDAYS           <- list_NDAYS         [[s]]       
+  ip_BC_s         <- ip_BC_site         [[s]]
+  icol_pChain_s   <- icol_pChain_site   [[s]]
+# Calculate model output for the MAP parameter vector
+  params[ip_BC_s] <- params_BC_MAP      [icol_pChain_s]
+  params.MAP         <- params
+  matrix_weather.MAP <- matrix_weather
+  calendar_fert.MAP  <- calendar_fert
+  calendar_prunC.MAP <- calendar_prunC
+  calendar_prunT.MAP <- calendar_prunT
+  calendar_thinT.MAP <- calendar_thinT
+  NDAYS.MAP          <- NDAYS
+  
+  source('initialisation/initialise_CAF2021_Turrialba_20_PS_MC.R')
+  output <- run_model( params, matrix_weather, calendar_fert, calendar_prunC,
+                     calendar_prunT, calendar_thinT, NDAYS )
+
+  output.MAP <- run_model( params.MAP, matrix_weather.MAP,
+                           calendar_fert.MAP, calendar_prunC.MAP,
+                           calendar_prunT.MAP, calendar_thinT.MAP, NDAYS.MAP )
+```
+
+```{r}  
+  source('BC/BC_averageYields.R')
+```
+
+```{r}
+  plot_output( list_output=list(output.MAP),
+               vars       =c( "fTran(1)"    , "fNgrowth(1)", "DVS(1)"  ,
+                              "SINKP(1)"    , "DayFl(1)"   , "PARMA(1)" ,
+                              "harvDM_f_hay", "CT_f" ) )
+  plot_output( list_output=list(output.MAP),
+               vars       =c( "fTran(2)"    , "fNgrowth(2)", "DVS(2)"  ,
+                              "SINKP(2)"    , "DayFl(2)"   , "PARMA(1)" ,
+                              "harvDM_f_hay", "CT_f" ) )
+```
+
+# Bienniality
+
+- Various attempts
+- Keep model simple
+- Await further BC
+
+## Checking bienniality
+
+```{r}
+  plot_output(vars=c( "fTran(1)", "fNgrowth(1)",
+                      "DVS(1)"  , "SINKP(1)" , "SINKPMAXnew(1)",
+                      "DayFl(1)", "PARMA(1)") )
+  plot_output(vars=c( "fTran(2)", "fNgrowth(2)",
+                      "DVS(2)"  , "SINKP(2)" , "SINKPMAXnew(2)",
+                      "DayFl(2)", "PARMA(2)") )
+
+  # plot_output( vars=c("Ac(1)","Ac(2)","Ac(3)","Ac(4)","Ac(5)","Ac(6)") )
+```
+
+# Model parameterisation for banana and avocado
+
+Banana (not really trees but we keep model structure) and avocado. Separate management calendars. 
+
+```{r}
+  source("initialisation/initialise_CAF2021_Turrialba_19_PS_AC.R")
+  params <- set_par( "TREEDENS0(2)", 0.04 )
+  output <- run_model()
+
+  plot_output(vars=c( "harvCPT_t(1)", "harvCPT_t(2)", "harvCPT_t(3)",
+                      "harvNPT_t(1)", "harvNPT_t(2)", "harvNPT_t(3)" ))
+```
+
+## Banana modelling
+
+- Simba: complex model for banana:
+  - @Blazy_2010_BANAD 
+  - @Damour_2012_Simulation: Tbase = 14 degC, SLA = 0.018 m2 g-1 (corresponds well to our 40 m2 kg-1 leaf C), KEXTT = 0.7 (more realistic than Chaves' value!), LAI up to 3.5. Leaf N-content 3-4% of DM (so NC ratio 0.07-0.09. In CAF2021 it can vary 0.05-0.12 with FNCLMINT=0.4 and NCLTMAX=12).
+  - @Ripoche_2012_Modeling.
+  - @Tixier_2008_SIMBA.
+
+- Modelling plantain in Colombia: @ChavesC._2009_Modeling. Very low light extinction coefficient of 0.2817. LUE 1.63 g MJ-1. Plantain typically less then 10 t ha-1 y-1 when grown in coffee. Tbase = 12.5 degC, Topt = 25 degC, Tmax = 40 degC. Implausibly high LAI of 12.9 (with observations even going up to 15), presumably because of an uncommon definition of LAI, as the given unit of 'm' makes no sense. Aboveground allocation during the vegetative stage about equally to leaves, pseudostem and corm (all about 1/3). During the reproductive stage leaves did nor grow anymore, the colm lost mass, pseudostem kept growing somewhat, but majority of allocation went to the fruits. At the end of their experiment, bunch dry matter was 45% of the aboveground total.
+
+- @VanDenBergh_2012_Climate. Empirical temperature- and rainfall-dependent banana model based on EcoCrop. Critical monthly tempreatures: Tkill = 0 degC, Tmin = 12 degC, Tmax = 33 degC, Topt = 17.5 to 26.3 degC.
+
+- @Landry_2017_foliar simulate growth of banana and expansion of Black leaf streak disease caused by *Mycosphaerella fijiensis*. The banana submodel focuses on leaf number and position.
+
+## Banana modelling
+
+- Simba: complex model for banana:
+  - @Blazy_2010_BANAD 
+  - @Damour_2012_Simulation: Tbase = 14 degC, SLA = 0.018 m2 g-1 (corresponds well to our 40 m2 kg-1 leaf C), KEXTT = 0.7 (more realistic than Chaves' value!), LAI up to 3.5. Leaf N-content 3-4% of DM (so NC ratio 0.07-0.09. In CAF2021 it can vary 0.05-0.12 with FNCLMINT=0.4 and NCLTMAX=12).
+  - @Ripoche_2012_Modeling.
+  - @Tixier_2008_SIMBA.
+
+- Modelling plantain in Colombia: @ChavesC._2009_Modeling. Very low light extinction coefficient of 0.2817. LUE 1.63 g MJ-1. Plantain typically less then 10 t ha-1 y-1 when grown in coffee. Tbase = 12.5 degC, Topt = 25 degC, Tmax = 40 degC. Implausibly high LAI of 12.9 (with observations even going up to 15), presumably because of an uncommon definition of LAI, as the given unit of 'm' makes no sense. Aboveground allocation during the vegetative stage about equally to leaves, pseudostem and corm (all about 1/3). During the reproductive stage leaves did nor grow anymore, the colm lost mass, pseudostem kept growing somewhat, but majority of allocation went to the fruits. At the end of their experiment, bunch dry matter was 45% of the aboveground total.
+
+- @VanDenBergh_2012_Climate. Empirical temperature- and rainfall-dependent banana model based on EcoCrop. Critical monthly tempreatures: Tkill = 0 degC, Tmin = 12 degC, Tmax = 33 degC, Topt = 17.5 to 26.3 degC.
+
+- @Landry_2017_foliar simulate growth of banana and expansion of Black leaf streak disease caused by *Mycosphaerella fijiensis*. The banana submodel focuses on leaf number and position.
+
+## Banana literature
+
+- @Bellamy_2013_Banana: 400 banana-plants per hectare in coffee plantation in Costa Rica.
+
+- @Cerda_2020_Coffee "identified six coffee agroforestry systems (CAFs) as the most promising ones for reducing losses [by pests and diseases] while simultaneously providing other ecosystem services [e.g. C-sequestration]" in which the density of Musaceae ranged from 0-1400 ha-1 (mean 216 ha-1). Total shade from all tree spp. (service, fruit, timber) did not surpass 35%.
+
+- @Dold_2007_Musa Musa in Shaded Coffee in Costa Rica. Interviews with farmers in Turrialba region: most common AFS: Coffee + Poro (E.p.) + Banana/plantain (most common at 30% banana 'Gros Michel') + Laurel (Cordia alliodora). Typical tree densities: Poro 162 ha-1, Banana/plantain 179 ha-1, Laurel 37 ha-1. Cites literature where poro is 130-208 ha-1, banana 149-343 ha-1. Banana from 120 ha-1 too much coffee yield reducing.
+
+- @Dold_2010_Improving. "In [Central] Costa Rica mean plant density is 4244 coffee ha-1, 341 trees ha-1, and 579 bananas ha-1. In [Northern] Nicaragua mean plant density is 4852 coffee plants ha-1, 185 trees ha-1, and 358 bananas ha-1. Thirteen different banana cultivars were identified, of which 91% are from subgroup AAA Gros Michel and AAA Cavendish in Costa Rica, and 97% are from AAA Gros Michel and AAA Red Subgroup in Nicaragua.
+
+- @GalvisR._2013_Effect. SLA from initially high values of 150 decreasing to 100 m2 g-1 (unit must be wrong).
+
+- @Jullien_2001_Withinbunch: Pulp DMP reaches asymptotically about 30%. 
+
+- @MartinezAcosta_2011_Dinamica. Final DM per tree, bunch:leaves:pseudostem+corm: 3000:1200:1800 g DM. With 0.45 gC g-1 DM this becomes 1350:540:810 g C per tree.
+
+- @Mustaffa_2012_Banana: leaf N content about 3% of DM.
+
+- @Rice_2011_Fruits: Guatemalan coffee farmers most often mentioned banana as their primary fruit tree in coffee fields (36% of respondents), followed by avocado (26%).
+
+- @MartinezAcosta_2011_Dinamica. Final DM per tree, bunch:leaves:pseudostem+corm: 3000:1200:1800 g DM. With 0.45 gC g-1 DM this becomes 1350:540:810 g C per tree.
+
+- @Mustaffa_2012_Banana: leaf N content about 3% of DM.
+
+- @Rice_2011_Fruits: Guatemalan coffee farmers most often mentioned banana as their primary fruit tree in coffee fields (36% of respondents), followed by avocado (26%).
+
+- @Schaffer_1999_Atmospheric give DM-partitioning of 6-month old vegetative banana (cv. 'Gros Michel'): leaves:pseudostem+rhizome:roots =  19:64:19%.
+
+- @Staver_2013_Intercropping inventoried the presence of banana in coffee agroforestry systems in Central America and Peru. 'Gros Michel' was the most-used banana cv. Banana planting density ranged from 300 to 600 ha-1, and trees (mainly poro and Inga) 150-550 ha-1.
+
+- @TorresB._2014_Accumulation found that DM-partitioning of cv. 'Williams' in Colombia was not affected strongly by the level of N-fertilization (0 to 483 kg N ha-1), but fruit yields increased from 9 to 12 kg DM. At harvest after 161 kg N ha-1 fertilization: corm+pseudostem/leaves/fruits = 6/1.5/3.5 kg DM per plant. Total plant N-concentration was 1-1.5% of DM.
+
+- @Turner_2007_Environmental: LAI ranges from 2 to 5 m2 m-2.
+
+## Banana simulation in CAF2021
+
+To make CAF2021 simulate banana in a coffee plantation, we start by initialising for a full-sun system, then set the density of fruit trees (TREEDENS(2)) to a positive value, and choose parameter settings that are appropriate for banana.
+
+```{r}
+  source("initialisation/initialise_CAF2021_Turrialba_19_PS_AC.R")
+  params <- set_par( "TREEDENS0(2)"                            , 0.04       )
+  params <- set_par( c("CBtree0","CLtree0","CRtree0","CStree0"), rep(1,4)   )
+  params <- set_par( c("FWT(2)","FST(2)","FPT(2)")             , rep(0.5,3) )
+  params <- set_par( "TBEFOREPT(2)"                            , 100        )
+  params <- set_par( c("TCBT(2)","TCRT(2)","TCST(2)")          , rep(365,3) )
+  params <- set_par( c("KH(2)","KAC(2)")                       , c(4,6)     )
+  output <- run_model()
+
+  par( mfrow=c(3,3), mar=c(3,3,3,3) )
+  
+  plot_CdistributionCoffee() ; plot_CdistributionTrees(it=2)
+  
+  Time <- output[,1]
+    i.ht2    <- which( outputNames=="h_t(2)" )       ; h_t2      <- output[,i.ht2]
+    i.Ac1    <- which( outputNames=="Ac(1)" )        ; Ac1       <- output[,i.Ac1]
+    i.CAt2   <- which( outputNames=="CAtree_t(2)" )  ; CAtree2   <- output[,i.CAt2]
+    i.Ycf    <- which( outputNames=="harvDM_f_hay" ) ; YcoffeeDM <- output[,i.Ycf]
+    i.CPT    <- which( outputNames=="harvCPT_f" )    ; harvCPT_f <- output[,i.CPT]
+    YtreesDM <- harvCPT_f * 1e4 * 365 / 0.45
+  plot( Time, h_t2     , type="l", ylab="", main="Banana height (m)" )
+  plot( Time, CAtree2  , type="l", ylab="", main="Crown area (m2 tree-1)" )
+  plot( Time, 1-Ac1    , type="l", ylab="", main="Banana shade (-)" )
+  plot( Time, YcoffeeDM, type="l", ylab="", main="Coffee yield (kg DM ha-1)" )
+  plot( Time, YtreesDM , type="l", ylab="", main="Banana yield (kg DM ha-1)" )
+```
+
+## Avocado modelling
+
+## Avocado literature
+
+## Avocado simulation in CAF2021
+
+To make CAF2021 simulate avocado in a coffee plantation, we proceed as for banana. So we start by initialising for a full-sun system, then set the density of fruit trees (TREEDENS(2)) to a positive value, and choose parameter settings that are appropriate for avocado.
+
+Compared with banana:
+
+- Lower planting density of 200 ha-1. CAF2021-parameter TREEDENS0(2) = 0.02.
+- Considerable delay (4-7 years) to first fruit production. CAF2021-parameter TBEFOREPT = 1825.
+- Similarly small trees. CAF2021-parameters KH(2) = 4, KAC(2) = 6.
+- True tree with woody plant parts and roots that senesce much more slowly than the pseudostem and roots of banana. Some stem senescence is still simulated to mimic the common practice of pruning avocado to keep its height within convenient levels for harvesting. CAF2021-parameters TCRT(2) = TCST(2) = TCBT(2) = 1000.
+- Similar allocation pattern (but with true stems and branches instead of rhizomes and pseudostems). CAF2021-parameters FWT(2) = 0.5, FST(2) = 0.5, FPT(2) = 0.5.
+- More seasonal than banana (but much less than coffee). Often two to three vegetative flushes and long harvest periods. But the harvesting occurs throughout the year which we simulate as for banana as a constant low-intensity harvesting. This allows us to keep CAF2021 simple without the need for simulateing flowering and fruit set phenology for any trees.
+
+```{r}
+  source("initialisation/initialise_CAF2021_Turrialba_19_PS_AC.R")
+  params <- set_par( "TREEDENS0(2)"                            , 0.02       )
+  params <- set_par( c("FWT(2)","FST(2)","FPT(2)")             , rep(0.5,3) )
+  params <- set_par( "TBEFOREPT(2)"                            , 1825       )
+  params <- set_par( c("TCBT(2)","TCRT(2)","TCST(2)")          , c(1000,1000,1000) )
+  params <- set_par( c("KH(2)","KAC(2)")                       , c(4,6)     )
+  output <- run_model()
+
+  par( mfrow=c(3,3), mar=c(3,3,3,3) )
+  
+  plot_CdistributionCoffee() ; plot_CdistributionTrees(it=2)
+  
+  Time <- output[,1]
+    i.ht2    <- which( outputNames=="h_t(2)" )       ; h_t2      <- output[,i.ht2]
+    i.Ac1    <- which( outputNames=="Ac(1)" )        ; Ac1       <- output[,i.Ac1]
+    i.CAt2   <- which( outputNames=="CAtree_t(2)" )  ; CAtree2   <- output[,i.CAt2]
+    i.Ycf    <- which( outputNames=="harvDM_f_hay" ) ; YcoffeeDM <- output[,i.Ycf]
+    i.CPT    <- which( outputNames=="harvCPT_f" )    ; harvCPT_f <- output[,i.CPT]
+    YtreesDM <- harvCPT_f * 1e4 * 365 / 0.45
+  plot( Time, h_t2     , type="l", ylab="", main="Avocado height (m)" )
+  plot( Time, CAtree2  , type="l", ylab="", main="Crown area (m2 tree-1)" )
+  plot( Time, 1-Ac1    , type="l", ylab="", main="Avocado shade (-)" )
+  plot( Time, YcoffeeDM, type="l", ylab="", main="Coffee yield (kg DM ha-1)" )
+  plot( Time, YtreesDM , type="l", ylab="", main="Avocado yield (kg DM ha-1)" )
+```
+
+# Outlook
+
+- Model structure? Not advisable to change much more
+  - Height not used in calculating overshadowing. Note that in banana the height of the top leaf exceeds that of the top of the pseudostem.
+- BC for NIC and GTM
+- Application to farms surveyed in project SEACAF
+- Model documentation, GitHub, Teaching
+- Publication of modelling results
+  
+# Acknowledgements {-}
+
+We thank the Natural Resources Institute of the University of Greenwich for funding. Colleagues in Central America and Europe shared their expertise on coffee agroforestry in project SEACAF and earlier projects, and this was essential for model development.
+
+# References {-}
