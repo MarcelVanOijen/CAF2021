@@ -49,6 +49,32 @@ Publications on earlier versions of the CAF model and its inputs:
 
 
 
+# TO DO - development, parameterisation and testing of CAF2021
+
+## Structural changes to consider (see also 'Parameter changes to consider')
+
+- Revisit the idea of adding N- and water-limitation stress (fTran, fNgrowth) to the calculation of SINKPMAXnew.
+- Introduce tree species-specific TOPTT. For example, we expect that parameter to have much lower values in the 'cold'-region avocado cultivar 'Hass' than in banana.
+
+## Parameter changes to consider
+
+- Increase Nsoil (via CNLITT0 etc.) to make it more realistic but reduce KNUPT & KNUPTT to maintain appropriate N-limitation and sensitivity to fertilisation.
+- Reduce SHADEPROJ to 1.0 (and remove it?) which may make CAtree-parameters KAC and KACEXP larger when calibrated to the Turrialba experiment, to meet the relatively low values of Ac (shading) measured there.
+  - The data seem inconsistent, with TREEDENS * CAtree implying much greater shading than observed. But also consider the possibility that the measurements are correct and that 'shading' differs from 'covered by crowns'. Perhaps shading should be calculated in CAF2021 as TREEDENS * CAtree * (1-KEXTT*LAIT), to account for the fact that not every cm2 under a crown is always in the shade.
+
+## Improve BC for Turrialba
+
+- Check the plausibility of the MAP-simulated C- and N-balances for all 18 treatments.
+- Replace the annual bean yields with average yields and their variability.
+  - Try that once without any other variables: can CAF2021 in principle simulate observed yield mean and variance?
+
+- Reconsider role of SHADEPROJ and CAtree vs. shading as mentioned above.
+- Assign correct species-specific calendars for thinning and pruning.
+- Assign correct fertilisation levels (BO should for example not be zero).
+
+
+
+
 # Model structure
 
 CAF2021 simulates a coffee agroforestry system where the coffee plants are shaded by 0, 1, 2 or 3 tree species. The model allows up to two 'lower-layer' tree species, but no more than one 'upper-layer' tree species. The simulated tree species can have different initial planting density and thinning regime.
