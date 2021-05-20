@@ -4,7 +4,7 @@
 ## 1. SITE-SPECIFIC SETTINGS ##
    year_start     <- as.integer(2000)
    doy_start      <- as.integer( 214)
-   NDAYS          <- as.integer(4896)
+   NDAYS          <- as.integer(4897)
    file_weather   <- 'weather/weather_2000_2013_niccorregido.txt'
    file_params    <- 'parameters/parameters_default.txt'
      parcol       <- 2
@@ -21,6 +21,7 @@
    df_params      <- read.table( file_params, header=T, sep="\t", row.names=1 )
    names_params   <- row.names(df_params)
    params         <- df_params[,parcol]
+   # params <- set_par( c("NFERTMULT","RAINMULT"), c(2,1) )
    
    calendar_prunC[ 1:10, 1 ] <- 2004:2013
    calendar_prunC[ 1:10, 2 ] <- 59

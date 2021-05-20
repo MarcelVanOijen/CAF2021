@@ -3,7 +3,7 @@
 
 ## 1. INITIALISE MCMC ##
    # nChain <- as.integer(36000)
-   nChain <- as.integer(36)
+   nChain <- as.integer(500)
    source('BC/BC_CAF2021_MCMC_init_Masatepe_01-14.R')
 
 ## 2. RUNNING THE MCMC ##
@@ -14,3 +14,8 @@
    source('BC/BC_plot_parameters_traceplots.R')
    source('BC/BC_plot_parameters_priorbeta_histograms.R')
    source('BC/BC_plot_outputs_data.R')
+
+## 4. SAVING WORKSPACE
+   Rfile <- paste0('BC_',format(Sys.time(),"%H_%M.RData"))
+   save.image( Rfile )
+   
