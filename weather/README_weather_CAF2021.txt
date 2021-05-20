@@ -1,4 +1,4 @@
-The first line of each CAF2020 weather file should contain the following variable names:
+The first line of each CAF2021 weather file should contain the following variable names:
 
 ST	year	doy	GR	TMIN	TMAX	VP	WN	RAIN
 
