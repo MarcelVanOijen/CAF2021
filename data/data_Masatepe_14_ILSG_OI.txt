@@ -1,0 +1,10 @@
+harvDM_f_hay	2004	365	2289	0.3
+harvDM_f_hay	2005	365	2033	0.3
+harvDM_f_hay	2006	365	1211	0.3
+harvDM_f_hay	2007	365	1178	0.3
+harvDM_f_hay	2008	365	1933	0.3
+harvDM_f_hay	2009	365	244	0.3
+harvDM_f_hay	2010	365	1756	0.3
+harvDM_f_hay	2011	365	1156	0.3
+harvDM_f_hay	2012	365	527	0.3
+harvDM_f_hay	2013	365	166	0.3
