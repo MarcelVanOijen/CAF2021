@@ -60,9 +60,10 @@ real    :: Evap(nc) , fTran    (nc), Nsup(nc)   , Tran(nc) , RWA(nc)
 real    :: PARav(nc), PARint   (nc), Rainint(nc), TCOFFEE(nc)
 real    :: PARMA(nc), PARCOFFEE(nc), PARold(nc,30)
 real    :: harvDM_f_ha
-real    :: dCLT_c (nc)=0, dCBT_c   (nc)=0, dCRT_c   (nc)=0, sCSTsen_c(nc)=0
+real    :: dCLT_c(nc)=0 , dCBlitt_c(nc)=0, dCRT_c(nc)=0
+real    :: sCSTsen_c(nc)=0
 real    :: dNLT_c (nc)=0, dNBlitt_c(nc)=0, dNSlitt_c(nc)=0, dNRsomf_c(nc)=0
-real    :: NuptT_c(nc)=0, NfixT_c  (nc)=0
+real    :: NuptT_c(nc)=0, NfixT_c(nc)=0
 
 ! EXTRA OUTPUT VARIABLES
 real 	  :: Cabg_f     , harvDM_f_hay, LAI_f
@@ -74,7 +75,7 @@ real    :: CsenprunT_f, Csenprun_f  , Rsoil_f    , Crunoff_f
 real    :: Rain_f     , Drain_f     , Runoff_f   , Evap_f
 real    :: Tran_f     , TranT_f     , Rainint_f  , RainintT_f
 real    :: C_f        , gC_f        , dC_f       , prunC_f   , harvCP_f
-real    :: CT_f       , gCT_f       , harvCPT_f  , harvCST_f
+real    :: CT_f       , gCT_f       , harvCBT_f  , harvCPT_f , harvCST_f
 real    :: CR_f       , CW_f        , CL_f       , CP_f
 
 ! PARAMETERS
@@ -239,7 +240,7 @@ do day = 1, NDAYS
   
 ! Splitting tree field-fluxes over different land cover classes
   call RescaleExt_t_tcc(dCLT_t   ,At,Atc, DUMMY_tc,dCLT_c   )
-  call RescaleExt_t_tcc(dCBT_t   ,At,Atc, DUMMY_tc,dCBT_c   )
+  call RescaleExt_t_tcc(dCBlitt_t,At,Atc, DUMMY_tc,dCBlitt_c)
   call RescaleExt_t_tcc(sCSTsen_t,At,Atc, DUMMY_tc,sCSTsen_c)
   call RescaleExt_t_tcc(dCRT_t   ,At,Atc, DUMMY_tc,dCRT_c   )
   call RescaleExt_t_tcc(dNLT_t   ,At,Atc, DUMMY_tc,dNLT_c   )
@@ -252,7 +253,7 @@ do day = 1, NDAYS
 ! Soil (arrays: [m-2 sun, m-2 shade])
   WA    = WA    + adjWA    + RAIN       - Rainint   - RainintT_c - Runoff &
                 - Drain    - Evap       - Tran      - TranT_c
-  CLITT = CLITT + adjCLITT + dCL        + dCLT_c    + dCBT_c + sCSTsen_c &
+  CLITT = CLITT + adjCLITT + dCL        + dCLT_c    + dCBlitt_c + sCSTsen_c &
                 - rCLITT   - dCLITT     + prunCL    + prunCW
   CSOMF = CSOMF + adjCSOMF + dCLITTsomf + dCR       + dCRT_c - rCSOMF - dCSOMF
   CSOMS = CSOMS + adjCSOMS + dCSOMFsoms - dCSOMS
@@ -300,7 +301,7 @@ do day = 1, NDAYS
   NuptT_f     = sum(Ac*NuptT_c)               ! N-uptake trees
   
 ! C-balance soil (kgC m-2 field d-1): Change in CLITT+CSOMF+CSOMS
-  CsenprunT_f = sum(Ac*(dCLT_c + dCBT_c + sCSTsen_c + dCRT_c))
+  CsenprunT_f = sum(Ac*(dCLT_c + dCBlitt_c + sCSTsen_c + dCRT_c))
                                               ! Senescence + pruning trees
   Csenprun_f  = sum(Ac*(dCL + prunCL + prunCW + dCR))
                                               ! Senescence + pruning coffee
@@ -326,6 +327,7 @@ do day = 1, NDAYS
 ! C-balance system (kgC m-2 field d-1):
 ! Change in CL+CW+CR+CP + CLT_t+CST_t+CBT_t+CPT_t+CRT_t + CLITT+CSOMF+CSOMS
   gCT_f       = sum(gCLT_t + gCST_t + gCBT_t + gCPT_t + gCRT_t)
+  harvCBT_f   = sum(harvCBT_t)
   harvCPT_f   = sum(harvCPT_t)
   harvCST_f   = sum(harvCST_t)
   ! gC_f, Crunoff_f, harvCP_f, Rsoil_f
@@ -404,32 +406,33 @@ do day = 1, NDAYS
   
   y(day,108  ) = CT_f                 ! kgC  m-2
   y(day,109  ) = gCT_f                ! kgC  m-2 d-1
-  y(day,110  ) = harvCPT_f            ! kgC  m-2 d-1
-  y(day,111  ) = harvCST_f            ! kgC  m-2 d-1
+  y(day,110  ) = harvCBT_f            ! kgC  m-2 d-1
+  y(day,111  ) = harvCPT_f            ! kgC  m-2 d-1
+  y(day,112  ) = harvCST_f            ! kgC  m-2 d-1
   
-  y(day,112:114) = CPT_t              ! kgC  m-2
-  y(day,115:117) = harvCPT_t          ! kgC  m-2 d-1
-  y(day,118:120) = harvNPT_t          ! kgN  m-2 d-1
+  y(day,113:115) = CPT_t              ! kgC  m-2
+  y(day,116:118) = harvCPT_t          ! kgC  m-2 d-1
+  y(day,119:121) = harvNPT_t          ! kgN  m-2 d-1
   
-  y(day,121    ) = DVS(1)             ! -
-  y(day,122    ) = SINKP(1)           ! -
-  y(day,123    ) = SINKPMAXnew(1)     ! -
-  y(day,124    ) = DayFl(1)           ! -
-  y(day,125    ) = PARMA(1)           ! MJ   m-2 d-1
-  y(day,126    ) = DVS(2)             ! -
-  y(day,127    ) = SINKP(2)           ! -
-  y(day,128    ) = SINKPMAXnew(2)     ! -
-  y(day,129    ) = DayFl(2)           ! -
-  y(day,130    ) = PARMA(2)           ! MJ   m-2 d-1
+  y(day,122    ) = DVS(1)             ! -
+  y(day,123    ) = SINKP(1)           ! -
+  y(day,124    ) = SINKPMAXnew(1)     ! -
+  y(day,125    ) = DayFl(1)           ! -
+  y(day,126    ) = PARMA(1)           ! MJ   m-2 d-1
+  y(day,127    ) = DVS(2)             ! -
+  y(day,128    ) = SINKP(2)           ! -
+  y(day,129    ) = SINKPMAXnew(2)     ! -
+  y(day,130    ) = DayFl(2)           ! -
+  y(day,131    ) = PARMA(2)           ! MJ   m-2 d-1
 
-  y(day,131    ) = CR_f               ! kgC  m-2
-  y(day,132    ) = CW_f               ! kgC  m-2
-  y(day,133    ) = CL_f               ! kgC  m-2
-  y(day,134    ) = CP_f               ! kgC  m-2
+  y(day,132    ) = CR_f               ! kgC  m-2
+  y(day,133    ) = CW_f               ! kgC  m-2
+  y(day,134    ) = CL_f               ! kgC  m-2
+  y(day,135    ) = CP_f               ! kgC  m-2
 
-  y(day,135:137) = CRT_t              ! kgC  m-2
-  y(day,138:140) = CBT_t              ! kgC  m-2
-  y(day,141:143) = CLT_t              ! kgC  m-2
+  y(day,136:138) = CRT_t              ! kgC  m-2
+  y(day,139:141) = CBT_t              ! kgC  m-2
+  y(day,142:144) = CLT_t              ! kgC  m-2
 
 ! CALIBRATION VARIABLES IN CAF2021's AND ORIANA's ORIGINAL BC DATA FILES.
 ! ------------------------------------------------------------------------

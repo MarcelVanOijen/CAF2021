@@ -84,7 +84,7 @@ outputNames <- c( "Time", "year", "doy",
   
   "C_f"        ,  "gC_f"      , "dC_f"       , "prunC_f"   , "harvCP_f", 
   
-  "CT_f"       , "gCT_f"      , "harvCPT_f"  , "harvCST_f" ,
+  "CT_f"       , "gCT_f"      , "harvCBT_f"  , "harvCPT_f" , "harvCST_f",
   
   paste0( "CPT_t(",1:nt,")" )     ,
   paste0( "harvCPT_t(",1:nt,")" ) ,
@@ -126,7 +126,7 @@ outputUnits <- c( "(y)", "(y)", "(d)",
 
   "(kgC m-2)"                   , rep("(kgC m-2 d-1)",4),
 
-  "(kgC m-2)"                   , rep("(kgC m-2 d-1)",3),
+  "(kgC m-2)"                   , rep("(kgC m-2 d-1)",4),
   
   rep("(kgC m-2)"    ,nt)       ,
   rep("(kgC m-2 d-1)",nt)       ,

@@ -259,13 +259,33 @@ Biogeochemical balances for Masatepe (Nicaragua) are shown in Fig. \ref{fig:Bala
   source("initialisation/initialise_CAF2021_Masatepe_09_ILSS_CI.R")
   output <- run_model()
   par( mar=c(3,3,3,0), mfrow=c(2,4) )
-  plot_NbalanceSoil  (output, title1="Soil N-balance"  , title2="")
+  plot_NbalanceSoil  (output, title1="Soil N-balance"  , title2="", ver=T)
   par( mar=c(3,3,3,0) )
-  plot_CbalanceSoil  (output, title1="Soil C-balance"  , title2="")
+  plot_CbalanceSoil  (output, title1="Soil C-balance"  , title2="", ver=T)
   par( mar=c(3,3,3,0) )
-  plot_H2ObalanceSoil(output, title1="Soil H2O-balance", title2="")
+  plot_H2ObalanceSoil(output, title1="Soil H2O-balance", title2="", ver=T)
   par( mar=c(3,3,3,0) )
-  plot_CbalanceSystem(output, title1="System C-balance", title2="")
+  plot_CbalanceSystem(output, title1="System C-balance", title2="", ver=T)
+```
+
+Comparison of leaving tree branches on the field after thinning and pruning (default) vs. removing them as harvest (customary in NIC and GTM).
+
+```{r}
+  source("initialisation/initialise_CAF2021_Masatepe_09_ILSS_CI.R")
+  output <- run_model()
+  source("initialisation/initialise_CAF2021_Masatepe_09_ILSS_CI.R")
+  params <- set_par( c("FHARVBT(1)","FHARVBT(3)","FHARVBT(3)"),
+                     c( 1          , 1          , 1          ) )
+  output2 <- run_model()
+
+  par( mar=c(3,3,3,0), mfrow=c(2,4) )
+  plot_NbalanceSoil  (output, title1="Soil N-balance"  , title2="", ver=T)
+  par( mar=c(3,3,3,0) )
+  plot_CbalanceSoil  (output, title1="Soil C-balance"  , title2="", ver=T)
+  par( mar=c(3,3,3,0) )
+  plot_NbalanceSoil  (output2, title1="Soil N-balance 2"  , title2="", ver=T)
+  par( mar=c(3,3,3,0) )
+  plot_CbalanceSoil  (output2, title1="Soil C-balance 2"  , title2="", ver=T)
 ```
 
 Fig. \ref{fig:Nbalance4Nlevels} shows how the soil N-balance is affected by N-fertilisation.
@@ -275,19 +295,19 @@ Fig. \ref{fig:Nbalance4Nlevels} shows how the soil N-balance is affected by N-fe
   par(mar=c(3,3,3,0))
   source("initialisation/initialise_CAF2021_Masatepe_09_ILSS_CI.R")
   output <- run_model()
-  plot_NbalanceSoil(output, title1="", title2="CI", ymax=800)
+  plot_NbalanceSoil(output, title1="", title2="CI", ymax=800, ver=T)
   par(mar=c(3,3,3,0))
   source("initialisation/initialise_CAF2021_Masatepe_10_ILSS_CM.R")
   output <- run_model()
-  plot_NbalanceSoil(output, title1="", title2="CM", ymax=800)
+  plot_NbalanceSoil(output, title1="", title2="CM", ymax=800, ver=T)
   par(mar=c(3,3,3,0))
   source("initialisation/initialise_CAF2021_Masatepe_11_ILSS_OI.R")
   output <- run_model()
-  plot_NbalanceSoil(output, title1="", title2="OI", ymax=800)
+  plot_NbalanceSoil(output, title1="", title2="OI", ymax=800, ver=T)
   par(mar=c(3,3,3,0))
   source("initialisation/initialise_CAF2021_Masatepe_12_ILSS_OM.R")
   output <- run_model()
-  plot_NbalanceSoil(output, title1="", title2="OM", ymax=800)
+  plot_NbalanceSoil(output, title1="", title2="OM", ymax=800, ver=T)
 ```
 
 
@@ -348,12 +368,12 @@ Fig. \ref{fig:Nbalance4Nlevels} shows how the soil N-balance is affected by N-fe
 
 Fig. \ref{fig:YieldsObsSim} shows observed and simulated variation of coffee production in the 14 simulated treatments of the Masatepe experiment.
 
-```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSim}Simulated vs. observed annual yields for the 14 treatments in Masatepe 2005-2014. Left: all 140 recorded and simulated yields. Right: average yield for each of the treatments."}
+```{r, eval=F, out.width="100%", fig.cap="\\label{fig:YieldsObsSim}Simulated vs. observed annual yields for the 14 treatments in Masatepe 2005-2014. Left: all 140 recorded and simulated yields. Right: average yield for each of the treatments."}
   load('BC_00_10.RData')
   source('BC/BC_averageYields.R')
 ```
 
-```{r}
+```{r, eval=F}
   s <- 1 # Choose a site from those for which the BC was carried out
   params_BC_MAP   <- scparMAP_BC  * sc
   params          <- list_params        [[s]] ; matrix_weather <- list_matrix_weather[[s]]

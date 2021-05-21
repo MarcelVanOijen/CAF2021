@@ -35,10 +35,12 @@ real :: NCLTnew_t(nt)=0, NdemT_t(nt)=0, NuptT_t  (nt)=0
 real :: NfixT_t  (nt)=0
 
 ! CNtree
-real :: dCBT_t   (nt)=0, dCLT_t(nt)=0, dCPT_t(nt)=0, dCRT_t(nt)=0, dCST_t(nt)=0
-real :: dNBlitt_t(nt)=0, dNSlitt_t(nt)=0, dNLT_t(nt)=0, dNPT_t(nt)=0, dNRsomf_t(nt)=0
-real :: harvCPT_t(nt)=0, harvNPT_t(nt)=0
-real :: harvCST_t(nt)=0, harvNST_t(nt)=0
+real :: dCBlitt_t(nt)=0, dCBT_t   (nt)=0, dCLT_t   (nt)=0
+real :: dCPT_t   (nt)=0, dCRT_t   (nt)=0, dCST_t   (nt)=0
+real :: dNBlitt_t(nt)=0, dNSlitt_t(nt)=0, dNLT_t   (nt)=0
+real :: dNPT_t   (nt)=0, dNRsomf_t(nt)=0
+real :: harvCBT_t(nt)=0, harvCPT_t(nt)=0, harvCST_t(nt)=0
+real :: harvNBT_t(nt)=0, harvNPT_t(nt)=0, harvNST_t(nt)=0
 real :: NCLT_t   (nt)
 real :: sCBTman_t(nt)=0, sCLTman_t(nt)=0, sCRTman_t(nt)=0, sCSTman_t(nt)=0
 real :: sCBTsen_t(nt)=0, sCLTsen_t(nt)=0, sCRTsen_t(nt)=0, sCSTsen_t(nt)=0
@@ -167,7 +169,10 @@ Contains
   sCBTman_t    = (thinFRT + prunFRT) * CBT_t
   sCBTsen_t    = CBT_t / TCBT
   dCBT_t       = sCBTman_t + sCBTsen_t
-  dNBlitt_t    = dCBT_t * NCWT
+  harvCBT_t    = sCBTman_t * FHARVBT
+  harvNBT_t    = sCBTman_t * FHARVBT * NCWT
+  dCBlitt_t    = dCBT_t - harvCBT_t
+  dNBlitt_t    = dCBlitt_t * NCWT
 ! Products (fruit)
   dCPT_t       = CPT_t / TCPTHARV
   harvCPT_t    = dCPT_t
