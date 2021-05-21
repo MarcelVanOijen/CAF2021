@@ -253,69 +253,6 @@ bibliography: [Avocado.bib,Banana.bib,MvO.bib]
   }
 ```
 
-Biogeochemical balances for Masatepe (Nicaragua) are shown in Fig. \ref{fig:Balances}.
-
-```{r Balances, fig.height=6, fig.cap="\\label{fig:Balances}Biogeochemical balances for nitrogen, carbon and water at Masatepe in the ILSS_CI system (shading by both Inga laurina and Samanea saman; Fertilisation-mode CI). Left bar from each pair: gains; right bar: losses. All rates are averages for the whole period of simulation."}
-  source("initialisation/initialise_CAF2021_Masatepe_09_ILSS_CI.R")
-  output <- run_model()
-  par( mar=c(3,3,3,0), mfrow=c(2,4) )
-  plot_NbalanceSoil  (output, title1="Soil N-balance"  , title2="", ver=T)
-  par( mar=c(3,3,3,0) )
-  plot_CbalanceSoil  (output, title1="Soil C-balance"  , title2="", ver=T)
-  par( mar=c(3,3,3,0) )
-  plot_H2ObalanceSoil(output, title1="Soil H2O-balance", title2="", ver=T)
-  par( mar=c(3,3,3,0) )
-  plot_CbalanceSystem(output, title1="System C-balance", title2="", ver=T)
-```
-
-Comparison of leaving tree branches on the field after thinning and pruning (default) vs. removing them as harvest (customary in NIC and GTM).
-
-```{r}
-  source("initialisation/initialise_CAF2021_Masatepe_09_ILSS_CI.R")
-  output <- run_model()
-  source("initialisation/initialise_CAF2021_Masatepe_09_ILSS_CI.R")
-  params <- set_par( c("FHARVBT(1)","FHARVBT(3)","FHARVBT(3)"),
-                     c( 1          , 1          , 1          ) )
-  output2 <- run_model()
-
-  par( mar=c(3,3,3,0), mfrow=c(2,4) )
-  plot_NbalanceSoil  (output, title1="Soil N-balance"  , title2="", ver=T)
-  par( mar=c(3,3,3,0) )
-  plot_CbalanceSoil  (output, title1="Soil C-balance"  , title2="", ver=T)
-  par( mar=c(3,3,3,0) )
-  plot_NbalanceSoil  (output2, title1="Soil N-balance 2"  , title2="", ver=T)
-  par( mar=c(3,3,3,0) )
-  plot_CbalanceSoil  (output2, title1="Soil C-balance 2"  , title2="", ver=T)
-```
-
-Fig. \ref{fig:Nbalance4Nlevels} shows how the soil N-balance is affected by N-fertilisation.
-
-```{r Nbalance4Nlevels, fig.height=6, fig.cap="\\label{fig:Nbalance4Nlevels}Soil nitrogen balances for 4 different treatments at Masatepe in the ILSS system (shading by both Inga laurina and Samanea saman). Gains on the left, losses on the right."}
-  par( mfrow=c(2,4) )
-  par(mar=c(3,3,3,0))
-  source("initialisation/initialise_CAF2021_Masatepe_09_ILSS_CI.R")
-  output <- run_model()
-  plot_NbalanceSoil(output, title1="", title2="CI", ymax=800, ver=T)
-  par(mar=c(3,3,3,0))
-  source("initialisation/initialise_CAF2021_Masatepe_10_ILSS_CM.R")
-  output <- run_model()
-  plot_NbalanceSoil(output, title1="", title2="CM", ymax=800, ver=T)
-  par(mar=c(3,3,3,0))
-  source("initialisation/initialise_CAF2021_Masatepe_11_ILSS_OI.R")
-  output <- run_model()
-  plot_NbalanceSoil(output, title1="", title2="OI", ymax=800, ver=T)
-  par(mar=c(3,3,3,0))
-  source("initialisation/initialise_CAF2021_Masatepe_12_ILSS_OM.R")
-  output <- run_model()
-  plot_NbalanceSoil(output, title1="", title2="OM", ymax=800, ver=T)
-```
-
-
-
-\clearpage
-
-# Bayesian calibration for Masatepe
-
 ```{r}
   plot_CdistributionCoffee <- function( sim=output ) {
     Time <- sim[,1]
@@ -336,7 +273,9 @@ Fig. \ref{fig:Nbalance4Nlevels} shows how the soil N-balance is affected by N-fe
                      "+ CW: Wood",
                      "   CR: Roots" ) )
   }
+```
 
+```{r}
   plot_CdistributionTrees <- function( sim=output, it=1:3 ) {
     Time <- sim[,1]
     i.CPT <- sapply( 1:3, function(i){which( outputNames==paste0("CPT_t(",i,")"))} )
@@ -366,43 +305,153 @@ Fig. \ref{fig:Nbalance4Nlevels} shows how the soil N-balance is affected by N-fe
   }
 ```
 
+```{r}
+  params.MAP.s <- function(s) {
+    params_BC_MAP   <- scparMAP_BC  * sc
+    params          <- list_params        [[s]]
+    ip_BC_s         <- ip_BC_site         [[s]]
+    icol_pChain_s   <- icol_pChain_site   [[s]]
+    params[ip_BC_s] <- params_BC_MAP      [icol_pChain_s]
+    return( params )
+  }
+```
+
+
+# Masatepe
+
+Unless otherwise indicated, all results shown in this section are for the Maximum A Posteriori (MAP) paramater vector from calibrating CAF2021 on data from Masatepe.
+
 Fig. \ref{fig:YieldsObsSim} shows observed and simulated variation of coffee production in the 14 simulated treatments of the Masatepe experiment.
 
-```{r, eval=F, out.width="100%", fig.cap="\\label{fig:YieldsObsSim}Simulated vs. observed annual yields for the 14 treatments in Masatepe 2005-2014. Left: all 140 recorded and simulated yields. Right: average yield for each of the treatments."}
-  load('BC_00_10.RData')
-  source('BC/BC_averageYields.R')
+```{r}
+  load('BC_18_44.RData')
+  source("initialisation/initialise_CAF2021_Masatepe_05_SGTR_CI.R")
+
+  params.Prior.5 <- params
+  output.Prior.5 <- run_model( p=params.Prior.5 )
+  
+  params.MAP.5   <- params.MAP.s( 5 )
+  output.MAP.5   <- run_model( p=params.MAP.5 )
 ```
 
-```{r, eval=F}
-  s <- 1 # Choose a site from those for which the BC was carried out
-  params_BC_MAP   <- scparMAP_BC  * sc
-  params          <- list_params        [[s]] ; matrix_weather <- list_matrix_weather[[s]]
-  calendar_fert   <- list_calendar_fert [[s]] ; calendar_prunC <- list_calendar_prunC[[s]] 
-  calendar_prunT  <- list_calendar_prunT[[s]] ; calendar_thinT <- list_calendar_thinT[[s]]  
-  NDAYS           <- list_NDAYS         [[s]]       
-  ip_BC_s         <- ip_BC_site         [[s]]
-  icol_pChain_s   <- icol_pChain_site   [[s]]
-# Calculate model output for the MAP parameter vector
-  params[ip_BC_s] <- params_BC_MAP      [icol_pChain_s]
-  params.MAP         <- params
-  matrix_weather.MAP <- matrix_weather
-  calendar_fert.MAP  <- calendar_fert
-  calendar_prunC.MAP <- calendar_prunC
-  calendar_prunT.MAP <- calendar_prunT
-  calendar_thinT.MAP <- calendar_thinT
-  NDAYS.MAP          <- NDAYS
-  source('initialisation/initialise_CAF2021_Turrialba_20_PS_MC.R')
-  output <- run_model( params, matrix_weather, calendar_fert, calendar_prunC,
-                     calendar_prunT, calendar_thinT, NDAYS )
-  output.MAP <- run_model( params.MAP, matrix_weather.MAP,
-                           calendar_fert.MAP, calendar_prunC.MAP,
-                           calendar_prunT.MAP, calendar_thinT.MAP, NDAYS.MAP )
+```{r}
+  load('BC_18_44.RData')
+  source("initialisation/initialise_CAF2021_Masatepe_09_ILSS_CI.R")
+
+  params.Prior.9 <- params
+  output.Prior.9 <- run_model( p=params.Prior.9 )
+  
+  params.MAP.9   <- params.MAP.s( 9 )
+  output.MAP.9   <- run_model( p=params.MAP.9 )
 ```
 
-```{r, eval=F}
-  plot_output( list_output=list(output.MAP),
+```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSim}Simulated vs. observed annual yields for the 14 treatments in Masatepe 2005-2014. Left: all 140 recorded and simulated yields. Right: average yield for each of the treatments."}
+  load('BC_18_44.RData')
+  source('BC/BC_plot_yields.R')
+```
+
+```{r}
+  plot_output( list_output=list(output.Prior.9),
+               vars       =c( "fTran(1)"    , "fNgrowth(1)", "DVS(1)"  ,
+                              "SINKP(1)"    , "DayFl(1)"   , "PARMA(1)" ,
+                              "harvDM_f_hay", "CT_f" ) )
+  plot_output( list_output=list(output.MAP.9),
                vars       =c( "fTran(1)"    , "fNgrowth(1)", "DVS(1)"  ,
                               "SINKP(1)"    , "DayFl(1)"   , "PARMA(1)" ,
                               "harvDM_f_hay", "CT_f" ) )
 ```
 
+Biogeochemical balances for Masatepe (Nicaragua) are shown in Fig. \ref{fig:Balances}.
+
+```{r Balances, fig.height=6, fig.cap="\\label{fig:Balances}Biogeochemical balances for nitrogen, carbon and water at Masatepe in the ILSS_CI system (shading by both Inga laurina and Samanea saman; Fertilisation-mode CI). Left bar from each pair: gains; right bar: losses. All rates are averages for the whole period of simulation."}
+  par( mar=c(3,3,3,0), mfrow=c(2,4) )
+  plot_NbalanceSoil  (output.MAP.9, title1="Soil N-balance"  , title2="")
+  par( mar=c(3,3,3,0) )
+  plot_CbalanceSoil  (output.MAP.9, title1="Soil C-balance"  , title2="")
+  par( mar=c(3,3,3,0) )
+  plot_H2ObalanceSoil(output.MAP.9, title1="Soil H2O-balance", title2="")
+  par( mar=c(3,3,3,0) )
+  plot_CbalanceSystem(output.MAP.9, title1="System C-balance", title2="")
+```
+
+Comparison of leaving tree branches on the field after thinning and pruning (default) vs. removing them as harvest (customary in NIC and GTM): Fig. \ref{fig:Balances2}.
+
+```{r Balances2, fig.height=6, fig.cap="\\label{fig:Balances2}Soil N- and C-balances at Masatepe in the ILSS_CI system. Top row: tree branches left as litter after pruning and thinning. Bottom row: branches harvested."}
+  params  <- params.MAP.9
+  params1 <- set_par( c("FHARVBT(1)","FHARVBT(2)","FHARVBT(3)"),
+                      c( 0          , 0          , 0          ) )
+  params2 <- set_par( c("FHARVBT(1)","FHARVBT(2)","FHARVBT(3)"),
+                      c( 1          , 1          , 1          ) )
+  output1 <- run_model( p=params1 )
+  output2 <- run_model( p=params2 )
+
+  par( mar=c(3,3,3,0), mfrow=c(2,4) )
+  plot_NbalanceSoil( output1, title1="Soil N-balance 1", title2="" )
+  par( mar=c(3,3,3,0) )
+  plot_CbalanceSoil( output1, title1="Soil C-balance 1", title2="" )
+  par( mar=c(3,3,3,0) )
+  plot_NbalanceSoil( output2, title1="Soil N-balance 2", title2="" )
+  par( mar=c(3,3,3,0) )
+  plot_CbalanceSoil( output2, title1="Soil C-balance 2", title2="" )
+```
+
+Fig. \ref{fig:Nbalance4Nlevels} shows how the soil N-balance is affected by N-fertilisation.
+
+```{r Nbalance4Nlevels, fig.height=6, fig.cap="\\label{fig:Nbalance4Nlevels}Soil nitrogen balances for 4 different treatments at Masatepe in the ILSS system (shading by both Inga laurina and Samanea saman). Gains on the left, losses on the right."}
+  par( mfrow=c(2,4) )
+  par(mar=c(3,3,3,0))
+  # source("initialisation/initialise_CAF2021_Masatepe_09_ILSS_CI.R")
+  # params <- params.MAP.s(9)
+  # output <- run_model()
+  # plot_NbalanceSoil(output, title1="", title2="CI", ymax=800)
+  plot_NbalanceSoil(output.MAP.9, title1="", title2="CI", ymax=800)
+  par(mar=c(3,3,3,0))
+  source("initialisation/initialise_CAF2021_Masatepe_10_ILSS_CM.R")
+  params <- params.MAP.s(10)
+  output <- run_model()
+  plot_NbalanceSoil(output, title1="", title2="CM", ymax=800)
+  par(mar=c(3,3,3,0))
+  source("initialisation/initialise_CAF2021_Masatepe_11_ILSS_OI.R")
+  params <- params.MAP.s(11)
+  output <- run_model()
+  plot_NbalanceSoil(output, title1="", title2="OI", ymax=800)
+  par(mar=c(3,3,3,0))
+  source("initialisation/initialise_CAF2021_Masatepe_12_ILSS_OM.R")
+  params <- params.MAP.s(12)
+  output <- run_model()
+  plot_NbalanceSoil(output, title1="", title2="OM", ymax=800)
+```
+
+# Deciduousness
+
+```{r}
+  plot_output( list_output=list(output.MAP.5),
+               vars       =c( "LAIT_t(1)", "LAIT_t(2)", "LAIT_t(3)" ) )
+
+  plot_output( list_output=list(output.MAP.9),
+               vars       =c( "LAIT_t(1)", "LAIT_t(2)", "LAIT_t(3)" ) )
+
+```
+
+```{r, fig.height=6, fig.cap="\\label{fig:Deciduousness}Soil N- and C-balances at Masatepe in the ILSS_CI system. Top row: tree branches left as litter after pruning and thinning. Bottom row: branches harvested."}
+  params    <- params.MAP.5
+  paramsM5a <- set_par( c("FTCLMINT(3)","TCLMAXT(3)"),
+                        c( 0.2         , 650        ) )
+  paramsM5b <- set_par( c("FTCLMINT(3)","TCLMAXT(3)"),
+                        c( 0.05        , 650        ) )
+  paramsM5c <- set_par( c("FTCLMINT(3)","TCLMAXT(3)"),
+                        c( 0.2         , 365        ) )
+  
+  source("initialisation/initialise_CAF2021_Masatepe_05_SGTR_CI.R")
+  output.MAP.5a <- run_model( p=paramsM5a )
+  output.MAP.5b <- run_model( p=paramsM5b )
+  output.MAP.5c <- run_model( p=paramsM5c )
+
+  plot_output( list_output=list(output.MAP.5,
+                                output.MAP.5a,output.MAP.5b ,output.MAP.5c),
+               vars=c( "LAIT_t(3)" ) )
+
+  plot_output( list_output=list(output.MAP.5,
+                                output.MAP.5a,output.MAP.5b ,output.MAP.5c),
+               vars=c( "fTranT_t(3)" ) )
+```

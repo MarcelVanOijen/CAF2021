@@ -1,11 +1,9 @@
 ## initialise_CAF2021_general.R ##
-## MvO, 2021-04-12
+## MvO, 2021-05-20
 
 ################################################################################
 calendar_fert  <- matrix( -1, nrow=100, ncol=3 )
 calendar_prunC <- matrix( -1, nrow=100, ncol=3 )
-# calendar_prunT <- matrix( -1, nrow=100, ncol=3 )
-# calendar_thinT <- matrix( -1, nrow=100, ncol=3 )
 calendar_prunT <- array( -1, c(3,100,3) )
 calendar_thinT <- array( -1, c(3,100,3) )
 
@@ -95,7 +93,9 @@ outputNames <- c( "Time", "year", "doy",
   
   "CR_f"       , "CW_f"       , "CL_f"          , "CP_f"    ,
   paste0( "CRT_t(",1:nt,")" ) , paste0( "CBT_t(",1:nt,")" ) ,
-  paste0( "CLT_t(",1:nt,")" )
+  paste0( "CLT_t(",1:nt,")" ) ,
+
+  paste0( "LAIT_t(",1:nt,")" ), paste0( "fTranT_t(",1:nt,")" )
 )
 
 outputUnits <- c( "(y)", "(y)", "(d)",
@@ -137,7 +137,9 @@ outputUnits <- c( "(y)", "(y)", "(d)",
   
   rep("(kgC m-2)",4)            ,
   rep("(kgC m-2)",nt)           , rep("(kgC m-2)",nt)   ,
-  rep("(kgC m-2)",nt)
+  rep("(kgC m-2)",nt)           ,
+
+  rep("(m2 t m-2)",nt)          , rep("(-)",nt)
 )
 
 NOUT <- as.integer( length(outputNames) )

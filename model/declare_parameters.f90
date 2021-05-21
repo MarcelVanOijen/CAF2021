@@ -27,14 +27,14 @@ real :: TREEDENS0(nt)
 real :: NFERTMULT
 
 ! TREES
-real :: FHARVBT(nt), FLTMAX(nt), FPT(nt), FST(nt), FWT(nt)
+real :: FHARVBT(nt), FLTMAX(nt), FPT(nt), FST(nt), FTCLMINT(nt), FWT(nt)
 real :: KAC(nt), KACEXP(nt), KH(nt), KHEXP(nt), KNFIX(nt)
 real :: LAIMAXT(nt), LUEMAX(nt), NCLMAXT(nt), SLAT(nt)
-real :: TBEFOREPT(nt), TCBT(nt), TCRT(nt), TCST(nt)
+real :: TBEFOREPT(nt), TCBT(nt), TCLMAXT(nt), TCRT(nt), TCST(nt)
 real :: BETA, CBTREE0, CLTREE0, CRTREE0, CSTREE0, FNCLMINT
-real :: FTCLMINT, GAMMA, KBA, KEXTT, KNMINT, KNUPTT
+real :: GAMMA, KBA, KEXTT, KNMINT, KNUPTT
 real :: KRAININTT, LAI0, NCPT, NCRT, NCWT, SHADEPROJ
-real :: TCLMAXT, TCPTHARV, TDIFFMAX, TOPTT
+real :: TCPTHARV, TDIFFMAX, TOPTT
 real :: TTOLT, TRANCOT, WOODDENS
 
 ! COFFEE

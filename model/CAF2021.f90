@@ -5,7 +5,7 @@ Subroutine CAF2021(PARAMS,MATRIX_WEATHER, &
 !========================================================
 ! This is the CAF2021 model.
 ! Authors: Marcel van Oijen, David Cameron, Oriana Ovalle
-! Date: 2021-04-14
+! Date: 2021-05-20
 !========================================================
 
 use belowgroundres
@@ -19,8 +19,8 @@ use soil
 use tree
 implicit none
 
-! As long as the total number of parameters stays below 120, the next line need not be changed
-integer, parameter :: NPAR     = 130
+! As long as the total number of parameters stays below 150, the next line need not be changed
+integer, parameter :: NPAR     = 150
 real               :: PARAMS(NPAR)
 integer, parameter :: NWEATHER = 8
 real               :: MATRIX_WEATHER(NMAXDAYS,NWEATHER)
@@ -433,6 +433,9 @@ do day = 1, NDAYS
   y(day,136:138) = CRT_t              ! kgC  m-2
   y(day,139:141) = CBT_t              ! kgC  m-2
   y(day,142:144) = CLT_t              ! kgC  m-2
+
+  y(day,145:147) = LAIT_t             ! m2 t m-2
+  y(day,148:150) = fTranT_t           ! -
 
 ! CALIBRATION VARIABLES IN CAF2021's AND ORIANA's ORIGINAL BC DATA FILES.
 ! ------------------------------------------------------------------------

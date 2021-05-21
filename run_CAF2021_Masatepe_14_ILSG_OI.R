@@ -16,3 +16,5 @@
    plot_output( vars=outputNames[ iEnv    ] )
    plot_output( vars=outputNames[ iCoffee ] )
    plot_output( vars=outputNames[ iTrees  ] )
+   plot_output( list_output=list(output), vars=c( "fTranT_t(3)" ) )
+   
