@@ -346,12 +346,11 @@ Fig. \ref{fig:Nbalance4Nlevels} shows how the soil N-balance is affected by N-fe
   }
 ```
 
-Fig. \ref{fig:averageYields} shows observed variation of coffee production in the 14 simulated treatments of the Masatepe experiment.
+Fig. \ref{fig:YieldsObsSim} shows observed and simulated variation of coffee production in the 14 simulated treatments of the Masatepe experiment.
 
-```{r averageYields, fig.height=3.5, fig.cap="\\label{fig:averageYields}Average annual yields for the 14 treatments in Masatepe: simulations vs. observations."}
-# After running a BC
-  load('BC_17_27.RData')
-  source('BC/BC_averageYields_Masatepe_01-14.R')
+```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSim}Simulated vs. observed annual yields for the 14 treatments in Masatepe 2005-2014. Left: all 140 recorded and simulated yields. Right: average yield for each of the treatments."}
+  load('BC_00_10.RData')
+  source('BC/BC_averageYields.R')
 ```
 
 ```{r}

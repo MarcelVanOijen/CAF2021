@@ -1,19 +1,37 @@
 source('initialisation/initialise_CAF2021_general.R')
 
+iyear.model <- which( outputNames=="year" )
+idoy.model  <- which( outputNames=="doy" )
 iH.model    <- which( outputNames=="harvDM_f_hay" )
- 
-idoy1.model <- which(output[,2]>=2003 & output[,3]==1)
 
-params_BC_MAP       <- scparMAP_BC  * sc
-params_BC_MaxL      <- scparMaxL_BC * sc
+params_BC_MAP     <- scparMAP_BC  * sc
+params_BC_MaxL    <- scparMaxL_BC * sc
+
+Yields             <- vector( "list", nSites )
 
 AvYield           <- matrix( NA, nrow=nSites, ncol=4 )
 colnames(AvYield) <- c( "Site", "Y.data", "Y.MAP", "Y.ML" )
-AvYield[,1]       <- c(1:10,13:20)
+AvYield[,1]       <- 1:14
 
 for (s in 1:nSites) {
   iH.data.s       <- which( data_name[[s]]=="harvDM_f_hay" )
-  AvYield[s,2]    <- mean( data_value[[s]][iH.data.s] )
+  nY.s            <- length( iH.data.s )
+  
+  year.data.s     <- data_year [[s]] [iH.data.s]
+  doy.data.s      <- data_doy  [[s]] [iH.data.s]
+  H.data.s        <- data_value[[s]] [iH.data.s]
+  
+  iH.model.s      <- sapply( 1:nY.s, function(i) {
+    which( output[,iyear.model]==year.data.s[i] & 
+                            output[,idoy.model ]==doy.data.s[i] ) } )
+  
+  Yields[[s]]           <- matrix( NA, nrow=nY.s, ncol=5 )
+  colnames(Yields[[s]]) <- c( "Site", "year", "doy", "Y.data", "Y.MAP" )
+  Yields[[s]][,1  ]     <- s
+  Yields[[s]][,2:4]     <- cbind( data_year[[s]], data_doy[[s]],
+                                  data_value[[s]] ) [iH.data.s,]
+  
+  AvYield[s,2]    <- mean( Yields[[s]][,"Y.data"] )
 
   params          <- list_params        [[s]] ; matrix_weather <- list_matrix_weather[[s]]
   calendar_fert   <- list_calendar_fert [[s]] ; calendar_prunC <- list_calendar_prunC[[s]] 
@@ -26,26 +44,52 @@ for (s in 1:nSites) {
   params[ip_BC_s] <- params_BC_MAP      [icol_pChain_s]
   outputMAP       <- run_model( params, matrix_weather, calendar_fert, calendar_prunC,
                                 calendar_prunT, calendar_thinT, NDAYS )
-  AvYield[s,3]    <- mean( outputMAP[idoy1.model,iH.model] )
-
+  
+  Yields[[s]][,"Y.MAP"] <- round( outputMAP[iH.model.s,iH.model], 0 )
+  
+  AvYield[s,"Y.MAP"]    <- mean( outputMAP[iH.model.s,iH.model] )
+  
 # Calculate model output for the MaxL parameter vector
-  params[ip_BC_s] <- params_BC_MaxL     [icol_pChain_s]
-  outputMaxL      <- run_model( params, matrix_weather, calendar_fert, calendar_prunC,
-	            	            calendar_prunT, calendar_thinT, NDAYS )
-  AvYield[s,4]    <- mean( outputMaxL[idoy1.model,iH.model] )
+  params[ip_BC_s]   <- params_BC_MaxL[ icol_pChain_s ]
+  outputMaxL        <- run_model( params, matrix_weather,
+                                  calendar_fert, calendar_prunC,
+	            	                  calendar_prunT, calendar_thinT, NDAYS )
+  AvYield[s,"Y.ML"] <- mean( outputMaxL[iH.model.s,iH.model] )
 }
 
-par( mfrow=c(1,1), mar=c(5,5,2,2) )
+par( mfrow=c(1,2), mar=c(5,5,2,2) )
 
-plot( AvYield[,2], AvYield[,3], main="Av. yield coffee (kg DM ha-1)",
-      xlab="Observed", ylab="Simulated",
-      xlim=c(0,max(AvYield[,2:3])), ylim=c(0,max(AvYield[,2:3])), type="n" )
-text( AvYield[,2], AvYield[,3], labels=1:18, cex=0.8 )
+AllYields      <- do.call(rbind, Yields)
+AllYields.data <- AllYields[,"Y.data"] ; AllYields.model <- AllYields[,"Y.MAP"]
+Yields.max     <- max( AllYields.data, AllYields.model )
+plot( AllYields.data, AllYields.model, main="Yields coffee\n(kg DM ha-1)",
+      xlab="Obs.", ylab="Sim.",
+      xlim=c(0,Yields.max), ylim=c(0,Yields.max),
+      cex.main=1, type="n" )
+text( AllYields.data, AllYields.model,
+      labels=AllYields[,1], cex=0.8 )
 abline(0,1,lty=2)
-lm.Y <- lm(AvYield[,3]~AvYield[,2])
+AllYields.lm <- lm(AllYields[,"Y.MAP"]~AllYields[,"Y.data"])
+AllYields.r2 <- signif( summary(AllYields.lm)$r.squared, 2 )
+abline( AllYields.lm$coefficients[1], AllYields.lm$coefficients[2], col="blue" )
+legend( "topleft",
+        legend=c("y=x", paste("r2= ",as.character(AllYields.r2)) ),
+        col=c("black","blue"), lty=c(2,1), cex=0.7 )
+
+
+AvYields.max   <- max(AvYield[,c("Y.data","Y.MAP")])
+plot( AvYield[,"Y.data"], AvYield[,"Y.MAP"],
+      main="Av. yield coffee\n(kg DM ha-1)",
+      xlab="Obs.", ylab="Sim.",
+      xlim=c(0,AvYields.max), ylim=c(0,AvYields.max),
+      cex.main=1, type="n" )
+text( AvYield[,"Y.data"], AvYield[,"Y.MAP"],
+      labels=AvYield[,1], cex=0.8 )
+abline(0,1,lty=2)
+lm.Y <- lm(AvYield[,"Y.MAP"]~AvYield[,"Y.data"])
 r2   <- signif( summary(lm.Y)$r.squared, 2 )
 abline( lm.Y$coefficients[1], lm.Y$coefficients[2], col="blue" )
 legend( "bottomright",
-        legend=c("y=x", paste("Regression\nr2= ",as.character(r2)) ),
+        legend=c("y=x", paste("r2= ",as.character(r2)) ),
         col=c("black","blue"), lty=c(2,1), cex=0.7 )
 
