@@ -324,7 +324,7 @@ Unless otherwise indicated, all results shown in this section are for the Maximu
 Fig. \ref{fig:YieldsObsSim} shows observed and simulated variation of coffee production in the 14 simulated treatments of the Masatepe experiment.
 
 ```{r}
-  load('BC_18_44.RData')
+  load('BC_07_51.RData')
   source("initialisation/initialise_CAF2021_Masatepe_05_SGTR_CI.R")
 
   params.Prior.5 <- params
@@ -335,7 +335,7 @@ Fig. \ref{fig:YieldsObsSim} shows observed and simulated variation of coffee pro
 ```
 
 ```{r}
-  load('BC_18_44.RData')
+  load('BC_07_51.RData')
   source("initialisation/initialise_CAF2021_Masatepe_09_ILSS_CI.R")
 
   params.Prior.9 <- params
@@ -346,7 +346,7 @@ Fig. \ref{fig:YieldsObsSim} shows observed and simulated variation of coffee pro
 ```
 
 ```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSim}Simulated vs. observed annual yields for the 14 treatments in Masatepe 2005-2014. Left: all 140 recorded and simulated yields. Right: average yield for each of the treatments."}
-  load('BC_18_44.RData')
+  load('BC_07_51.RData')
   source('BC/BC_plot_yields.R')
 ```
 
