@@ -21,6 +21,10 @@ bibliography: [Avocado.bib,Banana.bib,MvO.bib]
 ---
 
 ```{r, include=FALSE}
+  file_BC.RData <- 'BC_07_51.RData'
+```
+
+```{r, include=FALSE}
   knitr::opts_chunk$set(echo=F,results="asis",warning=FALSE,message=FALSE)
 ```
 
@@ -209,7 +213,8 @@ bibliography: [Avocado.bib,Banana.bib,MvO.bib]
   plot_CbalanceSystem <- function( sim=output, title1="", title2=title1,
                                    ymax=NULL, verify=F ) {
     CinNames  <- c("gC_f"   , "gCT_f")
-    CoutNames <- c("Rsoil_f", "Crunoff_f", "harvCP_f", "harvCPT_f", "harvCST_f")
+    CoutNames <- c("Rsoil_f", "Crunoff_f",
+                   "harvCP_f", "harvCPT_f", "harvCBT_f", "harvCST_f")
     nCin      <- length(CinNames) ; nCout  <- length(CoutNames)
     i.Cin     <- rep(NA,nCin)     ; i.Cout <- rep(NA,nCout)
     for(i in 1:nCin ) {i.Cin [i] <- which( outputNames==CinNames [i] ) }
@@ -241,8 +246,8 @@ bibliography: [Avocado.bib,Banana.bib,MvO.bib]
       C_f      <- sim[ , which( outputNames=="C_f" )    ] # kgC m-2
       CT_f     <- sim[ , which( outputNames=="CT_f")    ] # kgC m-2
       Csoil_f  <- sim[ , which( outputNames=="Csoil_f") ] # kgC m-2 
-      Csys_f   <- C_f + CT_f + Csoil_f                       # kgC m-2
-      D_Csys_f <- Csys_f[NDAYS] - Csys_f[1]                  # kgC m-2
+      Csys_f   <- C_f + CT_f + Csoil_f                    # kgC m-2
+      D_Csys_f <- Csys_f[NDAYS] - Csys_f[1]               # kgC m-2
       CinSum       <- colSums(sim[2:NDAYS,i.Cin ])        # kgC m-2
       CoutSum      <- colSums(sim[2:NDAYS,i.Cout])        # kgC m-2
       CinMinusCout <- sum(CinSum) - sum(CoutSum)
@@ -316,6 +321,42 @@ bibliography: [Avocado.bib,Banana.bib,MvO.bib]
   }
 ```
 
+# AGENDA 1: Improving the Masatepe-BC May-June 2021
+
+- Tree data
+  - Careful: Thinned trees are typically not representative of the stand.
+  - When data are in FWT, perhaps assume that 25% of tree woody *volume* is water (Cermak et al. 2007). We would then still need wood density (kg DM m-3) to be able to convert from FWT to DM.
+  - Tree biomass reported for ABG only or whole-tree including roots?
+  - Ignore 'Biomasa  de rebrotes a 3 metros de inga 2009.xls': extremely light pruning, providing no measure of branch biomass etc. Better data in 'Biomasa arboles  primer raleo por especie A S 2008.xls' which was an intensive pollarding (perhaps 90% of branch pruned), so those data provide a better estimate of the amount of leaves and branches on an Inga tree.
+- Data Martin Noponen
+- Fertilisation timing
+  - CI & CM 2 applications: 15 June, 15 Sep
+  - OI & OM 1 application: 30 April (end of dry season)
+- Include TCSOM parameters and aim for near-balance of sources and sinks?
+- When there are two timber species they will not overlap much, perhaps each could reach 60% of ground cover.
+- Inga is not a shade-plot like coffee and will suffer if fully overshadowed by timber trees. But coffee production would then suffer as well. Good management therefore aims to keep timber tree shade below 60%. 
+
+# AGENDA 2: Redoing the Turrialba-BC June 2021 (experiment and fruit trees)
+
+- Use latest model version
+- Use all data:
+  - Martin Noponen: soil, GHG balance, etc.
+  - Less SOM than in Masatepe (60%?)
+  - Higher CN ratio in soil than in Masatepe (15 instead of 10?)
+  - Roland Cerda: banana & citrus
+    - From Rolando's file: choose farms with high fruit tree density and simulate them as extra treatments in the Turrialba experiment (for soil, weather etc.): EMu = poro + banana, ECi = poro + citrus.
+  - Fertilisation levels from Haggar et al. (2011)
+  - Fertilisation timings as in file Oriana or as in Masatepe?
+  - Assumptions about non-leaching at zero-fertilisation
+  - Better weather data for final years?
+- Include TCSOM parameters and aim for near-balance of sources and sinks?
+
+# Agenda 3: BC Llano Bonito (and perhaps Aquiares)
+
+- Files from Oriana. LB at 1600+ m, Aquiares at 1000+ m.
+- At LB there were Musaceae, but not in the data files (two tree species could then not be handled by CAF2014), but maybe check the paper by Louise Myelan that is referred to in Oriana et al's 2020 paper.
+- Aquiares had unusual poro management: no thinning, no pruning.
+
 
 # Masatepe
 
@@ -324,7 +365,7 @@ Unless otherwise indicated, all results shown in this section are for the Maximu
 Fig. \ref{fig:YieldsObsSim} shows observed and simulated variation of coffee production in the 14 simulated treatments of the Masatepe experiment.
 
 ```{r}
-  load('BC_07_51.RData')
+  load( file_BC.RData )
   source("initialisation/initialise_CAF2021_Masatepe_05_SGTR_CI.R")
 
   params.Prior.5 <- params
@@ -335,7 +376,7 @@ Fig. \ref{fig:YieldsObsSim} shows observed and simulated variation of coffee pro
 ```
 
 ```{r}
-  load('BC_07_51.RData')
+  load( file_BC.RData )
   source("initialisation/initialise_CAF2021_Masatepe_09_ILSS_CI.R")
 
   params.Prior.9 <- params
@@ -346,7 +387,7 @@ Fig. \ref{fig:YieldsObsSim} shows observed and simulated variation of coffee pro
 ```
 
 ```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSim}Simulated vs. observed annual yields for the 14 treatments in Masatepe 2005-2014. Left: all 140 recorded and simulated yields. Right: average yield for each of the treatments."}
-  load('BC_07_51.RData')
+  load( file_BC.RData )
   source('BC/BC_plot_yields.R')
 ```
 
@@ -377,6 +418,9 @@ Biogeochemical balances for Masatepe (Nicaragua) are shown in Fig. \ref{fig:Bala
 Comparison of leaving tree branches on the field after thinning and pruning (default) vs. removing them as harvest (customary in NIC and GTM): Fig. \ref{fig:Balances2}.
 
 ```{r Balances2, fig.height=6, fig.cap="\\label{fig:Balances2}Soil N- and C-balances at Masatepe in the ILSS_CI system. Top row: tree branches left as litter after pruning and thinning. Bottom row: branches harvested."}
+  # load( file_BC.RData )
+  source("initialisation/initialise_CAF2021_Masatepe_09_ILSS_CI.R")
+
   params  <- params.MAP.9
   params1 <- set_par( c("FHARVBT(1)","FHARVBT(2)","FHARVBT(3)"),
                       c( 0          , 0          , 0          ) )
@@ -395,29 +439,99 @@ Comparison of leaving tree branches on the field after thinning and pruning (def
   plot_CbalanceSoil( output2, title1="Soil C-balance 2", title2="" )
 ```
 
+Sensitivity of soil balances to parameter settings: Fig. \ref{fig:Balances3}.
+
+```{r Balances3, fig.height=6, fig.cap="\\label{fig:Balances3}Soil N- and C-balances at Masatepe in the ILSS_CI system, with various parameter settings."}
+  # load( file_BC.RData )
+  source("initialisation/initialise_CAF2021_Masatepe_09_ILSS_CI.R")
+
+  params      <- params.MAP.9
+  TCLITT.MAP  <- params[ which(names_params=='TCLITT' ) ]
+  TCSOMF.MAP  <- params[ which(names_params=='TCSOMF' ) ]
+  TCSOMS.MAP  <- params[ which(names_params=='TCSOMS' ) ]
+  RNLEACH.MAP <- params[ which(names_params=='RNLEACH') ]
+  
+  params0 <- set_par( c("TCLITT"   ,"TCSOMF"   ,"TCSOMS"   ,"RNLEACH"   ),
+                      c( TCLITT.MAP, TCSOMF.MAP, TCSOMS.MAP, RNLEACH.MAP) )
+  params1 <- set_par( c("TCLITT"   ,"TCSOMF"   ,"TCSOMS"   ,"RNLEACH"   ),
+                      c( TCLITT.MAP, TCSOMF.MAP, TCSOMS.MAP, RNLEACH.MAP)*
+                      c( 2         , 2         , 2         , 1          ) )
+  params2 <- set_par( c("TCLITT"   ,"TCSOMF"   ,"TCSOMS"   ,"RNLEACH"   ),
+                      c( TCLITT.MAP, TCSOMF.MAP, TCSOMS.MAP, RNLEACH.MAP)*
+                      c( 1         , 1         , 1         , 0.1        ) )
+  output0 <- run_model( p=params0 )
+  output1 <- run_model( p=params1 )
+  output2 <- run_model( p=params2 )
+
+  par( mar=c(3,3,3,0), mfrow=c(3,4) )
+  plot_NbalanceSoil( output0, title1="Soil N-balance 0", title2="" )
+  par( mar=c(3,3,3,0) )
+  plot_CbalanceSoil( output0, title1="Soil C-balance 0", title2="" )
+  par( mar=c(3,3,3,0) )
+  plot_NbalanceSoil( output1, title1="Soil N-balance 1", title2="" )
+  par( mar=c(3,3,3,0) )
+  plot_CbalanceSoil( output1, title1="Soil C-balance 1", title2="" )
+  par( mar=c(3,3,3,0) )
+  plot_NbalanceSoil( output2, title1="Soil N-balance 2", title2="" )
+  par( mar=c(3,3,3,0) )
+  plot_CbalanceSoil( output2, title1="Soil C-balance 2", title2="" )
+```
+
 Fig. \ref{fig:Nbalance4Nlevels} shows how the soil N-balance is affected by N-fertilisation.
 
 ```{r Nbalance4Nlevels, fig.height=6, fig.cap="\\label{fig:Nbalance4Nlevels}Soil nitrogen balances for 4 different treatments at Masatepe in the ILSS system (shading by both Inga laurina and Samanea saman). Gains on the left, losses on the right."}
   par( mfrow=c(2,4) )
+
   par(mar=c(3,3,3,0))
-  # source("initialisation/initialise_CAF2021_Masatepe_09_ILSS_CI.R")
-  # params <- params.MAP.s(9)
-  # output <- run_model()
-  # plot_NbalanceSoil(output, title1="", title2="CI", ymax=800)
-  plot_NbalanceSoil(output.MAP.9, title1="", title2="CI", ymax=800)
+  source("initialisation/initialise_CAF2021_Masatepe_09_ILSS_CI.R")
+  params <- params.MAP.s(9)
+  # TCLITT.MAP  <- params[ which(names_params=='TCLITT' ) ]
+  # TCSOMF.MAP  <- params[ which(names_params=='TCSOMF' ) ]
+  # TCSOMS.MAP  <- params[ which(names_params=='TCSOMS' ) ]
+  # RNLEACH.MAP <- params[ which(names_params=='RNLEACH') ]
+  # params <- set_par( c("TCLITT"   ,"TCSOMF"   ,"TCSOMS"   ,"RNLEACH"   ),
+  #                    c( TCLITT.MAP, TCSOMF.MAP, TCSOMS.MAP, RNLEACH.MAP)*
+  #                    c( 2         , 2         , 2         , 0.1        ) )
+  output <- run_model()
+  plot_NbalanceSoil(output, title1="", title2="CI", ymax=800)
+  # plot_NbalanceSoil(output.MAP.9, title1="", title2="CI", ymax=800)
+  
   par(mar=c(3,3,3,0))
   source("initialisation/initialise_CAF2021_Masatepe_10_ILSS_CM.R")
   params <- params.MAP.s(10)
+  # TCLITT.MAP  <- params[ which(names_params=='TCLITT' ) ]
+  # TCSOMF.MAP  <- params[ which(names_params=='TCSOMF' ) ]
+  # TCSOMS.MAP  <- params[ which(names_params=='TCSOMS' ) ]
+  # RNLEACH.MAP <- params[ which(names_params=='RNLEACH') ]
+  # params <- set_par( c("TCLITT"   ,"TCSOMF"   ,"TCSOMS"   ,"RNLEACH"   ),
+  #                    c( TCLITT.MAP, TCSOMF.MAP, TCSOMS.MAP, RNLEACH.MAP)*
+  #                    c( 2         , 2         , 2         , 0.1        ) )
   output <- run_model()
   plot_NbalanceSoil(output, title1="", title2="CM", ymax=800)
+  
   par(mar=c(3,3,3,0))
   source("initialisation/initialise_CAF2021_Masatepe_11_ILSS_OI.R")
   params <- params.MAP.s(11)
+  # TCLITT.MAP  <- params[ which(names_params=='TCLITT' ) ]
+  # TCSOMF.MAP  <- params[ which(names_params=='TCSOMF' ) ]
+  # TCSOMS.MAP  <- params[ which(names_params=='TCSOMS' ) ]
+  # RNLEACH.MAP <- params[ which(names_params=='RNLEACH') ]
+  # params <- set_par( c("TCLITT"   ,"TCSOMF"   ,"TCSOMS"   ,"RNLEACH"   ),
+  #                    c( TCLITT.MAP, TCSOMF.MAP, TCSOMS.MAP, RNLEACH.MAP)*
+  #                    c( 2         , 2         , 2         , 0.1        ) )
   output <- run_model()
   plot_NbalanceSoil(output, title1="", title2="OI", ymax=800)
+  
   par(mar=c(3,3,3,0))
   source("initialisation/initialise_CAF2021_Masatepe_12_ILSS_OM.R")
   params <- params.MAP.s(12)
+  # TCLITT.MAP  <- params[ which(names_params=='TCLITT' ) ]
+  # TCSOMF.MAP  <- params[ which(names_params=='TCSOMF' ) ]
+  # TCSOMS.MAP  <- params[ which(names_params=='TCSOMS' ) ]
+  # RNLEACH.MAP <- params[ which(names_params=='RNLEACH') ]
+  # params <- set_par( c("TCLITT"   ,"TCSOMF"   ,"TCSOMS"   ,"RNLEACH"   ),
+  #                    c( TCLITT.MAP, TCSOMF.MAP, TCSOMS.MAP, RNLEACH.MAP)*
+  #                    c( 2         , 2         , 2         , 0.1        ) )
   output <- run_model()
   plot_NbalanceSoil(output, title1="", title2="OM", ymax=800)
 ```
