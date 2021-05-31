@@ -5,7 +5,7 @@ Subroutine CAF2021(PARAMS,MATRIX_WEATHER, &
 !========================================================
 ! This is the CAF2021 model.
 ! Authors: Marcel van Oijen, David Cameron, Oriana Ovalle
-! Date: 2021-05-20
+! Date: 2021-05-31
 !========================================================
 
 use belowgroundres
@@ -77,6 +77,9 @@ real    :: Tran_f     , TranT_f     , Rainint_f  , RainintT_f
 real    :: C_f        , gC_f        , dC_f       , prunC_f   , harvCP_f
 real    :: CT_f       , gCT_f       , harvCBT_f  , harvCPT_f , harvCST_f
 real    :: CR_f       , CW_f        , CL_f       , CP_f
+
+real    ::   Csoil_f1   =0,   Csys_f1   =0,   Nsoil_f1   =0
+real    :: D_Csoil_f_hay=0, D_Csys_f_hay=0, D_Nsoil_f_hay=0
 
 ! PARAMETERS
 call set_params(PARAMS)
@@ -338,6 +341,30 @@ do day = 1, NDAYS
   CL_f        = sum(Ac*CL)
   CP_f        = sum(Ac*CP)
 
+! Average process rates over the simulated period
+  real :: NfixT_f_hay=0, Nleaching_f_hay=0 ! MOVE UP!
+  real :: sum_NfixT_f=0, sum_Nleaching_f=0 ! MOVE UP!
+  sum_NfixT_f     = sum_NfixT_f     + NfixT_f
+  sum_Nleaching_f = sum_Nleaching_f + Nleaching_f
+  if(day==1) then
+    NfixT_f_hay     = sum_NfixT_f * 1E4 * 365
+    Nleaching_f_hay = sum_Nleaching_f * 1E4 * 365
+  else
+    NfixT_f_hay     = sum_NfixT_f * 1E4 * 365 / (day-1)
+    Nleaching_f_hay = sum_Nleaching_f * 1E4 * 365 / (day-1)
+  endif
+
+! Average C- and N-balances over the simulated period 
+  if(day==1) then
+    Nsoil_f1      = Nsoil_f
+    Csoil_f1      = Csoil_f 
+    Csys_f1       = Csoil_f + C_f + CT_f
+  else
+    D_Nsoil_f_hay = (Nsoil_f          - Nsoil_f1) * 1E4 * 365 / (day-1)
+    D_Csoil_f_hay = (Csoil_f          - Csoil_f1) * 1E4 * 365 / (day-1)
+    D_Csys_f_hay  = (Csoil_f+C_f+CT_f - Csys_f1 ) * 1E4 * 365 / (day-1)
+  endif
+
 ! Outputs
 ! The "c1", "c2" etc. in the units below refer to parts of the field with
 ! specific combinations of shade tree species:
@@ -436,6 +463,10 @@ do day = 1, NDAYS
 
   y(day,145:147) = LAIT_t             ! m2 t m-2
   y(day,148:150) = fTranT_t           ! -
+  
+  y(day,151)     = D_Csoil_f_hay      ! kgC  ha-1 y-1
+  y(day,152)     = D_Csys_f_hay       ! kgC  ha-1 y-1
+  y(day,153)     = D_Nsoil_f_hay      ! kgN  ha-1 y-1
 
 ! CALIBRATION VARIABLES IN CAF2021's AND ORIANA's ORIGINAL BC DATA FILES.
 ! ------------------------------------------------------------------------

@@ -21,7 +21,8 @@ bibliography: [Avocado.bib,Banana.bib,MvO.bib]
 ---
 
 ```{r, include=FALSE}
-  file_BC.RData <- 'BC_07_51.RData'
+  # file_BC.RData <- 'BC_07_51.RData'
+  file_BC.RData <- 'BC_11_52.RData'
 ```
 
 ```{r, include=FALSE}
@@ -107,7 +108,7 @@ bibliography: [Avocado.bib,Banana.bib,MvO.bib]
     title(title2,adj=0)
     if(verify) {
       Csoil_f   <- sim[ , which( outputNames=="Csoil_f") ] # kgC m-2 
-      D_Csoil_f <- Csoil_f[NDAYS] - Csoil_f[1]                # kgC m-2
+      D_Csoil_f <- Csoil_f[NDAYS] - Csoil_f[1]             # kgC m-2
       CinSum        <- colSums(sim[2:NDAYS,i.Cin ])        # kgC m-2
       CoutSum       <- colSums(sim[2:NDAYS,i.Cout])        # kgC m-2
       CinMinusCout  <- sum(CinSum) - sum(CoutSum)
@@ -351,7 +352,7 @@ bibliography: [Avocado.bib,Banana.bib,MvO.bib]
   - Better weather data for final years?
 - Include TCSOM parameters and aim for near-balance of sources and sinks?
 
-# Agenda 3: BC Llano Bonito (and perhaps Aquiares)
+# AGENDA 3: BC Llano Bonito (and perhaps Aquiares)
 
 - Files from Oriana. LB at 1600+ m, Aquiares at 1000+ m.
 - At LB there were Musaceae, but not in the data files (two tree species could then not be handled by CAF2014), but maybe check the paper by Louise Myelan that is referred to in Oriana et al's 2020 paper.

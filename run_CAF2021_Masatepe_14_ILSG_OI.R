@@ -17,4 +17,7 @@
    plot_output( vars=outputNames[ iCoffee ] )
    plot_output( vars=outputNames[ iTrees  ] )
    plot_output( list_output=list(output), vars=c( "fTranT_t(3)" ) )
+   plot_output( list_output=list(output), vars=c( "D_Csoil_f_hay" ) )
+   plot_output( list_output=list(output), vars=c( "D_Csys_f_hay" ) )
+   plot_output( list_output=list(output), vars=c( "D_Nsoil_f_hay" ) )
    

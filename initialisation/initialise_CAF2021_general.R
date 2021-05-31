@@ -52,97 +52,84 @@ read_weather_CAF <- function(y = year_start,
 ################################################################################
 nc <- 6 ; nt <- 3
 
-outputNames <- c( "Time", "year", "doy",
+yNames <- yUnits <- list()
 
-  paste0( "Ac("        ,1:nc,")" ), paste0( "At("      ,1:nt,")" ),
-  paste0( "fNgrowth("  ,1:nc,")" ), paste0( "fTran("   ,1:nc,")" ),
+yNames[[1]]  <- c( "Time", "year", "doy" )
+yUnits[[1]]  <- c( "(y)" , "(y)" , "(d)" )
+                                    
+yNames[[2]]  <- c( paste0("Ac(",1:nc,")")      , paste0("At(",1:nt,")"),
+                   paste0("fNgrowth(",1:nc,")"), paste0("fTran(",1:nc,")") )
+yUnits[[2]]  <- c( rep("(m2 c m-2)",nc )       , rep("(m2 t m-2)",nt),
+                   rep("(-)",nc)               , rep("(-)",nc) )
 
-  "Cabg_f"                        , paste0( "harvCP("  ,1:nc,")" ),
-  "harvDM_f_hay"                  , paste0( "LAI("     ,1:nc,")" ),
+yNames[[3]]  <- c( "Cabg_f"         , paste0("harvCP(",1:nc,")"),
+                   "harvDM_f_hay"   , paste0("LAI(",1:nc,")") )
+yUnits[[3]]  <- c( "(kgC m-2)"      , rep("(kgC m-2 c)",nc),
+                   "(kgDM ha-1 y-1)", rep("(m2 m-2 c)",nc) )
 
-  "CabgT_f"                       , paste0( "CAtree_t(",1:nt,")" ),
-  paste0( "h_t("       ,1:nt,")" ), paste0( "LAIT_c("  ,1:nc,")" ),
-  paste0( "treedens_t(",1:nt,")" ),
-  
-  "Csoil_f"                       , "Nsoil_f",
-  
-  paste0( "CST_t(",1:nt,")" )     , paste0( "SAT_t(",1:nt,")" ),
-  
-  "Nfert_f"    , "NfixT_f"    , "NsenprunT_f", "Nsenprun_f",
-  "Nleaching_f", "Nemission_f", "Nrunoff_f"  , "Nupt_f"    , "NuptT_f",
-  
-  paste0( "CLITT(", 1:nc,")" )   , paste0( "NLITT("    ,1:nc,")" ),
-  paste0( "harvCST_t(",1:nt,")" ), paste0( "harvNST_t(",1:nt,")" ),
-  
-  "CsenprunT_f", "Csenprun_f" , "Rsoil_f"    , "Crunoff_f" ,
-  
-  "WA_f"       ,
-  "Rain_f"     , "Drain_f"    , "Runoff_f"   , "Evap_f"    ,
-  "Tran_f"     , "TranT_f"    , "Rainint_f"  , "RainintT_f",
-  
-  "C_f"        ,  "gC_f"      , "dC_f"       , "prunC_f"   , "harvCP_f", 
-  
-  "CT_f"       , "gCT_f"      , "harvCBT_f"  , "harvCPT_f" , "harvCST_f",
-  
-  paste0( "CPT_t(",1:nt,")" )     ,
-  paste0( "harvCPT_t(",1:nt,")" ) ,
-  paste0( "harvNPT_t(",1:nt,")" ) ,
-  
-  "DVS(1)"     , "SINKP(1)"   , "SINKPMAXnew(1)", "DayFl(1)", "PARMA(1)",
-  "DVS(2)"     , "SINKP(2)"   , "SINKPMAXnew(2)", "DayFl(2)", "PARMA(2)",
-  
-  "CR_f"       , "CW_f"       , "CL_f"          , "CP_f"    ,
-  paste0( "CRT_t(",1:nt,")" ) , paste0( "CBT_t(",1:nt,")" ) ,
-  paste0( "CLT_t(",1:nt,")" ) ,
+yNames[[4]]  <- c( "CabgT_f"              , paste0("CAtree_t(",1:nt,")"),
+                   paste0("h_t(",1:nt,")"), paste0("LAIT_c(",1:nc,")"),
+                   paste0("treedens_t(",1:nt,")") )
+yUnits[[4]]  <- c( "(kgC m-2)"            , rep("(m2 tree-1)",nt),
+                   rep("(m)",nt)          , rep("(m2 m-2 c)",nc),
+                   rep("(m-2)",nt) )
 
-  paste0( "LAIT_t(",1:nt,")" ), paste0( "fTranT_t(",1:nt,")" )
-)
+yNames[[5]]  <- c( "Csoil_f"  , "Nsoil_f"   )
+yUnits[[5]]  <- c( "(kgC m-2)", "(kgN m-2)" )
 
-outputUnits <- c( "(y)", "(y)", "(d)",
+yNames[[6]]  <- c( paste0("CST_t(",1:nt,")"), paste0("SAT_t(",1:nt,")") )
+yUnits[[6]]  <- c( rep("(kgC m-2)",nt)      , rep("(m2 m-2)",nt) )
 
-  rep("(m2 c m-2)",nc)          , rep("(m2 t m-2)" ,nt),
-  rep("(-)"       ,nc)          , rep("(-)"        ,nc),
+yNames[[7]]  <- c( "Nfert_f"   , "NfixT_f"    , "NsenprunT_f",
+                   "Nsenprun_f", "Nleaching_f", "Nemission_f",
+                   "Nrunoff_f" , "Nupt_f"     , "NuptT_f" )
+yUnits[[7]]  <- c( rep("(kgN m-2 d-1)",9) )
+                  
+yNames[[8]]  <- c( paste0("CLITT(",1:nc,")")    , paste0("NLITT(",1:nc,")"),
+                   paste0("harvCST_t(",1:nt,")"), paste0("harvNST_t(",1:nt,")") )
+yUnits[[8]]  <- c( rep("(kgC m-2 c)",nc)        , rep("(kgN m-2 c)",nc),
+                   rep("(kgC m-2 d-1)",nt)      , rep("(kgN m-2 d-1)",nt) )
+                  
+yNames[[9]]  <- c( "CsenprunT_f", "Csenprun_f" , "Rsoil_f", "Crunoff_f" )
+yUnits[[9]]  <- c( rep("(kgC m-2 d-1)",4) )
 
-  "(kgC m-2)"                   , rep("(kgC m-2 c)",nc),
-  "(kgDM ha-1 y-1)"             , rep("(m2 m-2 c)" ,nc),
+yNames[[10]] <- c( "WA_f"  ,
+                   "Rain_f", "Drain_f", "Runoff_f" , "Evap_f"    ,
+                   "Tran_f", "TranT_f", "Rainint_f", "RainintT_f" )
+yUnits[[10]] <- c( "(mm)"  ,
+                   rep("(mm d-1)",8) )
+                  
+yNames[[11]] <- c( "C_f"      ,  "gC_f", "dC_f", "prunC_f", "harvCP_f" ) 
+yUnits[[11]] <- c( "(kgC m-2)", rep("(kgC m-2 d-1)",4) )
 
-  "(kgC m-2)"                   , rep("(m2 tree-1)",nt),
-  rep("(m)"       ,nt)          , rep("(m2 m-2 c)" ,nc),
-  rep("(m-2)"     ,nt),
-  
-  "(kgC m-2)"                   , "(kgN m-2)"          ,
-  
-  rep("(kgC m-2)",nt)           , rep("(m2 m-2)"   ,nt),
-  
-  rep("(kgN m-2 d-1)",9),
-  
-  rep("(kgC m-2 c)"  ,nc)       , rep("(kgN m-2 c)"  ,nc),
-  rep("(kgC m-2 d-1)",nt)       , rep("(kgN m-2 d-1)",nt),
-  
-  rep("(kgC m-2 d-1)",4)        ,
+yNames[[12]] <- c( "CT_f"     , "gCT_f", "harvCBT_f", "harvCPT_f", "harvCST_f" )
+yUnits[[12]] <- c( "(kgC m-2)", rep("(kgC m-2 d-1)",4) )
 
-  "(mm)"                        ,
-  rep("(mm d-1)"     ,8)        ,
+yNames[[13]] <- c( paste0("CPT_t(",1:nt,")"), paste0("harvCPT_t(",1:nt,")"),
+                   paste0("harvNPT_t(",1:nt,")") )
+yUnits[[13]] <- c( rep("(kgC m-2)",nt)      , rep("(kgC m-2 d-1)",nt)      ,
+                   rep("(kgN m-2 d-1)",nt) )
 
-  "(kgC m-2)"                   , rep("(kgC m-2 d-1)",4),
+yNames[[14]] <- c( "DVS(1)", "SINKP(1)", "SINKPMAXnew(1)", "DayFl(1)", "PARMA(1)",
+                   "DVS(2)", "SINKP(2)", "SINKPMAXnew(2)", "DayFl(2)", "PARMA(2)" )
+yUnits[[14]] <- c( rep("(-)",4), "(MJ m-2 d-1)",
+                   rep("(-)",4), "(MJ m-2 d-1)" )
 
-  "(kgC m-2)"                   , rep("(kgC m-2 d-1)",4),
-  
-  rep("(kgC m-2)"    ,nt)       ,
-  rep("(kgC m-2 d-1)",nt)       ,
-  rep("(kgN m-2 d-1)",nt)       ,
-  
-  rep("(-)",4)                  , "(MJ m-2 d-1)"        ,
-  rep("(-)",4)                  , "(MJ m-2 d-1)"        ,
-  
-  rep("(kgC m-2)",4)            ,
-  rep("(kgC m-2)",nt)           , rep("(kgC m-2)",nt)   ,
-  rep("(kgC m-2)",nt)           ,
+yNames[[15]] <- c( "CR_f", "CW_f", "CL_f", "CP_f",
+                   paste0("CRT_t(",1:nt,")") , paste0("CBT_t(",1:nt,")"),
+                   paste0("CLT_t(",1:nt,")") )
+yUnits[[15]] <- c( rep("(kgC m-2)",4),
+                   rep("(kgC m-2)",nt)       , rep("(kgC m-2)",nt),
+                   rep("(kgC m-2)",nt) )
 
-  rep("(m2 t m-2)",nt)          , rep("(-)",nt)
-)
+yNames[[16]] <- c( paste0("LAIT_t(",1:nt,")"), paste0("fTranT_t(",1:nt,")") )
+yUnits[[16]] <- c( rep("(m2 t m-2)",nt)      , rep("(-)",nt) )
 
-NOUT <- as.integer( length(outputNames) )
+yNames[[17]] <- c( "D_Csoil_f_hay", "D_Csys_f_hay", "D_Nsoil_f_hay" )
+yUnits[[17]] <- c( rep("kgC ha-1 y-1",2)          , "kgN ha-1 y-1" )
+
+outputNames  <- unlist(yNames) ; outputUnits <- unlist(yUnits)
+NOUT         <- as.integer( length(outputNames) )
 
 ################################################################################
 ### 4. FUNCTION FOR CHANGING PARAMETER VALUES
