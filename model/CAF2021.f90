@@ -38,48 +38,53 @@ real                        :: y(NDAYS,NOUT)
 integer :: day, doy, i, ic, it, NDAYS, NOUT, year
 
 ! State variables
-real    :: CBT_t(nt)  , CLT_t(nt)  , CPT_t (nt)  , CRT_t(nt)  , CST_t(nt), NLT_t(nt)
-real    :: CL   (nc)=0, CP   (nc)=0, CR    (nc)=0, CW   (nc)=0, NL   (nc)=0
-real    :: DVS  (nc)=0, LAI  (nc)=0, SENSIT(nc)  , SINKP(nc)
-real    :: CLITT(nc)  , CSOMF(nc)  , CSOMS (nc)
-real    :: NLITT(nc)  , NMIN (nc)  , NSOMF (nc)  , NSOMS(nc)  , WA   (nc)
+real :: CBT_t(nt)  , CLT_t(nt)  , CPT_t (nt)  , CRT_t(nt)  , CST_t(nt), NLT_t(nt)
+real :: CL   (nc)=0, CP   (nc)=0, CR    (nc)=0, CW   (nc)=0, NL   (nc)=0
+real :: DVS  (nc)=0, LAI  (nc)=0, SENSIT(nc)  , SINKP(nc)
+real :: CLITT(nc)  , CSOMF(nc)  , CSOMS (nc)
+real :: NLITT(nc)  , NMIN (nc)  , NSOMF (nc)  , NSOMS(nc)  , WA   (nc)
 
 ! Non-state variables
-real    :: T_c(nc), GR_c(nc)
+real :: T_c(nc), GR_c(nc)
 
-real    :: Ac(nc), At(nt), Atc(nt,nc)
+real :: Ac(nc), At(nt), Atc(nt,nc)
 
-real    :: DUMMY_c(nc), DUMMY_tc(nt,nc)
-real    :: fTranT_c(nc)=0, fTranT_t(nt)=0
-real    :: LAIT, LAIT_c(nc)=0, LAIT_t(nt)=0, LAIT_tc(nt,nc)=0
-real    :: NsupT_t(nt)=0
-real    :: Pevap(nc), PevapT_c(nc), Ptran(nc), PtranT_c(nc)
-real    :: RainintT_c(nc)=0, TranT_c(nc)=0
-real    :: fNgrowth(nc)
-real    :: Evap(nc) , fTran    (nc), Nsup(nc)   , Tran(nc) , RWA(nc)
-real    :: PARav(nc), PARint   (nc), Rainint(nc), TCOFFEE(nc)
-real    :: PARMA(nc), PARCOFFEE(nc), PARold(nc,30)
-real    :: harvDM_f_ha
-real    :: dCLT_c(nc)=0 , dCBlitt_c(nc)=0, dCRT_c(nc)=0
-real    :: sCSTsen_c(nc)=0
-real    :: dNLT_c (nc)=0, dNBlitt_c(nc)=0, dNSlitt_c(nc)=0, dNRsomf_c(nc)=0
-real    :: NuptT_c(nc)=0, NfixT_c(nc)=0
+real :: DUMMY_c(nc), DUMMY_tc(nt,nc)
+real :: fTranT_c(nc)=0, fTranT_t(nt)=0
+real :: LAIT, LAIT_c(nc)=0, LAIT_t(nt)=0, LAIT_tc(nt,nc)=0
+real :: NsupT_t(nt)=0
+real :: Pevap(nc), PevapT_c(nc), Ptran(nc), PtranT_c(nc)
+real :: RainintT_c(nc)=0, TranT_c(nc)=0
+real :: fNgrowth(nc)
+real :: Evap(nc) , fTran    (nc), Nsup(nc)   , Tran(nc) , RWA(nc)
+real :: PARav(nc), PARint   (nc), Rainint(nc), TCOFFEE(nc)
+real :: PARMA(nc), PARCOFFEE(nc), PARold(nc,30)
+real :: harvDM_f_ha
+real :: dCLT_c(nc)=0 , dCBlitt_c(nc)=0, dCRT_c(nc)=0
+real :: sCSTsen_c(nc)=0
+real :: dNLT_c (nc)=0, dNBlitt_c(nc)=0, dNSlitt_c(nc)=0, dNRsomf_c(nc)=0
+real :: NuptT_c(nc)=0, NfixT_c(nc)=0
 
 ! EXTRA OUTPUT VARIABLES
-real 	  :: Cabg_f     , harvDM_f_hay, LAI_f
-real 	  :: CabgT_f    , C           , CT
-real    :: Csoil(nc)  , Csoil_f     , Nsoil(nc)  , Nsoil_f   , WA_f   , WC_f
-real    :: Nfert_f    , NfixT_f     , NsenprunT_f, Nsenprun_f
-real    :: Nleaching_f, Nemission_f , Nrunoff_f  , Nupt_f    , NuptT_f
-real    :: CsenprunT_f, Csenprun_f  , Rsoil_f    , Crunoff_f
-real    :: Rain_f     , Drain_f     , Runoff_f   , Evap_f
-real    :: Tran_f     , TranT_f     , Rainint_f  , RainintT_f
-real    :: C_f        , gC_f        , dC_f       , prunC_f   , harvCP_f
-real    :: CT_f       , gCT_f       , harvCBT_f  , harvCPT_f , harvCST_f
-real    :: CR_f       , CW_f        , CL_f       , CP_f
+real :: Cabg_f     , harvDM_f_hay, LAI_f
+real :: CabgT_f    , C           , CT
+real :: Csoil(nc)  , Csoil_f     , Nsoil(nc)  , Nsoil_f   , WA_f   , WC_f
+real :: Nfert_f    , NfixT_f     , NsenprunT_f, Nsenprun_f
+real :: Nleaching_f, Nemission_f , Nrunoff_f  , Nupt_f    , NuptT_f
+real :: CsenprunT_f, Csenprun_f  , Rsoil_f    , Crunoff_f
+real :: Rain_f     , Drain_f     , Runoff_f   , Evap_f
+real :: Tran_f     , TranT_f     , Rainint_f  , RainintT_f
+real :: C_f        , gC_f        , dC_f       , prunC_f   , harvCP_f
+real :: CT_f       , gCT_f       , harvCBT_f  , harvCPT_f , harvCST_f
+real :: CR_f       , CW_f        , CL_f       , CP_f
 
-real    ::   Csoil_f1   =0,   Csys_f1   =0,   Nsoil_f1   =0
-real    :: D_Csoil_f_hay=0, D_Csys_f_hay=0, D_Nsoil_f_hay=0
+real ::   Csoil_f1   =0,   Csys_f1   =0,   Nsoil_f1   =0
+real :: D_Csoil_f_hay=0, D_Csys_f_hay=0, D_Nsoil_f_hay=0
+
+real :: NfixT_f_hay=0, Nleaching_f_hay=0
+real :: sum_NfixT_f=0, sum_Nleaching_f=0
+
+real :: Shade_f
 
 ! PARAMETERS
 call set_params(PARAMS)
@@ -193,6 +198,7 @@ do day = 1, NDAYS
   
 ! Coffee
   PARCOFFEE      = PAR - PARintT_c
+  Shade_f        = sum( Ac * (1-PARCOFFEE/PAR) )
   TCOFFEE        = T   - TDIFFMAX * (1. - PARCOFFEE/PAR)
   Rainint        = min( RAIN-RainintT_c, KRAININT*LAI )                     
   PARMA          = sum( PARold,2 ) / 30.
@@ -342,17 +348,10 @@ do day = 1, NDAYS
   CP_f        = sum(Ac*CP)
 
 ! Average process rates over the simulated period
-  real :: NfixT_f_hay=0, Nleaching_f_hay=0 ! MOVE UP!
-  real :: sum_NfixT_f=0, sum_Nleaching_f=0 ! MOVE UP!
   sum_NfixT_f     = sum_NfixT_f     + NfixT_f
+  NfixT_f_hay     = sum_NfixT_f * 1E4 * 365 / day
   sum_Nleaching_f = sum_Nleaching_f + Nleaching_f
-  if(day==1) then
-    NfixT_f_hay     = sum_NfixT_f * 1E4 * 365
-    Nleaching_f_hay = sum_Nleaching_f * 1E4 * 365
-  else
-    NfixT_f_hay     = sum_NfixT_f * 1E4 * 365 / (day-1)
-    Nleaching_f_hay = sum_Nleaching_f * 1E4 * 365 / (day-1)
-  endif
+  Nleaching_f_hay = sum_Nleaching_f * 1E4 * 365 / day
 
 ! Average C- and N-balances over the simulated period 
   if(day==1) then
@@ -467,7 +466,12 @@ do day = 1, NDAYS
   y(day,151)     = D_Csoil_f_hay      ! kgC  ha-1 y-1
   y(day,152)     = D_Csys_f_hay       ! kgC  ha-1 y-1
   y(day,153)     = D_Nsoil_f_hay      ! kgN  ha-1 y-1
-
+  
+  y(day,154)     = NfixT_f_hay        ! kgN  ha-1 y-1
+  y(day,155)     = Nleaching_f_hay    ! kgN  ha-1 y-1
+  
+  y(day,156)     = Shade_f            ! -
+  
 ! CALIBRATION VARIABLES IN CAF2021's AND ORIANA's ORIGINAL BC DATA FILES.
 ! ------------------------------------------------------------------------
 ! NAME in CAF2021 ! NAME in original data files   ! UNIT
@@ -490,7 +494,7 @@ do day = 1, NDAYS
 ! LAI(1)          !                               ! m2       m-2  c1
 ! LAI(2)          !                               ! m2       m-2  c2
 ! LAIT            !                               ! m2       m-2  shade
-! Nsoil_f         ! Nsoilave       (t N ha-1)     ! kg N     m-2  field
+! Nsoil_f         ! Nsoilave      (t N ha-1)      ! kg N     m-2  field
 ! WC_f            ! WC_F                          ! m3 W     m-3  field
 
 !if(day==1) then

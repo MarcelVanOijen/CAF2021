@@ -83,7 +83,7 @@ yUnits[[6]]  <- c( rep("(kgC m-2)",nt)      , rep("(m2 m-2)",nt) )
 yNames[[7]]  <- c( "Nfert_f"   , "NfixT_f"    , "NsenprunT_f",
                    "Nsenprun_f", "Nleaching_f", "Nemission_f",
                    "Nrunoff_f" , "Nupt_f"     , "NuptT_f" )
-yUnits[[7]]  <- c( rep("(kgN m-2 d-1)",9) )
+yUnits[[7]]  <- rep("(kgN m-2 d-1)",9)
                   
 yNames[[8]]  <- c( paste0("CLITT(",1:nc,")")    , paste0("NLITT(",1:nc,")"),
                    paste0("harvCST_t(",1:nt,")"), paste0("harvNST_t(",1:nt,")") )
@@ -91,13 +91,12 @@ yUnits[[8]]  <- c( rep("(kgC m-2 c)",nc)        , rep("(kgN m-2 c)",nc),
                    rep("(kgC m-2 d-1)",nt)      , rep("(kgN m-2 d-1)",nt) )
                   
 yNames[[9]]  <- c( "CsenprunT_f", "Csenprun_f" , "Rsoil_f", "Crunoff_f" )
-yUnits[[9]]  <- c( rep("(kgC m-2 d-1)",4) )
+yUnits[[9]]  <- rep("(kgC m-2 d-1)",4)
 
 yNames[[10]] <- c( "WA_f"  ,
                    "Rain_f", "Drain_f", "Runoff_f" , "Evap_f"    ,
                    "Tran_f", "TranT_f", "Rainint_f", "RainintT_f" )
-yUnits[[10]] <- c( "(mm)"  ,
-                   rep("(mm d-1)",8) )
+yUnits[[10]] <- c( "(mm)"  , rep("(mm d-1)",8) )
                   
 yNames[[11]] <- c( "C_f"      ,  "gC_f", "dC_f", "prunC_f", "harvCP_f" ) 
 yUnits[[11]] <- c( "(kgC m-2)", rep("(kgC m-2 d-1)",4) )
@@ -126,7 +125,13 @@ yNames[[16]] <- c( paste0("LAIT_t(",1:nt,")"), paste0("fTranT_t(",1:nt,")") )
 yUnits[[16]] <- c( rep("(m2 t m-2)",nt)      , rep("(-)",nt) )
 
 yNames[[17]] <- c( "D_Csoil_f_hay", "D_Csys_f_hay", "D_Nsoil_f_hay" )
-yUnits[[17]] <- c( rep("kgC ha-1 y-1",2)          , "kgN ha-1 y-1" )
+yUnits[[17]] <- c( rep("(kgC ha-1 y-1)",2)        , "(kgN ha-1 y-1)" )
+
+yNames[[18]] <- c( "NfixT_f_hay", "Nleaching_f_hay" )
+yUnits[[18]] <- rep( "(kgN ha-1 y-1)", 2 )
+
+yNames[[19]] <- "Shade_f"
+yUnits[[19]] <- "(-)"
 
 outputNames  <- unlist(yNames) ; outputUnits <- unlist(yUnits)
 NOUT         <- as.integer( length(outputNames) )

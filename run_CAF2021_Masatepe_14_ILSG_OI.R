@@ -10,7 +10,7 @@
 ## Temporary extra printed output
    nd   <- dim(output)[1]
    iEnv <- c(4:24,55) ; iCoffee <- 25:38 ; iTrees <- 39:54
-   print(output[ nd,    ])
+   print(output[ nd, ])
 
 ## OUTPUT ##
    plot_output( vars=outputNames[ iEnv    ] )
@@ -20,4 +20,7 @@
    plot_output( list_output=list(output), vars=c( "D_Csoil_f_hay" ) )
    plot_output( list_output=list(output), vars=c( "D_Csys_f_hay" ) )
    plot_output( list_output=list(output), vars=c( "D_Nsoil_f_hay" ) )
+   plot_output( list_output=list(output), vars=c( "NfixT_f_hay" ) )
+   plot_output( list_output=list(output), vars=c( "Nleaching_f_hay" ) )
+   plot_output( list_output=list(output), vars=c( paste0("Ac(",1:6,")"), "Shade_f" ) )
    
