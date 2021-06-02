@@ -8,6 +8,7 @@ real   , parameter :: PI    = ACOS(-1.)
 integer, parameter :: nt    = 3         ! # shade tree species
 integer, parameter :: ntlow = min(2,nt) ! # lower-stratum tree species 
 integer, parameter :: nc    = 6         ! # land-cover classes (combinations of tree spp).
+integer, parameter :: nz    = nt*2      ! # crown upper and lower heights for all tree spp.
 
 ! ENVIRONMENT
 real , parameter :: CO20 = 350 ! (ppm) Reference value of [CO2] at which fLUECO2 = 1

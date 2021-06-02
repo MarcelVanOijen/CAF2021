@@ -184,7 +184,8 @@ do day = 1, NDAYS
   call water_flux(PevapT_c,PtranT_c,TRANCOT,WA, &
                   DUMMY_c,fTranT_c,DUMMY_c,TranT_c)
   call RescaleInt_c_t( fTranT_c,At,Atc, fTranT_t )
-  call PARintT(Ac,Atc,LAIT_tc, PARintT_c,PARintT_t)
+  call PARintT(Atc,LAIT_tc, PARintT_c,PARintT_t)
+  call X(Ac,Atc,h_t,LAIT_tc, tmpPARintT_t,z,h_tc,LAIT_tz)
   call NPP(fTranT_t,PARintT_t)
   
   call Nsupplytree(At,Atc,CRT_t,NMIN, NsupT_t)
@@ -497,23 +498,41 @@ do day = 1, NDAYS
 ! Nsoil_f         ! Nsoilave      (t N ha-1)      ! kg N     m-2  field
 ! WC_f            ! WC_F                          ! m3 W     m-3  field
 
-!if(day==1) then
-!  write(66,*) "day=1    : fTranT_c= ", fTranT_c
-!  write(66,*) "day=1    : At= ", At
-!  write(66,*) "day=1    : Atc= ", Atc
-!  write(66,*) "day=1    : fTranT_t= ", fTranT_t
-!endif
+if(day==1) then
+  write(66,"('day=1, Ac:'        ,6F8.4)") Ac
+  write(66,"('day=1, At:'        ,6F8.4)") At
+  write(66,"('day=1, Atc:'       ,6F8.4)") Atc
+  write(66,"('day=1, z:'         ,6F8.4)") z
+  write(66,"('day=1, h_t:'       ,6F8.4)") h_t
+  write(66,"('day=1, h_tc:'      ,6F8.4)") h_tc
+  write(66,"('day=1, LAIT_c:'    ,6F8.4)") LAIT_c
+  write(66,"('day=1, LAIT_t:'    ,6F8.4)") LAIT_t
+  write(66,"('day=1, LAIT_tz:'   ,6F8.4)") LAIT_tz
+endif
 
-!if(day==NDAYS) then
-!  write(66,*) "---------------------------------------------------"
-!  write(66,*) "day=NDAYS: fTranT_c= ", fTranT_c
-!  write(66,*) "day=NDAYS: At= ", At
-!  write(66,*) "day=NDAYS: Atc= ", Atc
-!  write(66,*) "day=NDAYS: fTranT_t= ", fTranT_t
-!endif
+! if(day==NDAYS) then
+if(day==1000) then
+  write(66,*) "---------------------------------------------------"
+  write(66,"('day=NDAYS, Ac='          ,6F8.4)") Ac
+  write(66,"('day=NDAYS, At='          ,6F8.4)") At
+  write(66,"('day=NDAYS, Atc='         ,6F8.4)") Atc
+  write(66,"('day=NDAYS, z='           ,6F8.4)") z
+  write(66,"('day=NDAYS, h_t='         ,6F8.4)") h_t
+  write(66,"('day=NDAYS, h_tc='        ,6F8.4)") h_tc
+  write(66,"('day=NDAYS, LAIT_c='      ,6F8.4)") LAIT_c
+  write(66,"('day=NDAYS, LAIT_t='      ,6F8.4)") LAIT_t
+  write(66,"('day=NDAYS, LAIT_tz='     ,6F8.4)") LAIT_tz
+  write(66,"('day=NDAYS, z(1)='           ,6F8.4)") z(1)
+  write(66,"('day=NDAYS, z(2)='           ,6F8.4)") z(2)
+  write(66,"('day=NDAYS, z(3)='           ,6F8.4)") z(3)
+  write(66,*) "day=NDAYS, z(4)=", z(4)
+  write(66,"('day=NDAYS, z(5)='           ,6F8.4)") z(5)
+  write(66,"('day=NDAYS, z(6)='           ,6F8.4)") z(6)
+endif
+
 
 enddo ! end time loop
 
-!close(66)
+close(66)
 
 end  
