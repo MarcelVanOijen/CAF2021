@@ -9,18 +9,14 @@ use management
 implicit none
 
 ! Morphology
-real :: CAtree_t(nt)=0, CBpertree_t(nt)=0, CSpertree_t(nt)=0, SAT_t(nt)
-real :: h_t     (nt)=0
-real :: z       (nz)=0, h_tc(nt,nc)=0
+real :: CAtree_t(nt)=0, CBpertree_t(nt)=0, CSpertree_t(nt)=0
+real :: SAT_t(nt)=0, h_t(nt)=0, hC_t(nt)=0, z(nz)=0
+real :: dz(nz)=0, LAIT_tcz(nt,nc,nz)=0
 
-! NPP
+! PARintT & NPP
 real :: fLUEco2, fLUEt
 real :: GPP_t    (nt)=0, NPPmaxN_t(nt)=0
 real :: PARintT_c(nc)=0, PARintT_t(nt)=0
-
-! ATTENTION: CHECK whether these declarations will stay
-real :: tmpPARintT_t(nt)=0
-real :: LAIT_tz(nt,nz)
 
 ! Allocation
 real :: fGILAI_t(nt)=0, fGIN_t(nt)=0, FLT_t(nt)=0
@@ -52,9 +48,13 @@ real :: sCBTsen_t(nt)=0, sCLTsen_t(nt)=0, sCRTsen_t(nt)=0, sCSTsen_t(nt)=0
 
 Contains
 
-  Subroutine morphology(CBT_t,CST_t,LAIT_t,treedens_t, SAT_t)
-  real    :: CBT_t(nt),CST_t(nt),LAIT_t(nt),treedens_t(nt)
-  real    :: SAT_t(nt)
+  Subroutine morphology(CBT_t,CST_t,LAIT_t,LAIT_tc,treedens_t, SAT_t,h_t,hC_t,z,dz,LAIT_tcz)
+  real, intent(in)  :: CBT_t(nt),CST_t(nt),LAIT_t(nt),LAIT_tc(nt,nc),treedens_t(nt)
+  real, intent(out) :: SAT_t(nt),h_t(nt),hC_t(nt),z(nz)
+  real, intent(out) :: dz(nz), LAIT_tcz(nt,nc,nz)
+  real              :: z_unsorted(nz)
+  logical           :: mk(nz)
+  integer           :: ic,it,iz
   where (treedens_t>0.)
     CSpertree_t = CST_t / treedens_t
     CBpertree_t = CBT_t / treedens_t
@@ -62,18 +62,45 @@ Contains
     CSpertree_t = 0.
     CBpertree_t = 0.
   endwhere
-  h_t      = KH  * (CSpertree_t**KHEXP )
-  CAtree_t = KAC * (CBpertree_t**KACEXP)
-  SAT_t    = CAtree_t * treedens_t * SHADEPROJ
+  CAtree_t       = KAC * (CBpertree_t**KACEXP)
+  SAT_t          = CAtree_t * treedens_t * SHADEPROJ
   SAT_t(1:ntlow) = SAT_t(1:ntlow) / max(1., sum(SAT_t(1:ntlow))) ! sum(SAT_t(1:2)) <= 1
   SAT_t(3)       = min(1., SAT_t(3))                             ! SAT_t(3)) <= 1
+
+  h_t             = KH  * (CSpertree_t**KHEXP )
+  hC_t            = h_t / 2
+  z_unsorted(1:3) = h_t
+  z_unsorted(4:6) = h_t - hC_t
+  mk              = .TRUE.
+  do iz=1,(nz-1)
+    z(iz) = maxval(z_unsorted,mk)
+    mk(maxloc(z_unsorted,mk)) = .FALSE.
+  enddo
+  z(6) = minval(z_unsorted)
+  
+  dz(1:(nz-1)) = z(1:(nz-1)) - z(2:nz)
+  dz(nz)       = 0
+  
+  LAIT_tcz = 0
+  do ic=1,nc
+    do it=1,nt
+      do iz=1,(nz-1)
+        if( (  dz(iz)            >  0       ) .AND. &
+            (  h_t(it)           >= z(iz)   ) .AND. &
+            ( (h_t(it)-hC_t(it)) <= z(iz+1) ) ) then
+          LAIT_tcz(it,ic,iz) = LAIT_tc(it,ic) * dz(iz) / hC_t(it)
+        endif
+      enddo
+    enddo
+  enddo
+
   end Subroutine morphology  
 
   Subroutine PARintT(Atc,LAIT_tc, PARintT_c,PARintT_t)
-  real    :: Atc(nt,nc), LAIT_tc(nt,nc)
-  real    :: PARintT_c(nc), PARintT_t(nt)
-  real    :: PARbelowT3_c(nc), PARintT_tc(nt,nc)
-  integer :: it
+  real, intent(in)  :: Atc(nt,nc), LAIT_tc(nt,nc)
+  real, intent(out) :: PARintT_c(nc), PARintT_t(nt)
+  real              :: PARbelowT3_c(nc), PARintT_tc(nt,nc)
+  integer           :: it
   PARintT_tc      = 0
   PARintT_tc(3,:) = PAR * (1. - exp(-KEXTT*LAIT_tc(3,:)))
   PARbelowT3_c    = PAR-PARintT_tc(3,:)
@@ -84,52 +111,8 @@ Contains
   PARintT_c = sum( PARintT_tc, dim=1 )
   do it=1,nt
     PARintT_t(it) = sum( Atc(it,:) * PARintT_tc(it,:) )
-  enddo  
+  enddo
   end Subroutine PARintT
-
-  Subroutine X(Ac,Atc,h_t,LAIT_tc, tmpPARintT_t,z,h_tc,LAIT_tz)
-  real    :: Ac(nc)
-  real    :: Atc(nt,nc), LAIT_tc(nt,nc)
-  real    :: h_t(nt)
-  real    :: tmpPARintT_t(nt)
-  real    :: tmpPARintT_t2(nt,nc)
-  real    :: LAIT_tz(nt,nz)
-  real    :: z(nz), z_unsorted(nz), h_tc(nt,nc)
-  real    :: dz(nz), hC_t(nt)
-  integer :: ic, it, iz
-  logical :: mk(nz)
-! Why does deleting the following nonsense line affect z(4) and z(5) ???
-! [And why does deleting the unused Ac from the subroutine inputs also
-!  affect z(4)?]
-  tmpPARintT_t = sum( tmpPARintT_t2 )
-  hC_t            = h_t / 2
-  z_unsorted(1:3) = h_t
-  z_unsorted(4:6) = h_t - hC_t
-  mk(nz)          = .TRUE.
-  do iz=1,(nz-1)
-    z(iz) = maxval(z_unsorted,mk)
-    mk(maxloc(z_unsorted,mk)) = .FALSE.
-  enddo
-  z(6) = minval(z_unsorted)
-  dz(1:(nz-1)) = z(1:(nz-1)) - z(2:nz)
-  dz(nz)       = 0
-  h_tc = 0
-  do it=1,nt
-    where (Atc(it,:)>0.) h_tc(it,:) = h_t(it)
-  enddo
-  LAIT_tz = 0
-  do ic=5,5
-    do it=1,nt
-      do iz=1,(nz-1)
-        if( (  dz(iz)                >  0       ) .AND. &
-            (  h_tc(it,ic)           >= z(iz)   ) .AND. &
-            ( (h_tc(it,ic)-hC_t(it)) <= z(iz+1) ) ) then
-            LAIT_tz(it,iz) = LAIT_tc(it,ic) * dz(iz) / hC_t(it)
-        endif
-      enddo
-    enddo
-  enddo
-  end Subroutine X
 
   Subroutine NPP(fTranT_t,PARintT_t)
   real :: fTranT_t(nt), PARintT_t(nt)

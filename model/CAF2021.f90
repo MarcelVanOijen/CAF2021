@@ -165,18 +165,18 @@ do day = 1, NDAYS
   T_c  = T
   GR_c = GR
   
+! Land-cover areas
+  call CalcShade(LAI,CR,CW,CP,CL,NL,WA,CLITT,CSOMF,CSOMS,NLITT,NSOMF,NSOMS,NMIN, Ac)
+  call CalcAtc(Ac,TX, At,Atc)
+  call RescaleExt_t_tcc(LAIT_t,At,Atc, LAIT_tc,LAIT_c)
+  
 ! Trees
-  call morphology(CBT_t,CST_t,LAIT_t,treedens_t, SAT_t)
+  call morphology(CBT_t,CST_t,LAIT_t,LAIT_tc,treedens_t, SAT_t,h_t,hC_t,z,dz,LAIT_tcz)
 
 ! Management
   call fert_prun_thin(year,doy,DAYS_FERT ,NFERTV ,DAYS_PRUNC,FRPRUNC, &
                                 DAYS_PRUNT,FRPRUNT,DAYS_THINT,FRTHINT)
   treedens_t = treedens_t - thintreedens_t
-  
-! Land-cover areas
-  call CalcShade(LAI,CR,CW,CP,CL,NL,WA,CLITT,CSOMF,CSOMS,NLITT,NSOMF,NSOMS,NMIN, Ac)
-  call CalcAtc(Ac,TX, At,Atc)
-  call RescaleExt_t_tcc(LAIT_t,At,Atc, LAIT_tc,LAIT_c)
   
 ! Trees continued
   RainintT_c = min( RAIN, KRAININTT*LAIT_c )
@@ -185,7 +185,6 @@ do day = 1, NDAYS
                   DUMMY_c,fTranT_c,DUMMY_c,TranT_c)
   call RescaleInt_c_t( fTranT_c,At,Atc, fTranT_t )
   call PARintT(Atc,LAIT_tc, PARintT_c,PARintT_t)
-  call X(Ac,Atc,h_t,LAIT_tc, tmpPARintT_t,z,h_tc,LAIT_tz)
   call NPP(fTranT_t,PARintT_t)
   
   call Nsupplytree(At,Atc,CRT_t,NMIN, NsupT_t)
@@ -473,6 +472,8 @@ do day = 1, NDAYS
   
   y(day,156)     = Shade_f            ! -
   
+  y(day,157:162) = z                  ! m
+
 ! CALIBRATION VARIABLES IN CAF2021's AND ORIANA's ORIGINAL BC DATA FILES.
 ! ------------------------------------------------------------------------
 ! NAME in CAF2021 ! NAME in original data files   ! UNIT
@@ -503,31 +504,31 @@ if(day==1) then
   write(66,"('day=1, At:'        ,6F8.4)") At
   write(66,"('day=1, Atc:'       ,6F8.4)") Atc
   write(66,"('day=1, z:'         ,6F8.4)") z
+  write(66,"('day=1, dz:'        ,6F8.4)") dz
   write(66,"('day=1, h_t:'       ,6F8.4)") h_t
-  write(66,"('day=1, h_tc:'      ,6F8.4)") h_tc
+  write(66,"('day=1, hC_t:'      ,6F8.4)") hC_t
   write(66,"('day=1, LAIT_c:'    ,6F8.4)") LAIT_c
   write(66,"('day=1, LAIT_t:'    ,6F8.4)") LAIT_t
-  write(66,"('day=1, LAIT_tz:'   ,6F8.4)") LAIT_tz
+  write(66,"('day=1, LAIT_tc='   ,6F8.4)") LAIT_tc
+  write(66,"('day=1, LAIT_tcz='  ,6F8.4)") LAIT_tcz
 endif
 
 ! if(day==NDAYS) then
 if(day==1000) then
   write(66,*) "---------------------------------------------------"
-  write(66,"('day=NDAYS, Ac='          ,6F8.4)") Ac
-  write(66,"('day=NDAYS, At='          ,6F8.4)") At
-  write(66,"('day=NDAYS, Atc='         ,6F8.4)") Atc
-  write(66,"('day=NDAYS, z='           ,6F8.4)") z
-  write(66,"('day=NDAYS, h_t='         ,6F8.4)") h_t
-  write(66,"('day=NDAYS, h_tc='        ,6F8.4)") h_tc
-  write(66,"('day=NDAYS, LAIT_c='      ,6F8.4)") LAIT_c
-  write(66,"('day=NDAYS, LAIT_t='      ,6F8.4)") LAIT_t
-  write(66,"('day=NDAYS, LAIT_tz='     ,6F8.4)") LAIT_tz
-  write(66,"('day=NDAYS, z(1)='           ,6F8.4)") z(1)
-  write(66,"('day=NDAYS, z(2)='           ,6F8.4)") z(2)
-  write(66,"('day=NDAYS, z(3)='           ,6F8.4)") z(3)
-  write(66,*) "day=NDAYS, z(4)=", z(4)
-  write(66,"('day=NDAYS, z(5)='           ,6F8.4)") z(5)
-  write(66,"('day=NDAYS, z(6)='           ,6F8.4)") z(6)
+  write(66,"('day=N, Ac='        ,6F8.4)") Ac
+  write(66,"('day=N, At='        ,6F8.4)") At
+  write(66,"('day=N, Atc='       ,6F8.4)") Atc
+  write(66,"('day=N, z='         ,6F8.4)") z
+  write(66,"('day=N, dz='        ,6F8.4)") dz
+  write(66,"('day=N, h_t='       ,6F8.4)") h_t
+  write(66,"('day=N, hC_t='      ,6F8.4)") hC_t
+  write(66,"('day=N, LAIT_c='    ,6F8.4)") LAIT_c
+  write(66,"('day=N, LAIT_t='    ,6F8.4)") LAIT_t
+  write(66,"('day=N, LAIT_tc='   ,6F8.4)") LAIT_tc
+  write(66,"('day=N, LAIT_t1cz=' ,6F8.4)") LAIT_tcz(1,:,:)
+  write(66,"('day=N, LAIT_t3cz=' ,6F8.4)") LAIT_tcz(3,:,:)
+!  write(66,*) "day=N, x=", x
 endif
 
 

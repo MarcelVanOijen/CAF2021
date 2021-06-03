@@ -23,6 +23,7 @@
    plot_output( list_output=list(output), vars=c( "NfixT_f_hay" ) )
    plot_output( list_output=list(output), vars=c( "Nleaching_f_hay" ) )
    plot_output( list_output=list(output), vars=c( paste0("Ac(",1:6,")"), "Shade_f" ) )
+   plot_output( list_output=list(output), vars=paste0("z(",1:6,")") )
    
    iCST_t       <- which( startsWith(outputNames ,"CST_t("     ) )
    itreedens_t  <- which( startsWith(outputNames ,"treedens_t(") )
@@ -56,6 +57,7 @@
    points( Timefun, h_t3fun, col="red" )
    legend( "topleft", c("h(1)","h(3)"),
            lty=1, col=c("black","red") )
-   
+
    tail(output,1)
    # 2.611017 186.7073 0.9235559
+   # 2.635528 186.7674 0.9235564 (calculation of land-cover areas now at the top)

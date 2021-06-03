@@ -50,7 +50,7 @@ read_weather_CAF <- function(y = year_start,
 ################################################################################
 ### 3. OUTPUT VARIABLES
 ################################################################################
-nc <- 6 ; nt <- 3
+nc <- 6 ; nt <- 3 ; nz <- nt*2
 
 yNames <- yUnits <- list()
 
@@ -133,8 +133,13 @@ yUnits[[18]] <- rep( "(kgN ha-1 y-1)", 2 )
 yNames[[19]] <- "Shade_f"
 yUnits[[19]] <- "(-)"
 
+yNames[[20]] <- paste0("z(",1:nz,")")
+yUnits[[20]] <- rep("(-)",nz)
+
 outputNames  <- unlist(yNames) ; outputUnits <- unlist(yUnits)
 NOUT         <- as.integer( length(outputNames) )
+
+# cbind( outputNames, outputUnits )
 
 ################################################################################
 ### 4. FUNCTION FOR CHANGING PARAMETER VALUES
