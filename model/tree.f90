@@ -15,8 +15,10 @@ real :: dz(nz)=0, LAIT_tcz(nt,nc,nz)=0
 
 ! PARintT & NPP
 real :: fLUEco2, fLUEt
-real :: GPP_t    (nt)=0, NPPmaxN_t(nt)=0
-real :: PARintT_c(nc)=0, PARintT_t(nt)=0, PAR_cz(nc,nz)=0, PARintT_tcz(nt,nc,nz)=0
+real :: GPP_t    (nt)=0   , NPPmaxN_t(nt)=0
+real :: PARintT_c(nc)=0   , PARintT_t(nt)=0
+real :: PAR_cz(nc,nz)=0   , PARintT_tcz(nt,nc,nz)=0
+real :: PARintT_cNEW(nc)=0, PARintT_tNEW(nt)=0
 
 ! Allocation
 real :: fGILAI_t(nt)=0, fGIN_t(nt)=0, FLT_t(nt)=0
@@ -82,7 +84,7 @@ Contains
   dz(nz)       = 0
   
   LAIT_tcz = 0
-  do ic=1,nc
+  do ic=2,nc
     do it=1,nt
       do iz=1,(nz-1)
         if( (  dz(iz)            >  0       ) .AND. &
@@ -96,11 +98,14 @@ Contains
 
   end Subroutine morphology  
 
-  Subroutine PARintT(Atc,LAIT_tc,LAIT_tcz, PARintT_c,PARintT_t,PAR_cz,PARintT_tcz)
+  Subroutine PARintT(Atc,LAIT_tc,LAIT_tcz, &
+                     PARintT_c,PARintT_t,PAR_cz,PARintT_tcz,PARintT_cNEW,PARintT_tNEW)
   real, intent(in)  :: Atc(nt,nc), LAIT_tc(nt,nc), LAIT_tcz(nt,nc,nz)
   real, intent(out) :: PARintT_c(nc), PARintT_t(nt)
   real, intent(out) :: PAR_cz(nc,nz), PARintT_tcz(nt,nc,nz)
+  real, intent(out) :: PARintT_cNEW(nc), PARintT_tNEW(nt)
   real              :: PARbelowT3_c(nc), PARintT_tc(nt,nc)
+  real              :: PARintT_tcNEW(nt,nc)
   integer           :: ic,it,iz
   PARintT_tc      = 0
   PARintT_tc(3,:) = PAR * (1. - exp(-KEXTT*LAIT_tc(3,:)))
@@ -123,8 +128,25 @@ Contains
     enddo
   enddo
   
-  PARintT_tcz = 0
-  
+  PARintT_tcz   = 0
+  PARintT_tcNEW = 0
+  do it=1,nt
+    do ic=2,nc
+      do iz=1,(nz-1)
+        if( LAIT_tcz(it,ic,iz)>0 ) then
+          PARintT_tcz(it,ic,iz) = (PAR_cz(ic,iz) - PAR_cz(ic,iz+1)) * &
+                                       KEXTT*LAIT_tcz(it,ic,iz) /     &
+                                  sum( KEXTT*LAIT_tcz(: ,ic,iz) )
+        endif
+      enddo
+      PARintT_tcNEW(it,ic) = sum( PARintT_tcz(it,ic,:) )
+    enddo
+  enddo
+  PARintT_cNEW = sum( PARintT_tcNEW, dim=1 )
+  do it=1,nt
+    PARintT_tNEW(it) = sum( Atc(it,:) * PARintT_tcNEW(it,:) )
+  enddo
+
   end Subroutine PARintT
 
   Subroutine NPP(fTranT_t,PARintT_t)
