@@ -11,19 +11,38 @@ real :: adjLAI(nc)  , adjCR(nc)   , adjCW(nc)   , adjCP(nc)   , adjCL(nc), adjNL
 real :: adjWA(nc)   , adjCLITT(nc), adjCSOMF(nc), adjCSOMS(nc)
 real :: adjNLITT(nc), adjNSOMF(nc), adjNSOMS(nc), adjNMIN(nc)
 
+real :: f3up
+
 Contains
 
-  Subroutine CalcShade(LAI,CR,CW,CP,CL,NL,WA,CLITT,CSOMF,CSOMS,NLITT,NSOMF,NSOMS,NMIN, Ac)
+  Subroutine CalcShade( &
+    h_t,LAI,CR,CW,CP,CL,NL,WA,CLITT,CSOMF,CSOMS,NLITT,NSOMF,NSOMS,NMIN, &
+    Ac,f3up)
   integer :: i,j
+  real    :: h_t(nt)
   real    :: AcOld(nc), dAc(nc), dfAfromto(nc,nc)
   real    :: LAI(:), CR(:), CW(:), CP(:), CL(:), NL(:)
   real    :: WA(:), CLITT(:), CSOMF(:), CSOMS(:), NLITT(:), NSOMF(:), NSOMS(:), NMIN(:)
   real    :: Ac(nc)
+  real    :: f3up, f3lo
   AcOld   = Ac
   
-  Ac(5:6) = SAT_t(3) * SAT_t(1:2)
-  Ac(4)   = max( 0., SAT_t(3) * (1-SAT_t(1)-SAT_t(2)) )
-  Ac(2:3) = max( 0., (1.-SAT_t(3)) * SAT_t(1:2) )
+  f3up = 0
+  if( h_t(3)>0 ) then
+    f3up = max( 0., min( 1., 2.*(1.-maxval(h_t(1:2))/h_t(3)) ) )
+  endif
+  f3lo = 1 - f3up
+
+  Ac(5:6) = f3up * SAT_t(3) * SAT_t(1:2) + &
+            f3lo * 0. 
+  Ac(4)   = f3up * max( 0., SAT_t(3) * (1-SAT_t(1)-SAT_t(2)) ) + &
+            f3lo * SAT_t(3) / sum( SAT_t )
+  Ac(2:3) = f3up * max( 0., (1.-SAT_t(3)) * SAT_t(1:2) ) + &
+            f3lo * SAT_t(1:2) / sum( SAT_t )
+!  Ac(5:6) = SAT_t(3) * SAT_t(1:2)
+!  Ac(4)   = max( 0., SAT_t(3) * (1-SAT_t(1)-SAT_t(2)) )
+!  Ac(2:3) = max( 0., (1.-SAT_t(3)) * SAT_t(1:2) )
+
   Ac(1)   = max( 0., 1. - sum(Ac(2:nc)) )
 	
   dAc       = Ac - AcOld

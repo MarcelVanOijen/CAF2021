@@ -2,8 +2,8 @@ Subroutine set_params(pa)
 
 use declare_parameters
 implicit none
-! As long as the total number of parameters stays below 150, the next line need not be changed
-real pa(150)
+! As long as the total number of parameters stays below 160, the next line need not be changed
+real pa(160)
 
 !! COFFEE
 ! Initial constants
@@ -131,7 +131,8 @@ TCBT       = pa(134:136) ! (d)
 TCLMAXT    = pa(137:139) ! (d)               : Ca: 730, Ep: 81+-15, Gs: 100
 TCRT       = pa(140:142) ! (d)
 TCST       = pa(143:145) ! (d)
-TREEDENS0  = pa(146:148) ! (m-2)
+HMAX       = pa(146:148) ! (m)
+TREEDENS0  = pa(149:151) ! (m-2)
 
 ! FTCLMINT (1) Ep: medium (non-pollarded) - high (poll.)
 !          (3) {Ca,Gs,Ti}: low, Ed: medium

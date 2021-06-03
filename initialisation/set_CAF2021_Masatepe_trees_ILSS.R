@@ -1,8 +1,10 @@
 ## set_CAF2021_Masatepe_trees_ILSS.R ##
-## MvO, 2021-05-20
+## MvO, 2021-06-03
 
-params <- set_par( c("TREEDENS0(1)","KNFIX(1)"), c(0.0667,0.1) )
-params <- set_par( c("TREEDENS0(3)","KNFIX(3)"), c(0.0667,0.1) )
+params <- set_par( c("HMAX(1)","TREEDENS0(1)","KNFIX(1)"),
+                   c( 8       , 0.0333       , 0.1      ) )
+params <- set_par( c(          "TREEDENS0(3)","KNFIX(3)"),
+                   c(           0.0333       , 0.1      ) )
 
 calendar_prunT[ 1,  1, ] <- c( 2003, 158, 0.1  )
 calendar_prunT[ 1,  2, ] <- c( 2004,  49, 0.03 )

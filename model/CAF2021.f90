@@ -19,8 +19,8 @@ use soil
 use tree
 implicit none
 
-! As long as the total number of parameters stays below 150, the next line need not be changed
-integer, parameter :: NPAR     = 150
+! As long as the total number of parameters stays below 160, the next line need not be changed
+integer, parameter :: NPAR = 160
 real               :: PARAMS(NPAR)
 integer, parameter :: NWEATHER = 8
 real               :: MATRIX_WEATHER(NMAXDAYS,NWEATHER)
@@ -166,12 +166,15 @@ do day = 1, NDAYS
   GR_c = GR
   
 ! Land-cover areas
-  call CalcShade(LAI,CR,CW,CP,CL,NL,WA,CLITT,CSOMF,CSOMS,NLITT,NSOMF,NSOMS,NMIN, Ac)
+  call CalcShade(h_t, &
+                 LAI,CR,CW,CP,CL,NL,WA,CLITT,CSOMF,CSOMS,NLITT,NSOMF,NSOMS,NMIN, &
+                 Ac,f3up)
   call CalcAtc(Ac,TX, At,Atc)
   call RescaleExt_t_tcc(LAIT_t,At,Atc, LAIT_tc,LAIT_c)
   
 ! Trees
-  call morphology(CBT_t,CST_t,LAIT_t,LAIT_tc,treedens_t, SAT_t,h_t,hC_t,z,dz,LAIT_tcz)
+  call morphology(f3up,CBT_t,CST_t,LAIT_t,LAIT_tc,treedens_t, &
+                  SAT_t,h_t,hC_t,z,dz,LAIT_tcz)
 
 ! Management
   call fert_prun_thin(year,doy,DAYS_FERT ,NFERTV ,DAYS_PRUNC,FRPRUNC, &
@@ -185,7 +188,7 @@ do day = 1, NDAYS
                   DUMMY_c,fTranT_c,DUMMY_c,TranT_c)
   call RescaleInt_c_t( fTranT_c,At,Atc, fTranT_t )
   call PARintT(Atc,LAIT_tc,LAIT_tcz, &
-               PARintT_c,PARintT_t,PAR_cz,PARintT_tcz,PARintT_cNEW,PARintT_tNEW)
+               PARintT_c,PARintT_t,PAR_cz,PARintT_tcz)
   call NPP(fTranT_t,PARintT_t)
   
   call Nsupplytree(At,Atc,CRT_t,NMIN, NsupT_t)
@@ -475,6 +478,8 @@ do day = 1, NDAYS
   
   y(day,157:162) = z                  ! m
 
+  y(day,163)     = f3up               ! -
+  
 ! CALIBRATION VARIABLES IN CAF2021's AND ORIANA's ORIGINAL BC DATA FILES.
 ! ------------------------------------------------------------------------
 ! NAME in CAF2021 ! NAME in original data files   ! UNIT
@@ -516,9 +521,7 @@ if(day==1) then
   write(66,"('day=1, PAR_cz='      , 6F8.4)") PAR_cz
   write(66,"('day=1, PAR-PAR_cz(:,6)=', 6F8.4)") PAR-PAR_cz(:,6)
   write(66,"('day=1, PARintT_c=', 6F8.4)") PARintT_c
-  write(66,"('day=1, PARintT_cNEW=', 6F8.4)") PARintT_cNEW
   write(66,"('day=1, PARintT_t=', 6F8.4)") PARintT_t
-  write(66,"('day=1, PARintT_tNEW=', 6F8.4)") PARintT_tNEW
   write(66,"('day=1, PARintT_t1cz=', 6F8.4)") PARintT_tcz(1,:,:)
   write(66,"('day=1, PARintT_t3cz=', 6F8.4)") PARintT_tcz(3,:,:)
 
@@ -542,9 +545,7 @@ if(day==1000) then
   write(66,"('day=N, PAR_cz='      , 6F8.4)") PAR_cz
   write(66,"('day=N, PAR-PAR_cz(:,6)=', 6F8.4)") PAR-PAR_cz(:,6)
   write(66,"('day=N, PARintT_c=', 6F8.4)") PARintT_c
-  write(66,"('day=N, PARintT_cNEW=', 6F8.4)") PARintT_cNEW
   write(66,"('day=N, PARintT_t=', 6F8.4)") PARintT_t
-  write(66,"('day=N, PARintT_tNEW=', 6F8.4)") PARintT_tNEW
   write(66,"('day=N, PARintT_t1cz=', 6F8.4)") PARintT_tcz(1,:,:)
   write(66,"('day=N, PARintT_t3cz=', 6F8.4)") PARintT_tcz(3,:,:)
   

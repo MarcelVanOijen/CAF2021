@@ -23,7 +23,9 @@
    plot_output( list_output=list(output), vars=c( "NfixT_f_hay" ) )
    plot_output( list_output=list(output), vars=c( "Nleaching_f_hay" ) )
    plot_output( list_output=list(output), vars=c( paste0("Ac(",1:6,")"), "Shade_f" ) )
+   plot_output( list_output=list(output), vars=paste0("At(",1:3,")") )
    plot_output( list_output=list(output), vars=paste0("z(",1:6,")") )
+   plot_output( list_output=list(output), vars="f3up" )
    
    iCST_t       <- which( startsWith(outputNames ,"CST_t("     ) )
    itreedens_t  <- which( startsWith(outputNames ,"treedens_t(") )

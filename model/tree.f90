@@ -18,7 +18,6 @@ real :: fLUEco2, fLUEt
 real :: GPP_t    (nt)=0   , NPPmaxN_t(nt)=0
 real :: PARintT_c(nc)=0   , PARintT_t(nt)=0
 real :: PAR_cz(nc,nz)=0   , PARintT_tcz(nt,nc,nz)=0
-real :: PARintT_cNEW(nc)=0, PARintT_tNEW(nt)=0
 
 ! Allocation
 real :: fGILAI_t(nt)=0, fGIN_t(nt)=0, FLT_t(nt)=0
@@ -50,13 +49,18 @@ real :: sCBTsen_t(nt)=0, sCLTsen_t(nt)=0, sCRTsen_t(nt)=0, sCSTsen_t(nt)=0
 
 Contains
 
-  Subroutine morphology(CBT_t,CST_t,LAIT_t,LAIT_tc,treedens_t, SAT_t,h_t,hC_t,z,dz,LAIT_tcz)
+  Subroutine morphology(f3up, &
+    CBT_t,CST_t,LAIT_t,LAIT_tc,treedens_t, &
+    SAT_t,h_t,hC_t,z,dz,LAIT_tcz)
+  real, intent(in)  :: f3up
   real, intent(in)  :: CBT_t(nt),CST_t(nt),LAIT_t(nt),LAIT_tc(nt,nc),treedens_t(nt)
   real, intent(out) :: SAT_t(nt),h_t(nt),hC_t(nt),z(nz)
   real, intent(out) :: dz(nz), LAIT_tcz(nt,nc,nz)
   real              :: z_unsorted(nz)
+  real              :: f3lo
   logical           :: mk(nz)
   integer           :: ic,it,iz
+  
   where (treedens_t>0.)
     CSpertree_t = CST_t / treedens_t
     CBpertree_t = CBT_t / treedens_t
@@ -64,13 +68,15 @@ Contains
     CSpertree_t = 0.
     CBpertree_t = 0.
   endwhere
-  CAtree_t       = KAC * (CBpertree_t**KACEXP)
-  SAT_t          = CAtree_t * treedens_t * SHADEPROJ
-  SAT_t(1:ntlow) = SAT_t(1:ntlow) / max(1., sum(SAT_t(1:ntlow))) ! sum(SAT_t(1:2)) <= 1
-  SAT_t(3)       = min(1., SAT_t(3))                             ! SAT_t(3)) <= 1
 
-  h_t             = KH  * (CSpertree_t**KHEXP )
-  hC_t            = h_t / 2
+  where (CSpertree_t<1.)
+    h_t           = min( HMAX, KH *  CSpertree_t          )
+  elsewhere
+    h_t           = min( HMAX, KH * (CSpertree_t**KHEXP ) )
+  endwhere
+  hC_t(1)         = h_t(1) * 0.5
+  hC_t(2)         = h_t(2) * 0.5
+  hC_t(3)         = h_t(3) * 0.5
   z_unsorted(1:3) = h_t
   z_unsorted(4:6) = h_t - hC_t
   mk              = .TRUE.
@@ -95,29 +101,40 @@ Contains
       enddo
     enddo
   enddo
+  
+  CAtree_t       = KAC * (CBpertree_t**KACEXP)
+  SAT_t          = CAtree_t * treedens_t * SHADEPROJ
+  
+  f3lo = 1 - f3up
+  
+  SAT_t(1:ntlow) = f3up * SAT_t(1:ntlow) / max(1., sum(SAT_t(1:ntlow))) + &
+                   f3lo * SAT_t(1:ntlow) / max(1., sum(SAT_t))
+  SAT_t(3)       = f3up * min(1., SAT_t(3)) + &
+                   f3lo * SAT_t(3)       / max(1., sum(SAT_t))
+!  SAT_t(1:ntlow) = SAT_t(1:ntlow) / max(1., sum(SAT_t(1:ntlow))) ! sum(SAT_t(1:2)) <= 1
+!  SAT_t(3)       = min(1., SAT_t(3))                             ! SAT_t(3)) <= 1
 
   end Subroutine morphology  
 
   Subroutine PARintT(Atc,LAIT_tc,LAIT_tcz, &
-                     PARintT_c,PARintT_t,PAR_cz,PARintT_tcz,PARintT_cNEW,PARintT_tNEW)
+                     PARintT_c,PARintT_t,PAR_cz,PARintT_tcz)
   real, intent(in)  :: Atc(nt,nc), LAIT_tc(nt,nc), LAIT_tcz(nt,nc,nz)
   real, intent(out) :: PARintT_c(nc), PARintT_t(nt)
   real, intent(out) :: PAR_cz(nc,nz), PARintT_tcz(nt,nc,nz)
-  real, intent(out) :: PARintT_cNEW(nc), PARintT_tNEW(nt)
-  real              :: PARbelowT3_c(nc), PARintT_tc(nt,nc)
-  real              :: PARintT_tcNEW(nt,nc)
+!  real              :: PARbelowT3_c(nc)
+  real              :: PARintT_tc(nt,nc)
   integer           :: ic,it,iz
-  PARintT_tc      = 0
-  PARintT_tc(3,:) = PAR * (1. - exp(-KEXTT*LAIT_tc(3,:)))
-  PARbelowT3_c    = PAR-PARintT_tc(3,:)
-  do it=1,ntlow
-    PARintT_tc(it,:) = PARbelowT3_c * &
-	                   (1. - exp(-KEXTT*LAIT_tc(it,:)))
-  enddo
-  PARintT_c = sum( PARintT_tc, dim=1 )
-  do it=1,nt
-    PARintT_t(it) = sum( Atc(it,:) * PARintT_tc(it,:) )
-  enddo
+!  PARintT_tc      = 0
+!  PARintT_tc(3,:) = PAR * (1. - exp(-KEXTT*LAIT_tc(3,:)))
+!  PARbelowT3_c    = PAR-PARintT_tc(3,:)
+!  do it=1,ntlow
+!    PARintT_tc(it,:) = PARbelowT3_c * &
+!	                   (1. - exp(-KEXTT*LAIT_tc(it,:)))
+!  enddo
+!  PARintT_c = sum( PARintT_tc, dim=1 )
+!  do it=1,nt
+!    PARintT_t(it) = sum( Atc(it,:) * PARintT_tc(it,:) )
+!  enddo
   
   PAR_cz      = 0
   PAR_cz(:,1) = PAR
@@ -128,8 +145,8 @@ Contains
     enddo
   enddo
   
-  PARintT_tcz   = 0
-  PARintT_tcNEW = 0
+  PARintT_tcz = 0
+  PARintT_tc  = 0
   do it=1,nt
     do ic=2,nc
       do iz=1,(nz-1)
@@ -139,12 +156,12 @@ Contains
                                   sum( KEXTT*LAIT_tcz(: ,ic,iz) )
         endif
       enddo
-      PARintT_tcNEW(it,ic) = sum( PARintT_tcz(it,ic,:) )
+      PARintT_tc(it,ic) = sum( PARintT_tcz(it,ic,:) )
     enddo
   enddo
-  PARintT_cNEW = sum( PARintT_tcNEW, dim=1 )
+  PARintT_c = sum( PARintT_tc, dim=1 )
   do it=1,nt
-    PARintT_tNEW(it) = sum( Atc(it,:) * PARintT_tcNEW(it,:) )
+    PARintT_t(it) = sum( Atc(it,:) * PARintT_tc(it,:) )
   enddo
 
   end Subroutine PARintT

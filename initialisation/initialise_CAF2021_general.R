@@ -136,6 +136,9 @@ yUnits[[19]] <- "(-)"
 yNames[[20]] <- paste0("z(",1:nz,")")
 yUnits[[20]] <- rep("(-)",nz)
 
+yNames[[21]] <- "f3up"
+yUnits[[21]] <- "(-)"
+
 outputNames  <- unlist(yNames) ; outputUnits <- unlist(yUnits)
 NOUT         <- as.integer( length(outputNames) )
 
