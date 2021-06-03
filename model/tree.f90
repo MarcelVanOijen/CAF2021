@@ -16,7 +16,7 @@ real :: dz(nz)=0, LAIT_tcz(nt,nc,nz)=0
 ! PARintT & NPP
 real :: fLUEco2, fLUEt
 real :: GPP_t    (nt)=0, NPPmaxN_t(nt)=0
-real :: PARintT_c(nc)=0, PARintT_t(nt)=0
+real :: PARintT_c(nc)=0, PARintT_t(nt)=0, PAR_cz(nc,nz)=0, PARintT_tcz(nt,nc,nz)=0
 
 ! Allocation
 real :: fGILAI_t(nt)=0, fGIN_t(nt)=0, FLT_t(nt)=0
@@ -96,11 +96,12 @@ Contains
 
   end Subroutine morphology  
 
-  Subroutine PARintT(Atc,LAIT_tc, PARintT_c,PARintT_t)
-  real, intent(in)  :: Atc(nt,nc), LAIT_tc(nt,nc)
+  Subroutine PARintT(Atc,LAIT_tc,LAIT_tcz, PARintT_c,PARintT_t,PAR_cz,PARintT_tcz)
+  real, intent(in)  :: Atc(nt,nc), LAIT_tc(nt,nc), LAIT_tcz(nt,nc,nz)
   real, intent(out) :: PARintT_c(nc), PARintT_t(nt)
+  real, intent(out) :: PAR_cz(nc,nz), PARintT_tcz(nt,nc,nz)
   real              :: PARbelowT3_c(nc), PARintT_tc(nt,nc)
-  integer           :: it
+  integer           :: ic,it,iz
   PARintT_tc      = 0
   PARintT_tc(3,:) = PAR * (1. - exp(-KEXTT*LAIT_tc(3,:)))
   PARbelowT3_c    = PAR-PARintT_tc(3,:)
@@ -112,6 +113,18 @@ Contains
   do it=1,nt
     PARintT_t(it) = sum( Atc(it,:) * PARintT_tc(it,:) )
   enddo
+  
+  PAR_cz      = 0
+  PAR_cz(:,1) = PAR
+  do ic=1,nc
+    do iz=2,nz
+      PAR_cz(ic,iz) = PAR_cz(ic,iz-1) * &
+                      exp( -sum(KEXTT*LAIT_tcz(:,ic,iz-1)) )
+    enddo
+  enddo
+  
+  PARintT_tcz = 0
+  
   end Subroutine PARintT
 
   Subroutine NPP(fTranT_t,PARintT_t)
