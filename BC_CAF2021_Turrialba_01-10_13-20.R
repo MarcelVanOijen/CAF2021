@@ -14,3 +14,8 @@
    source('BC/BC_plot_parameters_traceplots.R')
    source('BC/BC_plot_parameters_priorbeta_histograms.R')
    source('BC/BC_plot_outputs_data.R')
+
+## 4. SAVING WORKSPACE
+   Rfile <- paste0('BC_',format(Sys.time(),"%H_%M.RData"))
+   save.image( Rfile )
+   
