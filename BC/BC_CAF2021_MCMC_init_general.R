@@ -239,7 +239,8 @@
   plot(1,type='n', axes=FALSE, xlab="", ylab="")
   legend( "bottomright", title = leg_title, legend=leg,
           col=cols, lty=ltys, lwd=lwds )
-  sitenames <- gsub( ".R", "", sub(".*CAF2021_","",sitesettings_filenames) )
+  sitenames <- gsub( ".R", "", sub(".*CAF2021_","",sitesettings_filenames),
+                     fixed=TRUE )
   mtext( paste("SITE ",s," (",sitenames[s],")",sep=""),
          side=3, line=1, outer=TRUE, cex=1, font=2)
   }
