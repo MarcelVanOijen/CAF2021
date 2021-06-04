@@ -505,56 +505,25 @@ do day = 1, NDAYS
 ! Nsoil_f         ! Nsoilave      (t N ha-1)      ! kg N     m-2  field
 ! WC_f            ! WC_F                          ! m3 W     m-3  field
 
-if(day==1) then
-  write(66,"('day=1, Ac:'          , 6F8.4)") Ac
-  write(66,"('day=1, At:'          , 6F8.4)") At
-  write(66,"('day=1, Atc:'         , 6F8.4)") Atc
-  write(66,"('day=1, z:'           , 6F8.4)") z
-  write(66,"('day=1, dz:'          , 6F8.4)") dz
-  write(66,"('day=1, h_t:'         , 6F8.4)") h_t
-  write(66,"('day=1, hC_t:'        , 6F8.4)") hC_t
-!  write(66,"('day=1, LAIT_c:'      , 6F8.4)") LAIT_c
-!  write(66,"('day=1, LAIT_t:'      , 6F8.4)") LAIT_t
-!  write(66,"('day=1, LAIT_tc='     , 6F8.4)") LAIT_tc
-!  write(66,"('day=1, LAIT_t1cz='   , 6F8.4)") LAIT_tcz(1,:,:)
-!  write(66,"('day=1, LAIT_t3cz='   , 6F8.4)") LAIT_tcz(3,:,:)
-  write(66,"('day=1, PAR_cz='      , 6F8.4)") PAR_cz
-  write(66,"('day=1, PAR-PAR_cz(:,6)=', 6F8.4)") PAR-PAR_cz(:,6)
-  write(66,"('day=1, PARintT_c=', 6F8.4)") PARintT_c
-  write(66,"('day=1, PARintT_t=', 6F8.4)") PARintT_t
-  write(66,"('day=1, PARintT_t1cz=', 6F8.4)") PARintT_tcz(1,:,:)
-  write(66,"('day=1, PARintT_t3cz=', 6F8.4)") PARintT_tcz(3,:,:)
-
-endif
-
-! if(day==NDAYS) then
-if(day==1000) then
-  write(66,*) "---------------------------------------------------"
-  write(66,"('day=N, Ac='          , 6F8.4)") Ac
-  write(66,"('day=N, At='          , 6F8.4)") At
-  write(66,"('day=N, Atc='         , 6F8.4)") Atc
-  write(66,"('day=N, z='           , 6F8.4)") z
-  write(66,"('day=N, dz='          , 6F8.4)") dz
-  write(66,"('day=N, h_t='         , 6F8.4)") h_t
-  write(66,"('day=N, hC_t='        , 6F8.4)") hC_t
+!if(day==NDAYS) then
+!  write(66,*) "---------------------------------------------------"
+!  write(66,"('day=N, Ac='          , 6F8.4)") Ac
+!  write(66,"('day=N, At='          , 6F8.4)") At
+!  write(66,"('day=N, Atc='         , 6F8.4)") Atc
+!  write(66,"('day=N, h_t='         , 6F8.4)") h_t
 !  write(66,"('day=N, LAIT_c='      , 6F8.4)") LAIT_c
 !  write(66,"('day=N, LAIT_t='      , 6F8.4)") LAIT_t
 !  write(66,"('day=N, LAIT_tc='     , 6F8.4)") LAIT_tc
-!  write(66,"('day=N, LAIT_t1cz='   , 6F8.4)") LAIT_tcz(1,:,:)
-!  write(66,"('day=N, LAIT_t3cz='   , 6F8.4)") LAIT_tcz(3,:,:)
-  write(66,"('day=N, PAR_cz='      , 6F8.4)") PAR_cz
-  write(66,"('day=N, PAR-PAR_cz(:,6)=', 6F8.4)") PAR-PAR_cz(:,6)
-  write(66,"('day=N, PARintT_c=', 6F8.4)") PARintT_c
-  write(66,"('day=N, PARintT_t=', 6F8.4)") PARintT_t
-  write(66,"('day=N, PARintT_t1cz=', 6F8.4)") PARintT_tcz(1,:,:)
-  write(66,"('day=N, PARintT_t3cz=', 6F8.4)") PARintT_tcz(3,:,:)
-  
+!  write(66,"('day=N, LAIT_tcz='    , 6F8.4)") LAIT_tcz
+!  write(66,"('day=N, PAR_cz='      , 6F8.4)") PAR_cz
+!  write(66,"('day=N, PARintT_c='   , 6F8.4)") PARintT_c
+!  write(66,"('day=N, PARintT_t='   , 6F8.4)") PARintT_t
+!  write(66,"('day=N, PARintT_tcz=' , 6F8.4)") PARintT_tcz
 !  write(66,*) "day=N, x=", x
-endif
-
+!endif
 
 enddo ! end time loop
 
-close(66)
+!close(66)
 
 end  

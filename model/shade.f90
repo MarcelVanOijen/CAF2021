@@ -24,8 +24,9 @@ Contains
   real    :: LAI(:), CR(:), CW(:), CP(:), CL(:), NL(:)
   real    :: WA(:), CLITT(:), CSOMF(:), CSOMS(:), NLITT(:), NSOMF(:), NSOMS(:), NMIN(:)
   real    :: Ac(nc)
-  real    :: f3up, f3lo
-  AcOld   = Ac
+  real    :: f3up, f3lo, Ac3up(nc), Ac3lo(nc)
+  
+  AcOld = Ac
   
   f3up = 0
   if( h_t(3)>0 ) then
@@ -33,21 +34,22 @@ Contains
   endif
   f3lo = 1 - f3up
 
-  Ac(5:6) = f3up * SAT_t(3) * SAT_t(1:2) + &
-            f3lo * 0. 
-  Ac(4)   = f3up * max( 0., SAT_t(3) * (1-SAT_t(1)-SAT_t(2)) ) + &
-            f3lo * SAT_t(3) / sum( SAT_t )
-  Ac(2:3) = f3up * max( 0., (1.-SAT_t(3)) * SAT_t(1:2) ) + &
-            f3lo * SAT_t(1:2) / sum( SAT_t )
-!  Ac(5:6) = SAT_t(3) * SAT_t(1:2)
-!  Ac(4)   = max( 0., SAT_t(3) * (1-SAT_t(1)-SAT_t(2)) )
-!  Ac(2:3) = max( 0., (1.-SAT_t(3)) * SAT_t(1:2) )
+  Ac3up(5:6) = SAT_t(3) * SAT_t(1:2)
+  Ac3up(4)   = max( 0., SAT_t(3) * (1-SAT_t(1)-SAT_t(2)) )
+  Ac3up(2:3) = max( 0., (1.-SAT_t(3)) * SAT_t(1:2) )
 
-  Ac(1)   = max( 0., 1. - sum(Ac(2:nc)) )
-	
-  dAc       = Ac - AcOld
-  Achange   = sum( dAc, MASK=dAc>0. )
-  dfAfromto = 0
+  if( sum(SAT_t)>0 ) then
+    Ac3lo(2:4) = SAT_t(1:3) / sum( SAT_t )
+    Ac3lo(5:6) = 0
+  else
+    Ac3lo(2:6) = 0
+  endif
+
+  Ac(2:6)    = f3up * Ac3up(2:6) + f3lo * Ac3lo(2:6)
+  Ac(1)      = max( 0., 1. - sum(Ac(2:nc)) )
+  dAc        = Ac - AcOld
+  Achange    = sum( dAc, MASK=dAc>0. )
+  dfAfromto  = 0
   do i = 1,nc
     do j = 1,nc
 	    if((dAc(i)<0).AND.(dAc(j)>0)) then

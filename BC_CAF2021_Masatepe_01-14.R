@@ -2,7 +2,7 @@
 ## MvO, 2021-05-20
 
 ## 1. INITIALISE MCMC ##
-   nChain <- as.integer(1e3)
+   nChain <- as.integer(1e2)
    source('BC/BC_CAF2021_MCMC_init_Masatepe_01-14.R')
 
 ## 2. RUNNING THE MCMC ##
