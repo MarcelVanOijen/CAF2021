@@ -1,13 +1,13 @@
-## set_CAF2021_Masatepe.R ##
-## MvO, 2021-05-20
+## set_CAF2021_Turrialba.R ##
+## MvO, 2021-06-04
 
 ## 1. SITE-SPECIFIC SETTINGS ##
    year_start     <- as.integer(2000)
    doy_start      <- as.integer( 214)
-   NDAYS          <- as.integer(4897)
-   file_weather   <- 'weather/weather_2000_2013_niccorregido.txt'
+   NDAYS          <- as.integer(6357)
+   file_weather   <- 'weather/weather_Turrialba_2000_2017.txt'
    file_params    <- 'parameters/parameters_default.txt'
-     parcol       <- 2
+     parcol       <- 1
 
 ## 2. GENERAL INITIALISATION ##
    MODEL_dll      <- 'CAF2021.DLL'
@@ -22,9 +22,9 @@
    names_params   <- row.names(df_params)
    params         <- df_params[,parcol]
 
-   calendar_prunC[ 1:10, 1 ] <- 2004:2013
-   calendar_prunC[ 1:10, 2 ] <- 59
-   calendar_prunC[ 1:10, 3 ] <-  0.28
+   calendar_prunC[ 1:14, 1 ] <- 2004:2017
+   calendar_prunC[ 1:14, 2 ] <- 59
+   calendar_prunC[ 1:14, 3 ] <-  0.28
    
 ## 5. CREATE EMPTY MATRIX y FOR MODEL OUTPUT ##
    y <- matrix(0,NDAYS,NOUT)

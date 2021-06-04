@@ -38,11 +38,11 @@ Contains
   Ac3up(4)   = max( 0., SAT_t(3) * (1-SAT_t(1)-SAT_t(2)) )
   Ac3up(2:3) = max( 0., (1.-SAT_t(3)) * SAT_t(1:2) )
 
-  if( sum(SAT_t)>0 ) then
+  Ac3lo(5:6) = 0
+  if( sum(SAT_t)>1 ) then
     Ac3lo(2:4) = SAT_t(1:3) / sum( SAT_t )
-    Ac3lo(5:6) = 0
   else
-    Ac3lo(2:6) = 0
+    Ac3lo(2:4) = SAT_t(1:3)
   endif
 
   Ac(2:6)    = f3up * Ac3up(2:6) + f3lo * Ac3lo(2:6)
