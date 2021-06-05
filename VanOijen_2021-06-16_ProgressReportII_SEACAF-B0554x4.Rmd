@@ -21,8 +21,8 @@ bibliography: [Avocado.bib,Banana.bib,MvO.bib]
 ---
 
 ```{r, include=FALSE}
-  file_BC_Turrialba.RData <- 'BC_06_02_Turrialba.RData'
-  file_BC_Masatepe.RData  <- 'BC_10_20_Masatepe.RData'
+  file_BC_Turrialba.RData <- 'BC_Turrialba_06_02.RData'
+  file_BC_Masatepe.RData  <- 'BC_Masatepe_17_36.RData'
 ```
 
 ```{r, include=FALSE}

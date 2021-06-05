@@ -1,8 +1,8 @@
-## BC_CAF2021_MCMC_init_Turrialba_01-10_13-20.R
+## BC_CAF2021_MCMC_init_Turrialba.R
 ## MvO, 2021-03-19
 
 ## FILE FOR PRIOR PARAMETER DISTRIBUTION
-   file_prior <- "parameters/parameters_BC_Turrialba_01-10_13-20.txt"
+   file_prior <- "parameters/parameters_BC_Turrialba.txt"
 
 ## LIKELIHOOD FUNCTION ##
    source('BC/fLogL_Sivia.R')

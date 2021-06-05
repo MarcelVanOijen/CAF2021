@@ -1,10 +1,10 @@
-## BC_CAF2021_Masatepe_01-14.R
-## MvO, 2021-05-20
+## BC_CAF2021_Turrialba.R
+## MvO, 2021-03-19
 
 ## 1. INITIALISE MCMC ##
    nChain <- as.integer(1e5)
-   source('BC/BC_CAF2021_MCMC_init_Masatepe_01-14.R')
-   
+   source('BC/BC_CAF2021_MCMC_init_Turrialba.R')
+
 ## 2. RUNNING THE MCMC ##
    source('BC/BC_CAF2021_MCMC.R')
 
@@ -15,6 +15,6 @@
    source('BC/BC_plot_outputs_data.R')
 
 ## 4. SAVING WORKSPACE
-   Rfile <- paste0('BC_',format(Sys.time(),"%H_%M.RData"))
+   Rfile <- paste0('BC_Turrialba_',format(Sys.time(),"%H_%M.RData"))
    save.image( Rfile )
    
