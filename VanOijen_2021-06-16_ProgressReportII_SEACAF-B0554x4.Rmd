@@ -21,8 +21,8 @@ bibliography: [Avocado.bib,Banana.bib,MvO.bib]
 ---
 
 ```{r, include=FALSE}
-  # file_BC.RData <- 'BC_07_51.RData'
-  file_BC.RData <- 'BC_16_01.RData'
+  file_BC_Turrialba.RData <- 'BC_06_02_Turrialba.RData'
+  # file_BC_Masatepe.RData  <- 'BC___Masatepe.RData'
 ```
 
 ```{r, include=FALSE}
@@ -358,15 +358,37 @@ bibliography: [Avocado.bib,Banana.bib,MvO.bib]
 - At LB there were Musaceae, but not in the data files (two tree species could then not be handled by CAF2014), but maybe check the paper by Louise Myelan that is referred to in Oriana et al's 2020 paper.
 - Aquiares had unusual poro management: no thinning, no pruning.
 
+# Turrialba
+
+Unless otherwise indicated, all results shown in this section are for the Maximum A Posteriori (MAP) paramater vector from calibrating CAF2021 on data from Turrialba
+
+Fig. \ref{fig:YieldsObsSimTurrialba} shows observed and simulated variation of coffee production in the 18 simulated treatments of the Turrialba experiment.
+
+```{r}
+  load( file_BC_Turrialba.RData )
+  source("initialisation/initialise_CAF2021_Turrialba_15_CE_AC.R")
+
+  params.Prior.15 <- params
+  output.Prior.15 <- run_model( p=params.Prior.15 )
+  
+  params.MAP.15   <- params.MAP.s( 15 )
+  output.MAP.15   <- run_model( p=params.MAP.15 )
+```
+
+```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSimMasatepe}Simulated vs. observed annual yields for the 18 treatments in Turrialba. Left: all recorded and simulated yields. Right: average yield for each of the treatments."}
+  load( file_BC_Turrialba.RData )
+  source('BC/BC_plot_yields.R')
+```
+
 
 # Masatepe
 
 Unless otherwise indicated, all results shown in this section are for the Maximum A Posteriori (MAP) paramater vector from calibrating CAF2021 on data from Masatepe.
 
-Fig. \ref{fig:YieldsObsSim} shows observed and simulated variation of coffee production in the 14 simulated treatments of the Masatepe experiment.
+Fig. \ref{fig:YieldsObsSimMasatepe} shows observed and simulated variation of coffee production in the 14 simulated treatments of the Masatepe experiment.
 
 ```{r}
-  load( file_BC.RData )
+  load( file_BC_Masatepe.RData )
   source("initialisation/initialise_CAF2021_Masatepe_05_SGTR_CI.R")
 
   params.Prior.5 <- params
@@ -377,7 +399,7 @@ Fig. \ref{fig:YieldsObsSim} shows observed and simulated variation of coffee pro
 ```
 
 ```{r}
-  load( file_BC.RData )
+  load( file_BC_Masatepe.RData )
   source("initialisation/initialise_CAF2021_Masatepe_09_ILSS_CI.R")
 
   params.Prior.9 <- params
@@ -387,8 +409,8 @@ Fig. \ref{fig:YieldsObsSim} shows observed and simulated variation of coffee pro
   output.MAP.9   <- run_model( p=params.MAP.9 )
 ```
 
-```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSim}Simulated vs. observed annual yields for the 14 treatments in Masatepe 2005-2014. Left: all 140 recorded and simulated yields. Right: average yield for each of the treatments."}
-  load( file_BC.RData )
+```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSimMasatepe}Simulated vs. observed annual yields for the 14 treatments in Masatepe 2005-2014. Left: all 140 recorded and simulated yields. Right: average yield for each of the treatments."}
+  load( file_BC_Masatepe.RData )
   source('BC/BC_plot_yields.R')
 ```
 

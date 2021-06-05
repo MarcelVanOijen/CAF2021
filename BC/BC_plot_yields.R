@@ -11,7 +11,7 @@ Yields             <- vector( "list", nSites )
 
 AvYield           <- matrix( NA, nrow=nSites, ncol=4 )
 colnames(AvYield) <- c( "Site", "Y.data", "Y.MAP", "Y.ML" )
-AvYield[,1]       <- 1:14
+AvYield[,1]       <- 1:nSites
 
 for (s in 1:nSites) {
   iH.data.s       <- which( data_name[[s]]=="harvDM_f_hay" )
