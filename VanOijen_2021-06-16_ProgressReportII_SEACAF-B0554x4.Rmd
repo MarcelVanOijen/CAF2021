@@ -22,7 +22,7 @@ bibliography: [Avocado.bib,Banana.bib,MvO.bib]
 
 ```{r, include=FALSE}
   file_BC_Turrialba.RData <- 'BC_06_02_Turrialba.RData'
-  # file_BC_Masatepe.RData  <- 'BC___Masatepe.RData'
+  file_BC_Masatepe.RData  <- 'BC_10_20_Masatepe.RData'
 ```
 
 ```{r, include=FALSE}
@@ -375,7 +375,7 @@ Fig. \ref{fig:YieldsObsSimTurrialba} shows observed and simulated variation of c
   output.MAP.15   <- run_model( p=params.MAP.15 )
 ```
 
-```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSimMasatepe}Simulated vs. observed annual yields for the 18 treatments in Turrialba. Left: all recorded and simulated yields. Right: average yield for each of the treatments."}
+```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSimTurrialba}Simulated vs. observed annual yields for the 18 treatments in Turrialba. Left: all recorded and simulated yields. Right: average yield for each of the treatments."}
   load( file_BC_Turrialba.RData )
   source('BC/BC_plot_yields.R')
 ```
@@ -393,7 +393,7 @@ Fig. \ref{fig:YieldsObsSimTurrialba} shows observed and simulated variation of c
 
 Biogeochemical balances for Turrialba are shown in Fig. \ref{fig:BalancesTurrialba}.
 
-```{r Balances, fig.height=6, fig.cap="\\label{fig:BalancesTurrialba}Biogeochemical balances for nitrogen, carbon and water at Turrialba in treatment 15. Left bar from each pair: gains; right bar: losses. All rates are averages for the whole period of simulation."}
+```{r BalancesTurrialba, fig.height=6, fig.cap="\\label{fig:BalancesTurrialba}Biogeochemical balances for nitrogen, carbon and water at Turrialba in treatment 15. Left bar from each pair: gains; right bar: losses. All rates are averages for the whole period of simulation."}
   par( mar=c(3,3,3,0), mfrow=c(2,4) )
   plot_NbalanceSoil  (output.MAP.15, title1="Soil N-balance"  , title2="")
   par( mar=c(3,3,3,0) )
@@ -448,9 +448,9 @@ Fig. \ref{fig:YieldsObsSimMasatepe} shows observed and simulated variation of co
                               "harvDM_f_hay", "CT_f" ) )
 ```
 
-Biogeochemical balances for Masatepe (Nicaragua) are shown in Fig. \ref{fig:Balances}.
+Biogeochemical balances for Masatepe (Nicaragua) are shown in Fig. \ref{fig:BalancesMasatepe}.
 
-```{r Balances, fig.height=6, fig.cap="\\label{fig:Balances}Biogeochemical balances for nitrogen, carbon and water at Masatepe in the ILSS_CI system (shading by both Inga laurina and Samanea saman; Fertilisation-mode CI). Left bar from each pair: gains; right bar: losses. All rates are averages for the whole period of simulation."}
+```{r BalancesMasatepe, fig.height=6, fig.cap="\\label{fig:BalancesMasatepe}Biogeochemical balances for nitrogen, carbon and water at Masatepe in the ILSS_CI system (shading by both Inga laurina and Samanea saman; Fertilisation-mode CI). Left bar from each pair: gains; right bar: losses. All rates are averages for the whole period of simulation."}
   par( mar=c(3,3,3,0), mfrow=c(2,4) )
   plot_NbalanceSoil  (output.MAP.9, title1="Soil N-balance"  , title2="")
   par( mar=c(3,3,3,0) )
