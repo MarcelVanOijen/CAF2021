@@ -380,6 +380,29 @@ Fig. \ref{fig:YieldsObsSimTurrialba} shows observed and simulated variation of c
   source('BC/BC_plot_yields.R')
 ```
 
+```{r}
+  plot_output( list_output=list(output.Prior.15),
+               vars       =c( "fTran(1)"    , "fNgrowth(1)", "DVS(1)"  ,
+                              "SINKP(1)"    , "DayFl(1)"   , "PARMA(1)" ,
+                              "harvDM_f_hay", "CT_f" ) )
+  plot_output( list_output=list(output.MAP.15),
+               vars       =c( "fTran(1)"    , "fNgrowth(1)", "DVS(1)"  ,
+                              "SINKP(1)"    , "DayFl(1)"   , "PARMA(1)" ,
+                              "harvDM_f_hay", "CT_f" ) )
+```
+
+Biogeochemical balances for Turrialba are shown in Fig. \ref{fig:BalancesTurrialba}.
+
+```{r Balances, fig.height=6, fig.cap="\\label{fig:BalancesTurrialba}Biogeochemical balances for nitrogen, carbon and water at Turrialba in treatment 15. Left bar from each pair: gains; right bar: losses. All rates are averages for the whole period of simulation."}
+  par( mar=c(3,3,3,0), mfrow=c(2,4) )
+  plot_NbalanceSoil  (output.MAP.15, title1="Soil N-balance"  , title2="")
+  par( mar=c(3,3,3,0) )
+  plot_CbalanceSoil  (output.MAP.15, title1="Soil C-balance"  , title2="")
+  par( mar=c(3,3,3,0) )
+  plot_H2ObalanceSoil(output.MAP.15, title1="Soil H2O-balance", title2="")
+  par( mar=c(3,3,3,0) )
+  plot_CbalanceSystem(output.MAP.15, title1="System C-balance", title2="")
+```
 
 # Masatepe
 
@@ -441,7 +464,7 @@ Biogeochemical balances for Masatepe (Nicaragua) are shown in Fig. \ref{fig:Bala
 Comparison of leaving tree branches on the field after thinning and pruning (default) vs. removing them as harvest (customary in NIC and GTM): Fig. \ref{fig:Balances2}.
 
 ```{r Balances2, fig.height=6, fig.cap="\\label{fig:Balances2}Soil N- and C-balances at Masatepe in the ILSS_CI system. Top row: tree branches left as litter after pruning and thinning. Bottom row: branches harvested."}
-  # load( file_BC.RData )
+  # load( file_BC_Masatepe.RData )
   source("initialisation/initialise_CAF2021_Masatepe_09_ILSS_CI.R")
 
   params  <- params.MAP.9
