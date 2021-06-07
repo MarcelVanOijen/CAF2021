@@ -1,17 +1,16 @@
 source('initialisation/initialise_CAF2021_general.R')
 
-iyear.model       <- which( outputNames=="year" )
-idoy.model        <- which( outputNames=="doy" )
-iH.model          <- which( outputNames=="harvDM_f_hay" )
-iNfert.model      <- which( outputNames=="Nfert_f" )
+iyear.model <- which( outputNames=="year" )
+idoy.model  <- which( outputNames=="doy" )
+iH.model    <- which( outputNames=="harvDM_f_hay" )
 
 params_BC_MAP     <- scparMAP_BC  * sc
 params_BC_MaxL    <- scparMaxL_BC * sc
 
 Yields             <- vector( "list", nSites )
 
-AvYield           <- matrix( NA, nrow=nSites, ncol=5 )
-colnames(AvYield) <- c( "Site", "Y.data", "Y.MAP", "Y.ML", "Nfert" )
+AvYield           <- matrix( NA, nrow=nSites, ncol=4 )
+colnames(AvYield) <- c( "Site", "Y.data", "Y.MAP", "Y.ML" )
 AvYield[,1]       <- 1:nSites
 
 for (s in 1:nSites) {
@@ -22,8 +21,8 @@ for (s in 1:nSites) {
   doy.data.s      <- data_doy  [[s]] [iH.data.s]
   H.data.s        <- data_value[[s]] [iH.data.s]
   
-  Yields[[s]]           <- matrix( NA, nrow=nY.s, ncol=6 )
-  colnames(Yields[[s]]) <- c( "Site", "year", "doy", "Y.data", "Y.MAP", "Nfert" )
+  Yields[[s]]           <- matrix( NA, nrow=nY.s, ncol=5 )
+  colnames(Yields[[s]]) <- c( "Site", "year", "doy", "Y.data", "Y.MAP" )
   Yields[[s]][,1  ]     <- s
   Yields[[s]][,2:4]     <- cbind( data_year[[s]], data_doy[[s]],
                                   data_value[[s]] ) [iH.data.s,]
@@ -47,8 +46,6 @@ for (s in 1:nSites) {
            outputMAP[,idoy.model ]==doy.data.s [i] ) } )
   Yields[[s]][,"Y.MAP"] <- round( outputMAP[iH.model.s,iH.model], 0 )
   AvYield[s,"Y.MAP"]    <- mean ( outputMAP[iH.model.s,iH.model] )
-  Yields[[s]][,"Nfert"] <- mean( outputMAP[,iNfert.model] ) * 365 * 1e4
-  AvYield[s,"Nfert"]    <- mean( outputMAP[,iNfert.model] ) * 365 * 1e4
   
 # Calculate model output for the MaxL parameter vector
   params[ip_BC_s]   <- params_BC_MaxL[ icol_pChain_s ]
@@ -58,20 +55,19 @@ for (s in 1:nSites) {
   AvYield[s,"Y.ML"] <- mean( outputMaxL[iH.model.s,iH.model] )
 }
 
-par( mfrow=c(1,1), mar=c(5,5,2,2) )
+par( mfrow=c(1,2), mar=c(5,5,2,2) )
 
 AllYields      <- do.call(rbind, Yields)
 AllYields.data <- AllYields[,"Y.data"] ; AllYields.model <- AllYields[,"Y.MAP"]
-plot( AllYields.model, AllYields.data, main="Yields coffee\n(kg DM ha-1 y-1)",
-      xlab="Sim.", ylab="Obs.",
+Yields.max     <- max( AllYields.data, AllYields.model )
+plot( AllYields.data, AllYields.model, main="Yields coffee\n(kg DM ha-1)",
+      xlab="Obs.", ylab="Sim.",
+      xlim=c(0,Yields.max), ylim=c(0,Yields.max),
       cex.main=1, type="n" )
-colVector <- rep("",nSites)
-colVector[ which( AllYields[,"Site"]<=18 ) ] <- "black"
-colVector[ which( AllYields[,"Site"]>=19 ) ] <- "red"
-text( AllYields.model, AllYields.data,
-      labels=AllYields[,"Site"], cex=0.8, col=colVector )
+text( AllYields.data, AllYields.model,
+      labels=AllYields[,1], cex=0.8 )
 abline(0,1,lty=2)
-AllYields.lm <- lm(AllYields[,"Y.data"]~AllYields[,"Y.MAP"])
+AllYields.lm <- lm(AllYields[,"Y.MAP"]~AllYields[,"Y.data"])
 AllYields.r2 <- signif( summary(AllYields.lm)$r.squared, 2 )
 abline( AllYields.lm$coefficients[1], AllYields.lm$coefficients[2], col="blue" )
 legend( "topleft",
@@ -79,42 +75,18 @@ legend( "topleft",
         col=c("black","blue"), lty=c(2,1), cex=0.7 )
 
 
-par( mfrow=c(1,2), mar=c(5,2,2,1) )
-
 AvYields.max   <- max(AvYield[,c("Y.data","Y.MAP")])
-plot( AvYield[,"Y.MAP"], AvYield[,"Y.data"],
-      main="Av. yield coffee\n(kg DM ha-1 y-1)",
-      xlab="Sim. yield (kg ha-1)", ylab="",
+plot( AvYield[,"Y.data"], AvYield[,"Y.MAP"],
+      main="Av. yield coffee\n(kg DM ha-1)",
+      xlab="Obs.", ylab="Sim.",
       xlim=c(0,AvYields.max), ylim=c(0,AvYields.max),
       cex.main=1, type="n" )
-colVector <- rep("",nSites)
-colVector[ which( AvYield[,"Site"]<=18 ) ] <- "black"
-colVector[ which( AvYield[,"Site"]>=19 ) ] <- "red"
-text( AvYield[,"Y.MAP"], AvYield[,"Y.data"],
-      labels=AvYield[,"Site"], cex=0.8, col=colVector )
+text( AvYield[,"Y.data"], AvYield[,"Y.MAP"],
+      labels=AvYield[,1], cex=0.8 )
 abline(0,1,lty=2)
-AvYield.lm <- lm(AvYield[,"Y.data"]~AvYield[,"Y.MAP"])
-r2   <- signif( summary(AvYield.lm)$r.squared, 2 )
-abline( AvYield.lm$coefficients[1], AvYield.lm$coefficients[2],
-        col="blue" )
-legend( "bottomright",
-        legend=c("y=x", paste("r2= ",as.character(r2)) ),
-        col=c("black","blue"), lty=c(2,1), cex=0.7 )
-
-plot( AvYield[,"Nfert"], AvYield[,"Y.data"],
-      main="Av. yield coffee\n(kg DM ha-1 y-1)",
-      xlab="N fert. (kg N ha-1 y-1)", ylab="Obs.",
-      ylim=c(0,AvYields.max),
-      cex.main=1, type="n" )
-colVector <- rep("",nSites)
-colVector[ which( AvYield[,"Site"]<=18 ) ] <- "black"
-colVector[ which( AvYield[,"Site"]>=19 ) ] <- "red"
-text( AvYield[,"Nfert"], AvYield[,"Y.data"],
-      labels=AvYield[,"Site"], cex=0.8, col=colVector )
-AvYield.Nfert.lm <- lm(AvYield[,"Y.data"]~AvYield[,"Nfert"])
-r2   <- signif( summary(AvYield.Nfert.lm)$r.squared, 2 )
-abline( AvYield.Nfert.lm$coefficients[1], AvYield.Nfert.lm$coefficients[2],
-        col="blue" )
+lm.Y <- lm(AvYield[,"Y.MAP"]~AvYield[,"Y.data"])
+r2   <- signif( summary(lm.Y)$r.squared, 2 )
+abline( lm.Y$coefficients[1], lm.Y$coefficients[2], col="blue" )
 legend( "bottomright",
         legend=c("y=x", paste("r2= ",as.character(r2)) ),
         col=c("black","blue"), lty=c(2,1), cex=0.7 )
