@@ -21,9 +21,18 @@ bibliography: [Avocado.bib,Banana.bib,MvO.bib]
 ---
 
 ```{r, include=FALSE}
-  file_BC_Turrialba.RData           <- 'BC_Turrialba_06_02.RData'
-  file_BC_Masatepe.RData            <- 'BC_Masatepe_17_36.RData'
-  file_BC_Turrialba_Masatepe.RData  <- 'BC_Turrialba_Masatepe_08_43.RData'
+  # file_BC_Turrialba_Masatepe.RData  <- 'BC_Turrialba_Masatepe_07_30.RData'
+  filesTM <- file.info(list.files(pattern="^BC_Turrialba_Masatepe.*\\.RData$"))
+  filesT  <- file.info(list.files(pattern="^BC_Turrialba......\\.RData$"))
+  filesM  <- file.info(list.files(pattern="^BC_Masatepe.*\\.RData$"))
+
+  filesTM = filesTM[with(filesTM, order(as.POSIXct(mtime))), ]
+  filesT  = filesT [with(filesT , order(as.POSIXct(mtime))), ]
+  filesM  = filesM [with(filesM , order(as.POSIXct(mtime))), ]
+  
+  fileTM <- tail( rownames(filesTM[1]), 1 ) 
+  fileT  <- tail( rownames(filesT [1]), 1 ) 
+  fileM  <- tail( rownames(filesM [1]), 1 ) 
 ```
 
 ```{r, include=FALSE}
@@ -361,30 +370,83 @@ bibliography: [Avocado.bib,Banana.bib,MvO.bib]
 
 # Turrialba and Masatepe
 
-Unless otherwise indicated, all results shown in this section are for the Maximum A Posteriori (MAP) paramater vector from one multi-site calibration of CAF2021 on data from Turrialba and Masatepe.
+ATTENTION: PARAMETER SETTINGS
 
-Fig. \ref{fig:YieldsObsSimTurrialbaMasatepe} shows observed and simulated variation of coffee production in the 32 simulated treatments (18 from Turrialba, 14 from Masatepe).
+- We set soil carbon turnover rates at Turrialba twice as high as at Masatepe.
+- RNLEACH	is set at 0.5 for both sites.
 
-```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSimTurrialbaMasatepe}Simulated vs. observed annual yields for the 32 treatments in Turrialba and Masatepe. Left: all recorded and simulated yields. Right: average yield for each of the treatments."}
-  load( file_BC_Turrialba_Masatepe.RData )
+Unless otherwise indicated, all simulation results shown in this section are for the Maximum A Posteriori (MAP) paramater vector from a single multi-site calibration of CAF2021 on data from Turrialba and Masatepe.
+
+Fig. \ref{fig:YieldsObsSimTurrialbaMasatepe} shows average observed coffee yield in the 32  treatments (18 from Turrialba, 14 from Masatepe) against N-fertilisation rate and against simulated yield.
+
+```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSimTurrialbaMasatepe}Yields for the 32 treatments in Turrialba and Masatepe. Left: Observed yields against N-fertilisation level. Right: Observed yield vs. simulated yield."}
+  load( fileTM )
   source(sitesettings_filenames[1]) # Knitting requires a model initialisation
-  source('BC/BC_plot_yields.R')
+  # source('BC/BC_plot_yields.R')
+  source('BC/BC_Yields.R')
+  s.plot <- 1:nSites ; source('BC/BC_plot_YieldsAverage.R')
+  # source('BC/BC_plot_YieldsAnnual.R')
+```
+
+Fig. \ref{fig:BalancesTurrialbaMasatepe} shows carbon and nitrogen balances in the 32 treatments (1:18 from Turrialba, 19:32 from Masatepe).
+
+```{r, out.width="100%", fig.cap="\\label{fig:BalancesTurrialbaMasatepe}Carbon- and nitrogen-balances for 32 treatments. 1:18 = Turrialba, 19:32 = Masatepe. Simulations using the MAP parameter vector from Bayesian calibration."}
+  load( fileTM )
+  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
+  source('BC/BC_Balances.R')
+  source('BC/BC_plot_Balances.R')
+```
+
+```{r, out.width="100%", fig.cap="\\label{fig:TurrialbaMasatepeYields2}Yields using the MAP parameter vector from Bayesian calibration, but with some additional parameter change(s)."}
+  load( fileTM )
+  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
+
+  # set_parNames  <- c( "FHARVBT(1)", "FHARVBT(2)", "FHARVBT(3)" )
+  # set_parValues <- c(  1,            1,            1           )
+  # set_parNames  <- c( "TCLITT", "TCSOMF", "TCSOMS" )
+  # set_parValues <- c(  300    ,  6000   ,  15000   )
+  # set_parNames  <- c( "RNLEACH" )
+  # set_parValues <- c(  0.2      )
+  # source('BC/BC_Yields_set_par.R')
+  # source('BC/BC_Balances_set_par.R')
+
+  source('BC/BC_plot_YieldsAverage.R')
+```
+
+```{r, out.width="100%", fig.cap="\\label{fig:TurrialbaMasatepeBalances2}Balances using the MAP parameter vector from Bayesian calibration, but with some additional parameter change(s)."}
+  source('BC/BC_plot_Balances.R')
+```
+
+```{r}
+  source('BC/BC_Final.R')
+  iNfixT     <- which(outputNames=="NfixT_f_hay")
+  iNleaching <- which(outputNames=="Nleaching_f_hay")
+  
+  par( mfrow=c(2,1), mar=c(3,2,2,0) )
+  
+  barplot( as.matrix(outputFinal[,iNfixT]),
+         main="N-fixation (kg N ha-1 y-1)",
+         beside=TRUE, names.arg="" )
+  barplot( as.matrix(outputFinal[,iNleaching]),
+         main="N-leaching (kg N ha-1 y-1)",
+         beside=TRUE, names.arg="" )
 ```
 
 # Turrialba
 
 Unless otherwise indicated, all results shown in this section are for the Maximum A Posteriori (MAP) paramater vector from calibrating CAF2021 on data from Turrialba.
 
-Fig. \ref{fig:YieldsObsSimTurrialba} shows observed and simulated variation of coffee production in the 18 simulated treatments of the Turrialba experiment.
+Fig. \ref{fig:YieldsObsSimTurrialba} shows average observed coffee yield in the 18 treatments at Turrialba against N-fertilisation rate and against simulated yield.
 
-```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSimTurrialba}Simulated vs. observed annual yields for the 18 treatments in Turrialba. Left: all recorded and simulated yields. Right: average yield for each of the treatments."}
-  load( file_BC_Turrialba.RData )
+```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSimTurrialba}Yields for the 18 treatments in Turrialba. Left: Observed yields against N-fertilisation level. Right: Observed yield vs. simulated yield."}
+  load( fileT )
   source(sitesettings_filenames[1]) # Knitting requires a model initialisation
-  source('BC/BC_plot_yields.R')
+  source('BC/BC_Yields.R')
+  s.plot <- 1:nSites ; source('BC/BC_plot_YieldsAverage.R')
 ```
 
 ```{r}
-  load( file_BC_Turrialba.RData )
+  load( fileT )
   sTa             <- 13
   source(sitesettings_filenames[13]) # Turrialba_15_CE_AC
   params.Prior.Ta <- params
@@ -419,15 +481,16 @@ Biogeochemical balances for Turrialba are shown in Fig. \ref{fig:BalancesTurrial
 
 Unless otherwise indicated, all results shown in this section are for the Maximum A Posteriori (MAP) paramater vector from calibrating CAF2021 on data from Masatepe.
 
-Fig. \ref{fig:YieldsObsSimMasatepe} shows observed and simulated variation of coffee production in the 14 simulated treatments of the Masatepe experiment.
+Fig. \ref{fig:YieldsObsSimTurrialbaMasatepe} shows average observed coffee yield in the 14  treatments at Masatepe against N-fertilisation rate and against simulated yield.
 
-```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSimMasatepe}Simulated vs. observed annual yields for the 14 treatments in Masatepe 2005-2014. Left: all 140 recorded and simulated yields. Right: average yield for each of the treatments."}
-  load( file_BC_Masatepe.RData )
-  source('BC/BC_plot_yields.R')
+```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSimMasatepe}Yields for the 14 treatments in Masatepe. Left: Observed yields against N-fertilisation level. Right: Observed yield vs. simulated yield."}
+  load( fileM )
+  source('BC/BC_Yields.R')
+  s.plot <- 1:nSites ; source('BC/BC_plot_YieldsAverage.R')
 ```
 
 ```{r}
-  load( file_BC_Masatepe.RData )
+  load( fileM )
   sMa             <- 5
   source( sitesettings_filenames[sMa] ) # Masatepe_05_SGTR_CI
   params.Prior.Ma <- params
@@ -437,7 +500,7 @@ Fig. \ref{fig:YieldsObsSimMasatepe} shows observed and simulated variation of co
 ```
 
 ```{r}
-  load( file_BC_Masatepe.RData )
+  load( fileM )
   sMb             <- 9
   source( sitesettings_filenames[sMb] ) # Masatepe_05_SGTR_CI
   params.Prior.Mb <- params
@@ -473,7 +536,7 @@ Biogeochemical balances for Masatepe (Nicaragua) are shown in Fig. \ref{fig:Bala
 Comparison of leaving tree branches on the field after thinning and pruning (default) vs. removing them as harvest (customary in NIC and GTM): Fig. \ref{fig:Balances2}.
 
 ```{r Balances2, fig.height=6, fig.cap="\\label{fig:Balances2}Soil N- and C-balances at Masatepe in the ILSS_CI system. Top row: tree branches left as litter after pruning and thinning. Bottom row: branches harvested."}
-  load( file_BC_Masatepe.RData )
+  load( fileM )
   source("initialisation/initialise_CAF2021_Masatepe_09_ILSS_CI.R")
 
   params  <- params.MAP.Mb
@@ -497,7 +560,7 @@ Comparison of leaving tree branches on the field after thinning and pruning (def
 Sensitivity of soil balances to parameter settings: Fig. \ref{fig:Balances3}.
 
 ```{r Balances3, fig.height=6, fig.cap="\\label{fig:Balances3}Soil N- and C-balances at Masatepe in the ILSS_CI system, with various parameter settings."}
-  load( file_BC_Masatepe.RData )
+  load( fileM )
   source("initialisation/initialise_CAF2021_Masatepe_09_ILSS_CI.R")
 
   params      <- params.MAP.Mb

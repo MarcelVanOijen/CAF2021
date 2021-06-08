@@ -2,7 +2,7 @@
 ## MvO, 2021-06-04
 
   params <- set_par(   "TREEDENS0(1)"            ,   0.0325      )
-  params <- set_par( c("TREEDENS0(3)","KNFIX(3)"), c(0.0325,0.1) )
+  params <- set_par( c("TREEDENS0(3)","KNFIX(3)"), c(0.0325,0.05) )
 
   calendar_prunT[ 1,  1, ] <- c( 2003, 158, 0.1  )
   calendar_prunT[ 1,  2, ] <- c( 2004,  49, 0.03 )

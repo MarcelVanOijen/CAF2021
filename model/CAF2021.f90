@@ -142,6 +142,11 @@ NSOMS = CSOM0 * (1-FCSOMF0) / CNSOMS0
 NMIN  = NMIN0
 WA    = 1000 * ROOTD * WCST * FWCFC
 
+NfixT_f_hay     = 0.
+Nleaching_f_hay = 0.
+sum_NfixT_f     = 0.
+sum_Nleaching_f = 0.
+
 ! Coffee
 where (Ac>0.)
   DVS           = DVS0

@@ -1,7 +1,7 @@
 ## set_CAF2021_Turrialba_trees_C.R ##
 ## MvO, 2021-06-04
 
-params <- set_par( c("TREEDENS0(3)","KNFIX(3)"), c(0.07,0.1) )
+params <- set_par( c("TREEDENS0(3)","KNFIX(3)"), c(0.07,0.05) )
 
 calendar_prunT[ 3,  1, ] <- c( 2003, 158, 0.1  )
 calendar_prunT[ 3,  2, ] <- c( 2004,  49, 0.03 )
