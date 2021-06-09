@@ -1,5 +1,6 @@
 par( mfrow=c(1,2), mar=c(5,2,2,1) )
 
+AvYields.max <- max(AvYield[s.plot,c("Y.data","Y.MAP")])
 plot( AvYield[s.plot,"Nfert"], AvYield[s.plot,"Y.data"],
       main="Av. yield coffee\n(kg DM ha-1 y-1)",
       xlab="N fert. (kg N ha-1 y-1)", ylab="Obs.",

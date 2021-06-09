@@ -15,6 +15,7 @@
    source('BC/BC_plot_outputs_data.R')
 
 ## 4. SAVING WORKSPACE
+   rm( fileM )
    Rfile <- paste0('BC_Masatepe_',format(Sys.time(),"%H_%M.RData"))
    save.image( Rfile )
    

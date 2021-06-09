@@ -14,3 +14,6 @@ harvDM_f_hay	2014	365	3820	0.3
 harvDM_f_hay	2015	365	410	0.3
 harvDM_f_hay	2016	365	3480	0.3
 harvDM_f_hay	2017	365	1420	0.3
+Cabg_f	2009	183	0.56	0.3
+CabgT_f	2009	183	1.7	0.3
+D_Csoil_f_hay 2010  183 -1684 0.3

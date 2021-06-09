@@ -8,3 +8,4 @@ harvDM_f_hay	2010	365	1844	0.3
 harvDM_f_hay	2011	365	1833	0.3
 harvDM_f_hay	2012	365	707	0.3
 harvDM_f_hay	2013	365	70	0.3
+D_Csoil_f_hay 2010  183 -251 0.3

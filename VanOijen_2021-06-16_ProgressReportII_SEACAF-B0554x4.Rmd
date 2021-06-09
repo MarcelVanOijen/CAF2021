@@ -352,11 +352,8 @@ bibliography: [Avocado.bib,Banana.bib,MvO.bib]
 - Use latest model version
 - Use all data:
   - Martin Noponen: soil, GHG balance, etc.
-  - Less SOM than in Masatepe (60%?)
-  - Higher CN ratio in soil than in Masatepe (15 instead of 10?)
   - Roland Cerda: banana & citrus
     - From Rolando's file: choose farms with high fruit tree density and simulate them as extra treatments in the Turrialba experiment (for soil, weather etc.): EMu = poro + banana, ECi = poro + citrus.
-  - Fertilisation levels from Haggar et al. (2011)
   - Fertilisation timings as in file Oriana or as in Masatepe?
   - Assumptions about non-leaching at zero-fertilisation
   - Better weather data for final years?
@@ -365,15 +362,150 @@ bibliography: [Avocado.bib,Banana.bib,MvO.bib]
 # AGENDA 3: BC Llano Bonito (and perhaps Aquiares)
 
 - Files from Oriana. LB at 1600+ m, Aquiares at 1000+ m.
-- At LB there were Musaceae, but not in the data files (two tree species could then not be handled by CAF2014), but maybe check the paper by Louise Myelan that is referred to in Oriana et al's 2020 paper.
+- At LB there were Musaceae, but not in the data files (two tree species could then not be handled by CAF2014), but maybe check the paper by Louise Meylan that is referred to in Oriana et al's 2020 paper.
 - Aquiares had unusual poro management: no thinning, no pruning.
 
 # Turrialba and Masatepe
 
-ATTENTION: PARAMETER SETTINGS
+## Parameter settings
 
-- We set soil carbon turnover rates at Turrialba twice as high as at Masatepe.
-- RNLEACH	is set at 0.5 for both sites.
+- We set soil carbon time constants  (TCLITT, TCSOMF, TCSOMS) at Turrialba twice as low as at Masatepe.
+  - We may also want for Turrialba to have a larger fraction of SOM in the fast pool, i.e. a larger value of FCSOMF0.
+- RNLEACH	is set at 0.5 for both sites. However, the fraction of N that leaches depends on soil type (Harmand et al. 2007), so different settings for the two sites would be realistic.
+  - Our notes give values of leaching in Turrialba of 16-27 kgN ha-1 y-1. Where do these numbers come from (which publication, which experimental treatments)?
+
+## Calibration data and constraints
+
+- Csoil: we should expect the sites in Masatepe to be closer to equilibrium from the start than the Turrialba ones because of differences in preceding land-use. The experiment in Masatepe followed on earlier use for coffee production (so no land-use change) whereas the site in Turrialba was originally used for sugar cane. This may well explain why Noponen found greater Csoil-loss in Turrialba despite lower initial Csoil-stock there.
+- Other biogeochemistry balances to include?
+- Leaching of N: expected to be very small in case of lowest fertilisation.
+- Consider recalculating the coffee yields in Nicaragua by dividing FWT by 3.87 (rather than the current value of 3), which would make all yields 22.5% lower.
+
+- Aboveground tree biomass in 2016 (Mg C ha-1) for Masatepe was taken from Sepulveda et al. (2016), Table 12, and units were converted to kg C m-2.
+  - NOT USEABLE: 2016 is beyond simulation period.
+
+```{r}
+  Sepulveda_treatments <- c(
+    "ILSG_CM", "ILSG_OI",
+    "SGTR_CI", "SGTR_CM", "SGTR_OI", "SGTR_OM",
+    "SSIL_CI", "SSIL_CM", "SSIL_OI", "SSIL_OM",
+    "SSTR_CM", "SSTR_OI")
+  Sepulveda_CabgT_f       <- c(
+     40.1    ,  32.6    ,
+     61.1    ,  60.5    ,  56.4    ,  55.6    ,
+     19.6    ,  21.7    ,  24.7    ,  19.9    ,
+     51.1    ,  51.2    ) * 1e3 * 1e-4
+  cbind( Sepulveda_treatments, Sepulveda_CabgT_f )
+```
+
+Carbon pools for Costa Rica in 2009 were taken from Noponen (2012, thesis Table A4.1) and converted from Mg C ha-1 to kg C m-2. 
+
+```{r}
+Noponen_treatments <- c(
+  "C_CM" , "C_OI" ,
+  "E_CI" , "E_CM" , "E_OI", "E_OM",
+  "ET_CM", "ET_OI",
+  "FS_CI", "FS_CM",
+  "T_CI" , "T_CM" , "T_OI", "T_OM" )
+Noponen_CabgT_f    <- round( c(
+   87.57 ,  87.62 ,
+    9.69 ,  18.79 ,  16.96,  16.64,
+   41.82 ,  23.98 ,
+    0    ,   0    ,
+   81.82 ,  41.21 ,  38.65,  36.39 ) * 1e3 * 1e-4, 2 )
+Noponen_Cabg_f     <- round( c(
+    4.05 ,   4.35 ,
+    5.16 ,   4.54 ,   5.55,   5.58,
+    4.50 ,   3.82 ,
+    4.98 ,   3.41 ,
+    5.41 ,   4.19 ,   4.36,   1.51 ) * 1e3 * 1e-4, 2 )
+cbind( Noponen_treatments, Noponen_CabgT_f, Noponen_Cabg_f )
+```
+
+Changes during the nine years 2001-2010 in  soil carbon pools for both countries were given by Noponen (2012, thesis Tables A5.2, A5.3). The values given in those tables were main effects for the shade and fertilisation treatments which we added to estimate carbon change in each of the experimental treatments. The Noponen data are in Mg C ha-1 for the top 40 cm of soil (which we assumed contained 75% of total soil carbon). We thus converted the data to kg C m-2 y-1 in the full soil column by multiplying with 1000 * (100/75) / 9.
+
+The calculations were:
+
+```{r}
+        DSOC_CRI_shade  <- c(  -9.23, -13.86, -5.89, -12.54, -7.26 )
+  names(DSOC_CRI_shade) <- c( "FS"  , "E"   , "ET" , "C"   , "T"   )
+        DSOC_CRI_fert   <- c( -11.40, -10.94, -7.49, -10.44 )
+  names(DSOC_CRI_fert)  <- c( "CI"  , "CM"  , "OI" , "OM"   )
+
+        DSOC_NIC_shade  <- c( -2.97,  0    , -3.97 , -2.37,   14.20 )
+  names(DSOC_NIC_shade) <- c( "FS" , "ILSG", "ILSS", "SGTR", "SSTR" )
+        DSOC_NIC_fert   <- c( -6.08,  1.07 ,  2.12 ,  0.82 )
+  names(DSOC_NIC_fert)  <- c( "CI" , "CM"  , "OI"  , "OM"  )
+  
+  n_CRI_shade <- c( 2, 4, 2, 2, 4 )
+  n_CRI_fert  <- c( 3, 5, 4, 2 )
+  n_NIC_shade <- c( 2, 2, 4, 4, 2 )
+  n_NIC_fert  <- c( 3, 5, 4, 2  )
+  
+  mCRI <- 0.5 * (
+    sum( DSOC_CRI_shade * n_CRI_shade ) / sum(n_CRI_shade) +
+    sum( DSOC_CRI_fert  * n_CRI_fert  ) / sum(n_CRI_fert ) )
+    
+  mNIC <- 0.5 * (
+    sum( DSOC_NIC_shade * n_NIC_shade ) / sum(n_NIC_shade) +
+    sum( DSOC_NIC_fert  * n_NIC_fert  ) / sum(n_NIC_fert ) )
+  
+  aCRI_shade <- DSOC_CRI_shade - mCRI
+  aCRI_fert  <- DSOC_CRI_fert  - mCRI
+  aNIC_shade <- DSOC_NIC_shade - mNIC
+  aNIC_fert  <- DSOC_NIC_fert  - mNIC
+  
+  treatments_CRI <- c(
+    "Tu01_E_AC.R" , "Tu02_E_MC.R" , "Tu03_E_MO.R" , "Tu04_E_BO.R" ,
+    "Tu05_T_AC.R" , "Tu06_T_MC.R" , "Tu07_T_MO.R" , "Tu08_T_BO.R" ,
+    "Tu09_C_MC.R" , "Tu10_C_MO.R" ,
+    "Tu13_TE_MC.R", "Tu14_TE_MO.R",
+    "Tu19_PS_AC.R", "Tu20_PS_MC.R" )
+  effects_CRI    <- mCRI + c(
+    aCRI_shade["E" ] + aCRI_fert["CI"],
+    aCRI_shade["E" ] + aCRI_fert["CM"],
+    aCRI_shade["E" ] + aCRI_fert["OI"],
+    aCRI_shade["E" ] + aCRI_fert["OM"],
+    aCRI_shade["T" ] + aCRI_fert["CI"],
+    aCRI_shade["T" ] + aCRI_fert["CM"],
+    aCRI_shade["T" ] + aCRI_fert["OI"],
+    aCRI_shade["T" ] + aCRI_fert["OM"],
+    aCRI_shade["C" ] + aCRI_fert["CM"],
+    aCRI_shade["C" ] + aCRI_fert["OI"],
+    aCRI_shade["ET"] + aCRI_fert["CM"],
+    aCRI_shade["ET"] + aCRI_fert["OI"],
+    aCRI_shade["FS"] + aCRI_fert["CI"],
+    aCRI_shade["FS"] + aCRI_fert["CM"] ) # kgC ha-1 in top 40 cm over 9 years 
+  effects_CRI_kghay <- round( effects_CRI * 1e3 * (4/3) / 9, 0 ) # kgC ha-1 y-1
+  cbind( treatments_CRI, effects_CRI_kghay )
+
+  treatments_NIC <- c(
+    "Ma01_PS_CI.txt"  , "Ma02_PS_CM.txt"  ,
+    "Ma03_SSTR_CM.txt", "Ma04_SSTR_OI.txt",
+    "Ma05_SGTR_CI.txt", "Ma06_SGTR_CM.txt", "Ma07_SGTR_OI.txt", "Ma08_SGTR_OM.txt",
+    "Ma09_ILSS_CI.txt", "Ma10_ILSS_CM.txt", "Ma11_ILSS_OI.txt", "Ma12_ILSS_OM.txt",
+    "Ma13_ILSG_CM.txt", "Ma14_ILSG_OI.txt" )
+  effects_NIC    <- mNIC + c(
+    aNIC_shade["FS"  ] + aNIC_fert["CI"],
+    aNIC_shade["FS"  ] + aNIC_fert["CM"],
+    aNIC_shade["SSTR"] + aNIC_fert["CM"],
+    aNIC_shade["SSTR"] + aNIC_fert["OI"],
+    aNIC_shade["SGTR"] + aNIC_fert["CI"],
+    aNIC_shade["SGTR"] + aNIC_fert["CM"],
+    aNIC_shade["SGTR"] + aNIC_fert["OI"],
+    aNIC_shade["SGTR"] + aNIC_fert["OM"],
+    aNIC_shade["ILSS"] + aNIC_fert["CI"],
+    aNIC_shade["ILSS"] + aNIC_fert["CM"],
+    aNIC_shade["ILSS"] + aNIC_fert["OI"],
+    aNIC_shade["ILSS"] + aNIC_fert["OM"],
+    aNIC_shade["ILSG"] + aNIC_fert["CM"],
+    aNIC_shade["ILSG"] + aNIC_fert["OI"] )
+  effects_NIC_kghay <- round( effects_NIC * 1e3 * (4/3) / 9, 0 ) # kgC ha-1 y-1
+  cbind( treatments_NIC, effects_NIC_kghay )
+```
+
+
+## Results from BC
 
 Unless otherwise indicated, all simulation results shown in this section are for the Maximum A Posteriori (MAP) paramater vector from a single multi-site calibration of CAF2021 on data from Turrialba and Masatepe.
 
@@ -381,8 +513,8 @@ Fig. \ref{fig:YieldsObsSimTurrialbaMasatepe} shows average observed coffee yield
 
 ```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSimTurrialbaMasatepe}Yields for the 32 treatments in Turrialba and Masatepe. Left: Observed yields against N-fertilisation level. Right: Observed yield vs. simulated yield."}
   load( fileTM )
+  load( "BC_Turrialba_Masatepe_07_09.RData" )
   source(sitesettings_filenames[1]) # Knitting requires a model initialisation
-  # source('BC/BC_plot_yields.R')
   source('BC/BC_Yields.R')
   s.plot <- 1:nSites ; source('BC/BC_plot_YieldsAverage.R')
   # source('BC/BC_plot_YieldsAnnual.R')
@@ -400,24 +532,27 @@ Fig. \ref{fig:BalancesTurrialbaMasatepe} shows carbon and nitrogen balances in t
 ```{r, out.width="100%", fig.cap="\\label{fig:TurrialbaMasatepeYields2}Yields using the MAP parameter vector from Bayesian calibration, but with some additional parameter change(s)."}
   load( fileTM )
   source(sitesettings_filenames[1]) # Knitting requires a model initialisation
-
-  # set_parNames  <- c( "FHARVBT(1)", "FHARVBT(2)", "FHARVBT(3)" )
-  # set_parValues <- c(  1,            1,            1           )
   # set_parNames  <- c( "TCLITT", "TCSOMF", "TCSOMS" )
   # set_parValues <- c(  300    ,  6000   ,  15000   )
   # set_parNames  <- c( "RNLEACH" )
   # set_parValues <- c(  0.2      )
-  # source('BC/BC_Yields_set_par.R')
-  # source('BC/BC_Balances_set_par.R')
-
+  set_parNames  <- c( "FCSOMF0" )
+  set_parValues <- c(  0.1      )
+  source('BC/BC_Yields_set_par.R')
   source('BC/BC_plot_YieldsAverage.R')
 ```
 
 ```{r, out.width="100%", fig.cap="\\label{fig:TurrialbaMasatepeBalances2}Balances using the MAP parameter vector from Bayesian calibration, but with some additional parameter change(s)."}
+  load( fileTM )
+  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
+  source('BC/BC_Balances_set_par.R')
   source('BC/BC_plot_Balances.R')
 ```
 
 ```{r}
+  load( fileTM )
+  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
+
   source('BC/BC_Final.R')
   iNfixT     <- which(outputNames=="NfixT_f_hay")
   iNleaching <- which(outputNames=="Nleaching_f_hay")
@@ -441,6 +576,7 @@ Fig. \ref{fig:YieldsObsSimTurrialba} shows average observed coffee yield in the 
 ```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSimTurrialba}Yields for the 18 treatments in Turrialba. Left: Observed yields against N-fertilisation level. Right: Observed yield vs. simulated yield."}
   load( fileT )
   source(sitesettings_filenames[1]) # Knitting requires a model initialisation
+
   source('BC/BC_Yields.R')
   s.plot <- 1:nSites ; source('BC/BC_plot_YieldsAverage.R')
 ```
