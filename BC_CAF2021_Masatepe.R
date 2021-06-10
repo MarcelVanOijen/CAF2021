@@ -1,5 +1,7 @@
 ## BC_CAF2021_Masatepe.R
-## MvO, 2021-05-20
+## MvO, 2021-06-10
+
+   rm(list = ls())
 
 ## 1. INITIALISE MCMC ##
    nChain <- as.integer(1e5)
@@ -15,7 +17,6 @@
    source('BC/BC_plot_outputs_data.R')
 
 ## 4. SAVING WORKSPACE
-   rm( fileM )
    Rfile <- paste0('BC_Masatepe_',format(Sys.time(),"%H_%M.RData"))
    save.image( Rfile )
    

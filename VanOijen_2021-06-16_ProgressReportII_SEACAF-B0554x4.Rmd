@@ -513,7 +513,7 @@ Fig. \ref{fig:YieldsObsSimTurrialbaMasatepe} shows average observed coffee yield
 
 ```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSimTurrialbaMasatepe}Yields for the 32 treatments in Turrialba and Masatepe. Left: Observed yields against N-fertilisation level. Right: Observed yield vs. simulated yield."}
   load( fileTM )
-  load( "BC_Turrialba_Masatepe_07_09.RData" )
+  # load( "BC_Turrialba_Masatepe_09_37.RData" )
   source(sitesettings_filenames[1]) # Knitting requires a model initialisation
   source('BC/BC_Yields.R')
   s.plot <- 1:nSites ; source('BC/BC_plot_YieldsAverage.R')
@@ -532,17 +532,31 @@ Fig. \ref{fig:BalancesTurrialbaMasatepe} shows carbon and nitrogen balances in t
 ```{r, out.width="100%", fig.cap="\\label{fig:TurrialbaMasatepeYields2}Yields using the MAP parameter vector from Bayesian calibration, but with some additional parameter change(s)."}
   load( fileTM )
   source(sitesettings_filenames[1]) # Knitting requires a model initialisation
-  # set_parNames  <- c( "TCLITT", "TCSOMF", "TCSOMS" )
-  # set_parValues <- c(  300    ,  6000   ,  15000   )
+  set_parNames  <- c( "TCLITT", "TCSOMF", "TCSOMS", "FCSOMF0" )
+  set_parValues <- c(  300    ,  6000   ,  15000  ,  0.9      )
   # set_parNames  <- c( "RNLEACH" )
   # set_parValues <- c(  0.2      )
-  set_parNames  <- c( "FCSOMF0" )
-  set_parValues <- c(  0.1      )
   source('BC/BC_Yields_set_par.R')
   source('BC/BC_plot_YieldsAverage.R')
 ```
 
 ```{r, out.width="100%", fig.cap="\\label{fig:TurrialbaMasatepeBalances2}Balances using the MAP parameter vector from Bayesian calibration, but with some additional parameter change(s)."}
+  load( fileTM )
+  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
+  source('BC/BC_Balances_set_par.R')
+  source('BC/BC_plot_Balances.R')
+```
+
+```{r, out.width="100%", fig.cap="\\label{fig:TurrialbaMasatepeYields3}Yields using the MAP parameter vector from Bayesian calibration, but with some additional parameter change(s)."}
+  load( fileTM )
+  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
+  set_parNames  <- c( "TCLITT", "TCSOMF", "TCSOMS", "FCSOMF0" )
+  set_parValues <- c(  1200   ,  24000  ,  60000  ,  0.1      )
+  source('BC/BC_Yields_set_par.R')
+  source('BC/BC_plot_YieldsAverage.R')
+```
+
+```{r, out.width="100%", fig.cap="\\label{fig:TurrialbaMasatepeBalances3}Balances using the MAP parameter vector from Bayesian calibration, but with some additional parameter change(s)."}
   load( fileTM )
   source(sitesettings_filenames[1]) # Knitting requires a model initialisation
   source('BC/BC_Balances_set_par.R')
@@ -559,13 +573,69 @@ Fig. \ref{fig:BalancesTurrialbaMasatepe} shows carbon and nitrogen balances in t
   
   par( mfrow=c(2,1), mar=c(3,2,2,0) )
   
+  colbars <- c( "gray40"    , "gray80"    , "gray60"    , "gray100"   ,
+                "gray40"    , "gray80"    , "gray60"    , "gray100"   ,
+                "gray80"    , "gray60"    ,
+                "gray80"    , "gray60"    ,
+                "gray40"    , "gray80"    , "gray60"    , "gray100"   ,
+                "gray40"    , "gray80"    ,
+                "firebrick4", "firebrick2", 
+                "firebrick2", "firebrick3",
+                "firebrick4", "firebrick2", "firebrick3", "firebrick1", 
+                "firebrick4", "firebrick2", "firebrick3", "firebrick1",
+                "firebrick2", "firebrick3" )
+
   barplot( as.matrix(outputFinal[,iNfixT]),
-         main="N-fixation (kg N ha-1 y-1)",
-         beside=TRUE, names.arg="" )
+         main=paste( "Turrialba     ",
+                     "N-FIXATION (kg N ha-1 y-1)",
+                     "      Masatepe" ),
+         col=colbars, beside=TRUE )
   barplot( as.matrix(outputFinal[,iNleaching]),
-         main="N-leaching (kg N ha-1 y-1)",
-         beside=TRUE, names.arg="" )
+         main="N-LEACHING (kg N ha-1 y-1)",
+         col=colbars, beside=TRUE, names.arg=1:nSites )
 ```
+
+```{r}
+  load( fileTM )
+  sA <- 1 ; sB <- 2 ; sC <- 3 ; sD <- 4
+  source(sitesettings_filenames[sA])
+  params.MAP.A <- params.MAP.s( sA )
+  output.MAP.A <- run_model( p=params.MAP.A )
+  source(sitesettings_filenames[sB])
+  params.MAP.B <- params.MAP.s( sB )
+  output.MAP.B <- run_model( p=params.MAP.B )
+  source(sitesettings_filenames[sC])
+  params.MAP.C <- params.MAP.s( sC )
+  output.MAP.C <- run_model( p=params.MAP.C )
+  source(sitesettings_filenames[sD])
+  params.MAP.D <- params.MAP.s( sD )
+  output.MAP.D <- run_model( p=params.MAP.D )
+  
+  par( mar=c(3,3,3,0), mfrow=c(2,4) )
+
+  plot_NbalanceSoil  (output.MAP.A, title1="Soil N-balance"  , title2="")
+  par( mar=c(3,3,3,0) )
+  plot_CbalanceSoil  (output.MAP.A, title1="Soil C-balance"  , title2="")
+  par( mar=c(3,3,3,0) )
+  plot_H2ObalanceSoil(output.MAP.A, title1="Soil H2O-balance", title2="")
+  par( mar=c(3,3,3,0) )
+  plot_CbalanceSystem(output.MAP.A, title1="System C-balance", title2="")
+```
+
+```{r}
+  par( mfrow=c(2,4) )
+
+  par(mar=c(3,3,3,0))
+  plot_NbalanceSoil(output.MAP.A, title1="", title2="CI", ymax=800)
+  par(mar=c(3,3,3,0))
+  plot_NbalanceSoil(output.MAP.B, title1="", title2="CM", ymax=800)
+  par(mar=c(3,3,3,0))
+  plot_NbalanceSoil(output.MAP.C, title1="", title2="OI", ymax=800)
+  par(mar=c(3,3,3,0))
+  plot_NbalanceSoil(output.MAP.D, title1="", title2="OM", ymax=800)
+```
+
+
 
 # Turrialba
 
