@@ -2,7 +2,7 @@
 ## MvO, 2021-06-03
 
 params <- set_par( c("HMAX(1)","TREEDENS0(1)","KNFIX(1)"),
-                   c( 8       , 0.0333       , 0.1      ) )
+                   c( 8       , 0.0333       , 0.05     ) )
 params <- set_par( c(          "TREEDENS0(3)","KNFIX(3)"),
                    c(           0.0333       , 0        ) )
 

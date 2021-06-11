@@ -208,7 +208,8 @@ table_output <- function(
 }
 
 ################################################################################
-### 6. FUNCTIONS FOR ANALYSIS
+### 6. FUNCTIONS FOR ANALYSIS OF MODEL OUTPUT
+################################################################################
 
 #######################
 ### 6.1 Function 'SA()'
@@ -377,3 +378,286 @@ SA_BC <- function(
   }
   dev.off(dev_likelihoods )
 } # End of function 'SA_BC()'
+
+##############################################
+### 6.3 Functions for bioegeochemical balances
+##############################################
+plot_NbalanceSoil <- function( sim=output, title1="", title2=title1,
+                               ymax=NULL, verify=F ) {
+  NinNames  <- c("Nfert_f", "NfixT_f", "NsenprunT_f", "Nsenprun_f")
+  NoutNames <- c("Nleaching_f", "Nemission_f", "Nrunoff_f", "Nupt_f", "NuptT_f")
+  nNin      <- length(NinNames) ; nNout  <- length(NoutNames)
+  i.Nin     <- rep(NA,nNin)     ; i.Nout <- rep(NA,nNout)
+  for(i in 1:nNin ) {i.Nin [i] <- which( outputNames==NinNames [i] ) }
+  for(i in 1:nNout) {i.Nout[i] <- which( outputNames==NoutNames[i] ) }
+  NinMean   <- colMeans(sim[,i.Nin])  * 1.e4 * 365 # kgN ha-1 y-1
+  NoutMean  <- colMeans(sim[,i.Nout]) * 1.e4 * 365 # kgN ha-1 y-1
+  if(is.null(ymax)) {
+    y.max <- max( sum(NinMean), sum(NoutMean) )
+  } else {
+    y.max = ymax
+  }
+  leg <- NinNames
+  barplot( as.matrix(NinMean),
+           beside=F, ylim=c(0,y.max), col=1:length(leg),
+           legend.text=leg,
+           args.legend=list( title="Inputs (kg ha-1 y-1)", cex=0.8,
+                             x="bottom", bg="white", inset=c(-0.3,0) ) )
+  title(title1,adj=1)
+  par(mar=c(3,0,3,3))
+  leg <- NoutNames
+  barplot( as.matrix(NoutMean),
+           yaxt="n",
+           beside=F, ylim=c(0,y.max), col=1:length(leg),
+           legend.text=leg,
+           args.legend=list( title="Outputs (kg ha-1 y-1)", cex=0.8,
+                             x="bottom", bg="white", inset=c(-0.3,0) ) )
+  title(title2,adj=0)
+  if(verify) {
+    Nsoil_f      <- sim[ , which( outputNames=="Nsoil_f") ] # kgN m-2
+    D_Nsoil_f    <- Nsoil_f[NDAYS] - Nsoil_f[1]                # kgN m-2
+    NinSum       <- colSums(sim[2:NDAYS,i.Nin ])            # kgN m-2
+    NoutSum      <- colSums(sim[2:NDAYS,i.Nout])            # kgN m-2
+    NinMinusNout <- sum(NinSum) - sum(NoutSum)
+    cat( "VERIFYING THE N-BALANCE FOR THE SOIL (kgN m-2):",
+         "\nState variable change: ", D_Nsoil_f,
+         "\nInputs minus outputs : ", NinMinusNout )
+  }
+}
+##############################################
+plot_CbalanceSoil <- function( sim=output, title1="", title2=title1,
+                               ymax=NULL, verify=F ) {
+  CinNames  <- c("CsenprunT_f", "Csenprun_f")
+  CoutNames <- c("Rsoil_f", "Crunoff_f")
+  nCin      <- length(CinNames) ; nCout  <- length(CoutNames)
+  i.Cin     <- rep(NA,nCin)     ; i.Cout <- rep(NA,nCout)
+  for(i in 1:nCin ) {i.Cin [i] <- which( outputNames==CinNames [i] ) }
+  for(i in 1:nCout) {i.Cout[i] <- which( outputNames==CoutNames[i] ) }
+  CinMean   <- colMeans(sim[,i.Cin])  * 1.e4 * 365 # kgC ha-1 y-1
+  CoutMean  <- colMeans(sim[,i.Cout]) * 1.e4 * 365 # kgC ha-1 y-1
+  if(is.null(ymax)) {
+    y.max <- max( sum(CinMean), sum(CoutMean) )
+  } else {
+    y.max = ymax
+  }
+  leg <- CinNames
+  barplot( as.matrix(CinMean),
+           beside=F, ylim=c(0,y.max), col=1:length(leg),
+           legend.text=leg,
+           args.legend=list( title="Inputs (kg ha-1 y-1)", cex=0.8,
+                             x="bottom", bg="white", inset=c(-0.3,0) ) )
+  title(title1,adj=1)
+  par(mar=c(3,0,3,3))
+  leg <- CoutNames
+  barplot( as.matrix(CoutMean),
+           yaxt="n",
+           beside=F, ylim=c(0,y.max), col=1:length(leg),
+           legend.text=leg,
+           args.legend=list( title="Outputs (kg ha-1 y-1)", cex=0.8,
+                             x="bottom", bg="white", inset=c(-0.3,0) ) )
+  title(title2,adj=0)
+  if(verify) {
+    Csoil_f   <- sim[ , which( outputNames=="Csoil_f") ] # kgC m-2 
+    D_Csoil_f <- Csoil_f[NDAYS] - Csoil_f[1]             # kgC m-2
+    CinSum        <- colSums(sim[2:NDAYS,i.Cin ])        # kgC m-2
+    CoutSum       <- colSums(sim[2:NDAYS,i.Cout])        # kgC m-2
+    CinMinusCout  <- sum(CinSum) - sum(CoutSum)
+    cat( "VERIFYING THE C-BALANCE FOR THE SOIL (kgC m-2):",
+         "\nState variable change: ", D_Csoil_f,
+         "\nInputs minus outputs : ", CinMinusCout )
+  }
+}
+##############################################
+plot_H2ObalanceSoil <- function( sim=output, title1="", title2=title1,
+                                 ymax=NULL, verify=F ) {
+  WinNames  <- c("Rain_f")
+  WoutNames <- c("Drain_f", "Runoff_f" , "Evap_f"    ,"Tran_f" , 
+                 "TranT_f", "Rainint_f", "RainintT_f")
+  nWin      <- length(WinNames) ; nWout  <- length(WoutNames)
+  i.Win     <- rep(NA,nWin)     ; i.Wout <- rep(NA,nWout)
+  for(i in 1:nWin ) {i.Win [i] <- which( outputNames==WinNames [i] ) }
+  for(i in 1:nWout) {i.Wout[i] <- which( outputNames==WoutNames[i] ) }
+  WinMean   <-    mean (sim[,i.Win])  # mm d-1
+  WoutMean  <- colMeans(sim[,i.Wout]) # mm d-1
+  if(is.null(ymax)) {
+    y.max <- max( sum(WinMean), sum(WoutMean) )
+  } else {
+    y.max = ymax
+  }
+  leg <- WinNames
+  barplot( as.matrix(WinMean),
+           beside=F, ylim=c(0,y.max), col=1:length(leg),
+           legend.text=leg,
+           args.legend=list( title="Inputs (mm d-1)", cex=0.8,
+                             x="bottom", bg="white", inset=c(-0.3,0) ) )
+  title(title1,adj=1)
+  par(mar=c(3,0,3,3))
+  leg <- WoutNames
+  barplot( as.matrix(WoutMean),
+           yaxt="n",
+           beside=F, ylim=c(0,y.max), col=1:length(leg),
+           legend.text=leg,
+           args.legend=list( title="Outputs (mm d-1)", cex=0.8,
+                             x="bottom", bg="white", inset=c(-0.3,0) ) )
+  title(title2,adj=0)
+  if(verify) {
+    WA_f   <- sim[ , which( outputNames=="WA_f") ] # mm
+    D_WA_f <- WA_f[NDAYS] - WA_f[1]                   # mm
+    WinSum        <-    sum (sim[2:NDAYS,i.Win ])  # mm
+    WoutSum       <- colSums(sim[2:NDAYS,i.Wout])  # mm
+    WinMinusWout  <- sum(WinSum) - sum(WoutSum)
+    cat( "VERIFYING THE H2O-BALANCE FOR THE SOIL (mm):",
+         "\nState variable change: ", D_WA_f,
+         "\nInputs minus outputs : ", WinMinusWout )
+  }
+}
+##############################################
+plot_CbalanceCoffee <- function( sim=output, title1="", title2=title1,
+                                 ymax=NULL, verify=F ) {
+  CinNames  <- "gC_f"
+  CoutNames <- c("dC_f", "prunC_f", "harvCP_f")
+  nCin      <- length(CinNames) ; nCout  <- length(CoutNames)
+  i.Cin     <- rep(NA,nCin)     ; i.Cout <- rep(NA,nCout)
+  for(i in 1:nCin ) {i.Cin [i] <- which( outputNames==CinNames [i] ) }
+  for(i in 1:nCout) {i.Cout[i] <- which( outputNames==CoutNames[i] ) }
+  CinMean   <-    mean (sim[,i.Cin])  * 1.e4 * 365 # kgC ha-1 y-1
+  CoutMean  <- colMeans(sim[,i.Cout]) * 1.e4 * 365 # kgC ha-1 y-1
+  if(is.null(ymax)) {
+    y.max <- max( sum(CinMean), sum(CoutMean) )
+  } else {
+    y.max = ymax
+  }
+  leg <- CinNames
+  barplot( CinMean,
+           beside=F, ylim=c(0,y.max), col=1:length(leg),
+           legend.text=leg,
+           args.legend=list( title="Inputs (kg ha-1 y-1)", cex=0.8,
+                             x="bottom", bg="white", inset=c(-0.3,0) ) )
+  title(title1,adj=1)
+  par(mar=c(3,0,3,3))
+  leg <- CoutNames
+  barplot( as.matrix(CoutMean),
+           yaxt="n",
+           beside=F, ylim=c(0,y.max), col=1:length(leg),
+           legend.text=leg,
+           args.legend=list( title="Outputs (kg ha-1 y-1)", cex=0.8,
+                             x="bottom", bg="white", inset=c(-0.3,0) ) )
+  title(title2,adj=0)
+  if(verify) {
+    C_f          <- sim[ , which( outputNames=="C_f" ) ] # kgC m-2
+    D_C_f        <- C_f[NDAYS] - C_f[1]                     # kgC m-2
+    CinSum       <-    sum (sim[2:NDAYS,i.Cin ])         # kgC m-2
+    CoutSum      <- colSums(sim[2:NDAYS,i.Cout])         # kgC m-2
+    CinMinusCout <- sum(CinSum) - sum(CoutSum)
+    cat( "VERIFYING THE C-BALANCE OF COFFEE (kgC m-2):",
+         "\nState variable change: ", D_C_f,
+         "\nInputs minus outputs : ", CinMinusCout )
+  }
+}
+##############################################
+plot_CbalanceSystem <- function( sim=output, title1="", title2=title1,
+                                 ymax=NULL, verify=F ) {
+  CinNames  <- c("gC_f"   , "gCT_f")
+  CoutNames <- c("Rsoil_f", "Crunoff_f",
+                 "harvCP_f", "harvCPT_f", "harvCBT_f", "harvCST_f")
+  nCin      <- length(CinNames) ; nCout  <- length(CoutNames)
+  i.Cin     <- rep(NA,nCin)     ; i.Cout <- rep(NA,nCout)
+  for(i in 1:nCin ) {i.Cin [i] <- which( outputNames==CinNames [i] ) }
+  for(i in 1:nCout) {i.Cout[i] <- which( outputNames==CoutNames[i] ) }
+  CinMean   <- colMeans(sim[,i.Cin])  * 1.e4 * 365 # kgC ha-1 y-1
+  CoutMean  <- colMeans(sim[,i.Cout]) * 1.e4 * 365 # kgC ha-1 y-1
+  if(is.null(ymax)) {
+    y.max <- max( sum(CinMean), sum(CoutMean) )
+  } else {
+    y.max = ymax
+  }
+  leg <- CinNames
+  barplot( as.matrix(CinMean),
+           beside=F, ylim=c(0,y.max), col=1:length(leg),
+           legend.text=leg,
+           args.legend=list( title="Inputs (kg ha-1 y-1)", cex=0.8,
+                             x="bottom", bg="white", inset=c(-0.3,0) ) )
+  title(title1,adj=1)
+  par(mar=c(3,0,3,3))
+  leg <- CoutNames
+  barplot( as.matrix(CoutMean),
+           yaxt="n",
+           beside=F, ylim=c(0,y.max), col=1:length(leg),
+           legend.text=leg,
+           args.legend=list( title="Outputs (kg ha-1 y-1)", cex=0.8,
+                             x="bottom", bg="white", inset=c(-0.3,0) ) )
+  title(title2,adj=0)
+  if(verify) {
+    C_f      <- sim[ , which( outputNames=="C_f" )    ] # kgC m-2
+    CT_f     <- sim[ , which( outputNames=="CT_f")    ] # kgC m-2
+    Csoil_f  <- sim[ , which( outputNames=="Csoil_f") ] # kgC m-2 
+    Csys_f   <- C_f + CT_f + Csoil_f                    # kgC m-2
+    D_Csys_f <- Csys_f[NDAYS] - Csys_f[1]               # kgC m-2
+    CinSum       <- colSums(sim[2:NDAYS,i.Cin ])        # kgC m-2
+    CoutSum      <- colSums(sim[2:NDAYS,i.Cout])        # kgC m-2
+    CinMinusCout <- sum(CinSum) - sum(CoutSum)
+    cat( "VERIFYING THE C-BALANCE FOR THE SYSTEM (kgC m-2):",
+         "\nState variable change: ", D_Csys_f,
+         "\nInputs minus outputs : ", CinMinusCout )
+  }
+}
+
+#########################################
+### 6.4 Functions for carbon distribution
+#########################################
+plot_CdistributionCoffee <- function( sim=output ) {
+  Time <- sim[,1]
+  i.CP <- which( outputNames=="CP_f" ) ; CP <- sim[,i.CP]
+  i.CL <- which( outputNames=="CL_f" ) ; CL <- sim[,i.CL]
+  i.CW <- which( outputNames=="CW_f" ) ; CW <- sim[,i.CW]
+  i.CR <- which( outputNames=="CR_f" ) ; CR <- sim[,i.CR]
+  plot( Time, CR+CW+CL+CP,
+        main="Carbon in coffee (kg C m-2)",
+        xlab="", ylab="", type="l", ylim=c(0,max(CR+CW+CL+CP)) )
+  points( Time, CR+CW+CL, type="l", col="yellow" )
+  points( Time, CR+CW   , type="l", col="green" )
+  points( Time, CR      , type="l", col="red" )
+  legend( "bottom", cex=0.7, lty=1, bg="white",
+          col=c("black","yellow","green","red"),
+          legend=c("+ CP: Beans",
+                   "+ CL: Leaves",
+                   "+ CW: Wood",
+                   "   CR: Roots" ) )
+}
+##############################################
+plot_CdistributionTrees <- function( sim=output, it=1:3 ) {
+  Time <- sim[,1]
+  i.CPT <- sapply( 1:3, function(i){which( outputNames==paste0("CPT_t(",i,")"))} )
+  i.CLT <- sapply( 1:3, function(i){which( outputNames==paste0("CLT_t(",i,")"))} )
+  i.CBT <- sapply( 1:3, function(i){which( outputNames==paste0("CBT_t(",i,")"))} )
+  i.CST <- sapply( 1:3, function(i){which( outputNames==paste0("CST_t(",i,")"))} )
+  i.CRT <- sapply( 1:3, function(i){which( outputNames==paste0("CRT_t(",i,")"))} )
+  for(t in it) {
+    CPT   <- sim[,i.CPT[t]] ; CLT <- sim[,i.CLT[t]] ; CBT <- sim[,i.CBT[t]]
+    CST   <- sim[,i.CST[t]] ; CRT <- sim[,i.CRT[t]]
+    y.max <- max(CRT+CST+CBT+CLT+CPT)
+    plot( Time, CRT+CST+CBT+CLT+CPT, ylim=c(0,y.max),
+          main=paste0("Carbon in tree sp. ",it," (kg C m-2)"),
+          xlab="", ylab="", type="l" )
+    points( Time, CRT+CST+CBT+CLT, type="l", col="yellow" )
+    points( Time, CRT+CST+CBT    , type="l", col="green"  )
+    points( Time, CRT+CST        , type="l", col="red"    )
+    points( Time, CRT            , type="l", col="blue"   )
+    legend( "bottom", cex=0.7, lty=1, bg="white",
+            col=c("black","yellow","green","red","blue"),
+            legend=c("+ CPT: Fruits",
+                     "+ CLT: Leaves",
+                     "+ CBT: Branches",
+                     "+ CST: Stems",
+                     "   CRT: Roots" ) )
+  }
+}
+
+#######################################################################
+### 7. Function for extracting a site-specific MAP from a multi-site BC
+#######################################################################
+params.MAP.s <- function(s) {
+  params_BC_MAP   <- scparMAP_BC * sc ; params        <- list_params[[s]]
+  ip_BC_s         <- ip_BC_site [[s]] ; icol_pChain_s <- icol_pChain_site[[s]]
+  params[ip_BC_s] <- params_BC_MAP[icol_pChain_s]
+  return( params ) }

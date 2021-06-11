@@ -21,315 +21,15 @@ bibliography: [Avocado.bib,Banana.bib,MvO.bib]
 ---
 
 ```{r, include=FALSE}
-  # file_BC_Turrialba_Masatepe.RData  <- 'BC_Turrialba_Masatepe_07_30.RData'
-  filesTM <- file.info(list.files(pattern="^BC_Turrialba_Masatepe.*\\.RData$"))
-  filesT  <- file.info(list.files(pattern="^BC_Turrialba......\\.RData$"))
-  filesM  <- file.info(list.files(pattern="^BC_Masatepe.*\\.RData$"))
-
-  filesTM = filesTM[with(filesTM, order(as.POSIXct(mtime))), ]
-  filesT  = filesT [with(filesT , order(as.POSIXct(mtime))), ]
-  filesM  = filesM [with(filesM , order(as.POSIXct(mtime))), ]
-  
-  fileTM <- tail( rownames(filesTM[1]), 1 ) 
-  fileT  <- tail( rownames(filesT [1]), 1 ) 
-  fileM  <- tail( rownames(filesM [1]), 1 ) 
-```
-
-```{r, include=FALSE}
   knitr::opts_chunk$set(echo=F,results="asis",warning=FALSE,message=FALSE)
 ```
 
-```{r}
-  plot_NbalanceSoil <- function( sim=output, title1="", title2=title1,
-                                 ymax=NULL, verify=F ) {
-    NinNames  <- c("Nfert_f", "NfixT_f", "NsenprunT_f", "Nsenprun_f")
-    NoutNames <- c("Nleaching_f", "Nemission_f", "Nrunoff_f", "Nupt_f", "NuptT_f")
-    nNin      <- length(NinNames) ; nNout  <- length(NoutNames)
-    i.Nin     <- rep(NA,nNin)     ; i.Nout <- rep(NA,nNout)
-    for(i in 1:nNin ) {i.Nin [i] <- which( outputNames==NinNames [i] ) }
-    for(i in 1:nNout) {i.Nout[i] <- which( outputNames==NoutNames[i] ) }
-    NinMean   <- colMeans(sim[,i.Nin])  * 1.e4 * 365 # kgN ha-1 y-1
-    NoutMean  <- colMeans(sim[,i.Nout]) * 1.e4 * 365 # kgN ha-1 y-1
-    if(is.null(ymax)) {
-      y.max <- max( sum(NinMean), sum(NoutMean) )
-    } else {
-      y.max = ymax
-    }
-    leg <- NinNames
-    barplot( as.matrix(NinMean),
-             beside=F, ylim=c(0,y.max), col=1:length(leg),
-             legend.text=leg,
-             args.legend=list( title="Inputs (kg ha-1 y-1)", cex=0.8,
-                               x="bottom", bg="white", inset=c(-0.3,0) ) )
-    title(title1,adj=1)
-    par(mar=c(3,0,3,3))
-    leg <- NoutNames
-    barplot( as.matrix(NoutMean),
-             yaxt="n",
-             beside=F, ylim=c(0,y.max), col=1:length(leg),
-             legend.text=leg,
-             args.legend=list( title="Outputs (kg ha-1 y-1)", cex=0.8,
-                               x="bottom", bg="white", inset=c(-0.3,0) ) )
-    title(title2,adj=0)
-    if(verify) {
-      Nsoil_f      <- sim[ , which( outputNames=="Nsoil_f") ] # kgN m-2
-      D_Nsoil_f    <- Nsoil_f[NDAYS] - Nsoil_f[1]                # kgN m-2
-      NinSum       <- colSums(sim[2:NDAYS,i.Nin ])            # kgN m-2
-      NoutSum      <- colSums(sim[2:NDAYS,i.Nout])            # kgN m-2
-      NinMinusNout <- sum(NinSum) - sum(NoutSum)
-      cat( "VERIFYING THE N-BALANCE FOR THE SOIL (kgN m-2):",
-           "\nState variable change: ", D_Nsoil_f,
-           "\nInputs minus outputs : ", NinMinusNout )
-    }
-  }
-```
-
-```{r}
-  plot_CbalanceSoil <- function( sim=output, title1="", title2=title1,
-                                 ymax=NULL, verify=F ) {
-    CinNames  <- c("CsenprunT_f", "Csenprun_f")
-    CoutNames <- c("Rsoil_f", "Crunoff_f")
-    nCin      <- length(CinNames) ; nCout  <- length(CoutNames)
-    i.Cin     <- rep(NA,nCin)     ; i.Cout <- rep(NA,nCout)
-    for(i in 1:nCin ) {i.Cin [i] <- which( outputNames==CinNames [i] ) }
-    for(i in 1:nCout) {i.Cout[i] <- which( outputNames==CoutNames[i] ) }
-    CinMean   <- colMeans(sim[,i.Cin])  * 1.e4 * 365 # kgC ha-1 y-1
-    CoutMean  <- colMeans(sim[,i.Cout]) * 1.e4 * 365 # kgC ha-1 y-1
-    if(is.null(ymax)) {
-      y.max <- max( sum(CinMean), sum(CoutMean) )
-    } else {
-      y.max = ymax
-    }
-    leg <- CinNames
-    barplot( as.matrix(CinMean),
-             beside=F, ylim=c(0,y.max), col=1:length(leg),
-             legend.text=leg,
-             args.legend=list( title="Inputs (kg ha-1 y-1)", cex=0.8,
-                               x="bottom", bg="white", inset=c(-0.3,0) ) )
-    title(title1,adj=1)
-    par(mar=c(3,0,3,3))
-    leg <- CoutNames
-    barplot( as.matrix(CoutMean),
-             yaxt="n",
-             beside=F, ylim=c(0,y.max), col=1:length(leg),
-             legend.text=leg,
-             args.legend=list( title="Outputs (kg ha-1 y-1)", cex=0.8,
-                               x="bottom", bg="white", inset=c(-0.3,0) ) )
-    title(title2,adj=0)
-    if(verify) {
-      Csoil_f   <- sim[ , which( outputNames=="Csoil_f") ] # kgC m-2 
-      D_Csoil_f <- Csoil_f[NDAYS] - Csoil_f[1]             # kgC m-2
-      CinSum        <- colSums(sim[2:NDAYS,i.Cin ])        # kgC m-2
-      CoutSum       <- colSums(sim[2:NDAYS,i.Cout])        # kgC m-2
-      CinMinusCout  <- sum(CinSum) - sum(CoutSum)
-      cat( "VERIFYING THE C-BALANCE FOR THE SOIL (kgC m-2):",
-           "\nState variable change: ", D_Csoil_f,
-           "\nInputs minus outputs : ", CinMinusCout )
-    }
-  }
-```
-
-```{r}
-  plot_H2ObalanceSoil <- function( sim=output, title1="", title2=title1,
-                                   ymax=NULL, verify=F ) {
-    WinNames  <- c("Rain_f")
-    WoutNames <- c("Drain_f", "Runoff_f" , "Evap_f"    ,"Tran_f" , 
-                   "TranT_f", "Rainint_f", "RainintT_f")
-    nWin      <- length(WinNames) ; nWout  <- length(WoutNames)
-    i.Win     <- rep(NA,nWin)     ; i.Wout <- rep(NA,nWout)
-    for(i in 1:nWin ) {i.Win [i] <- which( outputNames==WinNames [i] ) }
-    for(i in 1:nWout) {i.Wout[i] <- which( outputNames==WoutNames[i] ) }
-    WinMean   <-    mean (sim[,i.Win])  # mm d-1
-    WoutMean  <- colMeans(sim[,i.Wout]) # mm d-1
-    if(is.null(ymax)) {
-      y.max <- max( sum(WinMean), sum(WoutMean) )
-    } else {
-      y.max = ymax
-    }
-    leg <- WinNames
-    barplot( as.matrix(WinMean),
-             beside=F, ylim=c(0,y.max), col=1:length(leg),
-             legend.text=leg,
-             args.legend=list( title="Inputs (mm d-1)", cex=0.8,
-                               x="bottom", bg="white", inset=c(-0.3,0) ) )
-    title(title1,adj=1)
-    par(mar=c(3,0,3,3))
-    leg <- WoutNames
-    barplot( as.matrix(WoutMean),
-             yaxt="n",
-             beside=F, ylim=c(0,y.max), col=1:length(leg),
-             legend.text=leg,
-             args.legend=list( title="Outputs (mm d-1)", cex=0.8,
-                               x="bottom", bg="white", inset=c(-0.3,0) ) )
-    title(title2,adj=0)
-    if(verify) {
-      WA_f   <- sim[ , which( outputNames=="WA_f") ] # mm
-      D_WA_f <- WA_f[NDAYS] - WA_f[1]                   # mm
-      WinSum        <-    sum (sim[2:NDAYS,i.Win ])  # mm
-      WoutSum       <- colSums(sim[2:NDAYS,i.Wout])  # mm
-      WinMinusWout  <- sum(WinSum) - sum(WoutSum)
-      cat( "VERIFYING THE H2O-BALANCE FOR THE SOIL (mm):",
-           "\nState variable change: ", D_WA_f,
-           "\nInputs minus outputs : ", WinMinusWout )
-    }
-  }
-```
-
-```{r}
-  plot_CbalanceCoffee <- function( sim=output, title1="", title2=title1,
-                                   ymax=NULL, verify=F ) {
-    CinNames  <- "gC_f"
-    CoutNames <- c("dC_f", "prunC_f", "harvCP_f")
-    nCin      <- length(CinNames) ; nCout  <- length(CoutNames)
-    i.Cin     <- rep(NA,nCin)     ; i.Cout <- rep(NA,nCout)
-    for(i in 1:nCin ) {i.Cin [i] <- which( outputNames==CinNames [i] ) }
-    for(i in 1:nCout) {i.Cout[i] <- which( outputNames==CoutNames[i] ) }
-    CinMean   <-    mean (sim[,i.Cin])  * 1.e4 * 365 # kgC ha-1 y-1
-    CoutMean  <- colMeans(sim[,i.Cout]) * 1.e4 * 365 # kgC ha-1 y-1
-    if(is.null(ymax)) {
-      y.max <- max( sum(CinMean), sum(CoutMean) )
-    } else {
-      y.max = ymax
-    }
-    leg <- CinNames
-    barplot( CinMean,
-             beside=F, ylim=c(0,y.max), col=1:length(leg),
-             legend.text=leg,
-             args.legend=list( title="Inputs (kg ha-1 y-1)", cex=0.8,
-                               x="bottom", bg="white", inset=c(-0.3,0) ) )
-    title(title1,adj=1)
-    par(mar=c(3,0,3,3))
-    leg <- CoutNames
-    barplot( as.matrix(CoutMean),
-             yaxt="n",
-             beside=F, ylim=c(0,y.max), col=1:length(leg),
-             legend.text=leg,
-             args.legend=list( title="Outputs (kg ha-1 y-1)", cex=0.8,
-                               x="bottom", bg="white", inset=c(-0.3,0) ) )
-    title(title2,adj=0)
-    if(verify) {
-      C_f          <- sim[ , which( outputNames=="C_f" ) ] # kgC m-2
-      D_C_f        <- C_f[NDAYS] - C_f[1]                     # kgC m-2
-      CinSum       <-    sum (sim[2:NDAYS,i.Cin ])         # kgC m-2
-      CoutSum      <- colSums(sim[2:NDAYS,i.Cout])         # kgC m-2
-      CinMinusCout <- sum(CinSum) - sum(CoutSum)
-      cat( "VERIFYING THE C-BALANCE OF COFFEE (kgC m-2):",
-           "\nState variable change: ", D_C_f,
-           "\nInputs minus outputs : ", CinMinusCout )
-    }
-  }
-```
-
-```{r}
-  plot_CbalanceSystem <- function( sim=output, title1="", title2=title1,
-                                   ymax=NULL, verify=F ) {
-    CinNames  <- c("gC_f"   , "gCT_f")
-    CoutNames <- c("Rsoil_f", "Crunoff_f",
-                   "harvCP_f", "harvCPT_f", "harvCBT_f", "harvCST_f")
-    nCin      <- length(CinNames) ; nCout  <- length(CoutNames)
-    i.Cin     <- rep(NA,nCin)     ; i.Cout <- rep(NA,nCout)
-    for(i in 1:nCin ) {i.Cin [i] <- which( outputNames==CinNames [i] ) }
-    for(i in 1:nCout) {i.Cout[i] <- which( outputNames==CoutNames[i] ) }
-    CinMean   <- colMeans(sim[,i.Cin])  * 1.e4 * 365 # kgC ha-1 y-1
-    CoutMean  <- colMeans(sim[,i.Cout]) * 1.e4 * 365 # kgC ha-1 y-1
-    if(is.null(ymax)) {
-      y.max <- max( sum(CinMean), sum(CoutMean) )
-    } else {
-      y.max = ymax
-    }
-    leg <- CinNames
-    barplot( as.matrix(CinMean),
-             beside=F, ylim=c(0,y.max), col=1:length(leg),
-             legend.text=leg,
-             args.legend=list( title="Inputs (kg ha-1 y-1)", cex=0.8,
-                               x="bottom", bg="white", inset=c(-0.3,0) ) )
-    title(title1,adj=1)
-    par(mar=c(3,0,3,3))
-    leg <- CoutNames
-    barplot( as.matrix(CoutMean),
-             yaxt="n",
-             beside=F, ylim=c(0,y.max), col=1:length(leg),
-             legend.text=leg,
-             args.legend=list( title="Outputs (kg ha-1 y-1)", cex=0.8,
-                               x="bottom", bg="white", inset=c(-0.3,0) ) )
-    title(title2,adj=0)
-    if(verify) {
-      C_f      <- sim[ , which( outputNames=="C_f" )    ] # kgC m-2
-      CT_f     <- sim[ , which( outputNames=="CT_f")    ] # kgC m-2
-      Csoil_f  <- sim[ , which( outputNames=="Csoil_f") ] # kgC m-2 
-      Csys_f   <- C_f + CT_f + Csoil_f                    # kgC m-2
-      D_Csys_f <- Csys_f[NDAYS] - Csys_f[1]               # kgC m-2
-      CinSum       <- colSums(sim[2:NDAYS,i.Cin ])        # kgC m-2
-      CoutSum      <- colSums(sim[2:NDAYS,i.Cout])        # kgC m-2
-      CinMinusCout <- sum(CinSum) - sum(CoutSum)
-      cat( "VERIFYING THE C-BALANCE FOR THE SYSTEM (kgC m-2):",
-           "\nState variable change: ", D_Csys_f,
-           "\nInputs minus outputs : ", CinMinusCout )
-    }
-  }
-```
-
-```{r}
-  plot_CdistributionCoffee <- function( sim=output ) {
-    Time <- sim[,1]
-    i.CP <- which( outputNames=="CP_f" ) ; CP <- sim[,i.CP]
-    i.CL <- which( outputNames=="CL_f" ) ; CL <- sim[,i.CL]
-    i.CW <- which( outputNames=="CW_f" ) ; CW <- sim[,i.CW]
-    i.CR <- which( outputNames=="CR_f" ) ; CR <- sim[,i.CR]
-    plot( Time, CR+CW+CL+CP,
-          main="Carbon in coffee (kg C m-2)",
-          xlab="", ylab="", type="l", ylim=c(0,max(CR+CW+CL+CP)) )
-    points( Time, CR+CW+CL, type="l", col="yellow" )
-    points( Time, CR+CW   , type="l", col="green" )
-    points( Time, CR      , type="l", col="red" )
-    legend( "bottom", cex=0.7, lty=1, bg="white",
-            col=c("black","yellow","green","red"),
-            legend=c("+ CP: Beans",
-                     "+ CL: Leaves",
-                     "+ CW: Wood",
-                     "   CR: Roots" ) )
-  }
-```
-
-```{r}
-  plot_CdistributionTrees <- function( sim=output, it=1:3 ) {
-    Time <- sim[,1]
-    i.CPT <- sapply( 1:3, function(i){which( outputNames==paste0("CPT_t(",i,")"))} )
-    i.CLT <- sapply( 1:3, function(i){which( outputNames==paste0("CLT_t(",i,")"))} )
-    i.CBT <- sapply( 1:3, function(i){which( outputNames==paste0("CBT_t(",i,")"))} )
-    i.CST <- sapply( 1:3, function(i){which( outputNames==paste0("CST_t(",i,")"))} )
-    i.CRT <- sapply( 1:3, function(i){which( outputNames==paste0("CRT_t(",i,")"))} )
-    for(t in it) {
-      CPT   <- sim[,i.CPT[t]] ; CLT <- sim[,i.CLT[t]] ; CBT <- sim[,i.CBT[t]]
-      CST   <- sim[,i.CST[t]] ; CRT <- sim[,i.CRT[t]]
-      y.max <- max(CRT+CST+CBT+CLT+CPT)
-      plot( Time, CRT+CST+CBT+CLT+CPT, ylim=c(0,y.max),
-            main=paste0("Carbon in tree sp. ",it," (kg C m-2)"),
-            xlab="", ylab="", type="l" )
-      points( Time, CRT+CST+CBT+CLT, type="l", col="yellow" )
-      points( Time, CRT+CST+CBT    , type="l", col="green"  )
-      points( Time, CRT+CST        , type="l", col="red"    )
-      points( Time, CRT            , type="l", col="blue"   )
-      legend( "bottom", cex=0.7, lty=1, bg="white",
-              col=c("black","yellow","green","red","blue"),
-              legend=c("+ CPT: Fruits",
-                       "+ CLT: Leaves",
-                       "+ CBT: Branches",
-                       "+ CST: Stems",
-                       "   CRT: Roots" ) )
-    }
-  }
-```
-
-```{r}
-  params.MAP.s <- function(s) {
-    params_BC_MAP   <- scparMAP_BC  * sc
-    params          <- list_params        [[s]]
-    ip_BC_s         <- ip_BC_site         [[s]]
-    icol_pChain_s   <- icol_pChain_site   [[s]]
-    params[ip_BC_s] <- params_BC_MAP      [icol_pChain_s]
-    return( params )
-  }
+```{r, include=FALSE}
+  filesTM <- file.info(list.files(pattern="^BC_Turrialba_Masatepe.*\\.RData$"))
+  # filesT  <- file.info(list.files(pattern="^BC_Turrialba......\\.RData$"))
+  # filesM  <- file.info(list.files(pattern="^BC_Masatepe.*\\.RData$"))
+  filesTM <- filesTM[with(filesTM, order(as.POSIXct(mtime))), ]
+  fileTM  <- tail( rownames(filesTM[1]), 1 )
 ```
 
 # AGENDA 1: Improving the Masatepe-BC May-June 2021
@@ -345,7 +45,7 @@ bibliography: [Avocado.bib,Banana.bib,MvO.bib]
   - OI & OM 1 application: 30 April (end of dry season)
 - Include TCSOM parameters and aim for near-balance of sources and sinks?
 - When there are two timber species they will not overlap much, perhaps each could reach 60% of ground cover.
-- Inga is not a shade-plot like coffee and will suffer if fully overshadowed by timber trees. But coffee production would then suffer as well. Good management therefore aims to keep timber tree shade below 60%. 
+- Inga is not a shade-plant like coffee and will suffer if fully overshadowed by timber trees. But coffee production would then suffer as well. Good management therefore aims to keep timber tree shade below 60%. 
 
 # AGENDA 2: Redoing the Turrialba-BC June 2021 (experiment and fruit trees)
 
@@ -369,14 +69,13 @@ bibliography: [Avocado.bib,Banana.bib,MvO.bib]
 
 ## Parameter settings
 
-- We set soil carbon time constants  (TCLITT, TCSOMF, TCSOMS) at Turrialba twice as low as at Masatepe.
-  - We may also want for Turrialba to have a larger fraction of SOM in the fast pool, i.e. a larger value of FCSOMF0.
+- Compared to Masatepe, we set soil carbon time constants (TCLITT, TCSOMF, TCSOMS) for Turrialba at lower values and have a larger fraction of SOM in the fast pool (larger FCSOMF0).
 - RNLEACH	is set at 0.5 for both sites. However, the fraction of N that leaches depends on soil type (Harmand et al. 2007), so different settings for the two sites would be realistic.
   - Our notes give values of leaching in Turrialba of 16-27 kgN ha-1 y-1. Where do these numbers come from (which publication, which experimental treatments)?
 
 ## Calibration data and constraints
 
-- Csoil: we should expect the sites in Masatepe to be closer to equilibrium from the start than the Turrialba ones because of differences in preceding land-use. The experiment in Masatepe followed on earlier use for coffee production (so no land-use change) whereas the site in Turrialba was originally used for sugar cane. This may well explain why Noponen found greater Csoil-loss in Turrialba despite lower initial Csoil-stock there.
+- Csoil: we should expect the sites in Masatepe to be closer to equilibrium from the start than the Turrialba ones because of differences in preceding land-use. The experiment in Masatepe followed on earlier use for coffee production (so no land-use change) whereas the site in Turrialba was originally used for sugar cane. Also, the volcanic soils in Masatepe tend to be bind organic matter and minerals better than the soils at Turrialba. These differences in soil properties may explain why Noponen found greater Csoil-loss in Turrialba despite lower initial Csoil-stock there.
 - Other biogeochemistry balances to include?
 - Leaching of N: expected to be very small in case of lowest fertilisation.
 - Consider recalculating the coffee yields in Nicaragua by dividing FWT by 3.87 (rather than the current value of 3), which would make all yields 22.5% lower.
@@ -513,8 +212,8 @@ Fig. \ref{fig:YieldsObsSimTurrialbaMasatepe} shows average observed coffee yield
 
 ```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSimTurrialbaMasatepe}Yields for the 32 treatments in Turrialba and Masatepe. Left: Observed yields against N-fertilisation level. Right: Observed yield vs. simulated yield."}
   load( fileTM )
-  # load( "BC_Turrialba_Masatepe_09_37.RData" )
   source(sitesettings_filenames[1]) # Knitting requires a model initialisation
+
   source('BC/BC_Yields.R')
   s.plot <- 1:nSites ; source('BC/BC_plot_YieldsAverage.R')
   # source('BC/BC_plot_YieldsAnnual.R')
@@ -525,41 +224,8 @@ Fig. \ref{fig:BalancesTurrialbaMasatepe} shows carbon and nitrogen balances in t
 ```{r, out.width="100%", fig.cap="\\label{fig:BalancesTurrialbaMasatepe}Carbon- and nitrogen-balances for 32 treatments. 1:18 = Turrialba, 19:32 = Masatepe. Simulations using the MAP parameter vector from Bayesian calibration."}
   load( fileTM )
   source(sitesettings_filenames[1]) # Knitting requires a model initialisation
+
   source('BC/BC_Balances.R')
-  source('BC/BC_plot_Balances.R')
-```
-
-```{r, out.width="100%", fig.cap="\\label{fig:TurrialbaMasatepeYields2}Yields using the MAP parameter vector from Bayesian calibration, but with some additional parameter change(s)."}
-  load( fileTM )
-  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
-  set_parNames  <- c( "TCLITT", "TCSOMF", "TCSOMS", "FCSOMF0" )
-  set_parValues <- c(  300    ,  6000   ,  15000  ,  0.9      )
-  # set_parNames  <- c( "RNLEACH" )
-  # set_parValues <- c(  0.2      )
-  source('BC/BC_Yields_set_par.R')
-  source('BC/BC_plot_YieldsAverage.R')
-```
-
-```{r, out.width="100%", fig.cap="\\label{fig:TurrialbaMasatepeBalances2}Balances using the MAP parameter vector from Bayesian calibration, but with some additional parameter change(s)."}
-  load( fileTM )
-  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
-  source('BC/BC_Balances_set_par.R')
-  source('BC/BC_plot_Balances.R')
-```
-
-```{r, out.width="100%", fig.cap="\\label{fig:TurrialbaMasatepeYields3}Yields using the MAP parameter vector from Bayesian calibration, but with some additional parameter change(s)."}
-  load( fileTM )
-  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
-  set_parNames  <- c( "TCLITT", "TCSOMF", "TCSOMS", "FCSOMF0" )
-  set_parValues <- c(  1200   ,  24000  ,  60000  ,  0.1      )
-  source('BC/BC_Yields_set_par.R')
-  source('BC/BC_plot_YieldsAverage.R')
-```
-
-```{r, out.width="100%", fig.cap="\\label{fig:TurrialbaMasatepeBalances3}Balances using the MAP parameter vector from Bayesian calibration, but with some additional parameter change(s)."}
-  load( fileTM )
-  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
-  source('BC/BC_Balances_set_par.R')
   source('BC/BC_plot_Balances.R')
 ```
 
@@ -567,10 +233,14 @@ Fig. \ref{fig:BalancesTurrialbaMasatepe} shows carbon and nitrogen balances in t
   load( fileTM )
   source(sitesettings_filenames[1]) # Knitting requires a model initialisation
 
-  source('BC/BC_Final.R')
-  iNfixT     <- which(outputNames=="NfixT_f_hay")
-  iNleaching <- which(outputNames=="Nleaching_f_hay")
-  
+  # source('BC/BC_Final.R')
+  # iNfixT     <- which(outputNames=="NfixT_f_hay")
+  # iNleaching <- which(outputNames=="Nleaching_f_hay")
+
+  source('BC/BC_FinalYearMean.R')
+  iNfixT     <- which(outputNames=="NfixT_f")
+  iNleaching <- which(outputNames=="Nleaching_f")
+
   par( mfrow=c(2,1), mar=c(3,2,2,0) )
   
   colbars <- c( "gray40"    , "gray80"    , "gray60"    , "gray100"   ,
@@ -584,42 +254,30 @@ Fig. \ref{fig:BalancesTurrialbaMasatepe} shows carbon and nitrogen balances in t
                 "firebrick4", "firebrick2", "firebrick3", "firebrick1", 
                 "firebrick4", "firebrick2", "firebrick3", "firebrick1",
                 "firebrick2", "firebrick3" )
-
-  barplot( as.matrix(outputFinal[,iNfixT]),
-         main=paste( "Turrialba     ",
-                     "N-FIXATION (kg N ha-1 y-1)",
-                     "      Masatepe" ),
-         col=colbars, beside=TRUE )
-  barplot( as.matrix(outputFinal[,iNleaching]),
-         main="N-LEACHING (kg N ha-1 y-1)",
-         col=colbars, beside=TRUE, names.arg=1:nSites )
+  # barplot( as.matrix(outputFinalDay[,iNfixT]),
+  barplot( as.matrix(outputFinalYearMean[,iNfixT]) * 1e4 * 365,
+           main=paste( "Turrialba     ",
+                       "N-FIXATION (kg N ha-1 y-1)",
+                       "      Masatepe" ),
+           col=colbars, beside=TRUE )
+  # barplot( as.matrix(outputFinalDay[,iNleaching]),
+  barplot( as.matrix(outputFinalYearMean[,iNleaching]) * 1e4 * 365,
+           main="N-LEACHING (kg N ha-1 y-1)",
+           col=colbars, beside=TRUE, names.arg=1:nSites )
 ```
 
 ```{r}
   load( fileTM )
-  sA <- 1 ; sB <- 2 ; sC <- 3 ; sD <- 4
-  source(sitesettings_filenames[sA])
-  params.MAP.A <- params.MAP.s( sA )
-  output.MAP.A <- run_model( p=params.MAP.A )
-  source(sitesettings_filenames[sB])
-  params.MAP.B <- params.MAP.s( sB )
-  output.MAP.B <- run_model( p=params.MAP.B )
-  source(sitesettings_filenames[sC])
-  params.MAP.C <- params.MAP.s( sC )
-  output.MAP.C <- run_model( p=params.MAP.C )
-  source(sitesettings_filenames[sD])
-  params.MAP.D <- params.MAP.s( sD )
-  output.MAP.D <- run_model( p=params.MAP.D )
-  
-  par( mar=c(3,3,3,0), mfrow=c(2,4) )
 
-  plot_NbalanceSoil  (output.MAP.A, title1="Soil N-balance"  , title2="")
-  par( mar=c(3,3,3,0) )
-  plot_CbalanceSoil  (output.MAP.A, title1="Soil C-balance"  , title2="")
-  par( mar=c(3,3,3,0) )
-  plot_H2ObalanceSoil(output.MAP.A, title1="Soil H2O-balance", title2="")
-  par( mar=c(3,3,3,0) )
-  plot_CbalanceSystem(output.MAP.A, title1="System C-balance", title2="")
+  sA <- 1 ; sB <- 2 ; sC <- 3 ; sD <- 4
+  source(sitesettings_filenames[sA]) ; params.MAP.A <- params.MAP.s( sA )
+  output.MAP.A <- run_model( p=params.MAP.A )
+  source(sitesettings_filenames[sB]) ; params.MAP.B <- params.MAP.s( sB )
+  output.MAP.B <- run_model( p=params.MAP.B )
+  source(sitesettings_filenames[sC]) ; params.MAP.C <- params.MAP.s( sC )
+  output.MAP.C <- run_model( p=params.MAP.C )
+  source(sitesettings_filenames[sD]) ; params.MAP.D <- params.MAP.s( sD )
+  output.MAP.D <- run_model( p=params.MAP.D )
 ```
 
 ```{r}
@@ -635,24 +293,95 @@ Fig. \ref{fig:BalancesTurrialbaMasatepe} shows carbon and nitrogen balances in t
   plot_NbalanceSoil(output.MAP.D, title1="", title2="OM", ymax=800)
 ```
 
+## Sensitivity analyses
 
+### N-leaching (parameter RNLEACH) 
 
-# Turrialba
+We explore sensitivity of model outputs to the leaching-parameter 'RNLEACH'.
 
-Unless otherwise indicated, all results shown in this section are for the Maximum A Posteriori (MAP) paramater vector from calibrating CAF2021 on data from Turrialba.
+```{r, out.width="100%", fig.cap="\\label{fig:TurrialbaMasatepeYields2}Yields using the MAP parameter vector from Bayesian calibration, but with some additional parameter change(s)."}
+  load( fileTM )
+  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
 
-Fig. \ref{fig:YieldsObsSimTurrialba} shows average observed coffee yield in the 18 treatments at Turrialba against N-fertilisation rate and against simulated yield.
+  set_parNames  <- c( "RNLEACH" )
+  set_parValues <- c(  0.2      )
+  source('BC/BC_Yields_set_par.R')
+  source('BC/BC_plot_YieldsAverage.R')
+```
 
-```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSimTurrialba}Yields for the 18 treatments in Turrialba. Left: Observed yields against N-fertilisation level. Right: Observed yield vs. simulated yield."}
-  load( fileT )
+```{r, out.width="100%", fig.cap="\\label{fig:TurrialbaMasatepeBalances2}Balances using the MAP parameter vector from Bayesian calibration, but with some additional parameter change(s)."}
+  load( fileTM )
+  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
+
+  source('BC/BC_Balances_set_par.R')
+  source('BC/BC_plot_Balances.R')
+```
+
+### Deciduousness
+
+```{r}
+  load( fileTM )
+
+  sA            <- 23 # Masatepe_05_SGTR_CI
+  source(sitesettings_filenames[sA])
+  params        <- params.MAP.s( sA )
+  params.MAP.A  <- params
+  params.MAP.A1 <- set_par( c("FTCLMINT(3)","TCLMAXT(3)"),
+                            c( 0.2         , 650        ) )
+  params.MAP.A2 <- set_par( c("FTCLMINT(3)","TCLMAXT(3)"),
+                            c( 0.05        , 650        ) )
+  params.MAP.A3 <- set_par( c("FTCLMINT(3)","TCLMAXT(3)"),
+                            c( 0.2         , 365        ) )
+  output.MAP.A  <- run_model( p=params.MAP.A  )
+  output.MAP.A1 <- run_model( p=params.MAP.A1 )
+  output.MAP.A2 <- run_model( p=params.MAP.A2 )
+  output.MAP.A3 <- run_model( p=params.MAP.A3 )
+
+  plot_output( list_output=list( output.MAP.A,
+                                 output.MAP.A1, output.MAP.A2 ,output.MAP.A3),
+               vars=c( "fTranT_t(3)", "LAIT_t(3)" ) )
+```
+
+### Impact of removing pruned leaves and branches
+
+Comparison of leaving tree branches on the field after thinning and pruning (default) vs. removing them as harvest (customary in NIC and GTM): Fig. \ref{fig:Balances2}.
+
+```{r Balances2, fig.height=6, fig.cap="\\label{fig:Balances2}Soil N- and C-balances at Masatepe in the ILSS_CI system. Top row: tree branches harvested and removed after pruning and thinning. Bottom row: branches left on the field as litter."}
+  load( fileTM )
+  sA <- 27 # Masatepe_09_ILSS_CI
+  source(sitesettings_filenames[sA])
+  params        <- params.MAP.s( sA )
+  params.MAP.A  <- params
+  params.MAP.A1 <- set_par( c("FHARVBT(1)","FHARVBT(2)","FHARVBT(3)"),
+                            c( 0          , 0          , 0          ) )
+  output.MAP.A  <- run_model( p=params.MAP.A  )
+  output.MAP.A1 <- run_model( p=params.MAP.A1 )
+
+  par( mar=c(3,3,3,0), mfrow=c(2,4) )
+  plot_NbalanceSoil( output.MAP.A , title1="Soil N-balance MAP", title2="" )
+  par( mar=c(3,3,3,0) )
+  plot_CbalanceSoil( output.MAP.A , title1="Soil C-balance MAP", title2="" )
+  par( mar=c(3,3,3,0) )
+  plot_NbalanceSoil( output.MAP.A1, title1="Soil N-balance 1", title2="" )
+  par( mar=c(3,3,3,0) )
+  plot_CbalanceSoil( output.MAP.A1, title1="Soil C-balance 1", title2="" )
+```
+
+## Turrialba vs. Masatepe
+
+```{r}
+  load( fileTM )
   source(sitesettings_filenames[1]) # Knitting requires a model initialisation
 
   source('BC/BC_Yields.R')
-  s.plot <- 1:nSites ; source('BC/BC_plot_YieldsAverage.R')
+  s.plot <-  1:18 ; source('BC/BC_plot_YieldsAverage.R')
+  s.plot <- 19:32 ; source('BC/BC_plot_YieldsAverage.R')
 ```
 
+### After a BC: comparing posterior with prior
+
 ```{r}
-  load( fileT )
+  load( fileTM )
   sTa             <- 13
   source(sitesettings_filenames[13]) # Turrialba_15_CE_AC
   params.Prior.Ta <- params
@@ -668,200 +397,4 @@ Fig. \ref{fig:YieldsObsSimTurrialba} shows average observed coffee yield in the 
                vars       =c( "fTran(1)"    , "fNgrowth(1)", "DVS(1)"  ,
                               "SINKP(1)"    , "DayFl(1)"   , "PARMA(1)" ,
                               "harvDM_f_hay", "CT_f" ) )
-```
-
-Biogeochemical balances for Turrialba are shown in Fig. \ref{fig:BalancesTurrialba}.
-
-```{r BalancesTurrialba, fig.height=6, fig.cap="\\label{fig:BalancesTurrialba}Biogeochemical balances for nitrogen, carbon and water at Turrialba in treatment 15. Left bar from each pair: gains; right bar: losses. All rates are averages for the whole period of simulation."}
-  par( mar=c(3,3,3,0), mfrow=c(2,4) )
-  plot_NbalanceSoil  (output.MAP.Ta, title1="Soil N-balance"  , title2="")
-  par( mar=c(3,3,3,0) )
-  plot_CbalanceSoil  (output.MAP.Ta, title1="Soil C-balance"  , title2="")
-  par( mar=c(3,3,3,0) )
-  plot_H2ObalanceSoil(output.MAP.Ta, title1="Soil H2O-balance", title2="")
-  par( mar=c(3,3,3,0) )
-  plot_CbalanceSystem(output.MAP.Ta, title1="System C-balance", title2="")
-```
-
-# Masatepe
-
-Unless otherwise indicated, all results shown in this section are for the Maximum A Posteriori (MAP) paramater vector from calibrating CAF2021 on data from Masatepe.
-
-Fig. \ref{fig:YieldsObsSimTurrialbaMasatepe} shows average observed coffee yield in the 14  treatments at Masatepe against N-fertilisation rate and against simulated yield.
-
-```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSimMasatepe}Yields for the 14 treatments in Masatepe. Left: Observed yields against N-fertilisation level. Right: Observed yield vs. simulated yield."}
-  load( fileM )
-  source('BC/BC_Yields.R')
-  s.plot <- 1:nSites ; source('BC/BC_plot_YieldsAverage.R')
-```
-
-```{r}
-  load( fileM )
-  sMa             <- 5
-  source( sitesettings_filenames[sMa] ) # Masatepe_05_SGTR_CI
-  params.Prior.Ma <- params
-  params.MAP.Ma   <- params.MAP.s( sMa )
-  output.Prior.Ma <- run_model( p=params.Prior.Ma )
-  output.MAP.Ma   <- run_model( p=params.MAP.Ma )
-```
-
-```{r}
-  load( fileM )
-  sMb             <- 9
-  source( sitesettings_filenames[sMb] ) # Masatepe_05_SGTR_CI
-  params.Prior.Mb <- params
-  params.MAP.Mb   <- params.MAP.s( sMb )
-  output.Prior.Mb <- run_model( p=params.Prior.Mb )
-  output.MAP.Mb   <- run_model( p=params.MAP.Mb )
-```
-
-```{r}
-  plot_output( list_output=list(output.Prior.Mb),
-               vars       =c( "fTran(1)"    , "fNgrowth(1)", "DVS(1)"  ,
-                              "SINKP(1)"    , "DayFl(1)"   , "PARMA(1)" ,
-                              "harvDM_f_hay", "CT_f" ) )
-  plot_output( list_output=list(output.MAP.Mb),
-               vars       =c( "fTran(1)"    , "fNgrowth(1)", "DVS(1)"  ,
-                              "SINKP(1)"    , "DayFl(1)"   , "PARMA(1)" ,
-                              "harvDM_f_hay", "CT_f" ) )
-```
-
-Biogeochemical balances for Masatepe (Nicaragua) are shown in Fig. \ref{fig:BalancesMasatepe}.
-
-```{r BalancesMasatepe, fig.height=6, fig.cap="\\label{fig:BalancesMasatepe}Biogeochemical balances for nitrogen, carbon and water at Masatepe in the ILSS_CI system (shading by both Inga laurina and Samanea saman; Fertilisation-mode CI). Left bar from each pair: gains; right bar: losses. All rates are averages for the whole period of simulation."}
-  par( mar=c(3,3,3,0), mfrow=c(2,4) )
-  plot_NbalanceSoil  (output.MAP.Mb, title1="Soil N-balance"  , title2="")
-  par( mar=c(3,3,3,0) )
-  plot_CbalanceSoil  (output.MAP.Mb, title1="Soil C-balance"  , title2="")
-  par( mar=c(3,3,3,0) )
-  plot_H2ObalanceSoil(output.MAP.Mb, title1="Soil H2O-balance", title2="")
-  par( mar=c(3,3,3,0) )
-  plot_CbalanceSystem(output.MAP.Mb, title1="System C-balance", title2="")
-```
-
-Comparison of leaving tree branches on the field after thinning and pruning (default) vs. removing them as harvest (customary in NIC and GTM): Fig. \ref{fig:Balances2}.
-
-```{r Balances2, fig.height=6, fig.cap="\\label{fig:Balances2}Soil N- and C-balances at Masatepe in the ILSS_CI system. Top row: tree branches left as litter after pruning and thinning. Bottom row: branches harvested."}
-  load( fileM )
-  source("initialisation/initialise_CAF2021_Masatepe_09_ILSS_CI.R")
-
-  params  <- params.MAP.Mb
-  params1 <- set_par( c("FHARVBT(1)","FHARVBT(2)","FHARVBT(3)"),
-                      c( 0          , 0          , 0          ) )
-  params2 <- set_par( c("FHARVBT(1)","FHARVBT(2)","FHARVBT(3)"),
-                      c( 1          , 1          , 1          ) )
-  output1 <- run_model( p=params1 )
-  output2 <- run_model( p=params2 )
-
-  par( mar=c(3,3,3,0), mfrow=c(2,4) )
-  plot_NbalanceSoil( output1, title1="Soil N-balance 1", title2="" )
-  par( mar=c(3,3,3,0) )
-  plot_CbalanceSoil( output1, title1="Soil C-balance 1", title2="" )
-  par( mar=c(3,3,3,0) )
-  plot_NbalanceSoil( output2, title1="Soil N-balance 2", title2="" )
-  par( mar=c(3,3,3,0) )
-  plot_CbalanceSoil( output2, title1="Soil C-balance 2", title2="" )
-```
-
-Sensitivity of soil balances to parameter settings: Fig. \ref{fig:Balances3}.
-
-```{r Balances3, fig.height=6, fig.cap="\\label{fig:Balances3}Soil N- and C-balances at Masatepe in the ILSS_CI system, with various parameter settings."}
-  load( fileM )
-  source("initialisation/initialise_CAF2021_Masatepe_09_ILSS_CI.R")
-
-  params      <- params.MAP.Mb
-  TCLITT.MAP  <- params[ which(names_params=='TCLITT' ) ]
-  TCSOMF.MAP  <- params[ which(names_params=='TCSOMF' ) ]
-  TCSOMS.MAP  <- params[ which(names_params=='TCSOMS' ) ]
-  RNLEACH.MAP <- params[ which(names_params=='RNLEACH') ]
-  
-  params0 <- set_par( c("TCLITT"   ,"TCSOMF"   ,"TCSOMS"   ,"RNLEACH"   ),
-                      c( TCLITT.MAP, TCSOMF.MAP, TCSOMS.MAP, RNLEACH.MAP) )
-  params1 <- set_par( c("TCLITT"   ,"TCSOMF"   ,"TCSOMS"   ,"RNLEACH"   ),
-                      c( TCLITT.MAP, TCSOMF.MAP, TCSOMS.MAP, RNLEACH.MAP)*
-                      c( 2         , 2         , 2         , 1          ) )
-  params2 <- set_par( c("TCLITT"   ,"TCSOMF"   ,"TCSOMS"   ,"RNLEACH"   ),
-                      c( TCLITT.MAP, TCSOMF.MAP, TCSOMS.MAP, RNLEACH.MAP)*
-                      c( 1         , 1         , 1         , 0.1        ) )
-  output0 <- run_model( p=params0 )
-  output1 <- run_model( p=params1 )
-  output2 <- run_model( p=params2 )
-
-  par( mar=c(3,3,3,0), mfrow=c(3,4) )
-  plot_NbalanceSoil( output0, title1="Soil N-balance 0", title2="" )
-  par( mar=c(3,3,3,0) )
-  plot_CbalanceSoil( output0, title1="Soil C-balance 0", title2="" )
-  par( mar=c(3,3,3,0) )
-  plot_NbalanceSoil( output1, title1="Soil N-balance 1", title2="" )
-  par( mar=c(3,3,3,0) )
-  plot_CbalanceSoil( output1, title1="Soil C-balance 1", title2="" )
-  par( mar=c(3,3,3,0) )
-  plot_NbalanceSoil( output2, title1="Soil N-balance 2", title2="" )
-  par( mar=c(3,3,3,0) )
-  plot_CbalanceSoil( output2, title1="Soil C-balance 2", title2="" )
-```
-
-Fig. \ref{fig:Nbalance4Nlevels} shows how the soil N-balance is affected by N-fertilisation.
-
-```{r Nbalance4Nlevels, fig.height=6, fig.cap="\\label{fig:Nbalance4Nlevels}Soil nitrogen balances for 4 different treatments at Masatepe in the ILSS system (shading by both Inga laurina and Samanea saman). Gains on the left, losses on the right."}
-  par( mfrow=c(2,4) )
-
-  par(mar=c(3,3,3,0))
-                                        # Masatepe_9_ILSS_CI
-  plot_NbalanceSoil(output.MAP.Mb, title1="", title2="CI", ymax=800)
-  
-  par(mar=c(3,3,3,0))
-  sMc           <- 10 
-  source( sitesettings_filenames[sMc] ) # Masatepe_10_ILSS_CM
-  params        <- params.MAP.s( sMc )
-  output.MAP.Mc <- run_model()
-  plot_NbalanceSoil(output.MAP.Mc, title1="", title2="CM", ymax=800)
-  
-  par(mar=c(3,3,3,0))
-  sMd           <- 11 
-  source( sitesettings_filenames[sMd] ) # Masatepe_11_ILSS_OI
-  params        <- params.MAP.s( sMd )
-  output.MAP.Md <- run_model()
-  plot_NbalanceSoil(output.MAP.Md, title1="", title2="OI", ymax=800)
-  
-  par(mar=c(3,3,3,0))
-  sMe           <- 12 
-  source( sitesettings_filenames[sMe] ) # Masatepe_12_ILSS_OM
-  params        <- params.MAP.s( sMe )
-  output.MAP.Me <- run_model()
-  plot_NbalanceSoil(output.MAP.Me, title1="", title2="OM", ymax=800)
-```
-
-# Deciduousness
-
-```{r}
-  plot_output( list_output=list(output.MAP.Ma),
-               vars       =c( "LAIT_t(1)", "LAIT_t(2)", "LAIT_t(3)" ) )
-
-  plot_output( list_output=list(output.MAP.Mb),
-               vars       =c( "LAIT_t(1)", "LAIT_t(2)", "LAIT_t(3)" ) )
-
-```
-
-```{r, fig.height=6, fig.cap="\\label{fig:Deciduousness}Soil N- and C-balances at Masatepe in the ILSS_CI system. Top row: tree branches left as litter after pruning and thinning. Bottom row: branches harvested."}
-  params    <- params.MAP.Ma
-  paramsMa1 <- set_par( c("FTCLMINT(3)","TCLMAXT(3)"),
-                        c( 0.2         , 650        ) )
-  paramsMa2 <- set_par( c("FTCLMINT(3)","TCLMAXT(3)"),
-                        c( 0.05        , 650        ) )
-  paramsMa3 <- set_par( c("FTCLMINT(3)","TCLMAXT(3)"),
-                        c( 0.2         , 365        ) )
-  
-  source("initialisation/initialise_CAF2021_Masatepe_05_SGTR_CI.R")
-  output.MAP.Ma1 <- run_model( p=paramsMa1 )
-  output.MAP.Ma2 <- run_model( p=paramsMa2 )
-  output.MAP.Ma3 <- run_model( p=paramsMa3 )
-
-  plot_output( list_output=list( output.MAP.Ma,
-                                 output.MAP.Ma1, output.MAP.Ma2 ,output.MAP.Ma3),
-               vars=c( "LAIT_t(3)" ) )
-
-  plot_output( list_output=list( output.MAP.Ma,
-                                 output.MAP.Ma1, output.MAP.Ma2 ,output.MAP.Ma3),
-               vars=c( "fTranT_t(3)" ) )
 ```

@@ -2,9 +2,9 @@
 ## MvO, 2021-06-03
 
 params <- set_par( c("HMAX(1)","TREEDENS0(1)","KNFIX(1)"),
-                   c( 8       , 0.0333       , 0.1      ) )
+                   c( 8       , 0.0333       , 0.05     ) )
 params <- set_par( c(          "TREEDENS0(3)","KNFIX(3)"),
-                   c(           0.0333       , 0.1      ) )
+                   c(           0.0333       , 0.05     ) )
 
 calendar_prunT[ 1,  1, ] <- c( 2003, 158, 0.1  )
 calendar_prunT[ 1,  2, ] <- c( 2004,  49, 0.03 )
