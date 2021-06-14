@@ -17,63 +17,95 @@ output:
 fontsize: 11pt
 geometry: margin=1in
 csl: environmental-modelling-and-software.csl
-bibliography: [Avocado.bib,Banana.bib,MvO.bib]
+bibliography: [Avocado.bib,Banana.bib,Experiments.bib,MvO.bib,SEACAF.bib]
 ---
 
 ```{r, include=FALSE}
   knitr::opts_chunk$set(echo=F,results="asis",warning=FALSE,message=FALSE)
 ```
 
+
+
+\clearpage
+
+# Introduction
+
+This is the second progress report for project SEACAF on the process-based modelling of coffee agroforestry systems in Central America by means of the model CAF2021. The  first progress report [dated 30 April 2021; @VanOijen_2021_Modelling] provided details and references on the model that we do not repeat here. However, we have since made changes to model structure which we describe in the next section. After that we present details on a Bayesian calibration of the model using data from long-term experiments in Turrialba (Costa Rica) and Masatepe (Nicaragua). We conclude the report with a general discussion and an outlook to future work.
+
+
+# CAF2021: further changes in model structure
+
+User-friendliness. Several of the figures in this report. No further detail, but will be part of the user documentation to be provided in the final stage of project SEACAF.
+
+Structural changes now to be discussed.
+
+## Option to remove pruned leaves and branches from the field
+
+
+
+## Tree height and light interception
+
+- Stratification no longer assumed but developing over time.
+
+# Bayesian calibration on data from Turrialba and Masatepe
+
+- Differences between the two sites.
+- Soils had different land-use histories. Only in Turrialba, the coffee agroforestry experiment represented land-use change (from sugar cane), and involved soil disturbance increasing soil aeration. Soil texture and composition also differed between the sites. The volcanic soils in Masatepe have more organic matter than the soils in Turrialba [@Noponen_2012_Carbon], but with lower decomposition rates. The combined effect was that soil loss over the course of the experiment was found to be much lower in Masatepe than in Turrialba [@Noponen_2013_Sink].
+- The experiment used different shade tree species.
+  - A deciduous tree species present in Masatepe. No need for model change: leaf senescence was already made to be accelerated by drought, which is consistent with the dry-season falling of leaves in S.s. (?).
+  
+```{r}
+  Turrialba_trees <- c( rep("E" ,4), rep("T" ,4), rep("C" ,2),
+                        rep("TE",2), rep("CE",4), rep("-" ,2) )
+  fert4 <- c("CI","CM","OI","OM") ; fert2a <- c("CI","CM") ; fert2b <- c("CM","OI")
+  Turrialba_fert  <- c( rep(fert4,2), rep(fert2b,2), fert4, fert2a )
+                        
+  Masatepe_trees <- c( rep("-"    ,2), rep("SSTR" ,2), rep("SGTR" ,4),
+                       rep("ILSS" ,4), rep("ILSG" ,2), rep(NA,4)  )
+  Masatepe_fert  <- c( fert2a, fert2b, rep(fert4,2), fert2b, rep(NA,4) )
+
+  options(knitr.kable.NA = '')
+  knitr::kable( cbind( 1:18, Turrialba_trees, Turrialba_fert,
+                       rep(NA,18), 
+                       c(19:32,rep(NA,4)), Masatepe_trees, Masatepe_fert ),
+                col.names=c("TURRIALBA","Shade","Fertil.","","MASATEPE","Shade","Fertil."),
+                caption="Long-term experiments in Turrialba (treatments 1:18)
+                and Masatepe (treatments 19:32).
+                  Shade trees: E = \\textit{Erythrina poeppigiana},
+                    T = \\textit{Terminalia amazonia}, C = \\textit{Chloroleucon eurycyclum},
+                    SS = \\textit{Samanea saman}, TR = \\textit{Tabebuia rosea},
+                    SG = \\textit{Simarouba glauca}, IL = \\textit{Inga laurina}, .
+                  Fertilisation regime: C = conventional, O = organic,
+                                        I = intensive, M = moderate." )
+```
+
 ```{r, include=FALSE}
   filesTM <- file.info(list.files(pattern="^BC_Turrialba_Masatepe.*\\.RData$"))
   # filesT  <- file.info(list.files(pattern="^BC_Turrialba......\\.RData$"))
   # filesM  <- file.info(list.files(pattern="^BC_Masatepe.*\\.RData$"))
-  filesTM <- filesTM[with(filesTM, order(as.POSIXct(mtime))), ]
+  filesTM <- filesTM[ with(filesTM,order(as.POSIXct(mtime))), ]
   fileTM  <- tail( rownames(filesTM[1]), 1 )
 ```
-
-# AGENDA 1: Improving the Masatepe-BC May-June 2021
-
-- Tree data
-  - Careful: Thinned trees are typically not representative of the stand.
-  - When data are in FWT, perhaps assume that 25% of tree woody *volume* is water (Cermak et al. 2007). We would then still need wood density (kg DM m-3) to be able to convert from FWT to DM.
-  - Tree biomass reported for ABG only or whole-tree including roots?
-  - Ignore 'Biomasa  de rebrotes a 3 metros de inga 2009.xls': extremely light pruning, providing no measure of branch biomass etc. Better data in 'Biomasa arboles  primer raleo por especie A S 2008.xls' which was an intensive pollarding (perhaps 90% of branch pruned), so those data provide a better estimate of the amount of leaves and branches on an Inga tree.
-- Data Martin Noponen
-- Fertilisation timing
-  - CI & CM 2 applications: 15 June, 15 Sep
-  - OI & OM 1 application: 30 April (end of dry season)
-- Include TCSOM parameters and aim for near-balance of sources and sinks?
-- When there are two timber species they will not overlap much, perhaps each could reach 60% of ground cover.
-- Inga is not a shade-plant like coffee and will suffer if fully overshadowed by timber trees. But coffee production would then suffer as well. Good management therefore aims to keep timber tree shade below 60%. 
-
-# AGENDA 2: Redoing the Turrialba-BC June 2021 (experiment and fruit trees)
-
-- Use latest model version
-- Use all data:
-  - Martin Noponen: soil, GHG balance, etc.
-  - Roland Cerda: banana & citrus
-    - From Rolando's file: choose farms with high fruit tree density and simulate them as extra treatments in the Turrialba experiment (for soil, weather etc.): EMu = poro + banana, ECi = poro + citrus.
-  - Fertilisation timings as in file Oriana or as in Masatepe?
-  - Assumptions about non-leaching at zero-fertilisation
-  - Better weather data for final years?
-- Include TCSOM parameters and aim for near-balance of sources and sinks?
-
-# AGENDA 3: BC Llano Bonito (and perhaps Aquiares)
-
-- Files from Oriana. LB at 1600+ m, Aquiares at 1000+ m.
-- At LB there were Musaceae, but not in the data files (two tree species could then not be handled by CAF2014), but maybe check the paper by Louise Meylan that is referred to in Oriana et al's 2020 paper.
-- Aquiares had unusual poro management: no thinning, no pruning.
-
-# Turrialba and Masatepe
 
 ## Parameter settings
 
 - Compared to Masatepe, we set soil carbon time constants (TCLITT, TCSOMF, TCSOMS) for Turrialba at lower values and have a larger fraction of SOM in the fast pool (larger FCSOMF0).
-- RNLEACH	is set at 0.5 for both sites. However, the fraction of N that leaches depends on soil type (Harmand et al. 2007), so different settings for the two sites would be realistic.
+- RNLEACH	is set at 0.5 for both sites. However, the fraction of N that leaches depends on soil type [@Harmand_2007_Nitrogena], so different settings for the two sites would be realistic.
   - Our notes give values of leaching in Turrialba of 16-27 kgN ha-1 y-1. Where do these numbers come from (which publication, which experimental treatments)?
 
 ## Calibration data and constraints
+
+- Data files provided by Elias for Turrialba and by Jeremy for Masatepe
+- Additionally, some data were taken from the following publications:
+  - Noponen
+  - Ovalle et al. 
+  - Spanish text on Masatepe
+  - Haggar et al. (2011)
+- Future data use:
+  - Rolando Cerda data files for the Turrialba region
+  - Data on coffee agroforestry in LLano Bonito (Tarrazu)
+  
+
 
 - Csoil: we should expect the sites in Masatepe to be closer to equilibrium from the start than the Turrialba ones because of differences in preceding land-use. The experiment in Masatepe followed on earlier use for coffee production (so no land-use change) whereas the site in Turrialba was originally used for sugar cane. Also, the volcanic soils in Masatepe tend to be bind organic matter and minerals better than the soils at Turrialba. These differences in soil properties may explain why Noponen found greater Csoil-loss in Turrialba despite lower initial Csoil-stock there.
 - Other biogeochemistry balances to include?
@@ -219,7 +251,7 @@ Fig. \ref{fig:YieldsObsSimTurrialbaMasatepe} shows average observed coffee yield
   # source('BC/BC_plot_YieldsAnnual.R')
 ```
 
-Fig. \ref{fig:BalancesTurrialbaMasatepe} shows carbon and nitrogen balances in the 32 treatments (1:18 from Turrialba, 19:32 from Masatepe).
+Fig. \ref{fig:BalancesTurrialbaMasatepe} shows carbon and nitrogen balances in the 32 treatments (1:18 from Turrialba, 19:32 from Masatepe), for the whole simulated period of over 17 resp. 13 years. 
 
 ```{r, out.width="100%", fig.cap="\\label{fig:BalancesTurrialbaMasatepe}Carbon- and nitrogen-balances for 32 treatments. 1:18 = Turrialba, 19:32 = Masatepe. Simulations using the MAP parameter vector from Bayesian calibration."}
   load( fileTM )
@@ -228,6 +260,8 @@ Fig. \ref{fig:BalancesTurrialbaMasatepe} shows carbon and nitrogen balances in t
   source('BC/BC_Balances.R')
   source('BC/BC_plot_Balances.R')
 ```
+
+N-fixation and N-leaching in the final year. 
 
 ```{r}
   load( fileTM )
@@ -398,3 +432,48 @@ Comparison of leaving tree branches on the field after thinning and pruning (def
                               "SINKP(1)"    , "DayFl(1)"   , "PARMA(1)" ,
                               "harvDM_f_hay", "CT_f" ) )
 ```
+
+# Discussion and outlook
+
+## BC
+
+- Basis for BC remains narrow, dominated by just two locations: Turrialba in Costa Rica and Masatepe in Nicaragua.
+
+- N-leaching difficult to evaluate. No measurements were available for the calibration sites, and the few measurements carried out in Central America show that leaching varies both between sites (as a function of dfferences in soil type and management) and between depths in the soil where measurements are taken. For a coffee site in southern Costa Rica, @Harmand_2007_Nitrogena found N-leaching rates in kg N ha-1 y-1 to be 201-268 at 0.6 m depth, 70-113 at 1.2 m, and 16-27 at 2.0 m, with the highest values for the unshaded plot and the lowest for one shaded by *Eucalyptus deglupta*.
+
+## BC Banana (avocado?, citrus?)
+- Using data from Roland Cerda: banana.
+  - From Rolando's file: choose farms with high fruit tree density and simulate them as extra treatments in the Turrialba experiment (for soil, weather etc.): EMu = poro + banana, ECi = poro + citrus.
+
+## BC Llano Bonito (and perhaps Aquiares)
+
+- Files from Oriana. LB at 1600+ m, Aquiares at 1000+ m.
+- At LB there were Musaceae, but not in the data files (two tree species could then not be handled by CAF2014), but check @Meylan_2017_Evaluating.
+- Aquiares had unusual poro management: no thinning, no pruning.
+
+
+<br>  
+<br>  
+<br>  
+<br>  
+<br>  
+<br>  
+<br>  
+<br>  
+  
+  
+## Then ...
+- Use SEACAF farm database to prepare input files for CAF2021
+- Simulate full time series from COSA1 to present day for all farms in Costa Rica and Guatemala
+- Analyse shade management and fertilization impacts on yields and environment
+
+
+# Acknowledgements {-}
+
+I thank the Natural Resources Institute of the University of Greenwich for funding, and my colleagues in project SEACAF and earlier projects for support.
+
+
+
+\clearpage
+
+# References {-}
