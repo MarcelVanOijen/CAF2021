@@ -16,8 +16,8 @@ r2   <- signif( summary(AvYield.Nfert.lm)$r.squared, 2 )
 abline( AvYield.Nfert.lm$coefficients[1], AvYield.Nfert.lm$coefficients[2],
         col="blue" )
 legend( "bottomright",
-        legend=c("y=x", paste("r2= ",as.character(r2)) ),
-        col=c("black","blue"), lty=c(2,1), cex=0.7 )
+        legend=paste("r2= ",as.character(r2)),
+        col="blue", lty=1, cex=0.7 )
 
 AvYields.max   <- max(AvYield[s.plot,c("Y.data","Y.MAP")])
 plot( AvYield[s.plot,"Y.MAP"], AvYield[s.plot,"Y.data"],
