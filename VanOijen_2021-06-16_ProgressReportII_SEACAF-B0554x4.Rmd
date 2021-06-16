@@ -47,7 +47,7 @@ In previous versions of the model, pruned branches were assumed to be left on th
 
 CAF2021 simulates coffee agroforestry systems with up to three shade tree species. So far the assumption has been that tree species 1 and 2 would occupy a lower tree layer and species 3 the upper layer. This represented the common situation where tall timber trees (species 3) would overshadow service trees (sp. 1) and fruit trees (sp. 2). The model assumption was that species 3 would always have the first access to light throughout its lifetime, and the distribution of light interception was thus not modelled explicitly as a function of the relative heights of the different tree species. However, closer study of the long-term experiment in Masatepe (Nicaragua) showed that this approach is unrealistic. In Masatepe, during the first 7 years of tree growth the various timber tree species were not taller than the service tree *Inga laurina* so the expected stratification had not yet set in. To allow the model to represent such situations, the simulation of tree height dynamics and competition for light needed to be modified. We made the following changes:
 
-- We added the option of setting species-specific maximum tree heights by means of a new parameter array HMAX(1:3). This can be used to represent the practice of tree height pruning whereby service trees such as *Inga laurina* and *Erythrina poeppigiana* are kept below heights of 2-7 m. The model still calculates the tree height for every species as an allometric function of its stem biomass ($H = a S^b$), but caps that function at HMAX. Setting the HMAX-values to unattainable values such as 100 m provides equivalence to the former model version.
+- We added the option of setting species-specific maximum tree heights by means of a new parameter array HMAX(1:3). This can be used to represent the practice of tree height pruning whereby service trees such as *Inga laurina* and *Erythrina poeppigiana* are kept below heights of 2-7 m. The model still calculates the tree height for every species as an allometric function of its stem biomass ($H = a S^b$), but caps that function at HMAX. Setting the HMAX-values to unattainable high values provides equivalence to the former model version.
 - When H(3), the height of tree species 3, is less than that of the other species, the species are assumed to be in the same tree layer. There is then no horizontal overlap: the species occupy different complementary parts of the field.
 - When H(3) is more than twice the height of the others, it is assumed to be fully overshadowing as in the previous model version.
 - In the in-between situation ($1 < H(3)/max(H(1:2)) < 2$), the tree crowns are  assumed to partly overlap with light interception being proportional to each species' LAI in the overlapping layer. 
@@ -56,11 +56,15 @@ CAF2021 simulates coffee agroforestry systems with up to three shade tree specie
 
 # Bayesian calibration on data from Turrialba and Masatepe
 
+```{r MapTM, out.width="400px", fig.align="center", fig.cap="\\label{MapTM}Locations of the long-term experiments in Nicaragua and Costa Rica."}
+knitr::include_graphics("images/MapTM.png")
+```
+
 ## The experiments
 
-The two long-term coffee agroforestry experiments in Turrialba (Costa Rica) and Masatepe (Nicaragua) have become of central importance for the development and parameterisation of CAF2021 within project SEACAF. The experiments constitute the main source of long-term data on coffee, shade trees and soil. Data files for these experiments were provided by Elias de Melo Virginio Filho (CATIE) and Jeremy Haggar (Univ. Greenwich). Additionally, some data were taken from @Haggar_2011_Coffee, @Noponen_2012_Carbon, @Noponen_2013_Sink, @Sepulveda_2016_Efecto and @Ovalle-Rivera_2020_Assessing.
+The two long-term coffee agroforestry experiments at Turrialba in Costa rica and Masatepe in Nicaragua (Fig. \ref{fig:MapTM}) have become of central importance for the development and parameterisation of CAF2021 within project SEACAF. The experiments constitute the main source of long-term data on coffee, shade trees and soil. Data files for these experiments were provided by Elias de Melo Virginio Filho (CATIE) and Jeremy Haggar (Univ. Greenwich). Additionally, some data were taken from @Haggar_2011_Coffee, @Noponen_2012_Carbon, @Noponen_2013_Sink, @Sepulveda_2016_Efecto and @Ovalle-Rivera_2020_Assessing.
   
-In both experiments, four fertilisation regimes were combined with different choices of one or two shade tree species. For model calibration, we used data from 18 Turrialba treatments and 14 Nicaragua treatments, as listed in Table 1. The treatments numbers (1:18 for Turrialba, 19:32 for Masatepe) indicated in the table will be used in figures below.
+In both experiments, four fertilisation regimes were combined with different choices of one or two shade tree species. For model calibration, we used data from 18 Turrialba treatments and 14 Nicaragua treatments, as listed in Table 1. The treatments numbers (1:18 for Turrialba, 19:32 for Masatepe) given in the table will be used in the figures of this report.
 
 ```{r}
   Turrialba_trees <- c( rep("E" ,4), rep("T" ,4), rep("C" ,2),
@@ -246,7 +250,7 @@ All parameters were a priori assigned wide beta probability distributions, refle
 
 ## Results from the calibration
 
-```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSimTurrialbaMasatepe}Yields for the 32 treatments in Turrialba (black numbers) and Masatepe (red). Left: Observed yields against N-fertilisation level. Right: Observed yield vs. simulated yield."}
+```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSimTurrialbaMasatepe}Yields for the 32 treatments in Turrialba (black numbers) and Masatepe (red). Left: Observed yields against N-fertilisation level. Right: Observed yield vs. MAP-simulated yield."}
   load( fileTM )
   source(sitesettings_filenames[1]) # Knitting requires a model initialisation
 
@@ -255,9 +259,11 @@ All parameters were a priori assigned wide beta probability distributions, refle
   # source('BC/BC_plot_YieldsAnnual.R')
 ```
 
-All simulation results shown in this section are for the Maximum A Posteriori (MAP) paramater vector, i.e the model parameterisation that achieves the highest value for the product of prior (the beta distributions) and likelihood (fit to data).
+The calibration data for each of the 32 treatments are shown in the Appendix, together with model outputs for the MAP and ML parameter vectors. The MAP is the '*Maximum A Posteriori*' parameter vector, i.e. the model parameterisation that achieves the highest value for the product of prior (the beta distributions) and likelihood (fit to data). The ML parameter vector is the *Maximum Likelihood* parameter vector which ignores the prior probability distributions.
 
-The left panel of Fig. \ref{fig:YieldsObsSimTurrialbaMasatepe} shows observed coffee productivity in the 32 treatments against N-fertilisation rate. The values are averages over the years 2002-2017 for Turrialba and the years 2004-2013 for Masatepe. Differences in nitrogen application account for 23% of the variation between yield averages. The right panel plots the observed yields against yiels simulated with CAF2021 using the MAP parameter vector. The close relationship is encouraging but awaits testing against data not used in the calibration.
+In this section we focus on model performance for the MAP parameter vector. 
+
+The left panel of Fig. \ref{fig:YieldsObsSimTurrialbaMasatepe} shows observed coffee productivity in the 32 treatments against N-fertilisation rate. The values are averages over the years 2002-2017 for Turrialba and the years 2004-2013 for Masatepe. Differences in nitrogen application account for 23% of the variation between yield averages. The right panel plots the observed yields against yields simulated with CAF2021 using the MAP parameter vector. The close relationship is encouraging but awaits testing against data not used in the calibration.
 
 ```{r, out.width="100%", fig.cap="\\label{fig:BalancesTM}Carbon- and nitrogen-balances for 32 treatments. 1:18 = Turrialba, 19:32 = Masatepe. Simulations using the MAP parameter vector from Bayesian calibration."}
   load( fileTM )
@@ -267,9 +273,9 @@ The left panel of Fig. \ref{fig:YieldsObsSimTurrialbaMasatepe} shows observed co
   source('BC/BC_plot_Balances.R')
 ```
 
-We now examine the behaviour of the calibrated model with respect to carbon- and nitorgen balances. Fig. \ref{fig:BalancesTM} shows carbon and nitrogen balances in the 32 treatments (1:18 from Turrialba, 19:32 from Masatepe), for the whole simulated period of 17 resp. 13 years. In all treatments, the simulations show loss of soil carbon and nitrogen, with slightly greater losses in Turrialba. We can compare the results with the observations [@Noponen_2013_Sink] shown in Table 2 above. Across the Turrialba treatments the observed changes were $-1479 \pm 544 \, kg \, C \, ha^{-1} y^{-1}$ and in Masatepe they were $-30 \pm 1153 \, kg \, C \, ha^{-1} y^{-1}$. So the simulated losses seemed in the right order of magnitude for Turrialba but overestimates for Masatepe.
+We now examine the behaviour of the calibrated model with respect to carbon- and nitrogen balances. Fig. \ref{fig:BalancesTM} shows carbon and nitrogen balances in the 32 treatments (1:18 from Turrialba, 19:32 from Masatepe), for the whole simulated period of 17 resp. 13 years. In all treatments, the simulations show loss of soil carbon and nitrogen, with slightly greater losses in Turrialba. We can compare the results with the observations [@Noponen_2013_Sink] shown in Table 2 above. Across the Turrialba treatments the observed changes were $-1479 \pm 544 \, kg \, C \, ha^{-1} y^{-1}$ and in Masatepe they were $-30 \pm 1153 \, kg \, C \, ha^{-1} y^{-1}$. So the simulated losses seemed in the right order of magnitude for Turrialba but overestimates for Masatepe.
 
-```{r, out.width="100%", fig.cap="\\label{fig:NfixleachFinalTM}N-fixation and N-leaching during the final year in all treatments at Turrialba and Masatepe. Simulations using the MAP parameter vector from Bayesian calibration."}
+```{r, out.width="100%", fig.height=3, fig.cap="\\label{fig:NfixleachFinalTM}N-fixation and N-leaching during the final year in all treatments at Turrialba and Masatepe. Simulations using the MAP parameter vector from Bayesian calibration."}
   load( fileTM )
   source(sitesettings_filenames[1]) # Knitting requires a model initialisation
   source('BC/BC_FinalYearMean.R')
@@ -291,13 +297,13 @@ We now examine the behaviour of the calibrated model with respect to carbon- and
                 "firebrick2", "firebrick3" )
   # barplot( as.matrix(outputFinalDay[,iNfixT]),
   barplot( as.matrix(outputFinalYearMean[,iNfixT]) * 1e4 * 365,
-           main=paste( "Turrialba     ",
-                       "N-FIXATION (kg N ha-1 y-1)",
-                       "      Masatepe" ),
+           main=paste( "TURRIALBA     ",
+                       "N-fixation (kg N ha-1 y-1)",
+                       "      MASATEPE" ),
            col=colbars, beside=TRUE )
   # barplot( as.matrix(outputFinalDay[,iNleaching]),
   barplot( as.matrix(outputFinalYearMean[,iNleaching]) * 1e4 * 365,
-           main="N-LEACHING (kg N ha-1 y-1)",
+           main="N-leaching (kg N ha-1 y-1)",
            col=colbars, beside=TRUE, names.arg=1:nSites )
 ```
 
@@ -429,9 +435,9 @@ We examine this further by analysing the simulated soil nitrogen balances, showi
 
 CAF2021 is a fairly complex and parameter-rich model which is required to behave realistically for many different environmental conditions and parameter settings. Fortunately, the large number of model runs that were carried out in the Bayesian calibration showed that model behaviour is robust: the model did not behave erratically for any of the 6.4 million combinations of conditions and parameterisations that were explored.
 
-Overall, the behaviour of the calibrated CAF2012 seems to be plausible, with the caveat that no out-of-sample testing has been carried out yet. However, the data basis for calibration remains narrow, dominated by just two locations: the experimental sites of Turrialba in Costa Rica and Masatepe in Nicaragua.
+Overall, the behaviour of the calibrated CAF2012 seems to be plausible, with the caveat that no out-of-sample testing has been carried out yet. For each of the 32 treatments, the simulated time series for most measured variables seem plausible (all are shown in the Appendix). However, the data basis for calibration remains narrow, dominated by just two locations: the experimental sites of Turrialba in Costa Rica and Masatepe in Nicaragua.
 
-Above we showed that values for nitrogen-cycling processes that seemed high, in particular for N-leaching. However, these processes are difficult to evaluate. No measurements were available for the calibration sites, and the few measurements carried out in Central America on N-leaching have shown that it varies both between sites (as a function of differences in soil type and management) and between depths in the soil where measurements are taken. For a coffee site in southern Costa Rica, @Harmand_2007_Nitrogena found N-leaching rates in kg N ha-1 y-1 to be 201-268 at 0.6 m depth, 70-113 at 1.2 m, and 16-27 at 2.0 m, with the highest values for the unshaded plot and the lowest for one shaded by *Eucalyptus deglupta*. The values at 0.6 m depth are similar to our calibrated simulations, and that depth is similar to the rooting depth of the calibrated model.
+Above we showed that simulated values for some nitrogen-cycling processes seemed high, in particular for N-leaching. However, these processes are difficult to evaluate. No measurements were available for the calibration sites, and the few measurements carried out in Central America on N-leaching have shown that it varies both between sites (as a function of differences in soil type and management) and between depths in the soil where measurements are taken. For a coffee site in southern Costa Rica, @Harmand_2007_Nitrogena found N-leaching rates in kg N ha-1 y-1 to be 201-268 at 0.6 m depth, 70-113 at 1.2 m, and 16-27 at 2.0 m, with the highest values for the unshaded plot and the lowest for one shaded by *Eucalyptus deglupta*. The values at 0.6 m depth are similar to our calibrated simulations, and that depth is similar to the rooting depth of the calibrated model.
 
 Given the narrow data base, we must be careful about expanding the number of parameters that we calibrate. It is possible to add more parameters to explain remaining differences between observations and simulations for specific variables and specific sites, treatments, tree species. But this needs to be justified by very robust data, otherwise the model is being tuned to noise, and cannot be applied outside the calibration locations.
 
@@ -441,10 +447,29 @@ More data will be used for model calibration in the near future: data files from
 
 The first next step will be to use Rolando Cerda's data for farms in the Turrialba region to calibrate fruit production, in particular that of banana. Since not all required information to drive the model is available for the farms in this data set, we shall make the assumption that unmeasured conditions were the same as those prevailing in the Turrialba experiment. The intention is to select farms from Cerda's data with high fruit tree density and simulate them as extra treatments in the Turrialba experiment.
 
-Next, the model will be calibrate against data from Llano Bonito (Tarrazu, Costa Rica). This site is of importance because it will be the first source of information on coffee agroforestry from a high-altitude location, above 1600 m. There were Musaceae on this farm, but no relevant data in the files. However, @Meylan_2017_Evaluating reported the amount of shade provided by banana in Llano Bonito.
+Next, the model will be calibrated against data from Llano Bonito (Tarrazu, Costa Rica). This site is of importance because it will be the first source of information on coffee agroforestry from a high-altitude location, above 1600 m. There were Musaceae on this farm, but no relevant data in the files. However, @Meylan_2017_Evaluating reported the amount of shade provided by banana in Llano Bonito.
 
-Further steps have already been outlined in the previous progress report [@VanOijen_2021_Modelling] and will focus on model application to farms in Costa Rica and Guatemala.
+Once the final calibration data sets have been received, one overall re-calibration will be carried out with some data sets left out for out-of-sample testing of model predictive capacity.
 
+Further steps have already been outlined in the previous progress report [@VanOijen_2021_Modelling] and will focus on model application to farms in Costa Rica and Guatemala and on publication.
+
+\clearpage
+
+# APPENDIX: Data and simulations for each treatment
+
+Blue = data. Black = MAP simulations. Green = maximum likelihood simulations.
+
+```{r, eval=F}
+  load( fileTM )
+  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
+  source('BC/BC_plot_outputs_data_PNGs.R')
+```
+
+```{r, out.width="90%", fig.align="center"}
+  files <- dir("BC/results/",
+               pattern="BC_outputs_data.*png$", full.names=TRUE )
+  knitr::include_graphics(files)
+```
 
 
 \clearpage

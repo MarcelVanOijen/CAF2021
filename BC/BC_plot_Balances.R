@@ -13,9 +13,9 @@ colbars <- c( "gray40"    , "gray80"    , "gray60"    , "gray100"   ,
               "firebrick2", "firebrick3" )
 
 barplot( as.matrix(Balances[,"D_Csys"]),
-         main=paste( "Turrialba                  ",
-                     "SYSTEM C (kg ha-1 y-1)",
-                     "                   Masatepe" ),
+         main=paste( "TURRIALBA                  ",
+                     "System C (kg ha-1 y-1)",
+                     "                   MASATEPE" ),
          col=colbars, beside=TRUE, names.arg="" )
 barplot( as.matrix(Balances[,"D_Csoil"]),
          main="Soil C (kg ha-1 y-1)",
