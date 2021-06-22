@@ -1,0 +1,224 @@
+---
+title: 'Modelling Coffee Agroforestry in Central America with CAF2021'
+subtitle: 'Progress report III for project SEACAF, sub-contract B0554x4'
+author:
+- Marcel van Oijen^[Independent researcher, Edinburgh, UK - VanOijenMarcel@gmail.com]
+date: '`r Sys.Date()`'
+output:
+  pdf_document:
+    fig_crop: false
+    fig_caption: yes
+    keep_tex: no
+    number_sections: yes
+    toc: yes
+  word_document:
+    reference_docx: word-styles-reference-01.docx
+  html_document: default
+fontsize: 11pt
+geometry: margin=1in
+csl: environmental-modelling-and-software.csl
+bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
+---
+
+```{r, include=FALSE}
+  knitr::opts_chunk$set(echo=F,results="asis",warning=FALSE,message=FALSE)
+```
+
+
+
+\clearpage
+
+# Introduction
+
+This is the third progress report for project SEACAF on the process-based modelling of coffee agroforestry systems in Central America by means of the model CAF2021. The first progress report [dated 30 April 2021; @VanOijen_2021_Modelling] provided details and references on the model. The second report [dated 16 June 2021; @VanOijen_2021_Modellinga] presented changes to model structure and discussed the setup and results of a Bayesian model calibration using data from long-term experiments in Turrialba (Costa Rica) and Masatepe (Nicaragua).
+
+# 2012-06-17 to 07-31
+
+```{r, include=FALSE}
+  filesTM <- file.info(list.files(pattern="^BC_Turrialba_Masatepe.*\\.RData$"))
+  # filesT  <- file.info(list.files(pattern="^BC_Turrialba......\\.RData$"))
+  # filesM  <- file.info(list.files(pattern="^BC_Masatepe.*\\.RData$"))
+  filesTM <- filesTM[ with(filesTM,order(as.POSIXct(mtime))), ]
+  fileTM  <- tail( rownames(filesTM[1]), 1 )
+```
+
+## Results from the calibration
+
+```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSimTurrialbaMasatepe}Yields for the 32 treatments in Turrialba (black numbers) and Masatepe (red). Left: Observed yields against N-fertilisation level. Right: Observed yield vs. MAP-simulated yield."}
+  load( fileTM )
+  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
+
+  source('BC/BC_Yields.R')
+  s.plot <- 1:nSites ; source('BC/BC_plot_YieldsAverage.R')
+  # source('BC/BC_plot_YieldsAnnual.R')
+```
+
+```{r, out.width="100%", fig.cap="\\label{fig:BalancesTM}Carbon- and nitrogen-balances for 32 treatments. 1:18 = Turrialba, 19:32 = Masatepe. Simulations using the MAP parameter vector from Bayesian calibration."}
+  load( fileTM )
+  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
+
+  source('BC/BC_Balances.R')
+  source('BC/BC_plot_Balances.R')
+```
+
+```{r, out.width="100%", fig.height=3, fig.cap="\\label{fig:NfixleachFinalTM}N-fixation and N-leaching during the final year in all treatments at Turrialba and Masatepe. Simulations using the MAP parameter vector from Bayesian calibration."}
+  load( fileTM )
+  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
+  source('BC/BC_FinalYearMean.R')
+  iNfixT     <- which(outputNames=="NfixT_f")
+  iNleaching <- which(outputNames=="Nleaching_f")
+
+  par( mfrow=c(2,1), mar=c(3,2,2,0) )
+  
+  colbars <- c( "gray40"    , "gray80"    , "gray60"    , "gray100"   ,
+                "gray40"    , "gray80"    , "gray60"    , "gray100"   ,
+                "gray80"    , "gray60"    ,
+                "gray80"    , "gray60"    ,
+                "gray40"    , "gray80"    , "gray60"    , "gray100"   ,
+                "gray40"    , "gray80"    ,
+                "firebrick4", "firebrick2", 
+                "firebrick2", "firebrick3",
+                "firebrick4", "firebrick2", "firebrick3", "firebrick1", 
+                "firebrick4", "firebrick2", "firebrick3", "firebrick1",
+                "firebrick2", "firebrick3" )
+  # barplot( as.matrix(outputFinalDay[,iNfixT]),
+  barplot( as.matrix(outputFinalYearMean[,iNfixT]) * 1e4 * 365,
+           main=paste( "TURRIALBA     ",
+                       "N-fixation (kg N ha-1 y-1)",
+                       "      MASATEPE" ),
+           col=colbars, beside=TRUE )
+  # barplot( as.matrix(outputFinalDay[,iNleaching]),
+  barplot( as.matrix(outputFinalYearMean[,iNleaching]) * 1e4 * 365,
+           main="N-leaching (kg N ha-1 y-1)",
+           col=colbars, beside=TRUE, names.arg=1:nSites )
+```
+
+```{r}
+  load( fileTM )
+
+  # sA <- 1 ; sB <- 2 ; sC <- 3 ; sD <- 4
+  sA <- 11 ; sB <- 17 ; sC <- 31 ; sD <- 19
+  source(sitesettings_filenames[sA]) ; params.MAP.A <- params.MAP.s( sA )
+  output.MAP.A <- run_model( p=params.MAP.A )
+  source(sitesettings_filenames[sB]) ; params.MAP.B <- params.MAP.s( sB )
+  output.MAP.B <- run_model( p=params.MAP.B )
+  source(sitesettings_filenames[sC]) ; params.MAP.C <- params.MAP.s( sC )
+  output.MAP.C <- run_model( p=params.MAP.C )
+  source(sitesettings_filenames[sD]) ; params.MAP.D <- params.MAP.s( sD )
+  output.MAP.D <- run_model( p=params.MAP.D )
+```
+
+```{r, out.width="100%", fig.cap="\\label{fig:NBalancesSoil}Soil N-balances for 4 treatments, averaged over the whole simulated period. Top row: Turrialba; bottom row: Masatepe. Simulations using the MAP parameter vector from Bayesian calibration."}
+  par( mfrow=c(2,4) )
+
+  par(mar=c(3,3,3,0))
+  plot_NbalanceSoil(output.MAP.A, title1="", title2="11 TE-CM  ", ymax=800)
+  par(mar=c(3,3,3,0))
+  plot_NbalanceSoil(output.MAP.B, title1="", title2="17 -CI    ", ymax=800)
+  par(mar=c(3,3,3,0))
+  plot_NbalanceSoil(output.MAP.C, title1="", title2="31 ILSG-CM", ymax=800)
+  par(mar=c(3,3,3,0))
+  plot_NbalanceSoil(output.MAP.D, title1="", title2="19 -CI    ", ymax=800)
+```
+
+```{r, eval=F, include=F, out.width="100%", fig.cap="\\label{fig:TurrialbaMasatepeYields2}Yields using the MAP parameter vector from Bayesian calibration, but with some additional parameter change(s)."}
+## Sensitivity to leaching-parameter 'RNLEACH'.
+  load( fileTM )
+  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
+  set_parNames  <- c( "RNLEACH" )
+  set_parValues <- c(  0.2      )
+  source('BC/BC_Yields_set_par.R')
+  source('BC/BC_plot_YieldsAverage.R')
+```
+
+```{r, eval=F, include=F, out.width="100%", fig.cap="\\label{fig:TurrialbaMasatepeBalances2}Balances using the MAP parameter vector from Bayesian calibration, but with some additional parameter change(s)."}
+## Sensitivity to leaching-parameter 'RNLEACH': continued
+  load( fileTM )
+  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
+  source('BC/BC_Balances_set_par.R')
+  source('BC/BC_plot_Balances.R')
+```
+
+```{r, eval=F, include=F}
+## Exploring deciduousness
+  load( fileTM )
+  sA            <- 23 # Masatepe_05_SGTR_CI
+  source(sitesettings_filenames[sA])
+  params        <- params.MAP.s( sA )
+  params.MAP.A  <- params
+  params.MAP.A1 <- set_par( c("FTCLMINT(3)","TCLMAXT(3)"),
+                            c( 0.2         , 650        ) )
+  params.MAP.A2 <- set_par( c("FTCLMINT(3)","TCLMAXT(3)"),
+                            c( 0.05        , 650        ) )
+  params.MAP.A3 <- set_par( c("FTCLMINT(3)","TCLMAXT(3)"),
+                            c( 0.2         , 365        ) )
+  output.MAP.A  <- run_model( p=params.MAP.A  )
+  output.MAP.A1 <- run_model( p=params.MAP.A1 )
+  output.MAP.A2 <- run_model( p=params.MAP.A2 )
+  output.MAP.A3 <- run_model( p=params.MAP.A3 )
+  plot_output( list_output=list( output.MAP.A,
+                                 output.MAP.A1, output.MAP.A2 ,output.MAP.A3),
+               vars=c( "fTranT_t(3)", "LAIT_t(3)" ) )
+```
+
+```{r Balances2, eval=F, include=F, fig.height=6, fig.cap="\\label{fig:Balances2}Soil N- and C-balances at Masatepe in the ILSS_CI system. Top row: tree branches harvested and removed after pruning and thinning. Bottom row: branches left on the field as litter."}
+## Comparison of leaving tree branches on the field after thinning and pruning (default) vs. removing them as harvest
+  load( fileTM )
+  sA <- 27 # Masatepe_09_ILSS_CI
+  source(sitesettings_filenames[sA])
+  params        <- params.MAP.s( sA )
+  params.MAP.A  <- params
+  params.MAP.A1 <- set_par( c("FHARVBT(1)","FHARVBT(2)","FHARVBT(3)"),
+                            c( 0          , 0          , 0          ) )
+  output.MAP.A  <- run_model( p=params.MAP.A  )
+  output.MAP.A1 <- run_model( p=params.MAP.A1 )
+  par( mar=c(3,3,3,0), mfrow=c(2,4) )
+  plot_NbalanceSoil( output.MAP.A , title1="Soil N-balance MAP", title2="" )
+  par( mar=c(3,3,3,0) )
+  plot_CbalanceSoil( output.MAP.A , title1="Soil C-balance MAP", title2="" )
+  par( mar=c(3,3,3,0) )
+  plot_NbalanceSoil( output.MAP.A1, title1="Soil N-balance 1", title2="" )
+  par( mar=c(3,3,3,0) )
+  plot_CbalanceSoil( output.MAP.A1, title1="Soil C-balance 1", title2="" )
+```
+
+```{r, eval=F, include=F}
+## Turrialba vs. Masatepe
+  load( fileTM )
+  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
+  source('BC/BC_Yields.R')
+  s.plot <-  1:18 ; source('BC/BC_plot_YieldsAverage.R')
+  s.plot <- 19:32 ; source('BC/BC_plot_YieldsAverage.R')
+```
+
+```{r, eval=F, include=F}
+## After a BC: comparing posterior with prior
+  load( fileTM )
+  sTa             <- 13
+  source(sitesettings_filenames[13]) # Turrialba_15_CE_AC
+  params.Prior.Ta <- params
+  params.MAP.Ta   <- params.MAP.s( sTa )
+  output.Prior.Ta <- run_model( p=params.Prior.Ta )
+  output.MAP.Ta   <- run_model( p=params.MAP.Ta )
+
+  plot_output( list_output=list(output.Prior.Ta),
+               vars       =c( "fTran(1)"    , "fNgrowth(1)", "DVS(1)"  ,
+                              "SINKP(1)"    , "DayFl(1)"   , "PARMA(1)" ,
+                              "harvDM_f_hay", "CT_f" ) )
+  plot_output( list_output=list(output.MAP.Ta),
+               vars       =c( "fTran(1)"    , "fNgrowth(1)", "DVS(1)"  ,
+                              "SINKP(1)"    , "DayFl(1)"   , "PARMA(1)" ,
+                              "harvDM_f_hay", "CT_f" ) )
+```
+
+\clearpage
+
+
+
+# Acknowledgements {-}
+
+I thank the Natural Resources Institute of the University of Greenwich for funding, and my colleagues in project SEACAF and earlier projects for support.
+
+
+
+# References {-}

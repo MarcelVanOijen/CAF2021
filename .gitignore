@@ -6,6 +6,7 @@
 *.png
 *.DS_Store
 CAF2021_parModes_*.txt
+CAF2021_parMAP_*.rds
 MCMC_*.RData
 tmp*
 weather/clim_Icafe&IMN_red_train2.csv

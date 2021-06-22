@@ -7,7 +7,10 @@ params_BC_CVPosterior   <- sqrt(params_BC_VarPosterior) / abs(params_BC_MeanPost
 params_BC_MinPosterior  <- apply(pChain,2,min)                       * sc 
 params_BC_MaxPosterior  <- apply(pChain,2,max)                       * sc 
 
-df_parModes <- data.frame( row.names(df_params) )
+df_parModes       <- data.frame( row.names(df_params) )
+matMAP            <- matrix( NA, nrow=length(params), ncol=nSites )
+rownames(matMAP) <- names_params
+colnames(matMAP) <- paste0( "s", 1:nSites )
 for (s in 1:nSites) {
   params               <- list_params[[s]]
   params_ModePrior     <- params
@@ -38,10 +41,15 @@ for (s in 1:nSites) {
   p7 <- data.frame(signif(params_MinPosterior ,nsign)); colnames(p7) = paste("MinPost_"  ,s,sep="")
   p8 <- data.frame(signif(params_MaxPosterior ,nsign)); colnames(p8) = paste("MaxPost_"  ,s,sep="")
   # Update dataframe
-  df_parModes <- cbind( df_parModes, p1, p2, p3, p4, p5, p6, p7, p8 ) 
+  df_parModes <- cbind( df_parModes, p1, p2, p3, p4, p5, p6, p7, p8 )
+  matMAP[,s]  <- params_MAP
 }
   
-# Write the dataframe to txt-file
+# Write the modes-dataframe to txt-file
 write.table( df_parModes,
-			 paste('CAF2021_parModes',format(Sys.time(),"_%H_%M.txt"),sep=""),
-			 sep="\t", row.names=F )
+	paste0( 'CAF2021_parModes', format(Sys.time(),"_%H_%M.txt") ),
+	sep="\t", row.names=F )
+# Save the MAP-matrix to rds-file
+saveRDS( matMAP,
+  paste0( 'CAF2021_parMAP'  , format(Sys.time(),"_%H_%M.rds") ) )
+         
