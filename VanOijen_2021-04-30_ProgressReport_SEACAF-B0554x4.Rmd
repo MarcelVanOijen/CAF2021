@@ -642,7 +642,7 @@ More complex methods of modelling banana exist. One example is the model SIMBA [
 
 A simpler process-based model was proposed for plantain in Colombia by @ChavesC._2009_Modeling. Unfortunately their model's parameterisation and calibration data are partly implausible with an extremely low light extinction coefficient of 0.2817 and the LAI exceeding 12.9 (with observations even going up to 15). More realistic are their values for the LUE (1.63 g MJ-1) and the critical temperatures of $T_{min}$ = 12.5 $^{\circ}$C, $T_{opt}$ = 25 $^{\circ}$C, $T_{max}$ = 40 $^{\circ}$C. In their model, aboveground allocation during the vegetative stage is about equally to leaves, pseudostem and corm (all about 1/3). During the reproductive stage, leaves did nor grow anymore, the corm lost mass, the pseudostem kept growing slowly, but the majority of allocation went to fruits. At the end of their experiment, bunch dry matter was 45% of the aboveground total.
 
-An empirical temperature- and rainfall-dependent banana model based on EcoCrop was proposed by [@VanDenBergh_2012_Climate]. Their model used the following critical monthly tempreatures: $T_{kill}$ = 0 $^{\circ}$C, $T_{min}$ = 12 $^{\circ}$C, $T_{opt}$ = 17.5 to 26.3 $^{\circ}$C, $T_{max}$ = 33 $^{\circ}$C.
+An empirical temperature- and rainfall-dependent banana model based on EcoCrop was proposed by [@VanDenBergh_2012_Climate]. Their model used the following critical monthly temperatures: $T_{kill}$ = 0 $^{\circ}$C, $T_{min}$ = 12 $^{\circ}$C, $T_{opt}$ = 17.5 to 26.3 $^{\circ}$C, $T_{max}$ = 33 $^{\circ}$C.
 
 @Landry_2017_foliar simulated growth of banana and expansion of black leaf streak disease caused by *Mycosphaerella fijiensis*. Their banana submodel focuses on leaf number and position which is incompatible with the biogeochemical approach taken in CAF2021.
 
@@ -660,12 +660,6 @@ Several authors have made inventories of agroforestry systems in Central America
 Parameter values were reported by the following authors:
 
 - @GalvisR._2013_Effect reported that SLA decreased from initially high values of 150 decreasing to 100 m2 g-1, but these are impossibly high values.
-- @Jullien_2001_Withinbunch reported that pulp DMP reaches asymptotically to values of about 30%. 
-- @Mustaffa_2012_Banana: leaf N content was about 3% of DM.
-- @MartinezAcosta_2011_Dinamica reported for the final DM per tree, bunch:leaves:pseudostem+corm: 3000:1200:1800 g DM.
-- @Schaffer_1999_Atmospheric give DM-partitioning of 6-month old vegetative banana (cv. 'Gros Michel'): leaves:pseudostem+rhizome:roots =  19:64:19%.
-- DM-partitioning of cv. 'Williams' in Colombia was not affected strongly by the level of N-fertilization (0 to 483 kg N $ha^{-1}$), but fruit yields increased from 9 to 12 kg DM [@TorresB._2014_Accumulation]. At harvest after 161 kg N $ha^{-1}$ fertilization: corm+pseudostem/leaves/fruits = 6/1.5/3.5 kg DM per plant. Total plant N-concentration was 1-1.5% of DM.
-- @Turner_2007_Environmental: LAI ranges from 2 to 5 m2 m-2.
 
 ### Banana simulation in CAF2021
 
