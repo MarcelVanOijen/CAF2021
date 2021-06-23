@@ -147,10 +147,52 @@ NOUT         <- as.integer( length(outputNames) )
 ################################################################################
 ### 4. FUNCTION FOR CHANGING PARAMETER VALUES
 ################################################################################
-set_par <- function( names=names_params[1], vals=params[1] ) {
-  ipar <- match(names,names_params) ; npar <- length(ipar)
-  for (i in 1:npar) { params[ipar[i]] <- vals[i] }
-  return(params)
+set_par <- function( names=names_params[1], vals=params[1], p.old=params ) {
+  ipar  <- match(names,names_params) ; npar <- length(ipar)
+  p.new <- p.old
+  for (i in 1:npar) { p.new[ipar[i]] <- vals[i] }
+  return( p.new )
+}
+
+set_par_speciesT <- function( it, species="E. poeppigiana", p.old=params ) {
+  names <- vals <- NULL
+  if (species %in% c("Erythrina poeppigiana","E. poeppigiana","Erythrina",
+                     "Poro","poro")) {
+    stop( paste("Default parameterisation for", species, "is not provided.") )
+  } else if (species %in% c("Musa sp.", "Musa",
+                            "Banana", "banana")) {
+    names[ 1] <- paste0("TREEDENS0(",it,")") ; vals[ 1] <-   0.04
+    names[ 2] <- paste0("CBtree0("  ,it,")") ; vals[ 2] <-   1
+    names[ 3] <- paste0("CLtree0("  ,it,")") ; vals[ 3] <-   1
+    names[ 4] <- paste0("CRtree0("  ,it,")") ; vals[ 4] <-   1
+    names[ 5] <- paste0("CStree0("  ,it,")") ; vals[ 5] <-   1
+    names[ 6] <- paste0("FWT("      ,it,")") ; vals[ 6] <-   0.5
+    names[ 7] <- paste0("FST("      ,it,")") ; vals[ 7] <-   0.5
+    names[ 8] <- paste0("FPT("      ,it,")") ; vals[ 8] <-   0.5
+    names[ 9] <- paste0("TBEFOREPT(",it,")") ; vals[ 9] <- 100
+    names[10] <- paste0("TCBT("     ,it,")") ; vals[10] <- 365
+    names[11] <- paste0("TCRT("     ,it,")") ; vals[11] <- 365
+    names[12] <- paste0("TCST("     ,it,")") ; vals[12] <- 365
+    names[13] <- paste0("KH("       ,it,")") ; vals[13] <-   4
+    names[14] <- paste0("KAC("      ,it,")") ; vals[14] <-   6
+    p.new <- set_par( names, vals, p.old=p.old )    
+  } else if (species %in% c("Persea americana", "P. americana",
+                            "Avocado", "avocado")) {
+    names[ 1] <- paste0("TREEDENS0(",it,")") ; vals[ 1] <-    0.02
+    names[ 6] <- paste0("FWT("      ,it,")") ; vals[ 6] <-    0.5
+    names[ 7] <- paste0("FST("      ,it,")") ; vals[ 7] <-    0.5
+    names[ 8] <- paste0("FPT("      ,it,")") ; vals[ 8] <-    0.5
+    names[ 9] <- paste0("TBEFOREPT(",it,")") ; vals[ 9] <- 1825
+    names[10] <- paste0("TCBT("     ,it,")") ; vals[10] <- 1000
+    names[11] <- paste0("TCRT("     ,it,")") ; vals[11] <- 1000
+    names[12] <- paste0("TCST("     ,it,")") ; vals[12] <- 1000
+    names[13] <- paste0("KH("       ,it,")") ; vals[13] <-    4
+    names[14] <- paste0("KAC("      ,it,")") ; vals[14] <-    6
+    p.new <- set_par( names, vals, p.old=p.old )    
+  } else {
+    stop( paste("Default parameterisation for", species, "is not provided.") )
+  }
+  return( p.new )
 }
 
 ################################################################################
@@ -661,3 +703,72 @@ params.MAP.s <- function(s) {
   ip_BC_s         <- ip_BC_site [[s]] ; icol_pChain_s <- icol_pChain_site[[s]]
   params[ip_BC_s] <- params_BC_MAP[icol_pChain_s]
   return( params ) }
+
+#######################################################################
+### 8. Functions for running multiple sites
+#######################################################################
+fOutputTM <- function( parMatrix=parMAP, sfiles=sitesettings_filenames ) {
+
+  nSites <- length(sitesettings_filenames)
+  idoy   <- which( outputNames=="doy" )
+
+  ih_f_hay           <- which( outputNames=="harvDM_f_hay" )
+  ihCPT_f            <- which( outputNames=="harvCPT_f" )
+  ihCPT_2            <- which( outputNames=="harvCPT_t(2)" )
+  ihCST_f            <- which( outputNames=="harvCST_f" )
+  ihCST_3            <- which( outputNames=="harvCST_t(3)" )
+  Harvests           <- matrix( NA, nrow=nSites, ncol=6 )
+  colnames(Harvests) <- c( "Site", "harvDM_f_hay",
+                           "harvCPT_f", "harvCPT_2", "harvCST_f", "harvCST_3" )
+  Harvests[,1]       <- 1:nSites
+
+  iNsoil_f           <- which( outputNames=="Nsoil_f") # kgN m-2
+  iCsoil_f           <- which( outputNames=="Csoil_f") # kgC m-2 
+  iC_f               <- which( outputNames=="C_f" )    # kgC m-2
+  iCT_f              <- which( outputNames=="CT_f")    # kgC m-2
+  Balances           <- matrix( NA, nrow=nSites, ncol=6 )
+  colnames(Balances) <- c( "Site", "D_Nsoil", "D_Csoil", "D_C", "D_CT", "D_Csys" )
+  Balances[,1]       <- 1:nSites
+  
+  for (s in 1:nSites) {
+    source(sitesettings_filenames[s] )
+    params   <- parMatrix[,s]
+    output.s <- run_model( params, matrix_weather, calendar_fert, calendar_prunC,
+                           calendar_prunT, calendar_thinT, NDAYS )
+    
+    d365     <- which( output.s[,idoy]==365 )
+    Harvests[s,"harvDM_f_hay"] <- mean( output.s[d365,ih_f_hay] )
+    Harvests[s,"harvCPT_f"   ] <- sum ( output.s[    ,ihCPT_f ] )
+    Harvests[s,"harvCPT_2"   ] <- sum ( output.s[    ,ihCPT_2 ] )
+    Harvests[s,"harvCST_f"   ] <- sum ( output.s[    ,ihCST_f ] )
+    Harvests[s,"harvCST_3"   ] <- sum ( output.s[    ,ihCST_3 ] )
+    
+    fconv <- 1e4 * 365 / NDAYS # from 'm-2 over simulation period' to 'ha-1 y-1'
+    D_output.s <- ( output.s[NDAYS,] - output.s[1,] ) * fconv
+    Balances[s,"D_Nsoil"] <- D_output.s[iNsoil_f]
+    Balances[s,"D_Csoil"] <- D_output.s[iCsoil_f]
+    Balances[s,"D_C"    ] <- D_output.s[iC_f    ]
+    Balances[s,"D_CT"   ] <- D_output.s[iCT_f   ]
+    Balances[s,"D_Csys" ] <- Balances[s,"D_Csoil"] + Balances[s,"D_C"] + Balances[s,"D_CT"]
+  }
+  return( list( Harvests=Harvests, Balances=Balances ) )
+}
+
+barplotTM <- function( y, name=NULL ) {
+  colbars <- c( "gray40"    , "gray80"    , "gray60"    , "gray100"   ,
+                "gray40"    , "gray80"    , "gray60"    , "gray100"   ,
+                "gray80"    , "gray60"    ,
+                "gray80"    , "gray60"    ,
+                "gray40"    , "gray80"    , "gray60"    , "gray100"   ,
+                "gray40"    , "gray80"    ,
+                "firebrick4", "firebrick2", 
+                "firebrick2", "firebrick3",
+                "firebrick4", "firebrick2", "firebrick3", "firebrick1", 
+                "firebrick4", "firebrick2", "firebrick3", "firebrick1",
+                "firebrick2", "firebrick3" )
+  barplot( as.matrix(y),
+           main=paste( "TURRIALBA                  ",
+                       name,
+                       "                   MASATEPE" ),
+           col=colbars, beside=TRUE, names.arg="" )
+}

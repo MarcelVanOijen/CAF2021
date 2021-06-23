@@ -24,13 +24,54 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   knitr::opts_chunk$set(echo=F,results="asis",warning=FALSE,message=FALSE)
 ```
 
-
+```{r}
+  # filesTM <- file.info(list.files(pattern="^BC_Turrialba_Masatepe.*\\.RData$"))
+  # filesTM <- filesTM[ with(filesTM,order(as.POSIXct(mtime))), ]
+  # fileTM  <- tail( rownames(filesTM[1]), 1 )
+  fileTM     <- "BC_Turrialba_Masatepe_09_08.RData"
+  load( fileTM )
+  # source('BC/BC_export_parModes.R') # To write only the MAPs to rds-file
+  fileTM_MAP <- "CAF2021_parMAP_09_08.rds"
+  
+  # FOLLOWING LINES LOAD THE MAP FROM AN OLDER MODEL VERSION WITH
+  # FEWER PARAMATERES, AND CONSTRUCT THE MAP FOR THE CURRENT VERSION.
+  # SIMPLIFY THE CODE WHEN THE LOADED MAP IS FROM THE CURRENT VERSION.
+  # parMAP         <- readRDS( fileTM_MAP )
+  parMAP.old     <- readRDS( fileTM_MAP )
+  np.old         <- dim(parMAP.old)[1]
+  iCBtree0.old   <- which( rownames(parMAP.old)=="CBtree0"    )
+  iCLtree0.old   <- which( rownames(parMAP.old)=="CLtree0"    )
+  iCRtree0.old   <- which( rownames(parMAP.old)=="CRtree0"    )
+  iCStree0.old   <- which( rownames(parMAP.old)=="CStree0"    )
+  iKSINKPMAX.old <- which( rownames(parMAP.old)=="KSINKPMAX"  )
+  parMAP <- rbind( parMAP.old[ 1:(iCBtree0.old-1)             , ],
+                   parMAP.old[ (iCStree0.old+1):iKSINKPMAX.old, ],
+                   parMAP.old[ iCBtree0.old                   , ],
+                   parMAP.old[ iCBtree0.old                   , ],
+                   parMAP.old[ iCBtree0.old                   , ],
+                   parMAP.old[ iCLtree0.old                   , ],
+                   parMAP.old[ iCLtree0.old                   , ],
+                   parMAP.old[ iCLtree0.old                   , ],
+                   parMAP.old[ iCRtree0.old                   , ],
+                   parMAP.old[ iCRtree0.old                   , ],
+                   parMAP.old[ iCRtree0.old                   , ],
+                   parMAP.old[ iCStree0.old                   , ],
+                   parMAP.old[ iCStree0.old                   , ],
+                   parMAP.old[ iCStree0.old                   , ],
+                   parMAP.old[ (iKSINKPMAX.old+1):np.old      , ] )
+  source('initialisation/set_CAF2021_Turrialba.R')
+  rownames(parMAP) <- names_params   
+```
 
 \clearpage
+
+
 
 # Introduction
 
 This is the third progress report for project SEACAF on the process-based modelling of coffee agroforestry systems in Central America by means of the model CAF2021. The first progress report [dated 30 April 2021; @VanOijen_2021_Modelling] provided details and references on the model. The second report [dated 16 June 2021; @VanOijen_2021_Modellinga] presented changes to model structure and discussed the setup and results of a Bayesian model calibration using data from long-term experiments in Turrialba (Costa Rica) and Masatepe (Nicaragua).
+
+
 
 # Banana
 
@@ -60,53 +101,84 @@ Data for coffee agroforestry farms in the Turrialba region with fruit trees were
 - DM-partitioning of cv. 'Williams' in Colombia was not affected strongly by the level of N-fertilization (0 to 483 kg N $ha^{-1}$), but fruit yields increased from 9 to 12 kg DM [@TorresB._2014_Accumulation]. At harvest after 161 kg N $ha^{-1}$ fertilization: corm+pseudostem/leaves/fruits = 6/1.5/3.5 kg DM per plant. Total plant N-concentration was 1-1.5% of DM.
 - @Turner_2007_Environmental: LAI ranges from 2 to 5 m2 m-2.
 
-
-
 ## Banana simulation in CAF2021
 
 To make CAF2021 simulate banana in a coffee plantation, we start by initialising for a full-sun coffee system, then set the initial density of fruit trees (TREEDENS0(2)) to a positive value, and choose parameter settings that are appropriate for banana. We show some preliminary results in Fig. \ref{fig:SimBanana}.
 
 ```{r}
   source("initialisation/initialise_CAF2021_Turrialba_19_PS_AC.R")
-  params <- set_par( "TREEDENS0(2)"                            , 0.04       )
-  params <- set_par( c("CBtree0","CLtree0","CRtree0","CStree0"), rep(1,4)   )
-  params <- set_par( c("FWT(2)","FST(2)","FPT(2)")             , rep(0.5,3) )
-  params <- set_par( "TBEFOREPT(2)"                            , 100        )
-  params <- set_par( c("TCBT(2)","TCRT(2)","TCST(2)")          , rep(365,3) )
-  params <- set_par( c("KH(2)","KAC(2)")                       , c(4,6)     )
-  output <- run_model()
+  pBanana <- set_par_speciesT( 2, "Banana" )
+  outputB <- run_model( p=pBanana )
 ```
 
 ```{r SimBanana, fig.height=3.5, fig.cap="\\label{fig:SimBanana}Simulating banana with CAF2021."}
   par( mfrow=c(2,3), mar=c(3,3,3,3) )
   
-  plot_CdistributionTrees(it=2)
+  plot_CdistributionTrees( sim=outputB, it=2 )
   
-  Time <- output[,1]
-    i.ht2    <- which( outputNames=="h_t(2)" )       ; h_t2      <- output[,i.ht2]
-    i.Ac1    <- which( outputNames=="Ac(1)" )        ; Ac1       <- output[,i.Ac1]
-    i.CAt2   <- which( outputNames=="CAtree_t(2)" )  ; CAtree2   <- output[,i.CAt2]
-    i.CPT    <- which( outputNames=="harvCPT_f" )    ; harvCPT_f <- output[,i.CPT]
+  Time <- outputB[,1]
+    i.ht2    <- which( outputNames=="h_t(2)"      ) ; h_t2      <- outputB[,i.ht2]
+    i.Shade  <- which( outputNames=="Shade_f"     ) ; Shade_f   <- outputB[,i.Shade]
+    i.CAt2   <- which( outputNames=="CAtree_t(2)" ) ; CAtree2   <- outputB[,i.CAt2]
+    i.CPT    <- which( outputNames=="harvCPT_f"   ) ; harvCPT_f <- outputB[,i.CPT]
     YtreesDM <- harvCPT_f * 1e4 * 365 / 0.45
   plot( Time, h_t2     , type="l", ylab="", main="Height (m)" )
   plot( Time, CAtree2  , type="l", ylab="", main="Crown area (m2 tree-1)" )
-  plot( Time, 1-Ac1    , type="l", ylab="", main="Shade (-)" )
+  plot( Time, Shade_f  , type="l", ylab="", main="Shade (-)" )
+  plot( Time, YtreesDM , type="l", ylab="", main="Fruit yield (kg DM ha-1)" )
+```
+
+```{r}
+  tmp <- fOutputTM()
+
+  par( mfrow=c(5,1), mar=c(3,2,2,0) )
+  barplotTM( tmp$Harvests[,"harvDM_f_hay" ], name="Annual Coffee (kg DM ha-1)" )
+  barplotTM( tmp$Harvests[,"harvCPT_f" ], name="Total harvCPT_f (kg C m-2)" )
+  barplotTM( tmp$Harvests[,"harvCPT_2" ], name="Total harvCPT_2 (kg C m-2)" )
+  barplotTM( tmp$Harvests[,"harvCST_f" ], name="Total harvCST_f (kg C m-2)" )
+  barplotTM( tmp$Harvests[,"harvCST_3" ], name="Total harvCST_3 (kg C m-2)" )
+
+  par( mfrow=c(3,1), mar=c(3,2,2,0) )
+  barplotTM( tmp$Balances[,"D_Csys" ], name="System C (kg ha-1 y-1)" )
+  barplotTM( tmp$Balances[,"D_Csoil"], name="Soil C (kg ha-1 y-1)"   )
+  barplotTM( tmp$Balances[,"D_Nsoil" ], name="Soil N (kg ha-1 y-1)"  )
+```
+
+
+# Avocado
+
+## Exploring parameter values for Avocado
+
+## Avocado simulation in CAF2021
+
+See Fig. \ref{fig:SimAvocado}.
+
+```{r}
+  source("initialisation/initialise_CAF2021_Turrialba_19_PS_AC.R")
+  pAvocado <- set_par_speciesT( 2, "Avocado" )
+  outputA  <- run_model( p=pAvocado )
+```
+
+```{r SimAvocado, fig.height=3.5, fig.cap="\\label{fig:SimAvocado}Simulating avocado with CAF2021."}
+  par( mfrow=c(2,3), mar=c(3,3,3,3) )
+  
+  plot_CdistributionTrees( sim=outputA, it=2 )
+  
+  Time <- outputA[,1]
+    i.ht2    <- which( outputNames=="h_t(2)"      ) ; h_t2      <- outputA[,i.ht2]
+    i.Shade  <- which( outputNames=="Shade_f"     ) ; Shade_f   <- outputA[,i.Shade]
+    i.CAt2   <- which( outputNames=="CAtree_t(2)" ) ; CAtree2   <- outputA[,i.CAt2]
+    i.CPT    <- which( outputNames=="harvCPT_f"   ) ; harvCPT_f <- outputA[,i.CPT]
+    YtreesDM <- harvCPT_f * 1e4 * 365 / 0.45
+  plot( Time, h_t2     , type="l", ylab="", main="Height (m)" )
+  plot( Time, CAtree2  , type="l", ylab="", main="Crown area (m2 tree-1)" )
+  plot( Time, Shade_f  , type="l", ylab="", main="Shade (-)" )
   plot( Time, YtreesDM , type="l", ylab="", main="Fruit yield (kg DM ha-1)" )
 ```
 
 
-# APPENDIX
 
-```{r, include=FALSE}
-  # filesTM <- file.info(list.files(pattern="^BC_Turrialba_Masatepe.*\\.RData$"))
-  # filesTM <- filesTM[ with(filesTM,order(as.POSIXct(mtime))), ]
-  # fileTM  <- tail( rownames(filesTM[1]), 1 )
-  fileTM     <- "BC_Turrialba_Masatepe_09_08.RData"
-  load( fileTM )
-  # source('BC/BC_export_parModes.R') # To write only the MAPs to rds-file
-  fileTM_MAP <- "CAF2021_parMAP_09_08.rds"
-  parMAP     <- readRDS( fileTM_MAP )
-```
+# APPENDIX
 
 ```{r}
   sA <- 11 ; sB <- 17 ; sC <- 31 ; sD <- 19

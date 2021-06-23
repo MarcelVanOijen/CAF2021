@@ -43,96 +43,94 @@ TRANCO     = pa( 32) ! (mm d-1)          :
 YG         = pa( 33) ! (kg C kg-1 C)     :
 
 !! TREES: SHARED PARAMETERS FOR ALL SPECIES
-! Initial constants
-CBtree0    = pa( 34) ! (kg C tree-1)     : Gs: 0.72
-CLtree0    = pa( 35) ! (kg C tree-1)     : Gs: 0.23
-CRtree0    = pa( 36) ! (kg C tree-1)     : Gs: 1.28
-CStree0    = pa( 37) ! (kg C tree-1)     : Gs: 0.81
-! Parameters
-BETA       = pa( 38) ! (-)               :
-FNCLMINT   = pa( 39) ! (-)               : Ca: 0.7(0.6-0.8), Ep: 0.6(0.5-0.7), Gs: 0.6(0.5-0.7)
-GAMMA      = pa( 40) ! (kg C kg-1 C)     :
-KEXTT      = pa( 41) ! (m2 m-2)          : Ca: 0.32-0.72, Ed: 0.53-0.64, Ep: 0.50-0.87, Gs: low-0.345, Id: high
-KNMINT     = pa( 42) ! (kg N m-2)        :
-KNUPTT     = pa( 43) ! (kg N kg-1 C d-1) :
-KRAININTT  = pa( 44) ! (mm [m2 m-2]-1)   :
-NCPT       = pa( 45) ! (kg N kg-1 C)     :
-NCRT       = pa( 46) ! (kg N kg-1 C)     : Gs: 0.035
-NCWT       = pa( 47) ! (kg N kg-1 C)     : branches: 0.02-0.03, stem (Egran): 0.003
-SHADEPROJ  = pa( 48) ! (m2 m-2)          :
-TCPTHARV   = pa( 49) !
-TDIFFMAX   = pa( 50) ! (degC)            : Ed: 1.5-1.9, Ijin: 3.9, Ti: 2.4-4
-TOPTT      = pa( 51) ! (degC)            :
-TRANCOT    = pa( 52) ! (mm d-1)          :
-TTOLT      = pa( 53) ! (degC)            :
-WOODDENS   = pa( 54) ! (kg C m-3)        : Ca: 215(180-235), Ed: 250(205-315), Ep: 125(115-155), Gs: 225(175-270), Ti: 185(160-200)
+BETA       = pa( 34) ! (-)               :
+FNCLMINT   = pa( 35) ! (-)               : Ca: 0.7(0.6-0.8), Ep: 0.6(0.5-0.7), Gs: 0.6(0.5-0.7)
+GAMMA      = pa( 36) ! (kg C kg-1 C)     :
+KEXTT      = pa( 37) ! (m2 m-2)          : Ca: 0.32-0.72, Ed: 0.53-0.64, Ep: 0.50-0.87, Gs: low-0.345, Id: high
+KNMINT     = pa( 38) ! (kg N m-2)        :
+KNUPTT     = pa( 39) ! (kg N kg-1 C d-1) :
+KRAININTT  = pa( 40) ! (mm [m2 m-2]-1)   :
+NCPT       = pa( 41) ! (kg N kg-1 C)     :
+NCRT       = pa( 42) ! (kg N kg-1 C)     : Gs: 0.035
+NCWT       = pa( 43) ! (kg N kg-1 C)     : branches: 0.02-0.03, stem (Egran): 0.003
+SHADEPROJ  = pa( 44) ! (m2 m-2)          :
+TCPTHARV   = pa( 45) !
+TDIFFMAX   = pa( 46) ! (degC)            : Ed: 1.5-1.9, Ijin: 3.9, Ti: 2.4-4
+TOPTT      = pa( 47) ! (degC)            :
+TRANCOT    = pa( 48) ! (mm d-1)          :
+TTOLT      = pa( 49) ! (degC)            :
+WOODDENS   = pa( 50) ! (kg C m-3)        : Ca: 215(180-235), Ed: 250(205-315), Ep: 125(115-155), Gs: 225(175-270), Ti: 185(160-200)
 
 !! SOIL
 ! Initial constants
-CLITT0     = pa( 55) ! (kg C m-2)        : Egran: 0.225
-CNLITT0    = pa( 56) ! (kg C kg-1 N)     : Acaciamangium: 19-30, Egran: 31-56, Ep: 12(11-20), Gs: 10-20, Iedul: 14-19
-CNSOMF0    = pa( 57) ! (kg C kg-1 N)     : SOM: 9-14
-CNSOMS0    = pa( 58) ! (kg C kg-1 N)     : SOM: 9-14
-CSOM0      = pa( 59) ! (kg C m-2)        : Variation 50-200%
-FCSOMF0    = pa( 60) ! (-)               : 0.50-0.75
-NMIN0      = pa( 61) ! (kg N m-2)        :
+CLITT0     = pa( 51) ! (kg C m-2)        : Egran: 0.225
+CNLITT0    = pa( 52) ! (kg C kg-1 N)     : Acaciamangium: 19-30, Egran: 31-56, Ep: 12(11-20), Gs: 10-20, Iedul: 14-19
+CNSOMF0    = pa( 53) ! (kg C kg-1 N)     : SOM: 9-14
+CNSOMS0    = pa( 54) ! (kg C kg-1 N)     : SOM: 9-14
+CSOM0      = pa( 55) ! (kg C m-2)        : Variation 50-200%
+FCSOMF0    = pa( 56) ! (-)               : 0.50-0.75
+NMIN0      = pa( 57) ! (kg N m-2)        :
 ! Parameters
-FLITTSOMF  = pa( 62) ! (kg kg-1)         :
-FSOMFSOMS  = pa( 63) ! (kg kg-1)         :
-FWCAD      = pa( 64) ! (-)               : 
-FWCFC      = pa( 65) ! (-)               : 0.65
-FWCWET     = pa( 66) ! (-)               : 0.87
-FWCWP      = pa( 67) ! (-)               : 0.41
-KNEMIT     = pa( 68) ! (kg N kg-1 N d-1) :
-KRUNOFF    = pa( 69)
-RNLEACH    = pa( 70) ! (kg N kg-1 N)     :
-ROOTD      = pa( 71) ! (m)               :
-RRUNBULK   = pa( 72)
-SLOPE      = pa( 73)
-TCLITT     = pa( 74) ! (d)               : CAF: 79, Coffee: ~50, Ep: 80(78-104), Euc: "slow", Gs: 60(33-70), Inga: 388(285-6000+)
-TCSOMF     = pa( 75) ! (d)               : TROP. AFS: 6000-12000
-TCSOMS     = pa( 76) ! (d)               : TROP. AFS: 18000-36500
-WCST       = pa( 77) ! (m3 m-3)          : 0.633(0.62-0.66)
+FLITTSOMF  = pa( 58) ! (kg kg-1)         :
+FSOMFSOMS  = pa( 59) ! (kg kg-1)         :
+FWCAD      = pa( 60) ! (-)               : 
+FWCFC      = pa( 61) ! (-)               : 0.65
+FWCWET     = pa( 62) ! (-)               : 0.87
+FWCWP      = pa( 63) ! (-)               : 0.41
+KNEMIT     = pa( 64) ! (kg N kg-1 N d-1) :
+KRUNOFF    = pa( 65)
+RNLEACH    = pa( 66) ! (kg N kg-1 N)     :
+ROOTD      = pa( 67) ! (m)               :
+RRUNBULK   = pa( 68)
+SLOPE      = pa( 69)
+TCLITT     = pa( 70) ! (d)               : CAF: 79, Coffee: ~50, Ep: 80(78-104), Euc: "slow", Gs: 60(33-70), Inga: 388(285-6000+)
+TCSOMF     = pa( 71) ! (d)               : TROP. AFS: 6000-12000
+TCSOMS     = pa( 72) ! (d)               : TROP. AFS: 18000-36500
+WCST       = pa( 73) ! (m3 m-3)          : 0.633(0.62-0.66)
 
 !! ATMOSPHERE
-CO2A       = pa( 78)
+CO2A       = pa( 74)
 
 !! LOCATION
-LAT        = pa( 79)
+LAT        = pa( 75)
 
 !! MULTIPLIERS FOR SENSITIVITY ANALYSIS
-IOMULT     = pa( 80)
-NFERTMULT  = pa( 81)
-RAINMULT   = pa( 82)
-TPLUS      = pa( 83)
+IOMULT     = pa( 76)
+NFERTMULT  = pa( 77)
+RAINMULT   = pa( 78)
+TPLUS      = pa( 79)
 
 !! COFFEE BIENNIALITY
-FSINKPMAX0 = pa( 84)
-KSINKPMAX  = pa( 85)
+FSINKPMAX0 = pa( 80)
+KSINKPMAX  = pa( 81)
 
 !! TREES: SPECIES-SPECIFIC PARAMETERS
-FHARVBT    = pa( 86: 88) ! (kg C kg-1 C)
-FLTMAX     = pa( 89: 91) ! (kg C kg-1 C)
-FPT        = pa( 92: 94) ! (kg C kg-1 C)
-FST        = pa( 95: 97) ! (kg C kg-1 C)
-FTCLMINT   = pa( 98:100) ! (-)               : {Ca,Gs,Ti}: low, Ed: medium, Ep: medium(non-pollarded)-high(poll.)
-FWT        = pa(101:103) ! (kg C kg-1 C)
-KAC        = pa(104:106) ! (m2)
-KACEXP     = pa(107:109) ! (-)
-KH         = pa(110:112) ! (m)
-KHEXP      = pa(113:115) ! (-)
-KNFIX      = pa(116:118) ! (kg N kg-1 C)
-LAIMAXT    = pa(119:121) ! (m2 m-2)
-LUEMAX     = pa(122:124) ! (kg C MJ-1 PAR)
-NCLMAXT    = pa(125:127) ! (kg N kg-1 C)
-SLAT       = pa(128:130) ! (m2 kg-1 C)
-TBEFOREPT	 = pa(131:133) ! (d)
-TCBT       = pa(134:136) ! (d)
-TCLMAXT    = pa(137:139) ! (d)               : Ca: 730, Ep: 81+-15, Gs: 100
-TCRT       = pa(140:142) ! (d)
-TCST       = pa(143:145) ! (d)
-HMAX       = pa(146:148) ! (m)
-TREEDENS0  = pa(149:151) ! (m-2)
+CBtree0    = pa( 82: 84) ! (kg C tree-1)
+CLtree0    = pa( 85: 87) ! (kg C tree-1)
+CRtree0    = pa( 88: 90) ! (kg C tree-1)
+CStree0    = pa( 91: 93) ! (kg C tree-1)
+FHARVBT    = pa( 94: 96) ! (kg C kg-1 C)
+FLTMAX     = pa( 97: 99) ! (kg C kg-1 C)
+FPT        = pa(100:102) ! (kg C kg-1 C)
+FST        = pa(103:105) ! (kg C kg-1 C)
+FTCLMINT   = pa(106:108) ! (-)               : {Ca,Gs,Ti}: low, Ed: medium, Ep: medium(non-pollarded)-high(poll.)
+FWT        = pa(109:111) ! (kg C kg-1 C)
+KAC        = pa(112:114) ! (m2)
+KACEXP     = pa(115:117) ! (-)
+KH         = pa(118:120) ! (m)
+KHEXP      = pa(121:123) ! (-)
+KNFIX      = pa(124:126) ! (kg N kg-1 C)
+LAIMAXT    = pa(127:129) ! (m2 m-2)
+LUEMAX     = pa(130:132) ! (kg C MJ-1 PAR)
+NCLMAXT    = pa(133:135) ! (kg N kg-1 C)
+SLAT       = pa(136:138) ! (m2 kg-1 C)
+TBEFOREPT	 = pa(139:141) ! (d)
+TCBT       = pa(142:144) ! (d)
+TCLMAXT    = pa(145:147) ! (d)               : Ca: 730, Ep: 81+-15, Gs: 100
+TCRT       = pa(148:150) ! (d)
+TCST       = pa(151:153) ! (d)
+HMAX       = pa(154:156) ! (m)
+TREEDENS0  = pa(157:159) ! (m-2)
 
 ! FTCLMINT (1) Ep: medium (non-pollarded) - high (poll.)
 !          (3) {Ca,Gs,Ti}: low, Ed: medium

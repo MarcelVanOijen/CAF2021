@@ -4,7 +4,6 @@ iNsoil_f <- which( outputNames=="Nsoil_f") # kgN m-2
 iCsoil_f <- which( outputNames=="Csoil_f") # kgC m-2 
 iC_f     <- which( outputNames=="C_f" )    # kgC m-2
 iCT_f    <- which( outputNames=="CT_f")    # kgC m-2
-# Csys_f  <- C_f + CT_f + Csoil_f            # kgC m-2
 
 params_BC_MAP      <- scparMAP_BC  * sc
 
