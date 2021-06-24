@@ -1,0 +1,483 @@
+---
+title: 'Modelling Coffee Agroforestry in Central America with CAF2021'
+subtitle: 'Progress report II for project SEACAF, sub-contract B0554x4'
+author:
+- Marcel van Oijen^[Independent researcher, Edinburgh, UK - VanOijenMarcel@gmail.com]
+date: '`r Sys.Date()`'
+output:
+  pdf_document:
+    fig_crop: false
+    fig_caption: yes
+    keep_tex: no
+    number_sections: yes
+    toc: yes
+  word_document:
+    reference_docx: word-styles-reference-01.docx
+  html_document: default
+fontsize: 11pt
+geometry: margin=1in
+csl: environmental-modelling-and-software.csl
+bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
+---
+
+```{r, include=FALSE}
+  knitr::opts_chunk$set(echo=F,results="asis",warning=FALSE,message=FALSE)
+```
+
+
+
+\clearpage
+
+# Introduction
+
+This is the second progress report for project SEACAF on the process-based modelling of coffee agroforestry systems in Central America by means of the model CAF2021. The first progress report [dated 30 April 2021; @VanOijen_2021_Modelling] provided details and references on the model. Here we present some recent changes to model structure. We also discuss the setup and results of a Bayesian model calibration using data from long-term experiments in Turrialba (Costa Rica) and Masatepe (Nicaragua). We conclude the report with a general discussion and an outlook to future work.
+
+
+# CAF2021: changes in model structure
+
+The core of CAF2021 is formed by 12 FORTRAN files that represent biogeochemical and physiological processes in coffee agroforestry systems. Around those core files there is a large shell of R-files for interacting with the model. We made changes in both core and shell files. The changes in the shell files consisted mainly of adding R-functions for post-processing output from Bayesian calibration and model runs. The figures in this report were produced using the new R-functions. We leave a detailed description of the shell files to the final stage of the SEACAF project, when the work focus will shift to sharing the model with colleagues.
+
+We now discuss the recent structural changes to the model, which required changing FORTRAN files and recompiling the model.
+
+## Option to remove pruned leaves and branches from the field
+
+In previous versions of the model, pruned branches were assumed to be left on the field as litter. However, this is not common practice in all of Central America (e.g. not in Nicaragua), so the model now includes a new parameter array FHARVBT(1:3) which quantifies the fraction of pruned branches that is harvested and removed from the field for the different shade tree species in the system. Setting the parameter array equal to zero is equivalent to the previous version of the model.
+
+## Tree height and light interception
+
+CAF2021 simulates coffee agroforestry systems with up to three shade tree species. So far the assumption has been that tree species 1 and 2 would occupy a lower tree layer and species 3 the upper layer. This represented the common situation where tall timber trees (species 3) would overshadow service trees (sp. 1) and fruit trees (sp. 2). The model assumption was that species 3 would always have the first access to light throughout its lifetime, and the distribution of light interception was thus not modelled explicitly as a function of the relative heights of the different tree species. However, closer study of the long-term experiment in Masatepe (Nicaragua) showed that this approach is unrealistic. In Masatepe, during the first 7 years of tree growth the various timber tree species were not taller than the service tree *Inga laurina* so the expected stratification had not yet set in. To allow the model to represent such situations, the simulation of tree height dynamics and competition for light needed to be modified. We made the following changes:
+
+- We added the option of setting species-specific maximum tree heights by means of a new parameter array HMAX(1:3). This can be used to represent the practice of tree height pruning whereby service trees such as *Inga laurina* and *Erythrina poeppigiana* are kept below heights of 2-7 m. The model still calculates the tree height for every species as an allometric function of its stem biomass ($H = a S^b$), but caps that function at HMAX. Setting the HMAX-values to unattainable high values provides equivalence to the former model version.
+- When H(3), the height of tree species 3, is less than that of the other species, the species are assumed to be in the same tree layer. There is then no horizontal overlap: the species occupy different complementary parts of the field.
+- When H(3) is more than twice the height of the others, it is assumed to be fully overshadowing as in the previous model version.
+- In the in-between situation ($1 < H(3)/max(H(1:2)) < 2$), the tree crowns are  assumed to partly overlap with light interception being proportional to each species' LAI in the overlapping layer. 
+
+
+
+# Bayesian calibration on data from Turrialba and Masatepe
+
+```{r MapTM, out.width="400px", fig.align="center", fig.cap="\\label{MapTM}Locations of the long-term experiments in Nicaragua and Costa Rica."}
+knitr::include_graphics("images/MapTM.png")
+```
+
+## The experiments
+
+The two long-term coffee agroforestry experiments at Turrialba in Costa rica and Masatepe in Nicaragua (Fig. \ref{fig:MapTM}) have become of central importance for the development and parameterisation of CAF2021 within project SEACAF. The experiments constitute the main source of long-term data on coffee, shade trees and soil. Data files for these experiments were provided by Elias de Melo Virginio Filho (CATIE) and Jeremy Haggar (Univ. Greenwich). Additionally, some data were taken from @Haggar_2011_Coffee, @Noponen_2012_Carbon, @Noponen_2013_Sink, @Sepulveda_2016_Efecto and @Ovalle-Rivera_2020_Assessing.
+  
+In both experiments, four fertilisation regimes were combined with different choices of one or two shade tree species. For model calibration, we used data from 18 Turrialba treatments and 14 Nicaragua treatments, as listed in Table 1. The treatments numbers (1:18 for Turrialba, 19:32 for Masatepe) given in the table will be used in the figures of this report.
+
+```{r}
+  Turrialba_trees <- c( rep("E" ,4), rep("T" ,4), rep("C" ,2),
+                        rep("TE",2), rep("CE",4), rep("-" ,2) )
+  fert4 <- c("CI","CM","OI","OM") ; fert2a <- c("CI","CM") ; fert2b <- c("CM","OI")
+  Turrialba_fert  <- c( rep(fert4,2), rep(fert2b,2), fert4, fert2a )
+                        
+  Masatepe_trees <- c( rep("-"    ,2), rep("SSTR" ,2), rep("SGTR" ,4),
+                       rep("ILSS" ,4), rep("ILSG" ,2), rep(NA,4)  )
+  Masatepe_fert  <- c( fert2a, fert2b, rep(fert4,2), fert2b, rep(NA,4) )
+
+  options(knitr.kable.NA = '')
+  knitr::kable( cbind( 1:18, Turrialba_trees, Turrialba_fert,
+                       rep(NA,18), 
+                       c(19:32,rep(NA,4)), Masatepe_trees, Masatepe_fert ),
+                col.names=c("TURRIALBA","Shade","Fertil.","",
+                            "MASATEPE","Shade","Fertil."),
+                caption="Long-term experiments in Turrialba (treatments 1:18)
+                and Masatepe (treatments 19:32).
+                  Shade trees: E = \\textit{Erythrina poeppigiana},
+                               T = \\textit{Terminalia amazonia},
+                               C = \\textit{Chloroleucon eurycyclum},
+                              SS = \\textit{Samanea saman},
+                              TR = \\textit{Tabebuia rosea},
+                              SG = \\textit{Simarouba glauca},
+                              IL = \\textit{Inga laurina}.
+                  Fertilisation regime: C = conventional, O = organic,
+                                        I = intensive, M = moderate." )
+```
+
+The experiments differed in various respects: choice of coffee cultivar and shade tree species, shade management, fertilisation types and amounts, weather conditions and soil properties. The soils had different land-use histories, with only the Turrialba experiment representing land-use change (from sugar cane) involving soil disturbance with increased soil aeration. Soil texture and composition also differed. The volcanic soils in Masatepe have more organic matter than the soils in Turrialba [@Noponen_2012_Carbon], but with lower decomposition rates. The combined effect was that soil loss over the course of the experiment was found to be much lower in Masatepe than in Turrialba [@Noponen_2013_Sink]. 
+
+```{r, include=FALSE}
+        DSOC_CRI_shade  <- c(  -9.23, -13.86, -5.89, -12.54, -7.26 )
+  names(DSOC_CRI_shade) <- c( "FS"  , "E"   , "ET" , "C"   , "T"   )
+        DSOC_CRI_fert   <- c( -11.40, -10.94, -7.49, -10.44 )
+  names(DSOC_CRI_fert)  <- c( "CI"  , "CM"  , "OI" , "OM"   )
+
+        DSOC_NIC_shade  <- c( -2.97,  0    , -3.97 , -2.37,   14.20 )
+  names(DSOC_NIC_shade) <- c( "FS" , "ILSG", "ILSS", "SGTR", "SSTR" )
+        DSOC_NIC_fert   <- c( -6.08,  1.07 ,  2.12 ,  0.82 )
+  names(DSOC_NIC_fert)  <- c( "CI" , "CM"  , "OI"  , "OM"  )
+  
+  n_CRI_shade <- c( 2, 4, 2, 2, 4 )
+  n_CRI_fert  <- c( 3, 5, 4, 2 )
+  n_NIC_shade <- c( 2, 2, 4, 4, 2 )
+  n_NIC_fert  <- c( 3, 5, 4, 2  )
+  
+  mCRI <- 0.5 * (
+    sum( DSOC_CRI_shade * n_CRI_shade ) / sum(n_CRI_shade) +
+    sum( DSOC_CRI_fert  * n_CRI_fert  ) / sum(n_CRI_fert ) )
+    
+  mNIC <- 0.5 * (
+    sum( DSOC_NIC_shade * n_NIC_shade ) / sum(n_NIC_shade) +
+    sum( DSOC_NIC_fert  * n_NIC_fert  ) / sum(n_NIC_fert ) )
+  
+  aCRI_shade <- DSOC_CRI_shade - mCRI
+  aCRI_fert  <- DSOC_CRI_fert  - mCRI
+  aNIC_shade <- DSOC_NIC_shade - mNIC
+  aNIC_fert  <- DSOC_NIC_fert  - mNIC
+  
+  treatments_CRI <- c(
+    " 1  E-CI", " 2  E-CM", " 3  E-OI", " 4  E-OM",
+    " 5  T-CI", " 6  T-CM", " 7  T-OI", " 8  T-OM",
+    " 9  C-CM", "10  C-OI",
+    "11 TE-CM", "12 TE-OI",
+    "17   -CI", "18   -CM" )
+  effects_CRI    <- mCRI + c(
+    aCRI_shade["E" ] + aCRI_fert["CI"],
+    aCRI_shade["E" ] + aCRI_fert["CM"],
+    aCRI_shade["E" ] + aCRI_fert["OI"],
+    aCRI_shade["E" ] + aCRI_fert["OM"],
+    aCRI_shade["T" ] + aCRI_fert["CI"],
+    aCRI_shade["T" ] + aCRI_fert["CM"],
+    aCRI_shade["T" ] + aCRI_fert["OI"],
+    aCRI_shade["T" ] + aCRI_fert["OM"],
+    aCRI_shade["C" ] + aCRI_fert["CM"],
+    aCRI_shade["C" ] + aCRI_fert["OI"],
+    aCRI_shade["ET"] + aCRI_fert["CM"],
+    aCRI_shade["ET"] + aCRI_fert["OI"],
+    aCRI_shade["FS"] + aCRI_fert["CI"],
+    aCRI_shade["FS"] + aCRI_fert["CM"] ) # kgC ha-1 in top 40 cm over 9 years 
+  effects_CRI_kghay <- round( effects_CRI * 1e3 * (4/3) / 9, 0 ) # kgC ha-1 y-1
+  cbind( treatments_CRI, effects_CRI_kghay )
+
+  treatments_NIC <- c(
+    "19     -CI", "20     -CM",
+    "21 SSTR-CM", "22 SSTR-OI",
+    "23 SGTR-CI", "24 SGTR-CM", "25 SGTR-OI", "26 SGTR-OM",
+    "27 ILSS-CI", "28 ILSS-CM", "29 ILSS-OI", "30 ILSS-OM",
+    "31 ILSG-CM", "32 ILSG-OI" )
+  effects_NIC    <- mNIC + c(
+    aNIC_shade["FS"  ] + aNIC_fert["CI"],
+    aNIC_shade["FS"  ] + aNIC_fert["CM"],
+    aNIC_shade["SSTR"] + aNIC_fert["CM"],
+    aNIC_shade["SSTR"] + aNIC_fert["OI"],
+    aNIC_shade["SGTR"] + aNIC_fert["CI"],
+    aNIC_shade["SGTR"] + aNIC_fert["CM"],
+    aNIC_shade["SGTR"] + aNIC_fert["OI"],
+    aNIC_shade["SGTR"] + aNIC_fert["OM"],
+    aNIC_shade["ILSS"] + aNIC_fert["CI"],
+    aNIC_shade["ILSS"] + aNIC_fert["CM"],
+    aNIC_shade["ILSS"] + aNIC_fert["OI"],
+    aNIC_shade["ILSS"] + aNIC_fert["OM"],
+    aNIC_shade["ILSG"] + aNIC_fert["CM"],
+    aNIC_shade["ILSG"] + aNIC_fert["OI"] )
+  effects_NIC_kghay <- round( effects_NIC * 1e3 * (4/3) / 9, 0 ) # kgC ha-1 y-1
+  cbind( treatments_NIC, effects_NIC_kghay )
+```
+
+The changes during the nine years 2001-2010 in soil carbon pools for both countries were given by Noponen [-@Noponen_2012_Carbon: tables A5.2, A5.3]. The values given in his tables were main effects for the shade and fertilisation treatments which we added to estimate carbon change in each of the experimental treatments. The Noponen data are in $Mg \, C \, ha^{-1}$ for the top 40 cm of soil which we assumed contained 75% of total soil carbon. We thus converted the data to $kg \, C \, m^{-2} \, y^{-1}$ in the full soil column by multiplying with 1000 * (100/75) / 9 and show the results in Table 2.
+
+```{r, include=FALSE}
+Noponen_treatments <- c( treatments_CRI[ 1:12],
+                         "13 CE-CI", "14 CE-CM", "15 CE-OI", "16 CE-OM", 
+                         treatments_CRI[13:14] )
+Noponen_CabgT_f    <- round( c(
+    9.69 ,  18.79 ,  16.96,  16.64,
+   81.82 ,  41.21 ,  38.65,  36.39,
+   87.57 ,  87.62 ,
+   41.82 ,  23.98 ,
+   rep(NA,4),
+    0    ,   0 ) * 1e3 * 1e-4, 2 )
+Noponen_Cabg_f     <- round( c(
+    5.16 ,   4.54 ,   5.55,   5.58,
+    5.41 ,   4.19 ,   4.36,   1.51,
+    4.05 ,   4.35 ,
+    4.50 ,   3.82 ,
+   rep(NA,4),
+   4.98 ,   3.41 ) * 1e3 * 1e-4, 2 )
+cbind( Noponen_treatments, Noponen_CabgT_f, Noponen_Cabg_f )
+```
+
+```{r}
+  Turrialba_treatments <- Noponen_treatments
+  Masatepe_treatments  <- treatments_NIC
+  Turrialba_CabgT      <- Noponen_CabgT_f
+  Turrialba_Cabg       <- Noponen_Cabg_f
+  Turrialba_dCsoil     <- c( effects_CRI_kghay[ 1:12], rep(NA,4),
+                             effects_CRI_kghay[13:14] )
+  Masatepe_dCsoil      <- c( effects_NIC_kghay, rep(NA,4) )
+
+  options(knitr.kable.NA = '')
+  knitr::kable( cbind( Turrialba_treatments,
+                       Turrialba_CabgT, Turrialba_Cabg, Turrialba_dCsoil,
+                       rep(NA,18), 
+                       c(Masatepe_treatments,rep(NA,4)),
+                       Masatepe_dCsoil ),
+                row.names=FALSE,
+                col.names=c("TURRIALBA","CabgT","Cabg","dCsoil","",
+                            "MASATEPE","dCsoil"),
+                caption="Long-term experiments in Turrialba and Masatepe.
+                CabgT = Aboveground carbon in shade trees (kg C m-2).
+                Cabg = Aboveground carbon in coffee (kg C m-2).
+                dCsoil = Change in soil organic matter 2001-2010 (kg C m-2 y-1)." )
+```
+
+Table 2 also shows aboveground carbon stocks as measured in Turrialba by Noponen in 2009 [@Noponen_2012_Carbon: Table A4.1].
+
+Some treatments in Masatepe combined two timber species (see Table 1, treatments with shade 'SSTR' or 'SGTR'), which CAF2021 cannot simulate explicitly. In these cases, we calibrated the model for a single hypothetical intermediate species. The 'TR' species in these combinations is *Tabebuia rosea*, which is deciduous. This did not require model structural change: CAF2021 simulates accelerated leaf senescence under drought conditions. However, no intra-annual LAI-data were used in model calibration, so deciduousness remains poorly represented.
+  
+```{r, include=FALSE}
+  filesTM <- file.info(list.files(pattern="^BC_Turrialba_Masatepe.*\\.RData$"))
+  # filesT  <- file.info(list.files(pattern="^BC_Turrialba......\\.RData$"))
+  # filesM  <- file.info(list.files(pattern="^BC_Masatepe.*\\.RData$"))
+  filesTM <- filesTM[ with(filesTM,order(as.POSIXct(mtime))), ]
+  fileTM  <- tail( rownames(filesTM[1]), 1 )
+```
+
+## Setup of the Bayesian calibration
+
+We carried out a single multi-site Bayesian calibration of CAF2021, using Markov Chain Monte Carlo sampling (MCMC) with a chain length of 200,000. At each iteration of the chain the model was run for all 32 treatments, so a total of 6.4 million runs was carried out during the MCMC. The calibration provided samples from the posterior distribution for 65 of the model's parameters.
+
+With respect to this calibration, we can distinguish three categories of parameters:
+
+- *universal* parameters (n=45) that were not allowed to vary between the   treatments,
+- *site-specific* parameters (n=5) that were allowed to differ between Turrialba and Masatepe,
+- *tree-species specific* parameters (n=15).
+
+The universal parameters included all 23 coffee parameters that we calibrated, thus ignoring the differences between the cultivar in Turrialba ('Caturra') and the one in Masatepe ('Pacas'). Also treated as universal were 15 tree parameters and 7 soil parameters. The motivation for treating so many parameters as universal (which in reality may show variation) was to maintain a degree of universal applicability of the model, and to constrain the need for site- or tree-specific information in future applications of the model. The 5 site-specific parameters were all soil parameters (soil organic matter composition and turnover rate, nitrogen-leaching coefficient) to allow simulation of the greater capacity of soils in Masatepe to stabilise organic matter and minerals. The 15 tree-species specific parameters were predominantly parameters for carbon allocation and morphology.
+
+All parameters were a priori assigned wide beta probability distributions, reflecting large prior uncertainty about plausible parameter values for this largely new model.
+
+## Results from the calibration
+
+```{r, out.width="100%", fig.cap="\\label{fig:YieldsObsSimTurrialbaMasatepe}Yields for the 32 treatments in Turrialba (black numbers) and Masatepe (red). Left: Observed yields against N-fertilisation level. Right: Observed yield vs. MAP-simulated yield."}
+  load( fileTM )
+  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
+
+  source('BC/BC_Yields.R')
+  s.plot <- 1:nSites ; source('BC/BC_plot_YieldsAverage.R')
+  # source('BC/BC_plot_YieldsAnnual.R')
+```
+
+The calibration data for each of the 32 treatments are shown in the Appendix, together with model outputs for the MAP and ML parameter vectors. The MAP is the '*Maximum A Posteriori*' parameter vector, i.e. the model parameterisation that achieves the highest value for the product of prior (the beta distributions) and likelihood (fit to data). The ML parameter vector is the *Maximum Likelihood* parameter vector which ignores the prior probability distributions.
+
+In this section we focus on model performance for the MAP parameter vector. 
+
+The left panel of Fig. \ref{fig:YieldsObsSimTurrialbaMasatepe} shows observed coffee productivity in the 32 treatments against N-fertilisation rate. The values are averages over the years 2002-2017 for Turrialba and the years 2004-2013 for Masatepe. Differences in nitrogen application account for 23% of the variation between yield averages. The right panel plots the observed yields against yields simulated with CAF2021 using the MAP parameter vector. The close relationship is encouraging but awaits testing against data not used in the calibration.
+
+```{r, out.width="100%", fig.cap="\\label{fig:BalancesTM}Carbon- and nitrogen-balances for 32 treatments. 1:18 = Turrialba, 19:32 = Masatepe. Simulations using the MAP parameter vector from Bayesian calibration."}
+  load( fileTM )
+  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
+
+  source('BC/BC_Balances.R')
+  source('BC/BC_plot_Balances.R')
+```
+
+We now examine the behaviour of the calibrated model with respect to carbon- and nitrogen balances. Fig. \ref{fig:BalancesTM} shows carbon and nitrogen balances in the 32 treatments (1:18 from Turrialba, 19:32 from Masatepe), for the whole simulated period of 17 resp. 13 years. In all treatments, the simulations show loss of soil carbon and nitrogen, with slightly greater losses in Turrialba. We can compare the results with the observations [@Noponen_2013_Sink] shown in Table 2 above. Across the Turrialba treatments the observed changes were $-1479 \pm 544 \, kg \, C \, ha^{-1} y^{-1}$ and in Masatepe they were $-30 \pm 1153 \, kg \, C \, ha^{-1} y^{-1}$. So the simulated losses seemed in the right order of magnitude for Turrialba but overestimates for Masatepe.
+
+```{r, out.width="100%", fig.height=3, fig.cap="\\label{fig:NfixleachFinalTM}N-fixation and N-leaching during the final year in all treatments at Turrialba and Masatepe. Simulations using the MAP parameter vector from Bayesian calibration."}
+  load( fileTM )
+  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
+  source('BC/BC_FinalYearMean.R')
+  iNfixT     <- which(outputNames=="NfixT_f")
+  iNleaching <- which(outputNames=="Nleaching_f")
+
+  par( mfrow=c(2,1), mar=c(3,2,2,0) )
+  
+  colbars <- c( "gray40"    , "gray80"    , "gray60"    , "gray100"   ,
+                "gray40"    , "gray80"    , "gray60"    , "gray100"   ,
+                "gray80"    , "gray60"    ,
+                "gray80"    , "gray60"    ,
+                "gray40"    , "gray80"    , "gray60"    , "gray100"   ,
+                "gray40"    , "gray80"    ,
+                "firebrick4", "firebrick2", 
+                "firebrick2", "firebrick3",
+                "firebrick4", "firebrick2", "firebrick3", "firebrick1", 
+                "firebrick4", "firebrick2", "firebrick3", "firebrick1",
+                "firebrick2", "firebrick3" )
+  # barplot( as.matrix(outputFinalDay[,iNfixT]),
+  barplot( as.matrix(outputFinalYearMean[,iNfixT]) * 1e4 * 365,
+           main=paste( "TURRIALBA     ",
+                       "N-fixation (kg N ha-1 y-1)",
+                       "      MASATEPE" ),
+           col=colbars, beside=TRUE )
+  # barplot( as.matrix(outputFinalDay[,iNleaching]),
+  barplot( as.matrix(outputFinalYearMean[,iNleaching]) * 1e4 * 365,
+           main="N-leaching (kg N ha-1 y-1)",
+           col=colbars, beside=TRUE, names.arg=1:nSites )
+```
+
+Fig. \ref{fig:NfixleachFinalTM} shows the simulated levels of N-fixation and N-leaching for the final year of simulation, 2016-17 for Turrialba and 2012-13 for Masatepe. No good data are available for comparison with these simulations, but the final-year N-leaching values for Masatepe seem high.
+
+We examine this further by analysing the simulated soil nitrogen balances, showing all processes that add or remove nitrogen from the soil. We depict the nitrogen balances for selected treatments in Fig. \ref{fig:NBalancesSoil}. Note that the process rates shown in this figure are for the whole simulated period, not just for the final year as in Fig. \ref{fig:NfixleachFinalTM}. When we calculate rates for the whole simulated period, we include the very large fluxes of the first few years after the start of the experiments, when the system had not yet stabilised to the new conditions of vegetation and management. Therefore, average annual N-leaching rates over the whole duration of the experiments are higher than final-year rates. But Fig. \ref{fig:NBalancesSoil} shows that this effect was much stronger in Turrialba than in Masatepe, because of the much higher soil decomposition rates in Turrialba. The Masatepe soil was closer to equilibrium from the start.
+
+```{r}
+  load( fileTM )
+
+  # sA <- 1 ; sB <- 2 ; sC <- 3 ; sD <- 4
+  sA <- 11 ; sB <- 17 ; sC <- 31 ; sD <- 19
+  source(sitesettings_filenames[sA]) ; params.MAP.A <- params.MAP.s( sA )
+  output.MAP.A <- run_model( p=params.MAP.A )
+  source(sitesettings_filenames[sB]) ; params.MAP.B <- params.MAP.s( sB )
+  output.MAP.B <- run_model( p=params.MAP.B )
+  source(sitesettings_filenames[sC]) ; params.MAP.C <- params.MAP.s( sC )
+  output.MAP.C <- run_model( p=params.MAP.C )
+  source(sitesettings_filenames[sD]) ; params.MAP.D <- params.MAP.s( sD )
+  output.MAP.D <- run_model( p=params.MAP.D )
+```
+
+```{r, out.width="100%", fig.cap="\\label{fig:NBalancesSoil}Soil N-balances for 4 treatments, averaged over the whole simulated period. Top row: Turrialba; bottom row: Masatepe. Simulations using the MAP parameter vector from Bayesian calibration."}
+  par( mfrow=c(2,4) )
+
+  par(mar=c(3,3,3,0))
+  plot_NbalanceSoil(output.MAP.A, title1="", title2="11 TE-CM  ", ymax=800)
+  par(mar=c(3,3,3,0))
+  plot_NbalanceSoil(output.MAP.B, title1="", title2="17 -CI    ", ymax=800)
+  par(mar=c(3,3,3,0))
+  plot_NbalanceSoil(output.MAP.C, title1="", title2="31 ILSG-CM", ymax=800)
+  par(mar=c(3,3,3,0))
+  plot_NbalanceSoil(output.MAP.D, title1="", title2="19 -CI    ", ymax=800)
+```
+
+```{r, eval=F, include=F, out.width="100%", fig.cap="\\label{fig:TurrialbaMasatepeYields2}Yields using the MAP parameter vector from Bayesian calibration, but with some additional parameter change(s)."}
+## Sensitivity to leaching-parameter 'RNLEACH'.
+  load( fileTM )
+  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
+  set_parNames  <- c( "RNLEACH" )
+  set_parValues <- c(  0.2      )
+  source('BC/BC_Yields_set_par.R')
+  source('BC/BC_plot_YieldsAverage.R')
+```
+
+```{r, eval=F, include=F, out.width="100%", fig.cap="\\label{fig:TurrialbaMasatepeBalances2}Balances using the MAP parameter vector from Bayesian calibration, but with some additional parameter change(s)."}
+## Sensitivity to leaching-parameter 'RNLEACH': continued
+  load( fileTM )
+  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
+  source('BC/BC_Balances_set_par.R')
+  source('BC/BC_plot_Balances.R')
+```
+
+```{r, eval=F, include=F}
+## Exploring deciduousness
+  load( fileTM )
+  sA            <- 23 # Masatepe_05_SGTR_CI
+  source(sitesettings_filenames[sA])
+  params        <- params.MAP.s( sA )
+  params.MAP.A  <- params
+  params.MAP.A1 <- set_par( c("FTCLMINT(3)","TCLMAXT(3)"),
+                            c( 0.2         , 650        ) )
+  params.MAP.A2 <- set_par( c("FTCLMINT(3)","TCLMAXT(3)"),
+                            c( 0.05        , 650        ) )
+  params.MAP.A3 <- set_par( c("FTCLMINT(3)","TCLMAXT(3)"),
+                            c( 0.2         , 365        ) )
+  output.MAP.A  <- run_model( p=params.MAP.A  )
+  output.MAP.A1 <- run_model( p=params.MAP.A1 )
+  output.MAP.A2 <- run_model( p=params.MAP.A2 )
+  output.MAP.A3 <- run_model( p=params.MAP.A3 )
+  plot_output( list_output=list( output.MAP.A,
+                                 output.MAP.A1, output.MAP.A2 ,output.MAP.A3),
+               vars=c( "fTranT_t(3)", "LAIT_t(3)" ) )
+```
+
+```{r Balances2, eval=F, include=F, fig.height=6, fig.cap="\\label{fig:Balances2}Soil N- and C-balances at Masatepe in the ILSS_CI system. Top row: tree branches harvested and removed after pruning and thinning. Bottom row: branches left on the field as litter."}
+## Comparison of leaving tree branches on the field after thinning and pruning (default) vs. removing them as harvest
+  load( fileTM )
+  sA <- 27 # Masatepe_09_ILSS_CI
+  source(sitesettings_filenames[sA])
+  params        <- params.MAP.s( sA )
+  params.MAP.A  <- params
+  params.MAP.A1 <- set_par( c("FHARVBT(1)","FHARVBT(2)","FHARVBT(3)"),
+                            c( 0          , 0          , 0          ) )
+  output.MAP.A  <- run_model( p=params.MAP.A  )
+  output.MAP.A1 <- run_model( p=params.MAP.A1 )
+  par( mar=c(3,3,3,0), mfrow=c(2,4) )
+  plot_NbalanceSoil( output.MAP.A , title1="Soil N-balance MAP", title2="" )
+  par( mar=c(3,3,3,0) )
+  plot_CbalanceSoil( output.MAP.A , title1="Soil C-balance MAP", title2="" )
+  par( mar=c(3,3,3,0) )
+  plot_NbalanceSoil( output.MAP.A1, title1="Soil N-balance 1", title2="" )
+  par( mar=c(3,3,3,0) )
+  plot_CbalanceSoil( output.MAP.A1, title1="Soil C-balance 1", title2="" )
+```
+
+```{r, eval=F, include=F}
+## Turrialba vs. Masatepe
+  load( fileTM )
+  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
+  source('BC/BC_Yields.R')
+  s.plot <-  1:18 ; source('BC/BC_plot_YieldsAverage.R')
+  s.plot <- 19:32 ; source('BC/BC_plot_YieldsAverage.R')
+```
+
+```{r, eval=F, include=F}
+## After a BC: comparing posterior with prior
+  load( fileTM )
+  sTa             <- 13
+  source(sitesettings_filenames[13]) # Turrialba_15_CE_AC
+  params.Prior.Ta <- params
+  params.MAP.Ta   <- params.MAP.s( sTa )
+  output.Prior.Ta <- run_model( p=params.Prior.Ta )
+  output.MAP.Ta   <- run_model( p=params.MAP.Ta )
+
+  plot_output( list_output=list(output.Prior.Ta),
+               vars       =c( "fTran(1)"    , "fNgrowth(1)", "DVS(1)"  ,
+                              "SINKP(1)"    , "DayFl(1)"   , "PARMA(1)" ,
+                              "harvDM_f_hay", "CT_f" ) )
+  plot_output( list_output=list(output.MAP.Ta),
+               vars       =c( "fTran(1)"    , "fNgrowth(1)", "DVS(1)"  ,
+                              "SINKP(1)"    , "DayFl(1)"   , "PARMA(1)" ,
+                              "harvDM_f_hay", "CT_f" ) )
+```
+
+# Discussion and outlook
+
+## Model structure and Bayesian calibration
+
+CAF2021 is a fairly complex and parameter-rich model which is required to behave realistically for many different environmental conditions and parameter settings. Fortunately, the large number of model runs that were carried out in the Bayesian calibration showed that model behaviour is robust: the model did not behave erratically for any of the 6.4 million combinations of conditions and parameterisations that were explored.
+
+Overall, the behaviour of the calibrated CAF2012 seems to be plausible, with the caveat that no out-of-sample testing has been carried out yet. For each of the 32 treatments, the simulated time series for most measured variables seem plausible (all are shown in the Appendix). However, the data basis for calibration remains narrow, dominated by just two locations: the experimental sites of Turrialba in Costa Rica and Masatepe in Nicaragua.
+
+Above we showed that simulated values for some nitrogen-cycling processes seemed high, in particular for N-leaching. However, these processes are difficult to evaluate. No measurements were available for the calibration sites, and the few measurements carried out in Central America on N-leaching have shown that it varies both between sites (as a function of differences in soil type and management) and between depths in the soil where measurements are taken. For a coffee site in southern Costa Rica, @Harmand_2007_Nitrogena found N-leaching rates in kg N ha-1 y-1 to be 201-268 at 0.6 m depth, 70-113 at 1.2 m, and 16-27 at 2.0 m, with the highest values for the unshaded plot and the lowest for one shaded by *Eucalyptus deglupta*. The values at 0.6 m depth are similar to our calibrated simulations, and that depth is similar to the rooting depth of the calibrated model.
+
+Given the narrow data base, we must be careful about expanding the number of parameters that we calibrate. It is possible to add more parameters to explain remaining differences between observations and simulations for specific variables and specific sites, treatments, tree species. But this needs to be justified by very robust data, otherwise the model is being tuned to noise, and cannot be applied outside the calibration locations.
+
+## Next steps
+
+More data will be used for model calibration in the near future: data files from Rolando Cerda for farms in the Turrialba region, data used by @Ovalle-Rivera_2020_Assessing for a farm in LLano Bonito (Tarrazu, Costa Rica), possibly data from Munoz et al. for Guatemala. These data are less rich than the experimental data, but they will be helpful to broaden the supporting database and applicability of the model.
+
+The first next step will be to use Rolando Cerda's data for farms in the Turrialba region to calibrate fruit production, in particular that of banana. Since not all required information to drive the model is available for the farms in this data set, we shall make the assumption that unmeasured conditions were the same as those prevailing in the Turrialba experiment. The intention is to select farms from Cerda's data with high fruit tree density and simulate them as extra treatments in the Turrialba experiment.
+
+Next, the model will be calibrated against data from Llano Bonito (Tarrazu, Costa Rica). This site is of importance because it will be the first source of information on coffee agroforestry from a high-altitude location, above 1600 m. There were Musaceae on this farm, but no relevant data in the files. However, @Meylan_2017_Evaluating reported the amount of shade provided by banana in Llano Bonito.
+
+Once the final calibration data sets have been received, one overall re-calibration will be carried out with some data sets left out for out-of-sample testing of model predictive capacity.
+
+Further steps have already been outlined in the previous progress report [@VanOijen_2021_Modelling] and will focus on model application to farms in Costa Rica and Guatemala and on publication.
+
+\clearpage
+
+# APPENDIX: Data and simulations for each treatment
+
+Blue = data. Black = MAP simulations. Green = maximum likelihood simulations.
+
+```{r, eval=F}
+  load( fileTM )
+  source(sitesettings_filenames[1]) # Knitting requires a model initialisation
+  source('BC/BC_plot_outputs_data_PNGs.R')
+```
+
+```{r, out.width="90%", fig.align="center"}
+  files <- dir("BC/results/",
+               pattern="BC_outputs_data.*png$", full.names=TRUE )
+  knitr::include_graphics(files)
+```
+
+
+\clearpage
+
+# Acknowledgements {-}
+
+I thank the Natural Resources Institute of the University of Greenwich for funding, and my colleagues in project SEACAF and earlier projects for support. In particular, I thank Elias de Melo Virginio Filho, Jeremy Haggar and Rolando Cerda for information on coffee agroforestry experiments and farms. 
+
+
+
+# References {-}

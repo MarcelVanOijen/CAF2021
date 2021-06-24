@@ -161,33 +161,42 @@ set_par_speciesT <- function( it, species="E. poeppigiana", p.old=params ) {
     stop( paste("Default parameterisation for", species, "is not provided.") )
   } else if (species %in% c("Musa sp.", "Musa",
                             "Banana", "banana")) {
-    names[ 1] <- paste0("TREEDENS0(",it,")") ; vals[ 1] <-   0.04
-    names[ 2] <- paste0("CBtree0("  ,it,")") ; vals[ 2] <-   1
-    names[ 3] <- paste0("CLtree0("  ,it,")") ; vals[ 3] <-   1
-    names[ 4] <- paste0("CRtree0("  ,it,")") ; vals[ 4] <-   1
-    names[ 5] <- paste0("CStree0("  ,it,")") ; vals[ 5] <-   1
-    names[ 6] <- paste0("FWT("      ,it,")") ; vals[ 6] <-   0.5
-    names[ 7] <- paste0("FST("      ,it,")") ; vals[ 7] <-   0.5
-    names[ 8] <- paste0("FPT("      ,it,")") ; vals[ 8] <-   0.5
-    names[ 9] <- paste0("TBEFOREPT(",it,")") ; vals[ 9] <- 100
-    names[10] <- paste0("TCBT("     ,it,")") ; vals[10] <- 365
-    names[11] <- paste0("TCRT("     ,it,")") ; vals[11] <- 365
-    names[12] <- paste0("TCST("     ,it,")") ; vals[12] <- 365
-    names[13] <- paste0("KH("       ,it,")") ; vals[13] <-   4
-    names[14] <- paste0("KAC("      ,it,")") ; vals[14] <-   6
+    names[ 1] <- paste0("CBtree0("  ,it,")") ; vals[ 1] <-    0.1
+    names[ 2] <- paste0("CLtree0("  ,it,")") ; vals[ 2] <-    0.1
+    names[ 3] <- paste0("CRtree0("  ,it,")") ; vals[ 3] <-    0.1
+    names[ 4] <- paste0("CStree0("  ,it,")") ; vals[ 4] <-    0.1
+    names[ 5] <- paste0("FWT("      ,it,")") ; vals[ 5] <-    0.5
+    names[ 6] <- paste0("FST("      ,it,")") ; vals[ 6] <-    0.5
+    names[ 7] <- paste0("FPT("      ,it,")") ; vals[ 7] <-    0.5
+    names[ 8] <- paste0("KH("       ,it,")") ; vals[ 8] <-    4
+    names[ 9] <- paste0("KAC("      ,it,")") ; vals[ 9] <-    5
+    names[10] <- paste0("TBEFOREPT(",it,")") ; vals[10] <-  100
+    names[11] <- paste0("TCBT("     ,it,")") ; vals[11] <-  365
+    names[12] <- paste0("TCRT("     ,it,")") ; vals[12] <-  365
+    names[13] <- paste0("TCST("     ,it,")") ; vals[13] <-  365
+    names[14] <- paste0("TOPTT("    ,it,")") ; vals[14] <-   22
+    names[15] <- paste0("TTOLT("    ,it,")") ; vals[15] <-    8
+    names[16] <- paste0("TREEDENS0(",it,")") ; vals[16] <-    0.01
     p.new <- set_par( names, vals, p.old=p.old )    
   } else if (species %in% c("Persea americana", "P. americana",
                             "Avocado", "avocado")) {
-    names[ 1] <- paste0("TREEDENS0(",it,")") ; vals[ 1] <-    0.02
-    names[ 6] <- paste0("FWT("      ,it,")") ; vals[ 6] <-    0.5
-    names[ 7] <- paste0("FST("      ,it,")") ; vals[ 7] <-    0.5
-    names[ 8] <- paste0("FPT("      ,it,")") ; vals[ 8] <-    0.5
-    names[ 9] <- paste0("TBEFOREPT(",it,")") ; vals[ 9] <- 1825
-    names[10] <- paste0("TCBT("     ,it,")") ; vals[10] <- 1000
-    names[11] <- paste0("TCRT("     ,it,")") ; vals[11] <- 1000
-    names[12] <- paste0("TCST("     ,it,")") ; vals[12] <- 1000
-    names[13] <- paste0("KH("       ,it,")") ; vals[13] <-    4
-    names[14] <- paste0("KAC("      ,it,")") ; vals[14] <-    6
+    names[ 1] <- paste0("CBtree0("  ,it,")") ; vals[ 1] <-    0.1
+    names[ 2] <- paste0("CLtree0("  ,it,")") ; vals[ 2] <-    0.1
+    names[ 3] <- paste0("CRtree0("  ,it,")") ; vals[ 3] <-    0.1
+    names[ 4] <- paste0("CStree0("  ,it,")") ; vals[ 4] <-    0.1
+    names[ 5] <- paste0("FWT("      ,it,")") ; vals[ 5] <-    0.5
+    names[ 6] <- paste0("FST("      ,it,")") ; vals[ 6] <-    0.5
+    names[ 7] <- paste0("FPT("      ,it,")") ; vals[ 7] <-    0.5
+    names[ 8] <- paste0("KH("       ,it,")") ; vals[ 8] <-    3
+    names[ 9] <- paste0("KAC("      ,it,")") ; vals[ 9] <-    4
+    names[10] <- paste0("TBEFOREPT(",it,")") ; vals[10] <- 1825
+    names[11] <- paste0("TCBT("     ,it,")") ; vals[11] <- 1000
+    names[12] <- paste0("TCRT("     ,it,")") ; vals[12] <- 1000
+    names[13] <- paste0("TCST("     ,it,")") ; vals[13] <- 1000
+    names[14] <- paste0("TOPTT("    ,it,")") ; vals[14] <-   20
+    names[15] <- paste0("TTOLT("    ,it,")") ; vals[15] <-    8
+    names[16] <- paste0("HMAX("     ,it,")") ; vals[16] <-    5
+    names[17] <- paste0("TREEDENS0(",it,")") ; vals[17] <-    0.01
     p.new <- set_par( names, vals, p.old=p.old )    
   } else {
     stop( paste("Default parameterisation for", species, "is not provided.") )
@@ -709,49 +718,49 @@ params.MAP.s <- function(s) {
 #######################################################################
 fOutputTM <- function( parMatrix=parMAP, sfiles=sitesettings_filenames ) {
 
-  nSites <- length(sitesettings_filenames)
-  idoy   <- which( outputNames=="doy" )
-
-  ih_f_hay           <- which( outputNames=="harvDM_f_hay" )
-  ihCPT_f            <- which( outputNames=="harvCPT_f" )
-  ihCPT_2            <- which( outputNames=="harvCPT_t(2)" )
-  ihCST_f            <- which( outputNames=="harvCST_f" )
-  ihCST_3            <- which( outputNames=="harvCST_t(3)" )
-  Harvests           <- matrix( NA, nrow=nSites, ncol=6 )
-  colnames(Harvests) <- c( "Site", "harvDM_f_hay",
-                           "harvCPT_f", "harvCPT_2", "harvCST_f", "harvCST_3" )
-  Harvests[,1]       <- 1:nSites
-
-  iNsoil_f           <- which( outputNames=="Nsoil_f") # kgN m-2
-  iCsoil_f           <- which( outputNames=="Csoil_f") # kgC m-2 
-  iC_f               <- which( outputNames=="C_f" )    # kgC m-2
-  iCT_f              <- which( outputNames=="CT_f")    # kgC m-2
-  Balances           <- matrix( NA, nrow=nSites, ncol=6 )
-  colnames(Balances) <- c( "Site", "D_Nsoil", "D_Csoil", "D_C", "D_CT", "D_Csys" )
-  Balances[,1]       <- 1:nSites
+  nSites         <- length(sitesettings_filenames)
+  idoy           <- which( outputNames=="doy" )
+  names_vars     <- c( "Site",
+    "harvDM_f_hay", "harvCPT_f", "harvCPT_2", "harvCST_f", "harvCST_3",
+    "D_Nsoil"     , "D_Csoil"  , "D_C"      , "D_CT"     , "D_Csys"    )
+  fOut           <- matrix( NA, nrow=nSites, ncol=length(names_vars) )
+  colnames(fOut) <- names_vars
+  fOut[,1]       <- 1:nSites
   
+  ih_f_hay <- which( outputNames=="harvDM_f_hay" ) # kg C ha-1 y-1
+  ihCPT_f  <- which( outputNames=="harvCPT_f"    ) # kg C m-2 d-1
+  ihCPT_2  <- which( outputNames=="harvCPT_t(2)" ) # kg C m-2 d-1
+  ihCST_f  <- which( outputNames=="harvCST_f"    ) # kg C m-2 d-1
+  ihCST_3  <- which( outputNames=="harvCST_t(3)" ) # kg C m-2 d-1
+  iNsoil_f <- which( outputNames=="Nsoil_f"      ) # kg N m-2
+  iCsoil_f <- which( outputNames=="Csoil_f"      ) # kg C m-2 
+  iC_f     <- which( outputNames=="C_f"          ) # kg C m-2
+  iCT_f    <- which( outputNames=="CT_f"         ) # kg C m-2
+
   for (s in 1:nSites) {
     source(sitesettings_filenames[s] )
     params   <- parMatrix[,s]
     output.s <- run_model( params, matrix_weather, calendar_fert, calendar_prunC,
                            calendar_prunT, calendar_thinT, NDAYS )
     
-    d365     <- which( output.s[,idoy]==365 )
-    Harvests[s,"harvDM_f_hay"] <- mean( output.s[d365,ih_f_hay] )
-    Harvests[s,"harvCPT_f"   ] <- sum ( output.s[    ,ihCPT_f ] )
-    Harvests[s,"harvCPT_2"   ] <- sum ( output.s[    ,ihCPT_2 ] )
-    Harvests[s,"harvCST_f"   ] <- sum ( output.s[    ,ihCST_f ] )
-    Harvests[s,"harvCST_3"   ] <- sum ( output.s[    ,ihCST_3 ] )
+    c.DM  <- 1 / 0.47          # from 'kg C' to 'kg DM'
+    c.hay <- 1e4 * 365 / NDAYS # from 'm-2 over simulation period' to 'ha-1 y-1'
+    d365  <- which( output.s[,idoy]==365 )
     
-    fconv <- 1e4 * 365 / NDAYS # from 'm-2 over simulation period' to 'ha-1 y-1'
-    D_output.s <- ( output.s[NDAYS,] - output.s[1,] ) * fconv
-    Balances[s,"D_Nsoil"] <- D_output.s[iNsoil_f]
-    Balances[s,"D_Csoil"] <- D_output.s[iCsoil_f]
-    Balances[s,"D_C"    ] <- D_output.s[iC_f    ]
-    Balances[s,"D_CT"   ] <- D_output.s[iCT_f   ]
-    Balances[s,"D_Csys" ] <- Balances[s,"D_Csoil"] + Balances[s,"D_C"] + Balances[s,"D_CT"]
+    fOut[s,"harvDM_f_hay"] <- mean( output.s[d365,ih_f_hay] )
+    fOut[s,"harvCPT_f"   ] <- sum ( output.s[    ,ihCPT_f ] ) * c.DM * c.hay
+    fOut[s,"harvCPT_2"   ] <- sum ( output.s[    ,ihCPT_2 ] ) * c.DM * c.hay
+    fOut[s,"harvCST_f"   ] <- sum ( output.s[    ,ihCST_f ] ) * c.DM * c.hay
+    fOut[s,"harvCST_3"   ] <- sum ( output.s[    ,ihCST_3 ] ) * c.DM * c.hay
+    
+    D_output.s <- output.s[NDAYS,] - output.s[1,]
+    fOut[s,"D_Nsoil"] <- D_output.s[iNsoil_f] * c.hay
+    fOut[s,"D_Csoil"] <- D_output.s[iCsoil_f] * c.hay
+    fOut[s,"D_C"    ] <- D_output.s[iC_f    ] * c.hay
+    fOut[s,"D_CT"   ] <- D_output.s[iCT_f   ] * c.hay
+    fOut[s,"D_Csys" ] <- fOut[s,"D_Csoil"] + fOut[s,"D_C"] + fOut[s,"D_CT"]
   }
-  return( list( Harvests=Harvests, Balances=Balances ) )
+  return( fOut )
 }
 
 barplotTM <- function( y, name=NULL ) {
@@ -766,9 +775,5 @@ barplotTM <- function( y, name=NULL ) {
                 "firebrick4", "firebrick2", "firebrick3", "firebrick1", 
                 "firebrick4", "firebrick2", "firebrick3", "firebrick1",
                 "firebrick2", "firebrick3" )
-  barplot( as.matrix(y),
-           main=paste( "TURRIALBA                  ",
-                       name,
-                       "                   MASATEPE" ),
-           col=colbars, beside=TRUE, names.arg="" )
+  barplot( as.matrix(y), main=name, col=colbars, beside=T, names.arg="" )
 }

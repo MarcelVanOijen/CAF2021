@@ -14,7 +14,8 @@ real :: SAT_t(nt)=0, h_t(nt)=0, hC_t(nt)=0, z(nz)=0
 real :: dz(nz)=0, LAIT_tcz(nt,nc,nz)=0
 
 ! PARintT & NPP
-real :: fLUEco2, fLUEt
+real :: fLUEco2
+real :: fLUEt_t(nt)
 real :: GPP_t    (nt)=0   , NPPmaxN_t(nt)=0
 real :: PARintT_c(nc)=0   , PARintT_t(nt)=0
 real :: PAR_cz(nc,nz)=0   , PARintT_tcz(nt,nc,nz)=0
@@ -170,8 +171,8 @@ Contains
   real :: fTranT_t(nt), PARintT_t(nt)
   real :: LUEtree_t(nt)
   fLUEco2   = 1 + beta*log(co2a/co20)
-  fLUEt     = exp( -0.5*((T - toptt)/ttolt)**2. )
-  LUEtree_t = fLUEco2 * fLUET * LUEMAX * fTranT_t
+  fLUEt_t   = exp( -0.5*((T - toptt)/ttolt)**2. )
+  LUEtree_t = fLUEco2 * fLUET_t * LUEMAX * fTranT_t
   GPP_t     = PARintT_t * LUEtree_t
   NPPmaxN_t = GPP_t * (1-GAMMA)
   end Subroutine NPP
