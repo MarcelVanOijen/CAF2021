@@ -25,30 +25,32 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
 ```
 
 ```{r}
-  # filesTM <- file.info(list.files(pattern="^BC_Turrialba_Masatepe.*\\.RData$"))
-  # filesTM <- filesTM[ with(filesTM,order(as.POSIXct(mtime))), ]
-  # fileTM  <- tail( rownames(filesTM[1]), 1 )
-  fileTM     <- "BC_Turrialba_Masatepe_09_08.RData"
+  # fileTM     <- "BC_Turrialba_Masatepe_09_08.RData"
+  filesTM <- file.info(list.files(pattern="^BC_Turrialba_Masatepe.*\\.RData$"))
+  filesTM <- filesTM[ with(filesTM,order(as.POSIXct(mtime))), ]
+  fileTM  <- tail( rownames(filesTM[1]), 1 )
   load( fileTM )
-  # source('BC/BC_export_parModes.R') # To write only the MAPs to rds-file
-  fileTM_MAP <- "CAF2021_parMAP_09_08.rds"
   
-  # FOLLOWING LINES LOAD THE MAP FROM AN OLDER MODEL VERSION WITH
-  # FEWER PARAMATERES, AND CONSTRUCT THE MAP FOR THE CURRENT VERSION.
-  # SIMPLIFY THE CODE WHEN THE LOADED MAP IS FROM THE CURRENT VERSION.
-  # parMAP         <- readRDS( fileTM_MAP )
-  parMAP.old       <- readRDS( fileTM_MAP )
-  np.old           <- dim(parMAP.old)[1]
-  source('initialisation/set_CAF2021_Turrialba.R')
-  np               <- length( params )
-  parMAP           <- matrix( NA, nrow=np, ncol=nSites )
-  rownames(parMAP) <- names_params
-  colnames(parMAP) <- paste0( "s", 1:nSites )
-  for(p in 1:np.old) {
-    prow          <- which( startsWith( rownames(parMAP),
-                                        rownames(parMAP.old)[p] ) )
-    for(r in prow) { parMAP[r,] <- parMAP.old[p,] }
-  }
+  # fileTM_MAP <- "CAF2021_parMAP_09_08.rds"
+  filesTM_MAP <- file.info(list.files(pattern="^CAF2021_parMAP.*\\.rds$"))
+  filesTM_MAP <- filesTM_MAP[ with(filesTM_MAP,order(as.POSIXct(mtime))), ]
+  fileTM_MAP  <- tail( rownames(filesTM_MAP[1]), 1 )
+  parMAP      <- readRDS( fileTM_MAP )
+
+  # THE FOLLOWING LINES LOAD THE MAP FROM AN OLDER MODEL VERSION WITH
+  # FEWER PARAMATERS, AND CONSTRUCT THE MAP FOR THE CURRENT VERSION.
+  # parMAP.old       <- readRDS( fileTM_MAP )
+  # np.old           <- dim(parMAP.old)[1]
+  # source('initialisation/set_CAF2021_Turrialba.R')
+  # np               <- length( params )
+  # parMAP           <- matrix( NA, nrow=np, ncol=nSites )
+  # rownames(parMAP) <- names_params
+  # colnames(parMAP) <- paste0( "s", 1:nSites )
+  # for(p in 1:np.old) {
+  #   prow          <- which( startsWith( rownames(parMAP),
+  #                                       rownames(parMAP.old)[p] ) )
+  #   for(r in prow) { parMAP[r,] <- parMAP.old[p,] }
+  # }
 ```
 
 
@@ -66,6 +68,37 @@ Here we report on simulation of fruit production and on simulating the SEACAF fa
 \clearpage
 
 # Reference simulations for Turrialba and Masatepe
+
+```{r, fig.cap="\\label{fig:YieldsObsSimTM}Yields for the 32 treatments in Turrialba (black numbers) and Masatepe (red). Left: Observed yields against N-fertilisation level. Right: Observed yield vs. MAP-simulated yield."}
+  source('initialisation/initialise_CAF2021_general.R')
+  par( mfrow=c(1,2) )
+
+  y <- fYieldsTM( parMatrix=parMAP, sfiles=sitesettings_filenames )
+  par( pty="s" ) ; plotYieldsTM( y )
+  
+  # # Temporary check of setting initial tree pool values all to 0.1 kg C m-2
+  # # source('initialisation/initialise_CAF2021_general.R')
+  # # 
+  # parMAPmod <- parMAP
+  # iCtree0   <- which( startsWith( rownames(parMAPmod), "CBtree0") |
+  #                     startsWith( rownames(parMAPmod), "CLtree0") |
+  #                     startsWith( rownames(parMAPmod), "CRtree0") |
+  #                     startsWith( rownames(parMAPmod), "CStree0") ) 
+  # for(s in 1:nSites) { parMAPmod[iCtree0,] <- 0.1 }
+  # ymod <- fYieldsTM( parMatrix=parMAPmod, sfiles=sitesettings_filenames )
+  # par( pty="s" ) ; plotYieldsTM( ymod )
+
+  # Temporary check of setting FWCWP to 0.2 (default is 0.4)
+  # source('initialisation/initialise_CAF2021_general.R')
+  # 
+  parMAPmod <- parMAP
+  ip   <- which( rownames(parMAPmod) == "FWCWP" ) 
+  for(s in 1:nSites) { parMAPmod[ip,] <- 0.2 }
+  ymod <- fYieldsTM( parMatrix=parMAPmod, sfiles=sitesettings_filenames )
+  par( pty="s" ) ; plotYieldsTM( ymod )
+```
+
+We show observed vs. simulated average annual coffee dry matter yields for all 32 treatments in Fig. \ref{fig:YieldsObsSimTM}.
 
 ```{r TM, fig.height=8, fig.cap="\\label{fig:TM}Simulations for Turrialba (grey bars) and Masatepe (red)."}
   fOutTM <- fOutputTM( parMatrix=parMAP, sfiles=sitesettings_filenames )
@@ -107,7 +140,7 @@ Data for coffee agroforestry farms in the Turrialba region with fruit trees were
   - Up to 10 kg aboveground DM per plant.
 - @Jullien_2001_Withinbunch reported that pulp DMP reaches asymptotically to values of about 30%. 
 - @Mustaffa_2012_Banana: leaf N content about 3% of DM.
-- @MartinezAcosta_2011_Dinamica, final DM per tree, bunch:leaves:pseudostem+corm: 3000:1200:1800 g DM.
+- @MartinezAcosta_2011_Dinamica, final DM per tree, bunch / leaves / pseudostem + corm = 3000 / 1200 / 1800 g DM.
 - @Schaffer_1999_Atmospheric DM of 6-month old vegetative banana (cv. 'Gros Michel'): leaves:pseudostem+rhizome:roots =  19:64:19%.
 - DM-partitioning of cv. 'Williams' in Colombia not affected strongly by level of N-fertilization (0 to 483 kg N $ha^{-1}$), but fruit yields increased from 9 to 12 kg DM [@TorresB._2014_Accumulation]. At harvest after 161 kg N $ha^{-1}$ fertilization: corm+pseudostem/leaves/fruits = 6/1.5/3.5 kg DM per plant. Total plant N-concentration was 1-1.5% of DM.
 - @Turner_2007_Environmental: LAI ranges from 2 to 5 m2 m-2.

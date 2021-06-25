@@ -777,3 +777,59 @@ barplotTM <- function( y, name=NULL ) {
                 "firebrick2", "firebrick3" )
   barplot( as.matrix(y), main=name, col=colbars, beside=T, names.arg="" )
 }
+
+fYieldsTM <- function( parMatrix=parMAP, sfiles=sitesettings_filenames ) {
+  nSites            <- length(sitesettings_filenames)
+
+  names_vars        <- c( "Site", "Y.obs", "Y.sim" )
+  fYields           <- matrix( NA, nrow=nSites, ncol=3 )
+  colnames(fYields) <- names_vars
+  fYields[,"Site"]  <- 1:nSites
+  
+  iyear.model       <- which( outputNames=="year" )
+  idoy.model        <- which( outputNames=="doy" )
+  iH.model          <- which( outputNames=="harvDM_f_hay" )
+
+  for (s in 1:nSites) {
+    iH.data.s          <- which( data_name[[s]]=="harvDM_f_hay" )
+    H.data.s           <- data_value[[s]] [iH.data.s]
+    fYields[s,"Y.obs"] <- mean( H.data.s )
+    
+    nY.s               <- length( iH.data.s )
+    year.data.s        <- data_year [[s]] [iH.data.s]
+    doy.data.s         <- data_doy  [[s]] [iH.data.s]
+    
+    source(sitesettings_filenames[s] )
+    params     <- parMatrix[,s]
+    output.s   <- run_model( params, matrix_weather,
+                             calendar_fert, calendar_prunC,
+                             calendar_prunT, calendar_thinT, NDAYS )
+    iH.model.s <- sapply( 1:nY.s, function(i) {
+      which( output.s[,iyear.model]==year.data.s[i] & 
+             output.s[,idoy.model ]==doy.data.s [i] ) } )
+    fYields[s,"Y.sim"] <- mean ( output.s[iH.model.s,iH.model] )
+  }
+  return( fYields )
+}
+
+plotYieldsTM <- function( y ) {
+  nSites <- dim(y)[1]
+  y.max  <- max(y[,c("Y.obs","Y.sim")])
+  plot( y[,"Y.sim"], y[,"Y.obs"],
+        main="Av. yield coffee\n(kg DM ha-1 y-1)",
+        xlab="Sim. yield (kg ha-1)", ylab="",
+        xlim=c(0,y.max), ylim=c(0,y.max),
+        cex.main=1, type="n", asp=1 )
+  colVector <- rep("",nSites)
+  colVector[ which( y[,"Site"]<=18 ) ] <- "black"
+  colVector[ which( y[,"Site"]>=19 ) ] <- "red"
+  text( y[,"Y.sim"], y[,"Y.obs"],
+        labels=y[,"Site"], cex=0.8, col=colVector )
+  abline(0,1,lty=2)
+  y.lm <- lm(y[,"Y.obs"]~y[,"Y.sim"])
+  r2   <- signif( summary(y.lm)$r.squared, 2 )
+  abline( y.lm$coefficients[1], y.lm$coefficients[2], col="blue" )
+  legend( "bottomright",
+          legend=c("y=x", paste("r2= ",as.character(r2)) ),
+          col=c("black","blue"), lty=c(2,1), cex=0.7 )
+}
