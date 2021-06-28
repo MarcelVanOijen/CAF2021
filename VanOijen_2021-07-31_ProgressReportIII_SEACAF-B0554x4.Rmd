@@ -115,12 +115,12 @@ See Fig. \ref{fig:MapFarms}.
                               lon=-83.51, lat= 9.58)
   r_worldclim_alt_NW   <- getData('worldclim', var='alt'  , res=0.5,
                               lon=-92.07, lat=15.09)
-  tmean_CRI <- extract( r_worldclim_tmean_SE, points_CRI ) / 10
-  tmean_GTM <- extract( r_worldclim_tmean_NW, points_GTM ) / 10
-  prec_CRI  <- extract( r_worldclim_prec_SE , points_CRI )
-  prec_GTM  <- extract( r_worldclim_prec_NW , points_GTM )
-  alt_CRI   <- extract( r_worldclim_alt_SE  , points_CRI )
-  alt_GTM   <- extract( r_worldclim_alt_NW  , points_GTM )
+  tmean_CRI <- raster::extract( r_worldclim_tmean_SE, points_CRI ) / 10
+  tmean_GTM <- raster::extract( r_worldclim_tmean_NW, points_GTM ) / 10
+  prec_CRI  <- raster::extract( r_worldclim_prec_SE , points_CRI )
+  prec_GTM  <- raster::extract( r_worldclim_prec_NW , points_GTM )
+  alt_CRI   <- raster::extract( r_worldclim_alt_SE  , points_CRI )
+  alt_GTM   <- raster::extract( r_worldclim_alt_NW  , points_GTM )
 ```
     
 ```{r}
@@ -204,74 +204,74 @@ See Fig. \ref{fig:MapFarms}.
 
 ```{r}
   prec.data        <- df_CRIGTM 
-  prec.data$prec01 <- extract(prec01, points_CRIGTM) / 31
-  prec.data$prec02 <- extract(prec02, points_CRIGTM) / 28
-  prec.data$prec03 <- extract(prec03, points_CRIGTM) / 31
-  prec.data$prec04 <- extract(prec04, points_CRIGTM) / 30
-  prec.data$prec05 <- extract(prec05, points_CRIGTM) / 31
-  prec.data$prec06 <- extract(prec06, points_CRIGTM) / 30
-  prec.data$prec07 <- extract(prec07, points_CRIGTM) / 31
-  prec.data$prec08 <- extract(prec08, points_CRIGTM) / 31
-  prec.data$prec09 <- extract(prec09, points_CRIGTM) / 30
-  prec.data$prec10 <- extract(prec10, points_CRIGTM) / 31
-  prec.data$prec11 <- extract(prec11, points_CRIGTM) / 30
-  prec.data$prec12 <- extract(prec12, points_CRIGTM) / 31
+  prec.data$prec01 <- raster::extract(prec01, points_CRIGTM) / 31
+  prec.data$prec02 <- raster::extract(prec02, points_CRIGTM) / 28
+  prec.data$prec03 <- raster::extract(prec03, points_CRIGTM) / 31
+  prec.data$prec04 <- raster::extract(prec04, points_CRIGTM) / 30
+  prec.data$prec05 <- raster::extract(prec05, points_CRIGTM) / 31
+  prec.data$prec06 <- raster::extract(prec06, points_CRIGTM) / 30
+  prec.data$prec07 <- raster::extract(prec07, points_CRIGTM) / 31
+  prec.data$prec08 <- raster::extract(prec08, points_CRIGTM) / 31
+  prec.data$prec09 <- raster::extract(prec09, points_CRIGTM) / 30
+  prec.data$prec10 <- raster::extract(prec10, points_CRIGTM) / 31
+  prec.data$prec11 <- raster::extract(prec11, points_CRIGTM) / 30
+  prec.data$prec12 <- raster::extract(prec12, points_CRIGTM) / 31
   
   srad.data        <- df_CRIGTM 
-  srad.data$srad01 <- extract(srad01, points_CRIGTM) / 1000
-  srad.data$srad02 <- extract(srad02, points_CRIGTM) / 1000
-  srad.data$srad03 <- extract(srad03, points_CRIGTM) / 1000
-  srad.data$srad04 <- extract(srad04, points_CRIGTM) / 1000
-  srad.data$srad05 <- extract(srad05, points_CRIGTM) / 1000
-  srad.data$srad06 <- extract(srad06, points_CRIGTM) / 1000
-  srad.data$srad07 <- extract(srad07, points_CRIGTM) / 1000
-  srad.data$srad08 <- extract(srad08, points_CRIGTM) / 1000
-  srad.data$srad09 <- extract(srad09, points_CRIGTM) / 1000
-  srad.data$srad10 <- extract(srad10, points_CRIGTM) / 1000
-  srad.data$srad11 <- extract(srad11, points_CRIGTM) / 1000
-  srad.data$srad12 <- extract(srad12, points_CRIGTM) / 1000
+  srad.data$srad01 <- raster::extract(srad01, points_CRIGTM) / 1000
+  srad.data$srad02 <- raster::extract(srad02, points_CRIGTM) / 1000
+  srad.data$srad03 <- raster::extract(srad03, points_CRIGTM) / 1000
+  srad.data$srad04 <- raster::extract(srad04, points_CRIGTM) / 1000
+  srad.data$srad05 <- raster::extract(srad05, points_CRIGTM) / 1000
+  srad.data$srad06 <- raster::extract(srad06, points_CRIGTM) / 1000
+  srad.data$srad07 <- raster::extract(srad07, points_CRIGTM) / 1000
+  srad.data$srad08 <- raster::extract(srad08, points_CRIGTM) / 1000
+  srad.data$srad09 <- raster::extract(srad09, points_CRIGTM) / 1000
+  srad.data$srad10 <- raster::extract(srad10, points_CRIGTM) / 1000
+  srad.data$srad11 <- raster::extract(srad11, points_CRIGTM) / 1000
+  srad.data$srad12 <- raster::extract(srad12, points_CRIGTM) / 1000
   
   tavg.data        <- df_CRIGTM 
-  tavg.data$tavg01 <- extract(tavg01, points_CRIGTM) / 10
-  tavg.data$tavg02 <- extract(tavg02, points_CRIGTM) / 10
-  tavg.data$tavg03 <- extract(tavg03, points_CRIGTM) / 10
-  tavg.data$tavg04 <- extract(tavg04, points_CRIGTM) / 10
-  tavg.data$tavg05 <- extract(tavg05, points_CRIGTM) / 10
-  tavg.data$tavg06 <- extract(tavg06, points_CRIGTM) / 10
-  tavg.data$tavg07 <- extract(tavg07, points_CRIGTM) / 10
-  tavg.data$tavg08 <- extract(tavg08, points_CRIGTM) / 10
-  tavg.data$tavg09 <- extract(tavg09, points_CRIGTM) / 10
-  tavg.data$tavg10 <- extract(tavg10, points_CRIGTM) / 10
-  tavg.data$tavg11 <- extract(tavg11, points_CRIGTM) / 10
-  tavg.data$tavg12 <- extract(tavg12, points_CRIGTM) / 10
+  tavg.data$tavg01 <- raster::extract(tavg01, points_CRIGTM) / 10
+  tavg.data$tavg02 <- raster::extract(tavg02, points_CRIGTM) / 10
+  tavg.data$tavg03 <- raster::extract(tavg03, points_CRIGTM) / 10
+  tavg.data$tavg04 <- raster::extract(tavg04, points_CRIGTM) / 10
+  tavg.data$tavg05 <- raster::extract(tavg05, points_CRIGTM) / 10
+  tavg.data$tavg06 <- raster::extract(tavg06, points_CRIGTM) / 10
+  tavg.data$tavg07 <- raster::extract(tavg07, points_CRIGTM) / 10
+  tavg.data$tavg08 <- raster::extract(tavg08, points_CRIGTM) / 10
+  tavg.data$tavg09 <- raster::extract(tavg09, points_CRIGTM) / 10
+  tavg.data$tavg10 <- raster::extract(tavg10, points_CRIGTM) / 10
+  tavg.data$tavg11 <- raster::extract(tavg11, points_CRIGTM) / 10
+  tavg.data$tavg12 <- raster::extract(tavg12, points_CRIGTM) / 10
   
   vapr.data        <- df_CRIGTM 
-  vapr.data$vapr01 <- extract(vapr01, points_CRIGTM)
-  vapr.data$vapr02 <- extract(vapr02, points_CRIGTM)
-  vapr.data$vapr03 <- extract(vapr03, points_CRIGTM)
-  vapr.data$vapr04 <- extract(vapr04, points_CRIGTM)
-  vapr.data$vapr05 <- extract(vapr05, points_CRIGTM)
-  vapr.data$vapr06 <- extract(vapr06, points_CRIGTM)
-  vapr.data$vapr07 <- extract(vapr07, points_CRIGTM)
-  vapr.data$vapr08 <- extract(vapr08, points_CRIGTM)
-  vapr.data$vapr09 <- extract(vapr09, points_CRIGTM)
-  vapr.data$vapr10 <- extract(vapr10, points_CRIGTM)
-  vapr.data$vapr11 <- extract(vapr11, points_CRIGTM)
-  vapr.data$vapr12 <- extract(vapr12, points_CRIGTM)
+  vapr.data$vapr01 <- raster::extract(vapr01, points_CRIGTM)
+  vapr.data$vapr02 <- raster::extract(vapr02, points_CRIGTM)
+  vapr.data$vapr03 <- raster::extract(vapr03, points_CRIGTM)
+  vapr.data$vapr04 <- raster::extract(vapr04, points_CRIGTM)
+  vapr.data$vapr05 <- raster::extract(vapr05, points_CRIGTM)
+  vapr.data$vapr06 <- raster::extract(vapr06, points_CRIGTM)
+  vapr.data$vapr07 <- raster::extract(vapr07, points_CRIGTM)
+  vapr.data$vapr08 <- raster::extract(vapr08, points_CRIGTM)
+  vapr.data$vapr09 <- raster::extract(vapr09, points_CRIGTM)
+  vapr.data$vapr10 <- raster::extract(vapr10, points_CRIGTM)
+  vapr.data$vapr11 <- raster::extract(vapr11, points_CRIGTM)
+  vapr.data$vapr12 <- raster::extract(vapr12, points_CRIGTM)
 
   wind.data        <- df_CRIGTM 
-  wind.data$wind01 <- extract(wind01, points_CRIGTM)
-  wind.data$wind02 <- extract(wind02, points_CRIGTM)
-  wind.data$wind03 <- extract(wind03, points_CRIGTM)
-  wind.data$wind04 <- extract(wind04, points_CRIGTM)
-  wind.data$wind05 <- extract(wind05, points_CRIGTM)
-  wind.data$wind06 <- extract(wind06, points_CRIGTM)
-  wind.data$wind07 <- extract(wind07, points_CRIGTM)
-  wind.data$wind08 <- extract(wind08, points_CRIGTM)
-  wind.data$wind09 <- extract(wind09, points_CRIGTM)
-  wind.data$wind10 <- extract(wind10, points_CRIGTM)
-  wind.data$wind11 <- extract(wind11, points_CRIGTM)
-  wind.data$wind12 <- extract(wind12, points_CRIGTM)
+  wind.data$wind01 <- raster::extract(wind01, points_CRIGTM)
+  wind.data$wind02 <- raster::extract(wind02, points_CRIGTM)
+  wind.data$wind03 <- raster::extract(wind03, points_CRIGTM)
+  wind.data$wind04 <- raster::extract(wind04, points_CRIGTM)
+  wind.data$wind05 <- raster::extract(wind05, points_CRIGTM)
+  wind.data$wind06 <- raster::extract(wind06, points_CRIGTM)
+  wind.data$wind07 <- raster::extract(wind07, points_CRIGTM)
+  wind.data$wind08 <- raster::extract(wind08, points_CRIGTM)
+  wind.data$wind09 <- raster::extract(wind09, points_CRIGTM)
+  wind.data$wind10 <- raster::extract(wind10, points_CRIGTM)
+  wind.data$wind11 <- raster::extract(wind11, points_CRIGTM)
+  wind.data$wind12 <- raster::extract(wind12, points_CRIGTM)
 ```
 
 ```{r}
