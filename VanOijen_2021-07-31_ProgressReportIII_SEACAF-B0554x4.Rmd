@@ -65,12 +65,22 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   file_coords_G.f <- "coordinates_G.csv"
   
   dir_WC      <- "weather/WorldClim/"
-  dir_WC_prec <- paste0( dir_WC, "prec/" ) # Monthly climatic means 1970-2000
-  dir_WC_srad <- paste0( dir_WC, "srad/" ) # Monthly climatic means 1970-2000
-  dir_WC_tmax <- paste0( dir_WC, "tmax/" ) # Monthly climatic means 1970-2000
-  dir_WC_tmin <- paste0( dir_WC, "tmin/" ) # Monthly climatic means 1970-2000
-  dir_WC_vapr <- paste0( dir_WC, "vapr/" ) # Monthly climatic means 1970-2000
-  dir_WC_wind <- paste0( dir_WC, "wind/" ) # Monthly climatic means 1970-2000
+  
+  # Monthly climatic means 1970-2000 (scale 30 seconds)
+  dir_WC_prec <- paste0( dir_WC, "prec/" ) 
+  dir_WC_srad <- paste0( dir_WC, "srad/" )
+  dir_WC_tmax <- paste0( dir_WC, "tmax/" )
+  dir_WC_tmin <- paste0( dir_WC, "tmin/" )
+  dir_WC_vapr <- paste0( dir_WC, "vapr/" )
+  dir_WC_wind <- paste0( dir_WC, "wind/" )
+  
+  # Monthly weather 2000-2018 (scale 2.5 minutes)
+  dir_WC_prec.2000_2009 <- paste0( dir_WC, "prec_2000_2009/" )
+  dir_WC_prec.2010_2018 <- paste0( dir_WC, "prec_2010_2018/" )
+  dir_WC_tmax.2000_2009 <- paste0( dir_WC, "tmax_2000_2009/" )
+  dir_WC_tmax.2010_2018 <- paste0( dir_WC, "tmax_2010_2018/" )
+  dir_WC_tmin.2000_2009 <- paste0( dir_WC, "tmin_2000_2009/" )
+  dir_WC_tmin.2010_2018 <- paste0( dir_WC, "tmin_2010_2018/" )
 ```
 
 ```{r}
@@ -115,8 +125,8 @@ See Fig. \ref{fig:MapFarms}.
   spdf_G   <- getData('GADM', country="GTM", level=0)
   spdf_G.f <- crop(spdf_G, extent(-92.1,-90.4,14.4, 15.1))
   
-  ext_C    <- extent( spdf_C ) ; ext_C.f <- extent( spdf_C.f )
-  ext_G    <- extent( spdf_G ) ; ext_G.f <- extent( spdf_G.f )
+  ext_C <- extent( spdf_C ) ; ext_C.f <- extent( spdf_C.f )
+  ext_G <- extent( spdf_G ) ; ext_G.f <- extent( spdf_G.f )
 ```
 
 ```{r}
@@ -134,27 +144,27 @@ See Fig. \ref{fig:MapFarms}.
 ```
     
 ```{r}
-  code_C <- df_C.f$code - 1000
-  code_G <- df_G.f$code - 2000
+  code_C.f <- df_C.f$code - 1000
+  code_G.f <- df_G.f$code - 2000
   x_C.f <- coords_C.f[,"lon"] ; y_C.f <- coords_C.f[,"lat"] 
   x_G.f <- coords_G.f[,"lon"] ; y_G.f <- coords_G.f[,"lat"] 
 
   plot_C.f <- function() {
     plot  ( spdf_C, add=T )
     points( x_C.f, y_C.f, pch=1, cex=0.5)
-    # text  ( x_C.f, y_C.f, labels=code_C, pos=2, cex=0.5)
+    # text  ( x_C.f, y_C.f, labels=code_C.f, pos=2, cex=0.5)
   }
 
   plot_G.f <- function() {
     plot  ( spdf_G, add=T )
     points( x_G.f, y_G.f, pch=1, cex=0.5)
-    # text  ( x_G.f, y_G.f, labels=code_C, pos=2, cex=0.5)
+    # text  ( x_G.f, y_G.f, labels=code_C.f, pos=2, cex=0.5)
   }
 ```
 
-## RasterStack approach
+## Climate data 1970-2000
 
-See https://www.benjaminbell.co.uk/2018/02/rasterstacks-and-rasterplot.html.
+We import the files in RasterStacks (see https://www.benjaminbell.co.uk/2018/02/rasterstacks-and-rasterplot.html ).
 
 ```{r}
   prec <- stack( list.files( dir_WC_prec, ".tif", full.names=T ) )
@@ -190,12 +200,12 @@ See https://www.benjaminbell.co.uk/2018/02/rasterstacks-and-rasterplot.html.
 ```
 
 ```{r}
-  prec_C <- crop(prec, ext_C) ; prec_G <- crop(prec, ext_G)
-  srad_C <- crop(srad, ext_C) ; srad_G <- crop(srad, ext_G)
-  tmax_C <- crop(tmax, ext_C) ; tmax_G <- crop(tmax, ext_G)
-  tmin_C <- crop(tmin, ext_C) ; tmin_G <- crop(tmin, ext_G)
-  vapr_C <- crop(vapr, ext_C) ; vapr_G <- crop(vapr, ext_G)
-  wind_C <- crop(wind, ext_C) ; wind_G <- crop(wind, ext_G)
+  prec_C <- crop(prec, ext_C) ; prec_G <- crop(prec, ext_G) ; rm(prec)
+  srad_C <- crop(srad, ext_C) ; srad_G <- crop(srad, ext_G) ; rm(srad)
+  tmax_C <- crop(tmax, ext_C) ; tmax_G <- crop(tmax, ext_G) ; rm(tmax)
+  tmin_C <- crop(tmin, ext_C) ; tmin_G <- crop(tmin, ext_G) ; rm(tmin)
+  vapr_C <- crop(vapr, ext_C) ; vapr_G <- crop(vapr, ext_G) ; rm(vapr)
+  wind_C <- crop(wind, ext_C) ; wind_G <- crop(wind, ext_G) ; rm(wind)
 ```
 
 ```{r}
@@ -242,185 +252,26 @@ See https://www.benjaminbell.co.uk/2018/02/rasterstacks-and-rasterplot.html.
   points( alt_G.f, RAIN_G.f[,1], col="red" )
 ```
 
-
-
-## RasterLayer approach
-
-See https://www.benjaminbell.co.uk/2018/01/extracting-data-and-making-climate-maps.html.
+## Weather anomalies 2000-2018
 
 ```{r}
-  prec01 <- raster( paste0( dir_WC_prec, "wc2.1_30s_prec_01.tif" ) )
-  prec02 <- raster( paste0( dir_WC_prec, "wc2.1_30s_prec_02.tif" ) )
-  prec03 <- raster( paste0( dir_WC_prec, "wc2.1_30s_prec_03.tif" ) )
-  prec04 <- raster( paste0( dir_WC_prec, "wc2.1_30s_prec_04.tif" ) )
-  prec05 <- raster( paste0( dir_WC_prec, "wc2.1_30s_prec_05.tif" ) )
-  prec06 <- raster( paste0( dir_WC_prec, "wc2.1_30s_prec_06.tif" ) )
-  prec07 <- raster( paste0( dir_WC_prec, "wc2.1_30s_prec_07.tif" ) )
-  prec08 <- raster( paste0( dir_WC_prec, "wc2.1_30s_prec_08.tif" ) )
-  prec09 <- raster( paste0( dir_WC_prec, "wc2.1_30s_prec_09.tif" ) )
-  prec10 <- raster( paste0( dir_WC_prec, "wc2.1_30s_prec_10.tif" ) )
-  prec11 <- raster( paste0( dir_WC_prec, "wc2.1_30s_prec_11.tif" ) )
-  prec12 <- raster( paste0( dir_WC_prec, "wc2.1_30s_prec_12.tif" ) )
-  
-  srad01 <- raster( paste0( dir_WC_srad, "wc2.1_30s_srad_01.tif" ) )
-  srad02 <- raster( paste0( dir_WC_srad, "wc2.1_30s_srad_02.tif" ) )
-  srad03 <- raster( paste0( dir_WC_srad, "wc2.1_30s_srad_03.tif" ) )
-  srad04 <- raster( paste0( dir_WC_srad, "wc2.1_30s_srad_04.tif" ) )
-  srad05 <- raster( paste0( dir_WC_srad, "wc2.1_30s_srad_05.tif" ) )
-  srad06 <- raster( paste0( dir_WC_srad, "wc2.1_30s_srad_06.tif" ) )
-  srad07 <- raster( paste0( dir_WC_srad, "wc2.1_30s_srad_07.tif" ) )
-  srad08 <- raster( paste0( dir_WC_srad, "wc2.1_30s_srad_08.tif" ) )
-  srad09 <- raster( paste0( dir_WC_srad, "wc2.1_30s_srad_09.tif" ) )
-  srad10 <- raster( paste0( dir_WC_srad, "wc2.1_30s_srad_10.tif" ) )
-  srad11 <- raster( paste0( dir_WC_srad, "wc2.1_30s_srad_11.tif" ) )
-  srad12 <- raster( paste0( dir_WC_srad, "wc2.1_30s_srad_12.tif" ) )
-  
-  tmax01 <- raster( paste0( dir_WC_tmax, "wc2.1_30s_tmax_01.tif" ) )
-  tmax02 <- raster( paste0( dir_WC_tmax, "wc2.1_30s_tmax_02.tif" ) )
-  tmax03 <- raster( paste0( dir_WC_tmax, "wc2.1_30s_tmax_03.tif" ) )
-  tmax04 <- raster( paste0( dir_WC_tmax, "wc2.1_30s_tmax_04.tif" ) )
-  tmax05 <- raster( paste0( dir_WC_tmax, "wc2.1_30s_tmax_05.tif" ) )
-  tmax06 <- raster( paste0( dir_WC_tmax, "wc2.1_30s_tmax_06.tif" ) )
-  tmax07 <- raster( paste0( dir_WC_tmax, "wc2.1_30s_tmax_07.tif" ) )
-  tmax08 <- raster( paste0( dir_WC_tmax, "wc2.1_30s_tmax_08.tif" ) )
-  tmax09 <- raster( paste0( dir_WC_tmax, "wc2.1_30s_tmax_09.tif" ) )
-  tmax10 <- raster( paste0( dir_WC_tmax, "wc2.1_30s_tmax_10.tif" ) )
-  tmax11 <- raster( paste0( dir_WC_tmax, "wc2.1_30s_tmax_11.tif" ) )
-  tmax12 <- raster( paste0( dir_WC_tmax, "wc2.1_30s_tmax_12.tif" ) )
-  
-  tmin01 <- raster( paste0( dir_WC_tmin, "wc2.1_30s_tmin_01.tif" ) )
-  tmin02 <- raster( paste0( dir_WC_tmin, "wc2.1_30s_tmin_02.tif" ) )
-  tmin03 <- raster( paste0( dir_WC_tmin, "wc2.1_30s_tmin_03.tif" ) )
-  tmin04 <- raster( paste0( dir_WC_tmin, "wc2.1_30s_tmin_04.tif" ) )
-  tmin05 <- raster( paste0( dir_WC_tmin, "wc2.1_30s_tmin_05.tif" ) )
-  tmin06 <- raster( paste0( dir_WC_tmin, "wc2.1_30s_tmin_06.tif" ) )
-  tmin07 <- raster( paste0( dir_WC_tmin, "wc2.1_30s_tmin_07.tif" ) )
-  tmin08 <- raster( paste0( dir_WC_tmin, "wc2.1_30s_tmin_08.tif" ) )
-  tmin09 <- raster( paste0( dir_WC_tmin, "wc2.1_30s_tmin_09.tif" ) )
-  tmin10 <- raster( paste0( dir_WC_tmin, "wc2.1_30s_tmin_10.tif" ) )
-  tmin11 <- raster( paste0( dir_WC_tmin, "wc2.1_30s_tmin_11.tif" ) )
-  tmin12 <- raster( paste0( dir_WC_tmin, "wc2.1_30s_tmin_12.tif" ) )
-  
-  vapr01 <- raster( paste0( dir_WC_vapr, "wc2.1_30s_vapr_01.tif" ) )
-  vapr02 <- raster( paste0( dir_WC_vapr, "wc2.1_30s_vapr_02.tif" ) )
-  vapr03 <- raster( paste0( dir_WC_vapr, "wc2.1_30s_vapr_03.tif" ) )
-  vapr04 <- raster( paste0( dir_WC_vapr, "wc2.1_30s_vapr_04.tif" ) )
-  vapr05 <- raster( paste0( dir_WC_vapr, "wc2.1_30s_vapr_05.tif" ) )
-  vapr06 <- raster( paste0( dir_WC_vapr, "wc2.1_30s_vapr_06.tif" ) )
-  vapr07 <- raster( paste0( dir_WC_vapr, "wc2.1_30s_vapr_07.tif" ) )
-  vapr08 <- raster( paste0( dir_WC_vapr, "wc2.1_30s_vapr_08.tif" ) )
-  vapr09 <- raster( paste0( dir_WC_vapr, "wc2.1_30s_vapr_09.tif" ) )
-  vapr10 <- raster( paste0( dir_WC_vapr, "wc2.1_30s_vapr_10.tif" ) )
-  vapr11 <- raster( paste0( dir_WC_vapr, "wc2.1_30s_vapr_11.tif" ) )
-  vapr12 <- raster( paste0( dir_WC_vapr, "wc2.1_30s_vapr_12.tif" ) )
-  
-  wind01 <- raster( paste0( dir_WC_wind, "wc2.1_30s_wind_01.tif" ) )
-  wind02 <- raster( paste0( dir_WC_wind, "wc2.1_30s_wind_02.tif" ) )
-  wind03 <- raster( paste0( dir_WC_wind, "wc2.1_30s_wind_03.tif" ) )
-  wind04 <- raster( paste0( dir_WC_wind, "wc2.1_30s_wind_04.tif" ) )
-  wind05 <- raster( paste0( dir_WC_wind, "wc2.1_30s_wind_05.tif" ) )
-  wind06 <- raster( paste0( dir_WC_wind, "wc2.1_30s_wind_06.tif" ) )
-  wind07 <- raster( paste0( dir_WC_wind, "wc2.1_30s_wind_07.tif" ) )
-  wind08 <- raster( paste0( dir_WC_wind, "wc2.1_30s_wind_08.tif" ) )
-  wind09 <- raster( paste0( dir_WC_wind, "wc2.1_30s_wind_09.tif" ) )
-  wind10 <- raster( paste0( dir_WC_wind, "wc2.1_30s_wind_10.tif" ) )
-  wind11 <- raster( paste0( dir_WC_wind, "wc2.1_30s_wind_11.tif" ) )
-  wind12 <- raster( paste0( dir_WC_wind, "wc2.1_30s_wind_12.tif" ) )
+  prec.00_09 <- stack( list.files( dir_WC_prec.2000_2009, ".tif", full.names=T ) )
+  tmax.00_09 <- stack( list.files( dir_WC_tmax.2000_2009, ".tif", full.names=T ) )
+  tmin.00_09 <- stack( list.files( dir_WC_tmin.2000_2009, ".tif", full.names=T ) )
+
+  prec_C.00_09 <- crop(prec.00_09, ext_C)
+  prec_G.00_09 <- crop(prec.00_09, ext_G) ; rm(prec.00_09)
+  tmax_C.00_09 <- crop(tmax.00_09, ext_C)
+  tmax_G.00_09 <- crop(tmax.00_09, ext_G) ; rm(tmax.00_09)
+  tmin_C.00_09 <- crop(tmin.00_09, ext_C)
+  tmin_G.00_09 <- crop(tmin.00_09, ext_G) ; rm(tmin.00_09)
+
+  # month <- c( "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  #             "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" )
+  # names(prec.A) <- names(srad.A) <- names(tmax.A) <-
+  # names(tmin.A) <- names(vapr.A) <- names(wind.A) <- month
 ```
 
-```{r}
-  prec.data        <- df_CG.f
-  prec.data$prec01 <- raster::extract(prec01, coords_CG.f) / 31
-  prec.data$prec02 <- raster::extract(prec02, coords_CG.f) / 28
-  prec.data$prec03 <- raster::extract(prec03, coords_CG.f) / 31
-  prec.data$prec04 <- raster::extract(prec04, coords_CG.f) / 30
-  prec.data$prec05 <- raster::extract(prec05, coords_CG.f) / 31
-  prec.data$prec06 <- raster::extract(prec06, coords_CG.f) / 30
-  prec.data$prec07 <- raster::extract(prec07, coords_CG.f) / 31
-  prec.data$prec08 <- raster::extract(prec08, coords_CG.f) / 31
-  prec.data$prec09 <- raster::extract(prec09, coords_CG.f) / 30
-  prec.data$prec10 <- raster::extract(prec10, coords_CG.f) / 31
-  prec.data$prec11 <- raster::extract(prec11, coords_CG.f) / 30
-  prec.data$prec12 <- raster::extract(prec12, coords_CG.f) / 31
-  
-  srad.data        <- df_CG.f 
-  srad.data$srad01 <- raster::extract(srad01, coords_CG.f) / 1000
-  srad.data$srad02 <- raster::extract(srad02, coords_CG.f) / 1000
-  srad.data$srad03 <- raster::extract(srad03, coords_CG.f) / 1000
-  srad.data$srad04 <- raster::extract(srad04, coords_CG.f) / 1000
-  srad.data$srad05 <- raster::extract(srad05, coords_CG.f) / 1000
-  srad.data$srad06 <- raster::extract(srad06, coords_CG.f) / 1000
-  srad.data$srad07 <- raster::extract(srad07, coords_CG.f) / 1000
-  srad.data$srad08 <- raster::extract(srad08, coords_CG.f) / 1000
-  srad.data$srad09 <- raster::extract(srad09, coords_CG.f) / 1000
-  srad.data$srad10 <- raster::extract(srad10, coords_CG.f) / 1000
-  srad.data$srad11 <- raster::extract(srad11, coords_CG.f) / 1000
-  srad.data$srad12 <- raster::extract(srad12, coords_CG.f) / 1000
-  
-  tmax.data        <- df_CG.f 
-  tmax.data$tmax01 <- raster::extract(tmax01, coords_CG.f)
-  tmax.data$tmax02 <- raster::extract(tmax02, coords_CG.f)
-  tmax.data$tmax03 <- raster::extract(tmax03, coords_CG.f)
-  tmax.data$tmax04 <- raster::extract(tmax04, coords_CG.f)
-  tmax.data$tmax05 <- raster::extract(tmax05, coords_CG.f)
-  tmax.data$tmax06 <- raster::extract(tmax06, coords_CG.f)
-  tmax.data$tmax07 <- raster::extract(tmax07, coords_CG.f)
-  tmax.data$tmax08 <- raster::extract(tmax08, coords_CG.f)
-  tmax.data$tmax09 <- raster::extract(tmax09, coords_CG.f)
-  tmax.data$tmax10 <- raster::extract(tmax10, coords_CG.f)
-  tmax.data$tmax11 <- raster::extract(tmax11, coords_CG.f)
-  tmax.data$tmax12 <- raster::extract(tmax12, coords_CG.f)
-  
-  tmin.data        <- df_CG.f 
-  tmin.data$tmin01 <- raster::extract(tmin01, coords_CG.f)
-  tmin.data$tmin02 <- raster::extract(tmin02, coords_CG.f)
-  tmin.data$tmin03 <- raster::extract(tmin03, coords_CG.f)
-  tmin.data$tmin04 <- raster::extract(tmin04, coords_CG.f)
-  tmin.data$tmin05 <- raster::extract(tmin05, coords_CG.f)
-  tmin.data$tmin06 <- raster::extract(tmin06, coords_CG.f)
-  tmin.data$tmin07 <- raster::extract(tmin07, coords_CG.f)
-  tmin.data$tmin08 <- raster::extract(tmin08, coords_CG.f)
-  tmin.data$tmin09 <- raster::extract(tmin09, coords_CG.f)
-  tmin.data$tmin10 <- raster::extract(tmin10, coords_CG.f)
-  tmin.data$tmin11 <- raster::extract(tmin11, coords_CG.f)
-  tmin.data$tmin12 <- raster::extract(tmin12, coords_CG.f)
-  
-  vapr.data        <- df_CG.f 
-  vapr.data$vapr01 <- raster::extract(vapr01, coords_CG.f)
-  vapr.data$vapr02 <- raster::extract(vapr02, coords_CG.f)
-  vapr.data$vapr03 <- raster::extract(vapr03, coords_CG.f)
-  vapr.data$vapr04 <- raster::extract(vapr04, coords_CG.f)
-  vapr.data$vapr05 <- raster::extract(vapr05, coords_CG.f)
-  vapr.data$vapr06 <- raster::extract(vapr06, coords_CG.f)
-  vapr.data$vapr07 <- raster::extract(vapr07, coords_CG.f)
-  vapr.data$vapr08 <- raster::extract(vapr08, coords_CG.f)
-  vapr.data$vapr09 <- raster::extract(vapr09, coords_CG.f)
-  vapr.data$vapr10 <- raster::extract(vapr10, coords_CG.f)
-  vapr.data$vapr11 <- raster::extract(vapr11, coords_CG.f)
-  vapr.data$vapr12 <- raster::extract(vapr12, coords_CG.f)
-
-  wind.data        <- df_CG.f 
-  wind.data$wind01 <- raster::extract(wind01, coords_CG.f)
-  wind.data$wind02 <- raster::extract(wind02, coords_CG.f)
-  wind.data$wind03 <- raster::extract(wind03, coords_CG.f)
-  wind.data$wind04 <- raster::extract(wind04, coords_CG.f)
-  wind.data$wind05 <- raster::extract(wind05, coords_CG.f)
-  wind.data$wind06 <- raster::extract(wind06, coords_CG.f)
-  wind.data$wind07 <- raster::extract(wind07, coords_CG.f)
-  wind.data$wind08 <- raster::extract(wind08, coords_CG.f)
-  wind.data$wind09 <- raster::extract(wind09, coords_CG.f)
-  wind.data$wind10 <- raster::extract(wind10, coords_CG.f)
-  wind.data$wind11 <- raster::extract(wind11, coords_CG.f)
-  wind.data$wind12 <- raster::extract(wind12, coords_CG.f)
-```
-
-```{r}
-  par( mfrow=c(2,2) )
-  plot  ( alt_CG.f, tmax.data$tmax07, ylim=c(0,max(tmax.data$tmax07)) )
-  points( alt_CG.f, tmax.data$tmax01, col="red" )
-  plot  ( alt_CG.f, prec.data$prec07, ylim=c(0,max(prec.data$prec07)) )
-  points( alt_CG.f, prec.data$prec01, col="red" )
-```
 
 ## Data processing
 
@@ -699,38 +550,6 @@ We now virtually add 100 avocado trees per hectare to each of the experimental t
   plot_NbalanceSoil( output.MAP.A1, title1="Soil N-balance 1", title2="" )
   par( mar=c(3,3,3,0) )
   plot_CbalanceSoil( output.MAP.A1, title1="Soil C-balance 1", title2="" )
-```
-
-```{r}
-  # The following code chunks are for reading WorldClim (WC) data directly from R.
-  # Presumably these are data from WC1.4 which we will not use here; we use WC2.1.
-```
-
-```{r}
-  r_worldclim_tmean_SE <- getData('worldclim', var='tmean', res=0.5,
-                              lon=-83.51, lat= 9.58)
-  r_worldclim_tmean_NW <- getData('worldclim', var='tmean', res=0.5,
-                              lon=-92.07, lat=15.09)
-  r_worldclim_prec_SE  <- getData('worldclim', var='prec' , res=0.5,
-                              lon=-83.51, lat= 9.58)
-  r_worldclim_prec_NW  <- getData('worldclim', var='prec' , res=0.5,
-                              lon=-92.07, lat=15.09)
-  tmean_C.f <- raster::extract( r_worldclim_tmean_SE, coords_C.f )
-  tmean_G.f <- raster::extract( r_worldclim_tmean_NW, coords_G.f )
-  prec_C.f  <- raster::extract( r_worldclim_prec_SE , coords_C.f )
-  prec_G.f  <- raster::extract( r_worldclim_prec_NW , coords_G.f )
-```
-    
-```{r}
-  #  Comparing WC2.1 with WC1.4
-  par( mfrow=c(2,2) )
-
-  plot( prec.data$prec01, c(prec_C.f[,1],prec_G.f[,1]) )
-  plot( prec.data$prec07, c(prec_C.f[,7],prec_G.f[,7]) )
-  plot( 0.5 * (tmin.data$tmin01 + tmax.data$tmax01),
-        c(tmean_C.f[,1],tmean_G.f[,1]) )
-  plot( 0.5 * (tmin.data$tmin07 + tmax.data$tmax07),
-        c(tmean_C.f[,7],tmean_G.f[,7]) )
 ```
 
 
