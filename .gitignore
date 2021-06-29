@@ -17,3 +17,5 @@ BC_04_56.RData
 weather/WorldClim/
 data/Farms SEACAF/
 wc0.5/
+gadm36_CRI_0_sp.rds
+gadm36_GTM_0_sp.rds
