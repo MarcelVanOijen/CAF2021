@@ -106,18 +106,6 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   i_C.f  <- 1:n_C.f             ; i_G.f <- (n_C.f+1):n_CG.f
 ```
 
-See Fig. \ref{fig:MapFarms}.
-
-```{r, fig.cap="\\label{fig:MapFarms}Locations of SEACAF farms in Costa Rica and Guatemala."}
-  worldmap <- getMap(resolution = "high")
-  plot( worldmap,
-        col="lightgrey", border="darkgray",
-        xlim=c(-93,-83), ylim=c(8,18),
-        bg="aliceblue", asp=1 )
-  points( coords_C.f, col="red" , pch=1, cex=0.2 )
-  points( coords_G.f, col="blue", pch=1, cex=0.2 )
-```
-
 ```{r}
   spdf_C   <- getData('GADM', country="CRI", level=0)
   spdf_C   <- crop(spdf_C, extent(-86,-82, 8, 12))
@@ -167,45 +155,32 @@ See Fig. \ref{fig:MapFarms}.
 We import the files in RasterStacks (see https://www.benjaminbell.co.uk/2018/02/rasterstacks-and-rasterplot.html ).
 
 ```{r}
-  prec <- stack( list.files( dir_WC_prec, ".tif", full.names=T ) )
-  srad <- stack( list.files( dir_WC_srad, ".tif", full.names=T ) )
-  tmax <- stack( list.files( dir_WC_tmax, ".tif", full.names=T ) )
-  tmin <- stack( list.files( dir_WC_tmin, ".tif", full.names=T ) )
-  vapr <- stack( list.files( dir_WC_vapr, ".tif", full.names=T ) )
-  wind <- stack( list.files( dir_WC_wind, ".tif", full.names=T ) )
+  # prec <- stack( list.files( dir_WC_prec, ".tif", full.names=T ) )
+  # srad <- stack( list.files( dir_WC_srad, ".tif", full.names=T ) )
+  # tmax <- stack( list.files( dir_WC_tmax, ".tif", full.names=T ) )
+  # tmin <- stack( list.files( dir_WC_tmin, ".tif", full.names=T ) )
+  # vapr <- stack( list.files( dir_WC_vapr, ".tif", full.names=T ) )
+  # wind <- stack( list.files( dir_WC_wind, ".tif", full.names=T ) )
 
   month <- c( "Jan", "Feb", "Mar", "Apr", "May", "Jun",
               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" )
-  names(prec) <- names(srad) <- names(tmax) <-
-  names(tmin) <- names(vapr) <- names(wind) <- month
-```
-
-```{r}
-  monl    <- c( 31, 28.25, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 )
-
-  GR_CG.f   <- round( raster::extract(srad, coords_CG.f) / 1000, 1 )
-  TMIN_CG.f <- raster::extract(tmin, coords_CG.f)
-  TMAX_CG.f <- raster::extract(tmax, coords_CG.f)
-  VP_CG.f   <- raster::extract(vapr, coords_CG.f)
-  WN_CG.f   <- raster::extract(wind, coords_CG.f)
-  RAIN_CG.f <- raster::extract(prec, coords_CG.f)
-    for(m in 1:12) RAIN_CG.f[,m] <- round( RAIN_CG.f[,m] / monl[m], 2 )
+  # names(prec) <- names(srad) <- names(tmax) <-
+  # names(tmin) <- names(vapr) <- names(wind) <- month
   
-  GR_C.f   <- GR_CG.f  [ i_C.f, ] ; GR_G.f   <- GR_CG.f  [ i_G.f, ]
-  TMIN_C.f <- TMIN_CG.f[ i_C.f, ] ; TMIN_G.f <- TMIN_CG.f[ i_G.f, ]
-  TMAX_C.f <- TMAX_CG.f[ i_C.f, ] ; TMAX_G.f <- TMAX_CG.f[ i_G.f, ]
-  VP_C.f   <- VP_CG.f  [ i_C.f, ] ; VP_G.f   <- VP_CG.f  [ i_G.f, ]
-  WN_C.f   <- WN_CG.f  [ i_C.f, ] ; WN_G.f   <- WN_CG.f  [ i_G.f, ]
-  RAIN_C.f <- RAIN_CG.f[ i_C.f, ] ; RAIN_G.f <- RAIN_CG.f[ i_G.f, ]
-```
+  # prec_C <- crop(prec, ext_C) ; prec_G <- crop(prec, ext_G) ; rm(prec)
+  # srad_C <- crop(srad, ext_C) ; srad_G <- crop(srad, ext_G) ; rm(srad)
+  # tmax_C <- crop(tmax, ext_C) ; tmax_G <- crop(tmax, ext_G) ; rm(tmax)
+  # tmin_C <- crop(tmin, ext_C) ; tmin_G <- crop(tmin, ext_G) ; rm(tmin)
+  # vapr_C <- crop(vapr, ext_C) ; vapr_G <- crop(vapr, ext_G) ; rm(vapr)
+  # wind_C <- crop(wind, ext_C) ; wind_G <- crop(wind, ext_G) ; rm(wind)
+  # 
+  # save( prec_C, srad_C, tmax_C, tmin_C, vapr_C, wind_C,
+  #       file=paste0( dir_WC, "WC_climate_C.RData" ) )
+  # save( prec_G, srad_G, tmax_G, tmin_G, vapr_G, wind_G,
+  #       file=paste0( dir_WC, "WC_climate_G.RData" ) )
 
-```{r}
-  prec_C <- crop(prec, ext_C) ; prec_G <- crop(prec, ext_G) ; rm(prec)
-  srad_C <- crop(srad, ext_C) ; srad_G <- crop(srad, ext_G) ; rm(srad)
-  tmax_C <- crop(tmax, ext_C) ; tmax_G <- crop(tmax, ext_G) ; rm(tmax)
-  tmin_C <- crop(tmin, ext_C) ; tmin_G <- crop(tmin, ext_G) ; rm(tmin)
-  vapr_C <- crop(vapr, ext_C) ; vapr_G <- crop(vapr, ext_G) ; rm(vapr)
-  wind_C <- crop(wind, ext_C) ; wind_G <- crop(wind, ext_G) ; rm(wind)
+  load( paste0( dir_WC, "WC_climate_C.RData" ) )
+  load( paste0( dir_WC, "WC_climate_G.RData" ) )
 ```
 
 ```{r}
@@ -216,10 +191,49 @@ We import the files in RasterStacks (see https://www.benjaminbell.co.uk/2018/02/
 ```
 
 ```{r}
-  par( mfrow=c(1,2), mar=c(3,3,3,5) )
+  monl    <- c( 31, 28.25, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 )
 
-  plot( alt_C, main="alt_C", addfun=plot_C.f, zlim=c(0,4000) )
-  plot( alt_G, main="alt_G", addfun=plot_G.f, zlim=c(0,4000) )
+  GR_C.f   <- round( raster::extract(srad_C, coords_C.f) / 1000, 1 )
+  TMIN_C.f <-        raster::extract(tmin_C, coords_C.f)
+  TMAX_C.f <-        raster::extract(tmax_C, coords_C.f)
+  VP_C.f   <-        raster::extract(vapr_C, coords_C.f)
+  WN_C.f   <-        raster::extract(wind_C, coords_C.f)
+  RAIN_C.f <-        raster::extract(prec_C, coords_C.f)
+    for(m in 1:12) RAIN_C.f[,m] <- round( RAIN_C.f[,m] / monl[m], 2 )
+  
+  GR_G.f   <- round( raster::extract(srad_G, coords_G.f) / 1000, 1 )
+  TMIN_G.f <-        raster::extract(tmin_G, coords_G.f)
+  TMAX_G.f <-        raster::extract(tmax_G, coords_G.f)
+  VP_G.f   <-        raster::extract(vapr_G, coords_G.f)
+  WN_G.f   <-        raster::extract(wind_G, coords_G.f)
+  RAIN_G.f <-        raster::extract(prec_G, coords_G.f)
+    for(m in 1:12) RAIN_G.f[,m] <- round( RAIN_G.f[,m] / monl[m], 2 )
+  
+  GR_CG.f   <- rbind( GR_C.f  , GR_G.f   )
+  TMIN_CG.f <- rbind( TMIN_C.f, TMIN_G.f )
+  TMAX_CG.f <- rbind( TMAX_C.f, TMAX_G.f )
+  VP_CG.f   <- rbind( VP_C.f  , VP_G.f   )
+  WN_CG.f   <- rbind( WN_C.f  , WN_G.f   )
+  RAIN_CG.f <- rbind( RAIN_C.f, RAIN_G.f )
+```
+
+The locations of the farms are depicted in Fig. \ref{fig:Maps_CG}.
+
+```{r Maps_CG, out.width="400px", fig.align="center", fig.cap="\\label{Maps_CG}Locations of the farms in Costa Rica and Guatemala."}
+  # par( mfrow=c(1,2), mar=c(3,3,3,5) )
+  # plot( alt_C, main="alt_C", addfun=plot_C.f, zlim=c(0,4000) )
+  # plot( alt_G, main="alt_G", addfun=plot_G.f, zlim=c(0,4000) )
+
+  knitr::include_graphics("images/Maps_CG.png")
+
+  # Alternative way of producing a map with the farm locations
+  # worldmap <- getMap(resolution = "high")
+  # plot( worldmap,
+  #       col="lightgrey", border="darkgray",
+  #       xlim=c(-93,-83), ylim=c(8,18),
+  #       bg="aliceblue", asp=1 )
+  # points( coords_C.f, col="red" , pch=1, cex=0.2 )
+  # points( coords_G.f, col="blue", pch=1, cex=0.2 )
 ```
 
 ```{r}
@@ -255,21 +269,44 @@ We import the files in RasterStacks (see https://www.benjaminbell.co.uk/2018/02/
 ## Weather anomalies 2000-2018
 
 ```{r}
-  prec.00_09 <- stack( list.files( dir_WC_prec.2000_2009, ".tif", full.names=T ) )
-  tmax.00_09 <- stack( list.files( dir_WC_tmax.2000_2009, ".tif", full.names=T ) )
-  tmin.00_09 <- stack( list.files( dir_WC_tmin.2000_2009, ".tif", full.names=T ) )
+  # prec.00_18 <- stack( c(
+  #   list.files( dir_WC_prec.2000_2009, ".tif", full.names=T ),
+  #   list.files( dir_WC_prec.2010_2018, ".tif", full.names=T ) ) )
+  #   prec.00_18 <- prec.00_18[[1:228]] # Only keep years 2000-2018
+  # tmax.00_18 <- stack( c(
+  #   list.files( dir_WC_tmax.2000_2009, ".tif", full.names=T ),
+  #   list.files( dir_WC_tmax.2010_2018, ".tif", full.names=T ) ) )
+  #   tmax.00_18 <- tmax.00_18[[1:228]] # Only keep years 2000-2018
+  # tmin.00_18 <- stack( c(
+  #   list.files( dir_WC_tmin.2000_2009, ".tif", full.names=T ),
+  #   list.files( dir_WC_tmin.2010_2018, ".tif", full.names=T ) ) )
 
-  prec_C.00_09 <- crop(prec.00_09, ext_C)
-  prec_G.00_09 <- crop(prec.00_09, ext_G) ; rm(prec.00_09)
-  tmax_C.00_09 <- crop(tmax.00_09, ext_C)
-  tmax_G.00_09 <- crop(tmax.00_09, ext_G) ; rm(tmax.00_09)
-  tmin_C.00_09 <- crop(tmin.00_09, ext_C)
-  tmin_G.00_09 <- crop(tmin.00_09, ext_G) ; rm(tmin.00_09)
+  # names(prec.00_18) <- str_sub( names(prec.00_18), -7, -1 )
+  # names(tmax.00_18) <- str_sub( names(tmax.00_18), -7, -1 )
+  # names(tmin.00_18) <- str_sub( names(tmin.00_18), -7, -1 )
 
-  # month <- c( "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  #             "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" )
-  # names(prec.A) <- names(srad.A) <- names(tmax.A) <-
-  # names(tmin.A) <- names(vapr.A) <- names(wind.A) <- month
+  # prec_C.00_18 <- crop(prec.00_18, ext_C)
+  # prec_G.00_18 <- crop(prec.00_18, ext_G) ; rm(prec.00_18)
+  # tmax_C.00_18 <- crop(tmax.00_18, ext_C)
+  # tmax_G.00_18 <- crop(tmax.00_18, ext_G) ; rm(tmax.00_18)
+  # tmin_C.00_18 <- crop(tmin.00_18, ext_C)
+  # tmin_G.00_18 <- crop(tmin.00_18, ext_G) ; rm(tmin.00_18)
+
+  # save( prec_C.00_18, tmax_C.00_18, tmin_C.00_18,
+  #       file=paste0( dir_WC, "WC_weather_C.RData" ) )
+  # save( prec_G.00_18, tmax_G.00_18, tmin_G.00_18,
+  #       file=paste0( dir_WC, "WC_weather_G.RData" ) )
+
+  load( paste0( dir_WC, "WC_weather_C.RData" ) )
+  load( paste0( dir_WC, "WC_weather_G.RData" ) )
+```
+
+Monthly total rainfall (mm) in 2000 and 2001 is shown in Fig. \ref{fig:precC.00.01}.
+
+```{r precC.00.01, fig.height=8, fig.align="center", fig.cap="\\label{precC.00.01}Rainfall in Costa Rica in 2000 and 2001."}
+  plot( prec_C.00_18[[ 1:24]],
+        main=c( sapply(2000:2001, function(i){paste0(month," ",i)}) ),
+        col=rainbow(100,end=0.7), zlim=c(0,800), maxnl=24, nc=4 )
 ```
 
 
