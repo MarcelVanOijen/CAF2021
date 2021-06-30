@@ -199,7 +199,7 @@ We import the files in RasterStacks (see https://www.benjaminbell.co.uk/2018/02/
   VP_C.f   <-        raster::extract(vapr_C, coords_C.f)
   WN_C.f   <-        raster::extract(wind_C, coords_C.f)
   RAIN_C.f <-        raster::extract(prec_C, coords_C.f)
-    for(m in 1:12) RAIN_C.f[,m] <- round( RAIN_C.f[,m] / monl[m], 2 )
+    for(m in 1:12) RAIN_C.f[,m] <- RAIN_C.f[,m] / monl[m]
   
   GR_G.f   <- round( raster::extract(srad_G, coords_G.f) / 1000, 1 )
   TMIN_G.f <-        raster::extract(tmin_G, coords_G.f)
@@ -207,7 +207,7 @@ We import the files in RasterStacks (see https://www.benjaminbell.co.uk/2018/02/
   VP_G.f   <-        raster::extract(vapr_G, coords_G.f)
   WN_G.f   <-        raster::extract(wind_G, coords_G.f)
   RAIN_G.f <-        raster::extract(prec_G, coords_G.f)
-    for(m in 1:12) RAIN_G.f[,m] <- round( RAIN_G.f[,m] / monl[m], 2 )
+    for(m in 1:12) RAIN_G.f[,m] <- RAIN_G.f[,m] / monl[m]
   
   GR_CG.f   <- rbind( GR_C.f  , GR_G.f   )
   TMIN_CG.f <- rbind( TMIN_C.f, TMIN_G.f )
@@ -266,7 +266,7 @@ The locations of the farms are depicted in Fig. \ref{fig:Maps_CG}.
   points( alt_G.f, RAIN_G.f[,1], col="red" )
 ```
 
-## Weather anomalies 2000-2018
+## Weather 2000-2018
 
 ```{r}
   # prec.00_18 <- stack( c(
@@ -309,14 +309,233 @@ Monthly total rainfall (mm) in 2000 and 2001 is shown in Fig. \ref{fig:precC.00.
         col=rainbow(100,end=0.7), zlim=c(0,800), maxnl=24, nc=4 )
 ```
 
+```{r}
+  i.00_18.month <- vector( "list", 12 )
+  m.end         <- c( paste0(".0",1:9), paste0(".",10:12) )
+  for(m in 1:12) {
+    i.00_18.month[[m]] <- which( endsWith( names(tmin_C.00_18), m.end[m] ) )
+  }
 
-## Data processing
+  TMIN_C.00_18.f <-        raster::extract(tmin_C.00_18, coords_C.f)
+  TMAX_C.00_18.f <-        raster::extract(tmax_C.00_18, coords_C.f)
+  RAIN_C.00_18.f <-        raster::extract(prec_C.00_18, coords_C.f)
+  for(m in 1:12) { RAIN_C.00_18.f[ , i.00_18.month[[m]] ] <-
+    RAIN_C.00_18.f[ , i.00_18.month[[m]] ] / monl[m] }
+  
+  TMIN_G.00_18.f <-        raster::extract(tmin_G.00_18, coords_G.f)
+  TMAX_G.00_18.f <-        raster::extract(tmax_G.00_18, coords_G.f)
+  RAIN_G.00_18.f <-        raster::extract(prec_G.00_18, coords_G.f)
+  for(m in 1:12) { RAIN_G.00_18.f[ , i.00_18.month[[m]] ] <-
+    RAIN_G.00_18.f[ , i.00_18.month[[m]] ] / monl[m] }
+
+  # TMIN_CG.00_18.f <- rbind( TMIN_C.00_18.f, TMIN_G.00_18.f )
+  # TMAX_CG.00_18.f <- rbind( TMAX_C.00_18.f, TMAX_G.00_18.f )
+  # RAIN_CG.00_18.f <- rbind( RAIN_C.00_18.f, RAIN_G.00_18.f )
+```
 
 ```{r}
-  df_C.full <- df_C.f %>%
-    mutate( Alt = alt_C.f )
-  df_G.full <- df_G.f %>%
-    mutate( Alt = alt_G.f )
+  # Averages by calendar month for 2000-2018
+  TMIN_C.00_18.ma.f <- TMAX_C.00_18.ma.f <- RAIN_C.00_18.ma.f <-
+    matrix( NA, nrow=n_C.f, ncol=12 )
+  TMIN_G.00_18.ma.f <- TMAX_G.00_18.ma.f <- RAIN_G.00_18.ma.f <-
+    matrix( NA, nrow=n_G.f, ncol=12 )
+
+  for(m in 1:12) {
+    TMIN_C.00_18.ma.f[,m] <- rowMeans( TMIN_C.00_18.f[ , i.00_18.month[[m]] ] )
+    TMAX_C.00_18.ma.f[,m] <- rowMeans( TMAX_C.00_18.f[ , i.00_18.month[[m]] ] )
+    RAIN_C.00_18.ma.f[,m] <- rowMeans( RAIN_C.00_18.f[ , i.00_18.month[[m]] ] )
+    TMIN_G.00_18.ma.f[,m] <- rowMeans( TMIN_G.00_18.f[ , i.00_18.month[[m]] ] )
+    TMAX_G.00_18.ma.f[,m] <- rowMeans( TMAX_G.00_18.f[ , i.00_18.month[[m]] ] )
+    RAIN_G.00_18.ma.f[,m] <- rowMeans( RAIN_G.00_18.f[ , i.00_18.month[[m]] ] )
+  }
+  
+  # Anomalies by calendar month for 2000-2018
+  TMIN_C.00_18.anom.f <- TMAX_C.00_18.anom.f <- RAIN_C.00_18.anom.f <-
+    matrix( NA, nrow=n_C.f, ncol=228 )
+  TMIN_G.00_18.anom.f <- TMAX_G.00_18.anom.f <- RAIN_G.00_18.anom.f <-
+    matrix( NA, nrow=n_G.f, ncol=228 )
+  
+  for(m in 1:12) {
+    TMIN_C.00_18.anom.f[ , i.00_18.month[[m]] ] <-
+         TMIN_C.00_18.f[ , i.00_18.month[[m]] ] - TMIN_C.00_18.ma.f[,m]
+    TMAX_C.00_18.anom.f[ , i.00_18.month[[m]] ] <-
+         TMAX_C.00_18.f[ , i.00_18.month[[m]] ] - TMAX_C.00_18.ma.f[,m]
+    RAIN_C.00_18.anom.f[ , i.00_18.month[[m]] ] <-
+         RAIN_C.00_18.f[ , i.00_18.month[[m]] ] - RAIN_C.00_18.ma.f[,m]
+    
+    TMIN_G.00_18.anom.f[ , i.00_18.month[[m]] ] <-
+         TMIN_G.00_18.f[ , i.00_18.month[[m]] ] - TMIN_G.00_18.ma.f[,m]
+    TMAX_G.00_18.anom.f[ , i.00_18.month[[m]] ] <-
+         TMAX_G.00_18.f[ , i.00_18.month[[m]] ] - TMAX_G.00_18.ma.f[,m]
+    RAIN_G.00_18.anom.f[ , i.00_18.month[[m]] ] <-
+         RAIN_G.00_18.f[ , i.00_18.month[[m]] ] - RAIN_G.00_18.ma.f[,m]
+  }
+```
+
+Comparing anomalies between two farms in Costa Rica:
+
+```{r}
+  par( mfrow=c(3,2) )
+
+  iSite1 <- 1 ; iSite2 <- 2
+  plot  ( 1:228, TMIN_C.00_18.anom.f[iSite1,], main="Anomalies TMIN" )
+  points( 1:228, TMIN_C.00_18.anom.f[iSite2,], col="red" )
+  plot(TMIN_C.00_18.anom.f[iSite1,], TMIN_C.00_18.anom.f[iSite2,] )
+  
+  plot  ( 1:228, TMAX_C.00_18.anom.f[iSite1,], main="Anomalies TMAX" )
+  points( 1:228, TMAX_C.00_18.anom.f[iSite2,], col="red" )
+  plot(TMAX_C.00_18.anom.f[iSite1,], TMAX_C.00_18.anom.f[iSite2,] )
+  
+  plot  ( 1:228, RAIN_C.00_18.anom.f[iSite1,], main="Anomalies RAIN" )
+  points( 1:228, RAIN_C.00_18.anom.f[iSite2,], col="red" )
+  plot(RAIN_C.00_18.anom.f[iSite1,], RAIN_C.00_18.anom.f[iSite2,] )
+```
+
+Comparing anomalies between the countries:
+
+```{r}
+  par( mfrow=c(3,2) )
+
+  iSiteC <- 1 ; iSiteG <- 1
+  plot  ( 1:228, TMIN_C.00_18.anom.f[iSiteC,], main="Anomalies TMIN" )
+  points( 1:228, TMIN_G.00_18.anom.f[iSiteG,], col="red" )
+  plot(TMIN_C.00_18.anom.f[iSiteC,], TMIN_G.00_18.anom.f[iSiteG,] )
+  
+  plot  ( 1:228, TMAX_C.00_18.anom.f[iSiteC,], main="Anomalies TMAX" )
+  points( 1:228, TMAX_G.00_18.anom.f[iSiteG,], col="red" )
+  plot(TMAX_C.00_18.anom.f[iSiteC,], TMAX_G.00_18.anom.f[iSiteG,] )
+  
+  plot  ( 1:228, RAIN_C.00_18.anom.f[iSiteC,], main="Anomalies RAIN" )
+  points( 1:228, RAIN_G.00_18.anom.f[iSiteG,], col="red" )
+  plot(RAIN_C.00_18.anom.f[iSiteC,], RAIN_G.00_18.anom.f[iSiteG,] )
+```
+
+## Combining climate and weather
+
+```{r, eval=F}
+  # Expand climatic values to 2000-2018
+  matrix_GR_C.00_18.f <- matrix_TMIN_C.00_18.f <- matrix_TMAX_C.00_18.f <-
+  matrix_VP_C.00_18.f <- matrix_WN_C.00_18.f   <- matrix_RAIN_C.00_18.f <-
+    matrix( NA, nrow=n_C.f, ncol=228 )
+  matrix_GR_G.00_18.f <- matrix_TMIN_G.00_18.f <- matrix_TMAX_G.00_18.f <-
+  matrix_VP_G.00_18.f <- matrix_WN_G.00_18.f   <- matrix_RAIN_G.00_18.f <-
+    matrix( NA, nrow=n_G.f, ncol=228 )
+
+  for(y in 2000:2018) {
+    m <- (y-2000)*12 + (1:12)
+
+    matrix_GR_C.00_18.f  [ , m ] <- GR_C.f
+    matrix_TMIN_C.00_18.f[ , m ] <- TMIN_C.f
+    matrix_TMAX_C.00_18.f[ , m ] <- TMAX_C.f
+    matrix_VP_C.00_18.f  [ , m ] <- VP_C.f
+    matrix_WN_C.00_18.f  [ , m ] <- WN_C.f
+    matrix_RAIN_C.00_18.f[ , m ] <- RAIN_C.f
+
+    matrix_GR_G.00_18.f  [ , m ] <- GR_G.f
+    matrix_TMIN_G.00_18.f[ , m ] <- TMIN_G.f
+    matrix_TMAX_G.00_18.f[ , m ] <- TMAX_G.f
+    matrix_VP_G.00_18.f  [ , m ] <- VP_G.f
+    matrix_WN_G.00_18.f  [ , m ] <- WN_G.f
+    matrix_RAIN_G.00_18.f[ , m ] <- RAIN_G.f
+  }
+  matrix_TMIN_C.00_18.f  <- round( matrix_TMIN_C.00_18.f + TMIN_C.00_18.anom.f, 1 )
+  matrix_TMAX_C.00_18.f  <- round( matrix_TMAX_C.00_18.f + TMAX_C.00_18.anom.f, 1 )
+  matrix_RAIN_C.00_18.f0 <- round( matrix_RAIN_C.00_18.f + RAIN_C.00_18.anom.f, 2 )
+  matrix_RAIN_C.00_18.f  <- pmax(matrix_RAIN_C.00_18.f0, 0)
+
+  matrix_TMIN_G.00_18.f  <- round( matrix_TMIN_G.00_18.f + TMIN_G.00_18.anom.f, 1 )
+  matrix_TMAX_G.00_18.f  <- round( matrix_TMAX_G.00_18.f + TMAX_G.00_18.anom.f, 1 )
+  matrix_RAIN_G.00_18.f0 <- round( matrix_RAIN_G.00_18.f + RAIN_G.00_18.anom.f, 2 )
+  matrix_RAIN_G.00_18.f  <- pmax(matrix_RAIN_G.00_18.f0, 0)
+```
+
+## Creating CAF2021 daily weather files 2000-2018
+
+```{r, eval=F}
+  weather_C.f  <- vector( "list", n_C.f )
+  weather_G.f  <- vector( "list", n_G.f )
+  
+  NYEAR        <- 19
+  NDAY         <- NYEAR * 365
+  wf           <- matrix( NA, nrow=NDAY, ncol=9 )
+  colnames(wf) <- c( "ST", "year", "doy",
+                     "GR", "TMIN", "TMAX", "VP", "WN", "RAIN" )
+  wf[,"year"]  <- rep( 2000:2018, each=365 )
+  wf[,"doy" ]  <- rep(    1: 365, NYEAR    )
+  
+  for( i in 1:n_C.f ) { weather_C.f[[i]] <- wf }
+  for( i in 1:n_G.f ) { weather_G.f[[i]] <- wf }
+```
+
+```{r}
+  # monl.00_18 <- rep( as.integer(monl), 19 )
+  # NMON       <- length( monl.00_18 )
+
+  # for( f in 1:n_C.f)  {
+  #   weather_C.f[[f]][,"ST"] <- df_C.f$code[f] - 1000
+  #   lastday <- 0
+  #   for( m in 1:NMON ) {
+  #     ml   <- monl.00_18[m]
+  #     iday <- lastday + (1:ml)
+  #     weather_C.f[[f]] [iday,"GR"  ] <- rep( matrix_GR_C.00_18.f  [f,m], ml )
+  #     weather_C.f[[f]] [iday,"TMIN"] <- rep( matrix_TMIN_C.00_18.f[f,m], ml )
+  #     weather_C.f[[f]] [iday,"TMAX"] <- rep( matrix_TMAX_C.00_18.f[f,m], ml )
+  #     weather_C.f[[f]] [iday,"VP"  ] <- rep( matrix_VP_C.00_18.f  [f,m], ml )
+  #     weather_C.f[[f]] [iday,"WN"  ] <- rep( matrix_WN_C.00_18.f  [f,m], ml )
+  #     weather_C.f[[f]] [iday,"RAIN"] <- rep( matrix_RAIN_C.00_18.f[f,m], ml )
+  #     lastday <- lastday + ml
+  #   }
+  # }
+  
+  # for( f in 1:n_G.f)  {
+  #   weather_G.f[[f]][,"ST"] <- df_G.f$code[f] - 2000
+  #   lastday <- 0
+  #   for( m in 1:NMON ) {
+  #     ml   <- monl.00_18[m]
+  #     iday <- lastday + (1:ml)
+  #     weather_G.f[[f]] [iday,"GR"  ] <- rep( matrix_GR_G.00_18.f  [f,m], ml )
+  #     weather_G.f[[f]] [iday,"TMIN"] <- rep( matrix_TMIN_G.00_18.f[f,m], ml )
+  #     weather_G.f[[f]] [iday,"TMAX"] <- rep( matrix_TMAX_G.00_18.f[f,m], ml )
+  #     weather_G.f[[f]] [iday,"VP"  ] <- rep( matrix_VP_G.00_18.f  [f,m], ml )
+  #     weather_G.f[[f]] [iday,"WN"  ] <- rep( matrix_WN_G.00_18.f  [f,m], ml )
+  #     weather_G.f[[f]] [iday,"RAIN"] <- rep( matrix_RAIN_G.00_18.f[f,m], ml )
+  #     lastday <- lastday + ml
+  #   }
+  # }
+  
+  # save( weather_C.f, file=paste0( dir_WC, "WC_weather_C.f.RData" ) )
+  # save( weather_G.f, file=paste0( dir_WC, "WC_weather_G.f.RData" ) )
+  
+  load( paste0( dir_WC, "WC_weather_C.f.RData" ) )
+  load( paste0( dir_WC, "WC_weather_G.f.RData" ) )
+```
+
+```{r}
+  par( mfrow=c(2,2) )
+
+  f <- 1
+  plot  ( weather_C.f[[f]] [,"GR"  ], main="GR" )
+  plot  ( weather_C.f[[f]] [,"TMAX"], main="TMAX, TMIN (red)",
+          ylim=range(weather_C.f[[f]] [,c("TMAX", "TMIN")]) )
+  points( weather_C.f[[f]] [,"TMIN"], col="red" )
+  plot  ( weather_C.f[[f]] [,"VP"  ], main="VP, WN (blue)",
+          ylim=range(weather_C.f[[f]] [,c("VP", "WN")]) )
+  points( weather_C.f[[f]] [,"WN"  ], col="blue" )
+  plot  ( weather_C.f[[f]] [,"RAIN"], main="RAIN" )
+```
+
+```{r}
+  par( mfrow=c(2,2) )
+
+  f <- 1
+  plot  ( weather_G.f[[f]] [,"GR"  ], main="GR" )
+  plot  ( weather_G.f[[f]] [,"TMAX"], main="TMAX, TMIN (red)",
+          ylim=range(weather_G.f[[f]] [,c("TMAX", "TMIN")]) )
+  points( weather_G.f[[f]] [,"TMIN"], col="red" )
+  plot  ( weather_G.f[[f]] [,"VP"  ], main="VP, WN (blue)",
+          ylim=range(weather_G.f[[f]] [,c("VP", "WN")]) )
+  points( weather_G.f[[f]] [,"WN"  ], col="blue" )
+  plot  ( weather_G.f[[f]] [,"RAIN"], main="RAIN" )
 ```
 
 
@@ -438,7 +657,7 @@ To make CAF2021 simulate banana in a coffee plantation, we set the initial densi
 
 We now virtually add 100 banana plants per hectare to each of the experimental treatments in Turrialba and Masatepe that we investigated above (Fig. \ref{fig:TM}). We show the *differences* from those earlier results in Fig. \ref{fig:TM.B}. 
 
-```{r TM.B, fig.height=8, fig.cap="\\label{fig:TM.B}Differences between simulations for Turrialba (grey bars) and Masatepe (red) wtih 100 banana plants per hectare added and default simulations without fruit plants."}
+```{r TM.B, fig.height=8, fig.cap="\\label{fig:TM.B}Differences between simulations for Turrialba (grey bars) and Masatepe (red) with 100 banana plants per hectare added and default simulations without fruit plants."}
   parMAP.B  <- parMAP
   for (s in 1:nSites) {
     parMAP.B[,s] <- set_par_speciesT( 2, species="Banana", p.old=parMAP[,s] )
@@ -502,7 +721,7 @@ See Fig. \ref{fig:SimAvocado}.
 
 We now virtually add 100 avocado trees per hectare to each of the experimental treatments in Turrialba and Masatepe. The new results are shown in Fig. \ref{fig:TM.A}, and we can compare these with the results for the simulations for the experimental conditions without fruit trees (Fig. \ref{fig:TM}).
 
-```{r TM.A, fig.height=8, fig.cap="\\label{fig:TM.A}Differences between simulations for Turrialba (grey bars) and Masatepe (red) wtih 100 avocado trees per hectare added and default simulations without fruit trees."}
+```{r TM.A, fig.height=8, fig.cap="\\label{fig:TM.A}Differences between simulations for Turrialba (grey bars) and Masatepe (red) with 100 avocado trees per hectare added and default simulations without fruit trees."}
   parMAP.A  <- parMAP
   for (s in 1:nSites) {
     parMAP.A[,s] <- set_par_speciesT( 2, species="Avocado", p.old=parMAP[,s] )
