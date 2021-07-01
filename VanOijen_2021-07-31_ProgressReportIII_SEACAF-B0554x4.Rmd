@@ -667,6 +667,47 @@ Comparing anomalies between the countries:
   print( fG.r2max )
 ```
 
+Yields per farm (averaged over the 32 treatments).
+
+```{r}
+  ymean_C.f_condsTM <- colMeans( y_condsTM_weatherC )
+  ymin_C.f_condsTM  <- apply   ( y_condsTM_weatherC, 2, min )
+  ymax_C.f_condsTM  <- apply   ( y_condsTM_weatherC, 2, max )
+  ysd_C.f_condsTM   <- apply   ( y_condsTM_weatherC, 2, sd )
+
+  ymean_G.f_condsTM <- colMeans( y_condsTM_weatherG )
+  ymin_G.f_condsTM  <- apply   ( y_condsTM_weatherG, 2, min )
+  ymax_G.f_condsTM  <- apply   ( y_condsTM_weatherG, 2, max )
+  ysd_G.f_condsTM   <- apply   ( y_condsTM_weatherG, 2, sd )
+```
+
+```{r}
+  par( mfrow=c(1,2) )
+
+  ymax <- max( ymax_C.f_condsTM, ymax_G.f_condsTM )
+
+  plot  ( alt_C.f, ymean_C.f_condsTM, main="Costa Rica",
+          xlab="Alt. (m)", ylab="", ylim=c(0,ymax), pch=20 )
+  points( alt_C.f, ymax_C.f_condsTM, pch=1, cex=0.5 )
+  points( alt_C.f, ymin_C.f_condsTM, pch=1, cex=0.5 )
+  y.lm <- lm( ymean_C.f_condsTM ~ alt_C.f )
+  r2   <- signif( summary(y.lm)$r.squared, 2 )
+  abline( y.lm$coefficients[1], y.lm$coefficients[2], col="blue" )
+  legend( "topright",
+          legend=paste("r2= ",as.character(r2)),
+          col=c("blue"), lty=c(1), cex=0.7 )
+
+  plot  ( alt_G.f, ymean_G.f_condsTM, main="Guatemala",
+          xlab="Alt. (m)", ylab="", ylim=c(0,ymax), pch=20 )
+  points( alt_G.f, ymax_G.f_condsTM, pch=1, cex=0.5 )
+  points( alt_G.f, ymin_G.f_condsTM, pch=1, cex=0.5 )
+  y.lm <- lm( ymean_G.f_condsTM ~ alt_G.f )
+  r2   <- signif( summary(y.lm)$r.squared, 2 )
+  abline( y.lm$coefficients[1], y.lm$coefficients[2], col="blue" )
+  legend( "topright",
+          legend=paste("r2= ",as.character(r2)),
+          col=c("blue"), lty=c(1), cex=0.7 )
+```
 
 
 \clearpage
