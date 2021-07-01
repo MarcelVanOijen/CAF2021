@@ -155,32 +155,56 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
 We import the files in RasterStacks (see https://www.benjaminbell.co.uk/2018/02/rasterstacks-and-rasterplot.html ).
 
 ```{r}
-  # prec <- stack( list.files( dir_WC_prec, ".tif", full.names=T ) )
-  # srad <- stack( list.files( dir_WC_srad, ".tif", full.names=T ) )
-  # tmax <- stack( list.files( dir_WC_tmax, ".tif", full.names=T ) )
-  # tmin <- stack( list.files( dir_WC_tmin, ".tif", full.names=T ) )
-  # vapr <- stack( list.files( dir_WC_vapr, ".tif", full.names=T ) )
-  # wind <- stack( list.files( dir_WC_wind, ".tif", full.names=T ) )
-
   month <- c( "Jan", "Feb", "Mar", "Apr", "May", "Jun",
               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" )
-  # names(prec) <- names(srad) <- names(tmax) <-
-  # names(tmin) <- names(vapr) <- names(wind) <- month
-  
-  # prec_C <- crop(prec, ext_C) ; prec_G <- crop(prec, ext_G) ; rm(prec)
-  # srad_C <- crop(srad, ext_C) ; srad_G <- crop(srad, ext_G) ; rm(srad)
-  # tmax_C <- crop(tmax, ext_C) ; tmax_G <- crop(tmax, ext_G) ; rm(tmax)
-  # tmin_C <- crop(tmin, ext_C) ; tmin_G <- crop(tmin, ext_G) ; rm(tmin)
-  # vapr_C <- crop(vapr, ext_C) ; vapr_G <- crop(vapr, ext_G) ; rm(vapr)
-  # wind_C <- crop(wind, ext_C) ; wind_G <- crop(wind, ext_G) ; rm(wind)
-  # 
-  # save( prec_C, srad_C, tmax_C, tmin_C, vapr_C, wind_C,
-  #       file=paste0( dir_WC, "WC_climate_C.RData" ) )
-  # save( prec_G, srad_G, tmax_G, tmin_G, vapr_G, wind_G,
-  #       file=paste0( dir_WC, "WC_climate_G.RData" ) )
+```
 
-  load( paste0( dir_WC, "WC_climate_C.RData" ) )
-  load( paste0( dir_WC, "WC_climate_G.RData" ) )
+```{r, eval=F}
+  prec        <- stack( list.files( dir_WC_prec, ".tif", full.names=T ) )
+  srad        <- stack( list.files( dir_WC_srad, ".tif", full.names=T ) )
+  tmax        <- stack( list.files( dir_WC_tmax, ".tif", full.names=T ) )
+  tmin        <- stack( list.files( dir_WC_tmin, ".tif", full.names=T ) )
+  vapr        <- stack( list.files( dir_WC_vapr, ".tif", full.names=T ) )
+  wind        <- stack( list.files( dir_WC_wind, ".tif", full.names=T ) )
+  names(prec) <- names(srad) <- names(tmax) <-
+  names(tmin) <- names(vapr) <- names(wind) <- month
+  
+  prec_C <- crop(prec, ext_C) ; prec_G <- crop(prec, ext_G) ; rm(prec)
+  srad_C <- crop(srad, ext_C) ; srad_G <- crop(srad, ext_G) ; rm(srad)
+  tmax_C <- crop(tmax, ext_C) ; tmax_G <- crop(tmax, ext_G) ; rm(tmax)
+  tmin_C <- crop(tmin, ext_C) ; tmin_G <- crop(tmin, ext_G) ; rm(tmin)
+  vapr_C <- crop(vapr, ext_C) ; vapr_G <- crop(vapr, ext_G) ; rm(vapr)
+  wind_C <- crop(wind, ext_C) ; wind_G <- crop(wind, ext_G) ; rm(wind)
+
+  writeRaster( prec_C, paste0(dir_WC,"WC_prec_C.grd") )
+  writeRaster( srad_C, paste0(dir_WC,"WC_srad_C.grd") )
+  writeRaster( tmax_C, paste0(dir_WC,"WC_tmax_C.grd") )
+  writeRaster( tmin_C, paste0(dir_WC,"WC_tmin_C.grd") )
+  writeRaster( vapr_C, paste0(dir_WC,"WC_vapr_C.grd") )
+  writeRaster( wind_C, paste0(dir_WC,"WC_wind_C.grd") )
+
+  writeRaster( prec_G, paste0(dir_WC,"WC_prec_G.grd") )
+  writeRaster( srad_G, paste0(dir_WC,"WC_srad_G.grd") )
+  writeRaster( tmax_G, paste0(dir_WC,"WC_tmax_G.grd") )
+  writeRaster( tmin_G, paste0(dir_WC,"WC_tmin_G.grd") )
+  writeRaster( vapr_G, paste0(dir_WC,"WC_vapr_G.grd") )
+  writeRaster( wind_G, paste0(dir_WC,"WC_wind_G.grd") )
+```
+
+```{r}
+  prec_C <- stack( paste0(dir_WC,"WC_prec_C.grd") )
+  srad_C <- stack( paste0(dir_WC,"WC_srad_C.grd") )
+  tmax_C <- stack( paste0(dir_WC,"WC_tmax_C.grd") )
+  tmin_C <- stack( paste0(dir_WC,"WC_tmin_C.grd") )
+  vapr_C <- stack( paste0(dir_WC,"WC_vapr_C.grd") )
+  wind_C <- stack( paste0(dir_WC,"WC_wind_C.grd") )
+
+  prec_G <- stack( paste0(dir_WC,"WC_prec_G.grd") )
+  srad_G <- stack( paste0(dir_WC,"WC_srad_G.grd") )
+  tmax_G <- stack( paste0(dir_WC,"WC_tmax_G.grd") )
+  tmin_G <- stack( paste0(dir_WC,"WC_tmin_G.grd") )
+  vapr_G <- stack( paste0(dir_WC,"WC_vapr_G.grd") )
+  wind_G <- stack( paste0(dir_WC,"WC_wind_G.grd") )
 ```
 
 ```{r}
@@ -219,21 +243,23 @@ We import the files in RasterStacks (see https://www.benjaminbell.co.uk/2018/02/
 
 The locations of the farms are depicted in Fig. \ref{fig:Maps_CG}.
 
+```{r, eval=F}
+  par( mfrow=c(1,2), mar=c(3,3,3,5) )
+  plot( alt_C, main="alt_C", addfun=plot_C.f, zlim=c(0,4000) )
+  plot( alt_G, main="alt_G", addfun=plot_G.f, zlim=c(0,4000) )
+
+  Alternative way of producing a map with the farm locations
+  worldmap <- getMap(resolution = "high")
+  plot( worldmap,
+        col="lightgrey", border="darkgray",
+        xlim=c(-93,-83), ylim=c(8,18),
+        bg="aliceblue", asp=1 )
+  points( coords_C.f, col="red" , pch=1, cex=0.2 )
+  points( coords_G.f, col="blue", pch=1, cex=0.2 )
+```
+
 ```{r Maps_CG, out.width="400px", fig.align="center", fig.cap="\\label{Maps_CG}Locations of the farms in Costa Rica and Guatemala."}
-  # par( mfrow=c(1,2), mar=c(3,3,3,5) )
-  # plot( alt_C, main="alt_C", addfun=plot_C.f, zlim=c(0,4000) )
-  # plot( alt_G, main="alt_G", addfun=plot_G.f, zlim=c(0,4000) )
-
   knitr::include_graphics("images/Maps_CG.png")
-
-  # Alternative way of producing a map with the farm locations
-  # worldmap <- getMap(resolution = "high")
-  # plot( worldmap,
-  #       col="lightgrey", border="darkgray",
-  #       xlim=c(-93,-83), ylim=c(8,18),
-  #       bg="aliceblue", asp=1 )
-  # points( coords_C.f, col="red" , pch=1, cex=0.2 )
-  # points( coords_G.f, col="blue", pch=1, cex=0.2 )
 ```
 
 ```{r}
@@ -268,37 +294,45 @@ The locations of the farms are depicted in Fig. \ref{fig:Maps_CG}.
 
 ## Weather 2000-2018
 
+```{r, eval=F}
+  prec.00_18 <- stack( c(
+    list.files( dir_WC_prec.2000_2009, ".tif", full.names=T ),
+    list.files( dir_WC_prec.2010_2018, ".tif", full.names=T ) ) )
+    prec.00_18 <- prec.00_18[[1:228]] # Only keep years 2000-2018
+  tmax.00_18 <- stack( c(
+    list.files( dir_WC_tmax.2000_2009, ".tif", full.names=T ),
+    list.files( dir_WC_tmax.2010_2018, ".tif", full.names=T ) ) )
+    tmax.00_18 <- tmax.00_18[[1:228]] # Only keep years 2000-2018
+  tmin.00_18 <- stack( c(
+    list.files( dir_WC_tmin.2000_2009, ".tif", full.names=T ),
+    list.files( dir_WC_tmin.2010_2018, ".tif", full.names=T ) ) )
+
+  names(prec.00_18) <- str_sub( names(prec.00_18), -7, -1 )
+  names(tmax.00_18) <- str_sub( names(tmax.00_18), -7, -1 )
+  names(tmin.00_18) <- str_sub( names(tmin.00_18), -7, -1 )
+
+  prec_C.00_18 <- crop(prec.00_18, ext_C)
+  prec_G.00_18 <- crop(prec.00_18, ext_G) ; rm(prec.00_18)
+  tmax_C.00_18 <- crop(tmax.00_18, ext_C)
+  tmax_G.00_18 <- crop(tmax.00_18, ext_G) ; rm(tmax.00_18)
+  tmin_C.00_18 <- crop(tmin.00_18, ext_C)
+  tmin_G.00_18 <- crop(tmin.00_18, ext_G) ; rm(tmin.00_18)
+
+  writeRaster( prec_C.00_18, paste0(dir_WC,"WC_prec_C.00_18.grd") )
+  writeRaster( prec_G.00_18, paste0(dir_WC,"WC_prec_G.00_18.grd") )
+  writeRaster( tmax_C.00_18, paste0(dir_WC,"WC_tmax_C.00_18.grd") )
+  writeRaster( tmax_G.00_18, paste0(dir_WC,"WC_tmax_G.00_18.grd") )
+  writeRaster( tmin_C.00_18, paste0(dir_WC,"WC_tmin_C.00_18.grd") )
+  writeRaster( tmin_G.00_18, paste0(dir_WC,"WC_tmin_G.00_18.grd") )
+```
+
 ```{r}
-  # prec.00_18 <- stack( c(
-  #   list.files( dir_WC_prec.2000_2009, ".tif", full.names=T ),
-  #   list.files( dir_WC_prec.2010_2018, ".tif", full.names=T ) ) )
-  #   prec.00_18 <- prec.00_18[[1:228]] # Only keep years 2000-2018
-  # tmax.00_18 <- stack( c(
-  #   list.files( dir_WC_tmax.2000_2009, ".tif", full.names=T ),
-  #   list.files( dir_WC_tmax.2010_2018, ".tif", full.names=T ) ) )
-  #   tmax.00_18 <- tmax.00_18[[1:228]] # Only keep years 2000-2018
-  # tmin.00_18 <- stack( c(
-  #   list.files( dir_WC_tmin.2000_2009, ".tif", full.names=T ),
-  #   list.files( dir_WC_tmin.2010_2018, ".tif", full.names=T ) ) )
-
-  # names(prec.00_18) <- str_sub( names(prec.00_18), -7, -1 )
-  # names(tmax.00_18) <- str_sub( names(tmax.00_18), -7, -1 )
-  # names(tmin.00_18) <- str_sub( names(tmin.00_18), -7, -1 )
-
-  # prec_C.00_18 <- crop(prec.00_18, ext_C)
-  # prec_G.00_18 <- crop(prec.00_18, ext_G) ; rm(prec.00_18)
-  # tmax_C.00_18 <- crop(tmax.00_18, ext_C)
-  # tmax_G.00_18 <- crop(tmax.00_18, ext_G) ; rm(tmax.00_18)
-  # tmin_C.00_18 <- crop(tmin.00_18, ext_C)
-  # tmin_G.00_18 <- crop(tmin.00_18, ext_G) ; rm(tmin.00_18)
-
-  # save( prec_C.00_18, tmax_C.00_18, tmin_C.00_18,
-  #       file=paste0( dir_WC, "WC_weather_C.RData" ) )
-  # save( prec_G.00_18, tmax_G.00_18, tmin_G.00_18,
-  #       file=paste0( dir_WC, "WC_weather_G.RData" ) )
-
-  load( paste0( dir_WC, "WC_weather_C.RData" ) )
-  load( paste0( dir_WC, "WC_weather_G.RData" ) )
+  prec_C.00_18 <- stack( paste0(dir_WC,"WC_prec_C.00_18.grd") )
+  prec_G.00_18 <- stack( paste0(dir_WC,"WC_prec_G.00_18.grd") )
+  tmax_C.00_18 <- stack( paste0(dir_WC,"WC_tmax_C.00_18.grd") )
+  tmax_G.00_18 <- stack( paste0(dir_WC,"WC_tmax_G.00_18.grd") )
+  tmin_C.00_18 <- stack( paste0(dir_WC,"WC_tmin_C.00_18.grd") )
+  tmin_G.00_18 <- stack( paste0(dir_WC,"WC_tmin_G.00_18.grd") )
 ```
 
 Monthly total rainfall (mm) in 2000 and 2001 is shown in Fig. \ref{fig:precC.00.01}.
@@ -467,45 +501,47 @@ Comparing anomalies between the countries:
   for( i in 1:n_G.f ) { weather_G.f[[i]] <- wf }
 ```
 
-```{r}
-  # monl.00_18 <- rep( as.integer(monl), 19 )
-  # NMON       <- length( monl.00_18 )
+```{r, eval=F}
+  monl.00_18 <- rep( as.integer(monl), 19 )
+  NMON       <- length( monl.00_18 )
 
-  # for( f in 1:n_C.f)  {
-  #   weather_C.f[[f]][,"ST"] <- df_C.f$code[f] - 1000
-  #   lastday <- 0
-  #   for( m in 1:NMON ) {
-  #     ml   <- monl.00_18[m]
-  #     iday <- lastday + (1:ml)
-  #     weather_C.f[[f]] [iday,"GR"  ] <- rep( matrix_GR_C.00_18.f  [f,m], ml )
-  #     weather_C.f[[f]] [iday,"TMIN"] <- rep( matrix_TMIN_C.00_18.f[f,m], ml )
-  #     weather_C.f[[f]] [iday,"TMAX"] <- rep( matrix_TMAX_C.00_18.f[f,m], ml )
-  #     weather_C.f[[f]] [iday,"VP"  ] <- rep( matrix_VP_C.00_18.f  [f,m], ml )
-  #     weather_C.f[[f]] [iday,"WN"  ] <- rep( matrix_WN_C.00_18.f  [f,m], ml )
-  #     weather_C.f[[f]] [iday,"RAIN"] <- rep( matrix_RAIN_C.00_18.f[f,m], ml )
-  #     lastday <- lastday + ml
-  #   }
-  # }
+  for( f in 1:n_C.f)  {
+    weather_C.f[[f]][,"ST"] <- df_C.f$code[f] - 1000
+    lastday <- 0
+    for( m in 1:NMON ) {
+      ml   <- monl.00_18[m]
+      iday <- lastday + (1:ml)
+      weather_C.f[[f]] [iday,"GR"  ] <- rep( matrix_GR_C.00_18.f  [f,m], ml )
+      weather_C.f[[f]] [iday,"TMIN"] <- rep( matrix_TMIN_C.00_18.f[f,m], ml )
+      weather_C.f[[f]] [iday,"TMAX"] <- rep( matrix_TMAX_C.00_18.f[f,m], ml )
+      weather_C.f[[f]] [iday,"VP"  ] <- rep( matrix_VP_C.00_18.f  [f,m], ml )
+      weather_C.f[[f]] [iday,"WN"  ] <- rep( matrix_WN_C.00_18.f  [f,m], ml )
+      weather_C.f[[f]] [iday,"RAIN"] <- rep( matrix_RAIN_C.00_18.f[f,m], ml )
+      lastday <- lastday + ml
+    }
+  }
   
-  # for( f in 1:n_G.f)  {
-  #   weather_G.f[[f]][,"ST"] <- df_G.f$code[f] - 2000
-  #   lastday <- 0
-  #   for( m in 1:NMON ) {
-  #     ml   <- monl.00_18[m]
-  #     iday <- lastday + (1:ml)
-  #     weather_G.f[[f]] [iday,"GR"  ] <- rep( matrix_GR_G.00_18.f  [f,m], ml )
-  #     weather_G.f[[f]] [iday,"TMIN"] <- rep( matrix_TMIN_G.00_18.f[f,m], ml )
-  #     weather_G.f[[f]] [iday,"TMAX"] <- rep( matrix_TMAX_G.00_18.f[f,m], ml )
-  #     weather_G.f[[f]] [iday,"VP"  ] <- rep( matrix_VP_G.00_18.f  [f,m], ml )
-  #     weather_G.f[[f]] [iday,"WN"  ] <- rep( matrix_WN_G.00_18.f  [f,m], ml )
-  #     weather_G.f[[f]] [iday,"RAIN"] <- rep( matrix_RAIN_G.00_18.f[f,m], ml )
-  #     lastday <- lastday + ml
-  #   }
-  # }
+  for( f in 1:n_G.f)  {
+    weather_G.f[[f]][,"ST"] <- df_G.f$code[f] - 2000
+    lastday <- 0
+    for( m in 1:NMON ) {
+      ml   <- monl.00_18[m]
+      iday <- lastday + (1:ml)
+      weather_G.f[[f]] [iday,"GR"  ] <- rep( matrix_GR_G.00_18.f  [f,m], ml )
+      weather_G.f[[f]] [iday,"TMIN"] <- rep( matrix_TMIN_G.00_18.f[f,m], ml )
+      weather_G.f[[f]] [iday,"TMAX"] <- rep( matrix_TMAX_G.00_18.f[f,m], ml )
+      weather_G.f[[f]] [iday,"VP"  ] <- rep( matrix_VP_G.00_18.f  [f,m], ml )
+      weather_G.f[[f]] [iday,"WN"  ] <- rep( matrix_WN_G.00_18.f  [f,m], ml )
+      weather_G.f[[f]] [iday,"RAIN"] <- rep( matrix_RAIN_G.00_18.f[f,m], ml )
+      lastday <- lastday + ml
+    }
+  }
   
-  # save( weather_C.f, file=paste0( dir_WC, "WC_weather_C.f.RData" ) )
-  # save( weather_G.f, file=paste0( dir_WC, "WC_weather_G.f.RData" ) )
-  
+  save( weather_C.f, file=paste0( dir_WC, "WC_weather_C.f.RData" ) )
+  save( weather_G.f, file=paste0( dir_WC, "WC_weather_G.f.RData" ) )
+```
+
+```{r}
   load( paste0( dir_WC, "WC_weather_C.f.RData" ) )
   load( paste0( dir_WC, "WC_weather_G.f.RData" ) )
 ```
@@ -514,28 +550,28 @@ Comparing anomalies between the countries:
   par( mfrow=c(2,2) )
 
   f <- 1
-  plot  ( weather_C.f[[f]] [,"GR"  ], main="GR" )
-  plot  ( weather_C.f[[f]] [,"TMAX"], main="TMAX, TMIN (red)",
+  plot  ( weather_C.f[[f]] [,"GR"  ], main="GR", type="l" )
+  plot  ( weather_C.f[[f]] [,"TMAX"], main="TMAX, TMIN (red)", type="l",
           ylim=range(weather_C.f[[f]] [,c("TMAX", "TMIN")]) )
-  points( weather_C.f[[f]] [,"TMIN"], col="red" )
-  plot  ( weather_C.f[[f]] [,"VP"  ], main="VP, WN (blue)",
+  points( weather_C.f[[f]] [,"TMIN"], col="red", type="l" )
+  plot  ( weather_C.f[[f]] [,"VP"  ], main="VP, WN (blue)", type="l",
           ylim=range(weather_C.f[[f]] [,c("VP", "WN")]) )
-  points( weather_C.f[[f]] [,"WN"  ], col="blue" )
-  plot  ( weather_C.f[[f]] [,"RAIN"], main="RAIN" )
+  points( weather_C.f[[f]] [,"WN"  ], col="blue", type="l" )
+  plot  ( weather_C.f[[f]] [,"RAIN"], main="RAIN", type="l" )
 ```
 
 ```{r}
   par( mfrow=c(2,2) )
 
   f <- 1
-  plot  ( weather_G.f[[f]] [,"GR"  ], main="GR" )
-  plot  ( weather_G.f[[f]] [,"TMAX"], main="TMAX, TMIN (red)",
+  plot  ( weather_G.f[[f]] [,"GR"  ], main="GR", type="l" )
+  plot  ( weather_G.f[[f]] [,"TMAX"], main="TMAX, TMIN (red)", type="l",
           ylim=range(weather_G.f[[f]] [,c("TMAX", "TMIN")]) )
-  points( weather_G.f[[f]] [,"TMIN"], col="red" )
-  plot  ( weather_G.f[[f]] [,"VP"  ], main="VP, WN (blue)",
+  points( weather_G.f[[f]] [,"TMIN"], col="red", type="l" )
+  plot  ( weather_G.f[[f]] [,"VP"  ], main="VP, WN (blue)", type="l",
           ylim=range(weather_G.f[[f]] [,c("VP", "WN")]) )
-  points( weather_G.f[[f]] [,"WN"  ], col="blue" )
-  plot  ( weather_G.f[[f]] [,"RAIN"], main="RAIN" )
+  points( weather_G.f[[f]] [,"WN"  ], col="blue", type="l" )
+  plot  ( weather_G.f[[f]] [,"RAIN"], main="RAIN", type="l" )
 ```
 
 
