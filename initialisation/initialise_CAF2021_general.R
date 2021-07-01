@@ -22,7 +22,7 @@ run_model <- function(p     = params,
 }
 
 ################################################################################
-### 2. FUNCTION FOR READING WEATHER DATA
+### 2. FUNCTIONS FOR READING WEATHER DATA
 ################################################################################
 read_weather_CAF <- function(y = year_start,
                              d = doy_start,
@@ -45,6 +45,15 @@ read_weather_CAF <- function(y = year_start,
   matrix_weather[1:n,7] <- df_weather_sim$WN
   matrix_weather[1:n,8] <- df_weather_sim$RAIN
   return(matrix_weather)
+}
+
+read_weather_CAF_WC <- function( list_w=weather_C.f, f=1,
+                                 y1=year_start, d1=doy_start, nd=NDAYS) {
+  file_weather <- "tmp_weather.txt"
+  write.table( list_w[[f]],
+               file=file_weather, col.names=colnames(weather_G.f[[f]]) )
+  matrix_weather <- read_weather_CAF( y1, d1, nd, file_weather )
+  return( matrix_weather ) 
 }
 
 ################################################################################
@@ -778,7 +787,9 @@ barplotTM <- function( y, name=NULL ) {
   barplot( as.matrix(y), main=name, col=colbars, beside=T, names.arg="" )
 }
 
-fYieldsTM <- function( parMatrix=parMAP, sfiles=sitesettings_filenames ) {
+fYieldsTM <- function( parMatrix=parMAP, sfiles=sitesettings_filenames,
+                       WC=FALSE, list_w=weather_C.f, f=1 ) {
+  
   nSites            <- length(sitesettings_filenames)
 
   names_vars        <- c( "Site", "Y.obs", "Y.sim" )
@@ -801,6 +812,7 @@ fYieldsTM <- function( parMatrix=parMAP, sfiles=sitesettings_filenames ) {
     
     source(sitesettings_filenames[s] )
     params     <- parMatrix[,s]
+    if( WC ) matrix_weather <- read_weather_CAF_WC( list_w, f )
     output.s   <- run_model( params, matrix_weather,
                              calendar_fert, calendar_prunC,
                              calendar_prunT, calendar_thinT, NDAYS )

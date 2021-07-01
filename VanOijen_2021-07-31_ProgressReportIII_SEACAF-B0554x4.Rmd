@@ -574,6 +574,99 @@ Comparing anomalies between the countries:
   plot  ( weather_G.f[[f]] [,"RAIN"], main="RAIN", type="l" )
 ```
 
+## Running CAF2021 on WorldClim weather files
+
+```{r, eval=F}
+  source( "run_CAF2021_Turrialba_01_WC_C.f01.R")
+```
+
+```{r}
+  source('initialisation/initialise_CAF2021_general.R')
+  par( mfrow=c(2,2) )
+
+  yC1 <- fYieldsTM( parMatrix=parMAP, sfiles=sitesettings_filenames,
+                    WC=TRUE, list_w=weather_C.f, f=1 )
+  par( pty="s" ) ; plotYieldsTM( yC1 )
+  
+  yG1 <- fYieldsTM( parMatrix=parMAP, sfiles=sitesettings_filenames,
+                    WC=TRUE, list_w=weather_G.f, f=1 )
+  par( pty="s" ) ; plotYieldsTM( yG1 )
+  
+  yC90 <- fYieldsTM( parMatrix=parMAP, sfiles=sitesettings_filenames,
+                    WC=TRUE, list_w=weather_C.f, f=90 )
+  par( pty="s" ) ; plotYieldsTM( yC90 )
+  
+  yG96 <- fYieldsTM( parMatrix=parMAP, sfiles=sitesettings_filenames,
+                    WC=TRUE, list_w=weather_G.f, f=96 )
+  par( pty="s" ) ; plotYieldsTM( yG96 )
+```
+
+```{r, eval=F}
+  y_TM.obs           <- rep   ( NA, nSites )
+  y_condsTM_weatherC <- matrix( NA, nSites, n_C.f )
+  y_condsTM_weatherG <- matrix( NA, nSites, n_G.f )
+  
+  source('initialisation/initialise_CAF2021_general.R')
+  y_TM.obs <- fYieldsTM( parMatrix=parMAP,
+                         sfiles=sitesettings_filenames ) [,"Y.obs"]
+
+  for(f in 1:n_C.f) {
+    yCf <- fYieldsTM( parMatrix=parMAP,
+                      sfiles=sitesettings_filenames, WC=T, weather_C.f, f )
+    y_condsTM_weatherC[,f] <- yCf[,"Y.sim"]
+  }
+
+  for(f in 1:n_G.f) {
+    yGf <- fYieldsTM( parMatrix=parMAP,
+                      sfiles=sitesettings_filenames, WC=T, weather_G.f, f )
+    y_condsTM_weatherG[,f] <- yGf[,"Y.sim"]
+  }
+  
+  save( y_TM.obs, y_condsTM_weatherC, y_condsTM_weatherG,
+        file="y_TM_CG.rda" )
+```
+  
+```{r}
+  load( "y_TM_CG.rda" )
+```
+
+```{r}
+  r2_condsTM_weatherC <- rep( NA, n_C.f )
+  r2_condsTM_weatherG <- rep( NA, n_G.f )
+
+  for(f in 1:n_C.f) {
+    yCf.lm <- lm( y_condsTM_weatherC[,f] ~ y_TM.obs )
+    r2_condsTM_weatherC[f] <- summary(yCf.lm)$r.squared
+  }
+
+  for(f in 1:n_G.f) {
+    yGf.lm <- lm( y_condsTM_weatherG[,f] ~ y_TM.obs )
+    r2_condsTM_weatherG[f] <- summary(yGf.lm)$r.squared
+  }
+```
+
+```{r}
+  par( mfrow=c(1,1) )
+  ymax <- max( r2_condsTM_weatherC, r2_condsTM_weatherG )
+  plot  ( 1:n_G.f, r2_condsTM_weatherG, col="red", ylim=c(0,1.2*ymax) )
+  points( 1:n_C.f, r2_condsTM_weatherC )
+  legend( "topleft",
+          legend=c("weather farms C","weather farms G"),
+          pch=c(1,1), col=c("black","red"),
+          horiz=T )
+```
+  
+```{r}
+  iC.r2max <- which.max( r2_condsTM_weatherC ) ; fC.r2max <- df_C.f[ iC.r2max, ]
+  iG.r2max <- which.max( r2_condsTM_weatherG ) ; fG.r2max <- df_G.f[ iG.r2max, ]
+  
+  fC.r2max$alt <- alt_C.f[iC.r2max]
+  fG.r2max$alt <- alt_G.f[iG.r2max]
+  
+  print( fC.r2max )
+  print( fG.r2max )
+```
+
 
 
 \clearpage
@@ -590,7 +683,7 @@ Here we report on simulation of fruit production and on simulating the SEACAF fa
 
 # Reference simulations for Turrialba and Masatepe
 
-```{r, fig.cap="\\label{fig:YieldsObsSimTM}Yields for the 32 treatments in Turrialba (black numbers) and Masatepe (red). Left: Observed yields against N-fertilisation level. Right: Observed yield vs. MAP-simulated yield."}
+```{r, fig.cap="\\label{fig:YieldsObsSimTM}Yields for the 32 treatments in Turrialba (black numbers) and Masatepe (red). Left: Observed yield vs. MAP-simulated yield. Right: as left but with higher soil water holding capacity (FWCWP reduced from 0.47 to 0.20) in the simulations."}
   source('initialisation/initialise_CAF2021_general.R')
   par( mfrow=c(1,2) )
 
