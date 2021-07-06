@@ -58,14 +58,19 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   # }
 ```
 
+
+
+\clearpage
+
 # SEACAF farms database
 
 ```{r}
   dir.f           <- "data/Farms SEACAF/"
 
+  file_bioph.f    <- "biophisical data sets.xls" 
   file_coords_C.f <- "coordinates_CR.csv"
   file_coords_G.f <- "coordinates_G.csv"
-  file_bioph.f    <- "biophisical data sets.xls" 
+  file_soil.f     <- "Soil_general.xlsx"
   file_typol.f    <- "typology.XLSX" 
 ```
 
@@ -192,7 +197,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
 
 ## Biophysics
 
-Soil measurements were taken in the top 26 cm of the soil. We assume that this layer contains half the soil organic matter.
+Soil measurements were taken in the top 26 cm of the soil. We assume that this layer contains two-thirds of the soil organic matter.
 
 To calculate soil dry matter amounts, we account for the fact that the spreadsheet soil dry matter values were for cylinders of depth 13 cm and radius 5 cm (i.e. area $\pi \, 5^2 = 78.54 \, cm^2$). So dry matter totals in kg m-2 for each soil layer (0-13 cm, 13-26 cm) were found by multiplying the reported values by $0.001 * 10^4 / 78.54$
 
@@ -221,8 +226,8 @@ To calculate soil dry matter amounts, we account for the fact that the spreadshe
               (DM_BL.soil.13_26 + DM_BP.soil.13_26 ) ) %>%
     mutate( DM.soil.00_26 = DM.soil.00_13 + DM.soil.13_26 ) %>%
     mutate( DMfrac.soil = DM.soil.00_26 / (2.6 * 100) ) %>%
-    mutate( C.soil = 2 * DM.soil.00_26 * Cperc.soil.00_26 / 100 ) %>%
-    mutate( N.soil = 2 * DM.soil.00_26 * Nperc.soil.00_26 / 100 ) %>%
+    mutate( C.soil = 1.5 * DM.soil.00_26 * Cperc.soil.00_26 / 100 ) %>%
+    mutate( N.soil = 1.5 * DM.soil.00_26 * Nperc.soil.00_26 / 100 ) %>%
     dplyr::select( code, DMfrac.soil, CN.soil, C.soil, N.soil ) %>%
     arrange( code )
 ```
@@ -282,7 +287,165 @@ To calculate soil dry matter amounts, we account for the fact that the spreadshe
           lty=1, cex=0.7 )
 ```
 
+## Soil
 
+Note various data corrections that were applied in the following code.
+
+- Guatemala sample weights were about 12 times smaller than those in Costa Rica. We use a correction factor of 10 in the following code (assuming soils in Costa Rica are only 20% heavier than those in Guatemala, not 1100%). 
+- Two farms in Guatemala had higher weights in some subsamples after drying at 105 degC: farm 138 (Excel-file rows 1209,1212:1215,1220) and farm 330 (rows 1833:1838). Those subsample weights were set to NA.
+
+```{r}
+  df_soil1.f0 <- read_excel( paste0(dir.f,file_soil.f),
+                             sheet="Apparent density", guess_max=3000 )
+
+  df_soil1.f  <- df_soil1.f0 %>%
+    mutate( code = ifelse(country=="Costa Rica", 1000,
+                   ifelse(country=="Guatemala" , 2000,
+                          NA )) ) %>%
+    mutate( code = code + farm_number ) %>%
+    arrange( code ) %>%
+    rename( DM_AD.soil.sample    = "sub sample weight" ) %>%
+    rename( DM_AD.soil.subsample_C = "airdry weight"   ) %>%
+    rename( DM.soil.subsample_C    = "weight 105"      ) %>%
+    rename( DM_AD.soil.subsample_G = "Gsubsample_105C" ) %>%
+    rename( DM.soil.subsample_G    = "Gweight_105C"    ) %>%
+    mutate( DM.soil.subsample_G    =
+              ifelse( DM.soil.subsample_G < DM_AD.soil.subsample_G,
+                      DM.soil.subsample_G,
+                      NA ) ) %>% # Removing values where 105C increased weight
+    mutate( DM.soil.sample =
+              ifelse( country=="Costa Rica", DM_AD.soil.sample *
+                        DM.soil.subsample_C / DM_AD.soil.subsample_C,
+              ifelse( country=="Guatemala" , DM_AD.soil.sample * 10 *
+                        DM.soil.subsample_G / DM_AD.soil.subsample_G,
+                      NA )) ) %>% # Assuming Guatemala values are in dg.
+    group_by( code, Profundity ) %>%
+    summarise( DM.soil.layer = median(DM.soil.sample) * 
+                               0.001 * (10000/78.54) ) %>% # kg DM m-2 per layer
+    summarise( DM.soil.00_26 = sum(DM.soil.layer) ) %>% # kg DM m-2 in top 26 cm
+    mutate( DMfrac.soil = DM.soil.00_26 / (2.6 * 100) ) # DM in kg l-1 in top 26 cm
+```
+
+```{r}
+  knitr::kable( summary( df_soil1.f ) )
+```
+
+```{r}
+  df_soil2.f0 <- read_excel( paste0(dir.f,file_soil.f),
+                             sheet="physical_chemical" )
+
+  df_soil2.f <- df_soil2.f0 %>%
+    mutate( code = ifelse( startsWith(farm_code,"Costa Rica"), 1000,
+                   ifelse( startsWith(farm_code,"Guatemala" ), 2000,
+                           NA )) ) %>%
+    mutate( code = code + farm_number ) %>%
+    arrange( code ) %>%
+    rename( Cperc.soil.00_13 = "0-13_%Carbon"         ) %>%
+    rename( Cperc.soil.13_26 = "13-26_%Carbon"        ) %>%
+    rename( Nperc.soil.00_13 = "0-13_%Nitrogen"       ) %>%
+    rename( Nperc.soil.13_26 = "13-26_%Nitrogen"      ) %>%
+    mutate( Cperc.soil.00_26 = 0.5 * (Cperc.soil.00_13 +
+                                      Cperc.soil.13_26) ) %>%
+    mutate( Nperc.soil.00_26 = 0.5 * (Nperc.soil.00_13 +
+                                      Nperc.soil.13_26) ) %>%
+    mutate( CN.soil          = Cperc.soil.00_26 /
+                               Nperc.soil.00_26 ) %>%
+
+    select( code, CN.soil, Cperc.soil.00_26, Nperc.soil.00_26 )
+```
+
+```{r}
+  knitr::kable( summary( df_soil2.f ) )
+```
+
+```{r}
+  df_soil.f <- df_soil1.f %>%
+    inner_join( df_soil2.f, by="code" ) %>%
+    mutate( C.soil.00_26 = DM.soil.00_26 * Cperc.soil.00_26 / 100 ) %>%
+    mutate( N.soil.00_26 = DM.soil.00_26 * Nperc.soil.00_26 / 100 ) %>%
+    mutate( C.soil       = C.soil.00_26  * 1.5 ) %>% # Assuming 2/3 of SM is in top 26 cm
+    mutate( N.soil       = N.soil.00_26  * 1.5 ) %>% # Assuming 2/3 of SM is in top 26 cm
+    inner_join( df_typol, by="code" ) %>%
+    select( code, altitude, DMfrac.soil, CN.soil, C.soil, N.soil )
+```
+
+```{r}
+  knitr::kable( summary( df_soil.f ) )
+```
+
+```{r, fig.height=8}
+  iC <- which(df_soil.f$code <  2000)
+  iG <- which(df_soil.f$code >= 2000)
+
+  par( mfrow=c(2,2) )
+  
+  ymax <- max( df_soil.f$DMfrac.soil, na.rm=T )
+  plot  ( df_soil.f$altitude[iC], df_soil.f$DMfrac.soil[iC], main="DMfrac.soil",
+          xlab="Alt. (m)", ylab="", ylim=c(0,ymax), pch=20 )
+  points( df_soil.f$altitude[iG], df_soil.f$DMfrac.soil[iG],
+          col="red", pch=20 )
+  y.lm.C <- lm( df_soil.f$DMfrac.soil[iC] ~ df_soil.f$altitude[iC] )
+  y.lm.G <- lm( df_soil.f$DMfrac.soil[iG] ~ df_soil.f$altitude[iG] )
+  r2.C   <- signif( summary(y.lm.C)$r.squared, 2 )
+  r2.G   <- signif( summary(y.lm.G)$r.squared, 2 )
+  abline( y.lm.C$coefficients[1], y.lm.C$coefficients[2], col="black" )
+  abline( y.lm.G$coefficients[1], y.lm.G$coefficients[2], col="red"   )
+  legend( "bottomleft",
+          legend=c( paste("r2[C]= ",as.character(r2.C)),
+                    paste("r2[G]= ",as.character(r2.G)) ),
+          col=c("black","red"), lty=c(1,1), cex=0.7 )
+  
+  ymax <- max( df_soil.f$CN.soil )
+  plot  ( df_soil.f$altitude[iC], df_soil.f$CN.soil[iC], main="CN.soil",
+          xlab="Alt. (m)", ylab="", ylim=c(0,ymax), pch=20 )
+  points( df_soil.f$altitude[iG], df_soil.f$CN.soil[iG],
+          col="red", pch=20 )
+  y.lm.C <- lm( df_soil.f$CN.soil[iC] ~ df_soil.f$altitude[iC] )
+  y.lm.G <- lm( df_soil.f$CN.soil[iG] ~ df_soil.f$altitude[iG] )
+  r2.C   <- signif( summary(y.lm.C)$r.squared, 2 )
+  r2.G   <- signif( summary(y.lm.G)$r.squared, 2 )
+  abline( y.lm.C$coefficients[1], y.lm.C$coefficients[2], col="black" )
+  abline( y.lm.G$coefficients[1], y.lm.G$coefficients[2], col="red"   )
+  legend( "bottomleft",
+          legend=c( paste("r2[C]= ",as.character(r2.C)),
+                    paste("r2[G]= ",as.character(r2.G)) ),
+          col=c("black","red"), lty=c(1,1), cex=0.7 )
+  
+  ymax <- max( df_soil.f$C.soil, na.rm=T )
+  plot  ( df_soil.f$altitude[iC], df_soil.f$C.soil[iC], main="C.soil",
+          xlab="Alt. (m)", ylab="", ylim=c(0,ymax), pch=20 )
+  points( df_soil.f$altitude[iG], df_soil.f$C.soil[iG],
+          col="red", pch=20 )
+  y.lm.C <- lm( df_soil.f$C.soil[iC] ~ df_soil.f$altitude[iC] )
+  y.lm.G <- lm( df_soil.f$C.soil[iG] ~ df_soil.f$altitude[iG] )
+  r2.C   <- signif( summary(y.lm.C)$r.squared, 2 )
+  r2.G   <- signif( summary(y.lm.G)$r.squared, 2 )
+  abline( y.lm.C$coefficients[1], y.lm.C$coefficients[2], col="black" )
+  abline( y.lm.G$coefficients[1], y.lm.G$coefficients[2], col="red"   )
+  legend( "bottomleft",
+          legend=c( paste("r2[C]= ",as.character(r2.C)),
+                    paste("r2[G]= ",as.character(r2.G)) ),
+          col=c("black","red"), lty=c(1,1), cex=0.7 )
+  
+  ymax <- max( df_soil.f$N.soil, na.rm=T )
+  plot  ( df_soil.f$altitude[iC], df_soil.f$N.soil[iC], main="N.soil",
+          xlab="Alt. (m)", ylab="", ylim=c(0,ymax), pch=20 )
+  points( df_soil.f$altitude[iG], df_soil.f$N.soil[iG],
+          col="red", pch=20 )
+  y.lm.C <- lm( df_soil.f$N.soil[iC] ~ df_soil.f$altitude[iC] )
+  y.lm.G <- lm( df_soil.f$N.soil[iG] ~ df_soil.f$altitude[iG] )
+  r2.C   <- signif( summary(y.lm.C)$r.squared, 2 )
+  r2.G   <- signif( summary(y.lm.G)$r.squared, 2 )
+  abline( y.lm.C$coefficients[1], y.lm.C$coefficients[2], col="black" )
+  abline( y.lm.G$coefficients[1], y.lm.G$coefficients[2], col="red"   )
+  legend( "bottomleft",
+          legend=c( paste("r2[C]= ",as.character(r2.C)),
+                    paste("r2[G]= ",as.character(r2.G)) ),
+          col=c("black","red"), lty=c(1,1), cex=0.7 )
+  
+```
+
+\clearpage
 
 # WorldClim
 
