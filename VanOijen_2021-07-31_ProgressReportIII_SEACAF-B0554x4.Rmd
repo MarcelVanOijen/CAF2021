@@ -289,9 +289,8 @@ To calculate soil dry matter amounts, we account for the fact that the spreadshe
 
 ## Soil
 
-Note various data corrections that were applied in the following code.
+Note that data corrections were applied in the following code.
 
-- Guatemala sample weights were about 12 times smaller than those in Costa Rica. We use a correction factor of 10 in the following code (assuming soils in Costa Rica are only 20% heavier than those in Guatemala, not 1100%). 
 - Two farms in Guatemala had higher weights in some subsamples after drying at 105 degC: farm 138 (Excel-file rows 1209,1212:1215,1220) and farm 330 (rows 1833:1838). Those subsample weights were set to NA.
 
 ```{r}
@@ -304,20 +303,21 @@ Note various data corrections that were applied in the following code.
                           NA )) ) %>%
     mutate( code = code + farm_number ) %>%
     arrange( code ) %>%
-    rename( DM_AD.soil.sample    = "sub sample weight" ) %>%
-    rename( DM_AD.soil.subsample_C = "airdry weight"   ) %>%
-    rename( DM.soil.subsample_C    = "weight 105"      ) %>%
-    rename( DM_AD.soil.subsample_G = "Gsubsample_105C" ) %>%
-    rename( DM.soil.subsample_G    = "Gweight_105C"    ) %>%
-    mutate( DM.soil.subsample_G    =
-              ifelse( DM.soil.subsample_G < DM_AD.soil.subsample_G,
-                      DM.soil.subsample_G,
+    rename( DM.soil.sample_C     = "weight 105"        ) %>%
+    rename( FW.soil.sample_G     = "Fresh weight"      ) %>%
+    rename( FW.soil.subsample1_G = "sub sample weight" ) %>%
+    rename( AD.soil.subsample1_G = "airdry weight"     ) %>%
+    rename( AD.soil.subsample2_G = "Gsubsample_105C"   ) %>%
+    rename( DM.soil.subsample2_G = "Gweight_105C"      ) %>%
+    mutate( DM.soil.subsample2_G =
+              ifelse( DM.soil.subsample2_G < AD.soil.subsample2_G,
+                      DM.soil.subsample2_G,
                       NA ) ) %>% # Removing values where 105C increased weight
     mutate( DM.soil.sample =
-              ifelse( country=="Costa Rica", DM_AD.soil.sample *
-                        DM.soil.subsample_C / DM_AD.soil.subsample_C,
-              ifelse( country=="Guatemala" , DM_AD.soil.sample * 10 *
-                        DM.soil.subsample_G / DM_AD.soil.subsample_G,
+              ifelse( country=="Costa Rica", DM.soil.sample_C,
+              ifelse( country=="Guatemala" , FW.soil.sample_G *
+                      (AD.soil.subsample1_G / FW.soil.subsample1_G) *
+                      (DM.soil.subsample2_G / AD.soil.subsample2_G),
                       NA )) ) %>% # Assuming Guatemala values are in dg.
     group_by( code, Profundity ) %>%
     summarise( DM.soil.layer = median(DM.soil.sample) * 
