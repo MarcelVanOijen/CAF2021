@@ -377,10 +377,10 @@ Note that data corrections were applied in the following code.
   iC <- which(df_soil.f$code <  2000)
   iG <- which(df_soil.f$code >= 2000)
 
-  par( mfrow=c(2,2) )
+  par( mfrow=c(2,2), mar=c(4,2,3,2) )
   
   ymax <- max( df_soil.f$DMfrac.soil, na.rm=T )
-  plot  ( df_soil.f$altitude[iC], df_soil.f$DMfrac.soil[iC], main="DMfrac.soil",
+  plot  ( df_soil.f$altitude[iC], df_soil.f$DMfrac.soil[iC], main="DMfrac.soil (g cm-3)",
           xlab="Alt. (m)", ylab="", ylim=c(0,ymax), pch=20 )
   points( df_soil.f$altitude[iG], df_soil.f$DMfrac.soil[iG],
           col="red", pch=20 )
@@ -396,7 +396,7 @@ Note that data corrections were applied in the following code.
           col=c("black","red"), lty=c(1,1), cex=0.7 )
   
   ymax <- max( df_soil.f$CN.soil )
-  plot  ( df_soil.f$altitude[iC], df_soil.f$CN.soil[iC], main="CN.soil",
+  plot  ( df_soil.f$altitude[iC], df_soil.f$CN.soil[iC], main="C/N.soil (-)",
           xlab="Alt. (m)", ylab="", ylim=c(0,ymax), pch=20 )
   points( df_soil.f$altitude[iG], df_soil.f$CN.soil[iG],
           col="red", pch=20 )
@@ -412,7 +412,7 @@ Note that data corrections were applied in the following code.
           col=c("black","red"), lty=c(1,1), cex=0.7 )
   
   ymax <- max( df_soil.f$C.soil, na.rm=T )
-  plot  ( df_soil.f$altitude[iC], df_soil.f$C.soil[iC], main="C.soil",
+  plot  ( df_soil.f$altitude[iC], df_soil.f$C.soil[iC], main="C.soil (kg C m-2)",
           xlab="Alt. (m)", ylab="", ylim=c(0,ymax), pch=20 )
   points( df_soil.f$altitude[iG], df_soil.f$C.soil[iG],
           col="red", pch=20 )
@@ -428,7 +428,7 @@ Note that data corrections were applied in the following code.
           col=c("black","red"), lty=c(1,1), cex=0.7 )
   
   ymax <- max( df_soil.f$N.soil, na.rm=T )
-  plot  ( df_soil.f$altitude[iC], df_soil.f$N.soil[iC], main="N.soil",
+  plot  ( df_soil.f$altitude[iC], df_soil.f$N.soil[iC], main="N.soil (kg N m-2)",
           xlab="Alt. (m)", ylab="", ylim=c(0,ymax), pch=20 )
   points( df_soil.f$altitude[iG], df_soil.f$N.soil[iG],
           col="red", pch=20 )
