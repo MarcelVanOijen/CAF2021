@@ -865,10 +865,23 @@ Comparing anomalies between the countries:
 
 \clearpage
 
-# Combining all data for CAF2021 in one data frame. 
+# Combining all data for CAF2021 in one R-dataframe 
 
 ```{r}
-  source( "run_CAF2021_Turrialba_01_WC_C.f01.R")
+  df_C.f <- df_coords_C.f %>% mutate( weather = weather_C.f )
+  df_G.f <- df_coords_G.f %>% mutate( weather = weather_G.f )
+  row.names( df_C.f ) <- df_C.f$code
+  row.names( df_G.f ) <- df_G.f$code
+  
+  # str( df_C.f ) ; str(df_G.f)
+  
+  save( df_C.f, file="df_C.f.rda" )
+  save( df_G.f, file="df_C.f.rda" )
+```
+
+```{r}
+  # Extracting the weather data for a single farm, say Costa Rica farm 1103
+  knitr::kable( summary( df_C.f["1103","weather"][[1]], digits=2 ) )
 ```
 
 
