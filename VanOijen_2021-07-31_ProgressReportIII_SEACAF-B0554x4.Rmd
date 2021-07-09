@@ -834,6 +834,15 @@ Comparing anomalies between the countries:
 ```
 
 ```{r}
+  df_weather_C.f <- df_coords_C.f %>%
+    mutate( alt.WC     = alt_C.f     ) %>%
+    mutate( weather.WC = weather_C.f )
+  df_weather_G.f <- df_coords_G.f %>%
+    mutate( alt.WC     = alt_G.f     ) %>%
+    mutate( weather.WC = weather_G.f )
+```
+
+```{r}
   par( mfrow=c(2,2) )
 
   f <- 1
@@ -868,20 +877,24 @@ Comparing anomalies between the countries:
 # Combining all data for CAF2021 in one R-dataframe 
 
 ```{r}
-  df_C.f <- df_coords_C.f %>% mutate( weather = weather_C.f )
-  df_G.f <- df_coords_G.f %>% mutate( weather = weather_G.f )
-  row.names( df_C.f ) <- df_C.f$code
-  row.names( df_G.f ) <- df_G.f$code
+  df_C.f     <- df_weather_C.f            %>%
+    inner_join( df_soil_C.f , by="code" ) %>%
+    inner_join( df_typol_C.f, by="code" )
+  df_G.f     <- df_weather_G.f            %>%
+    inner_join( df_soil_G.f , by="code" ) %>%
+    inner_join( df_typol_G.f, by="code" )
   
+  # names( df_C.f) ; names( df_C.f)
   # str( df_C.f ) ; str(df_G.f)
   
-  save( df_C.f, file="df_C.f.rda" )
-  save( df_G.f, file="df_C.f.rda" )
+  # save( df_C.f, file="df_C.f.rda" )
+  # save( df_G.f, file="df_C.f.rda" )
 ```
 
 ```{r}
   # Extracting the weather data for a single farm, say Costa Rica farm 1103
-  knitr::kable( summary( df_C.f["1103","weather"][[1]], digits=2 ) )
+  i <- 1103 ; df_C.fi <- df_C.f %>% filter( code==i )
+  knitr::kable( summary( df_C.fi[,"weather.WC"][[1]], digits=2 ) )
 ```
 
 
@@ -890,7 +903,7 @@ Comparing anomalies between the countries:
 
 # Running CAF2021 on WorldClim weather files
 
-```{r}
+```{r, eval=F}
   source( "run_CAF2021_Turrialba_01_WC_C.f01.R")
 ```
 
@@ -1055,9 +1068,11 @@ Yields per farm (averaged over the 32 treatments).
 
 # Running CAF2021 on WorldClim weather files plus farm soil data
 
-```{r}
+```{r, eval=F}
   source( "run_CAF2021_Turrialba_01_WC_C.f01.R")
+```
 
+```{r}
   fcode.soil      <- df_soil.f$code
   fcode_C.WC      <- names( weather_C.f )
   fcode_G.WC      <- names( weather_G.f )
