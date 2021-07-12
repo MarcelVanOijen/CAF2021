@@ -22,11 +22,12 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
 
 ```{r, include=FALSE}
   knitr::opts_chunk$set(echo=F,results="asis",warning=FALSE,message=FALSE)
-  library(rworldmap)
-  library(rworldxtra)
-  library(raster)
-  library(readxl)
-  library(tidyverse)
+  library( geosphere  )
+  library( rworldmap  )
+  library( rworldxtra )
+  library( raster     )
+  library( readxl     )
+  library( tidyverse  )
 ```
 
 ```{r}
@@ -338,19 +339,19 @@ We import the files in RasterStacks (see https://www.benjaminbell.co.uk/2018/02/
   vapr_C <- crop(vapr, ext_C) ; vapr_G <- crop(vapr, ext_G) ; rm(vapr)
   wind_C <- crop(wind, ext_C) ; wind_G <- crop(wind, ext_G) ; rm(wind)
 
-  writeRaster( prec_C, paste0(dir_WC,"WC_prec_C.grd") )
-  writeRaster( srad_C, paste0(dir_WC,"WC_srad_C.grd") )
-  writeRaster( tmax_C, paste0(dir_WC,"WC_tmax_C.grd") )
-  writeRaster( tmin_C, paste0(dir_WC,"WC_tmin_C.grd") )
-  writeRaster( vapr_C, paste0(dir_WC,"WC_vapr_C.grd") )
-  writeRaster( wind_C, paste0(dir_WC,"WC_wind_C.grd") )
-
-  writeRaster( prec_G, paste0(dir_WC,"WC_prec_G.grd") )
-  writeRaster( srad_G, paste0(dir_WC,"WC_srad_G.grd") )
-  writeRaster( tmax_G, paste0(dir_WC,"WC_tmax_G.grd") )
-  writeRaster( tmin_G, paste0(dir_WC,"WC_tmin_G.grd") )
-  writeRaster( vapr_G, paste0(dir_WC,"WC_vapr_G.grd") )
-  writeRaster( wind_G, paste0(dir_WC,"WC_wind_G.grd") )
+  # writeRaster( prec_C, paste0(dir_WC,"WC_prec_C.grd") )
+  # writeRaster( srad_C, paste0(dir_WC,"WC_srad_C.grd") )
+  # writeRaster( tmax_C, paste0(dir_WC,"WC_tmax_C.grd") )
+  # writeRaster( tmin_C, paste0(dir_WC,"WC_tmin_C.grd") )
+  # writeRaster( vapr_C, paste0(dir_WC,"WC_vapr_C.grd") )
+  # writeRaster( wind_C, paste0(dir_WC,"WC_wind_C.grd") )
+  # 
+  # writeRaster( prec_G, paste0(dir_WC,"WC_prec_G.grd") )
+  # writeRaster( srad_G, paste0(dir_WC,"WC_srad_G.grd") )
+  # writeRaster( tmax_G, paste0(dir_WC,"WC_tmax_G.grd") )
+  # writeRaster( tmin_G, paste0(dir_WC,"WC_tmin_G.grd") )
+  # writeRaster( vapr_G, paste0(dir_WC,"WC_vapr_G.grd") )
+  # writeRaster( wind_G, paste0(dir_WC,"WC_wind_G.grd") )
 ```
 
 ```{r}
@@ -403,7 +404,7 @@ The locations of the farms are depicted in Fig. \ref{fig:Maps_CG}.
   plot( alt_C, main="alt_C", addfun=plot_C.f, zlim=c(0,4000) )
   plot( alt_G, main="alt_G", addfun=plot_G.f, zlim=c(0,4000) )
 
-  Alternative way of producing a map with the farm locations
+  # Alternative way of producing a map with the farm locations
   worldmap <- getMap(resolution = "high")
   plot( worldmap,
         col="lightgrey", border="darkgray",
@@ -480,12 +481,12 @@ The locations of the farms are depicted in Fig. \ref{fig:Maps_CG}.
   tmin_C.00_18 <- crop(tmin.00_18, ext_C)
   tmin_G.00_18 <- crop(tmin.00_18, ext_G) ; rm(tmin.00_18)
 
-  writeRaster( prec_C.00_18, paste0(dir_WC,"WC_prec_C.00_18.grd") )
-  writeRaster( prec_G.00_18, paste0(dir_WC,"WC_prec_G.00_18.grd") )
-  writeRaster( tmax_C.00_18, paste0(dir_WC,"WC_tmax_C.00_18.grd") )
-  writeRaster( tmax_G.00_18, paste0(dir_WC,"WC_tmax_G.00_18.grd") )
-  writeRaster( tmin_C.00_18, paste0(dir_WC,"WC_tmin_C.00_18.grd") )
-  writeRaster( tmin_G.00_18, paste0(dir_WC,"WC_tmin_G.00_18.grd") )
+  # writeRaster( prec_C.00_18, paste0(dir_WC,"WC_prec_C.00_18.grd") )
+  # writeRaster( prec_G.00_18, paste0(dir_WC,"WC_prec_G.00_18.grd") )
+  # writeRaster( tmax_C.00_18, paste0(dir_WC,"WC_tmax_C.00_18.grd") )
+  # writeRaster( tmax_G.00_18, paste0(dir_WC,"WC_tmax_G.00_18.grd") )
+  # writeRaster( tmin_C.00_18, paste0(dir_WC,"WC_tmin_C.00_18.grd") )
+  # writeRaster( tmin_G.00_18, paste0(dir_WC,"WC_tmin_G.00_18.grd") )
 ```
 
 ```{r}
@@ -572,18 +573,18 @@ Comparing anomalies between two farms in Costa Rica:
   iSite1 <- 1 ; iSite2 <- 2
   plot  ( 1:228, TMIN_C.00_18.anom.f[iSite1,], main="Anomalies TMIN" )
   points( 1:228, TMIN_C.00_18.anom.f[iSite2,], col="red" )
-  plot(TMIN_C.00_18.anom.f[iSite1,], TMIN_C.00_18.anom.f[iSite2,] )
+  plot( TMIN_C.00_18.anom.f[iSite1,], TMIN_C.00_18.anom.f[iSite2,] )
   
   plot  ( 1:228, TMAX_C.00_18.anom.f[iSite1,], main="Anomalies TMAX" )
   points( 1:228, TMAX_C.00_18.anom.f[iSite2,], col="red" )
-  plot(TMAX_C.00_18.anom.f[iSite1,], TMAX_C.00_18.anom.f[iSite2,] )
+  plot( TMAX_C.00_18.anom.f[iSite1,], TMAX_C.00_18.anom.f[iSite2,] )
   
   plot  ( 1:228, RAIN_C.00_18.anom.f[iSite1,], main="Anomalies RAIN" )
   points( 1:228, RAIN_C.00_18.anom.f[iSite2,], col="red" )
-  plot(RAIN_C.00_18.anom.f[iSite1,], RAIN_C.00_18.anom.f[iSite2,] )
+  plot( RAIN_C.00_18.anom.f[iSite1,], RAIN_C.00_18.anom.f[iSite2,] )
 ```
 
-Comparing anomalies between the countries:
+Comparing anomalies between a farm in Costa Rica and one in Guatemala:
 
 ```{r}
   par( mfrow=c(3,2) )
@@ -722,32 +723,40 @@ Comparing anomalies between the countries:
     mutate( weather.WC = weather_G.f )
 ```
 
-```{r}
-  par( mfrow=c(2,2) )
+```{r, fig.height=3}
+  par( mfrow=c(2,2), mar=c(2,2,2,2) )
 
   f <- 1
-  plot  ( weather_C.f[[f]] [,"GR"  ], main="GR", type="l" )
-  plot  ( weather_C.f[[f]] [,"TMAX"], main="TMAX, TMIN (red)", type="l",
+  plot  ( weather_C.f[[f]] [,"GR"  ], main="GR",
+          xlab="", ylab="", type="l" )
+  plot  ( weather_C.f[[f]] [,"TMAX"], main="TMAX, TMIN (red)",
+          xlab="", ylab="", type="l",
           ylim=range(weather_C.f[[f]] [,c("TMAX", "TMIN")]) )
   points( weather_C.f[[f]] [,"TMIN"], col="red", type="l" )
-  plot  ( weather_C.f[[f]] [,"VP"  ], main="VP, WN (blue)", type="l",
+  plot  ( weather_C.f[[f]] [,"VP"  ], main="VP, WN (blue)",
+          xlab="", ylab="", type="l",
           ylim=range(weather_C.f[[f]] [,c("VP", "WN")]) )
   points( weather_C.f[[f]] [,"WN"  ], col="blue", type="l" )
-  plot  ( weather_C.f[[f]] [,"RAIN"], main="RAIN", type="l" )
+  plot  ( weather_C.f[[f]] [,"RAIN"], main="RAIN",
+          xlab="", ylab="", type="l" )
 ```
 
-```{r}
-  par( mfrow=c(2,2) )
+```{r, fig.height=3}
+  par( mfrow=c(2,2), mar=c(2,2,2,2) )
 
   f <- 1
-  plot  ( weather_G.f[[f]] [,"GR"  ], main="GR", type="l" )
-  plot  ( weather_G.f[[f]] [,"TMAX"], main="TMAX, TMIN (red)", type="l",
+  plot  ( weather_G.f[[f]] [,"GR"  ], main="GR",
+          xlab="", ylab="", type="l" )
+  plot  ( weather_G.f[[f]] [,"TMAX"], main="TMAX, TMIN (red)",
+          xlab="", ylab="", type="l",
           ylim=range(weather_G.f[[f]] [,c("TMAX", "TMIN")]) )
   points( weather_G.f[[f]] [,"TMIN"], col="red", type="l" )
-  plot  ( weather_G.f[[f]] [,"VP"  ], main="VP, WN (blue)", type="l",
+  plot  ( weather_G.f[[f]] [,"VP"  ], main="VP, WN (blue)",
+          xlab="", ylab="", type="l",
           ylim=range(weather_G.f[[f]] [,c("VP", "WN")]) )
   points( weather_G.f[[f]] [,"WN"  ], col="blue", type="l" )
-  plot  ( weather_G.f[[f]] [,"RAIN"], main="RAIN", type="l" )
+  plot  ( weather_G.f[[f]] [,"RAIN"], main="RAIN",
+          xlab="", ylab="", type="l" )
 ```
 
 
@@ -802,34 +811,64 @@ Comparing anomalies between the countries:
             col=c("black","red"), lty=c(1,1), cex=0.7 ) }
 ```
 
-```{r, fig.height=8}
-  par( mfrow=c(2,2) )
+```{r, fig.height=5}
+  par( mfrow=c(2,2), mar=c(4,2,2,2) )
   
   xtxt <- "Alt. (m)"        ; x_C <- df_C.f$altitude ; x_G <- df_G.f$altitude
   
   ytxt <- "Yield (kg/ha)"   ; y_C <- df_C.f$yield    ; y_G <- df_G.f$yield
-  plot_xy_CG( )
+  plot_xy_CG( xtxt="" )
   ytxt <- "# tree spp."     ; y_C <- df_C.f$nt       ; y_G <- df_G.f$nt
-  plot_xy_CG( )
+  plot_xy_CG( xtxt="" )
   ytxt <- "Shade (-)"       ; y_C <- df_C.f$shade    ; y_G <- df_G.f$shade
   plot_xy_CG( )
   ytxt <- "Nfert (kg/ha/y)" ; y_C <- df_C.f$Nfert    ; y_G <- df_G.f$Nfert
   plot_xy_CG( )
 ```
 
-```{r, fig.height=8}
-  par( mfrow=c(2,2) )
+```{r, fig.height=5}
+  par( mfrow=c(2,2), mar=c(4,2,2,2) )
   
   xtxt <- "Alt. (m)"   ; x_C <- df_C.f$altitude ; x_G <- df_G.f$altitude
   
   ytxt <- "DM (g/cm3)" ; y_C <- df_C.f$DM.soil  ; y_G <- df_G.f$DM.soil
-  plot_xy_CG( )
+  plot_xy_CG( xtxt="" )
   ytxt <- "C/N (-)"    ; y_C <- df_C.f$CN.soil  ; y_G <- df_G.f$CN.soil
-  plot_xy_CG( )
+  plot_xy_CG( xtxt="" )
   ytxt <- "C (kg/m2)"  ; y_C <- df_C.f$C.soil   ; y_G <- df_G.f$C.soil
   plot_xy_CG( )
   ytxt <- "N (kg/m2)"  ; y_C <- df_C.f$N.soil   ; y_G <- df_G.f$N.soil
   plot_xy_CG( )
+```
+
+
+
+\clearpage
+
+# Running CAF2021 with default settings for Turrialba and Masatepe
+
+We use the MAP parameter vector determined by Bayesian calibration in earlier work.
+
+```{r}
+  iT <- 1:18 ; iM <- 19:32
+  
+  source('initialisation/initialise_CAF2021_general.R')
+  y_TM <- fYieldsTM( parMatrix=parMAP, sfiles=sitesettings_filenames )
+  y_TM.obs <- y_TM[,"Y.obs"]
+  y_TM.MAP <- y_TM[,"Y.sim"]
+  yTM.lm   <- lm( y_TM.obs     ~ y_TM.MAP     )
+  yT.lm    <- lm( y_TM.obs[iT] ~ y_TM.MAP[iT] )
+  yM.lm    <- lm( y_TM.obs[iM] ~ y_TM.MAP[iM] )
+  r2_condsTM_weatherTM <- summary(yTM.lm)$r.squared
+  r2_condsT_weatherT   <- summary(yT.lm)$r.squared
+  r2_condsM_weatherM   <- summary(yM.lm)$r.squared
+```
+
+```{r}
+  par( mfrow=c(1,3), mar=c(2,2,2,2), pty="s" )
+  
+  y_T <- y_TM[iT,]    ; y_M <- y_TM[iM,]
+  plotYieldsTM( y_T ) ; plotYieldsTM( y_M ) ; plotYieldsTM( y_TM )
 ```
 
 
@@ -842,91 +881,95 @@ Comparing anomalies between the countries:
   source( "run_CAF2021_Turrialba_01_WC_C.f01.R")
 ```
 
-```{r, out.width="100%"}
-  source('initialisation/initialise_CAF2021_general.R')
-  par( mfrow=c(2,2), mar=c(2,1,3,1) )
-
-  yC1 <- fYieldsTM( parMatrix=parMAP, sfiles=sitesettings_filenames,
-                    WC=TRUE, list_w=df_C.f$weather.WC, f=1 )
-  par( pty="s" ) ; plotYieldsTM( yC1 )
-  
-  yG1 <- fYieldsTM( parMatrix=parMAP, sfiles=sitesettings_filenames,
-                    WC=TRUE, list_w=df_G.f$weather.WC, f=1 )
-  par( pty="s" ) ; plotYieldsTM( yG1 )
-  
-  yCn <- fYieldsTM( parMatrix=parMAP, sfiles=sitesettings_filenames,
-                    WC=TRUE, list_w=df_C.f$weather.WC, f=n_C.f )
-  par( pty="s" ) ; plotYieldsTM( yCn )
-  
-  yGn <- fYieldsTM( parMatrix=parMAP, sfiles=sitesettings_filenames,
-                    WC=TRUE, list_w=df_G.f$weather.WC, f=n_G.f )
-  par( pty="s" ) ; plotYieldsTM( yGn )
-```
-
 ```{r, eval=F}
-  y_TM.obs           <- rep   ( NA, nSites )
   y_condsTM_weatherC <- matrix( NA, nSites, n_C.f )
     colnames(y_condsTM_weatherC) <- df_C.f$code
   y_condsTM_weatherG <- matrix( NA, nSites, n_G.f )
     colnames(y_condsTM_weatherG) <- df_G.f$code
   
-  source('initialisation/initialise_CAF2021_general.R')
-  y_TM.obs <- fYieldsTM( parMatrix=parMAP,
-                         sfiles=sitesettings_filenames ) [,"Y.obs"]
-
   for(f in 1:n_C.f) {
     yCf <- fYieldsTM( parMatrix=parMAP,
                       sfiles=sitesettings_filenames,
-                      WC=T, df_C.f$weather.WC, f )
+                      df_C.f$weather.WC, f )
     y_condsTM_weatherC[,f] <- yCf[,"Y.sim"]
   }
 
   for(f in 1:n_G.f) {
     yGf <- fYieldsTM( parMatrix=parMAP,
                       sfiles=sitesettings_filenames,
-                      WC=T, df_G.f$weather.WC, f )
+                      df_G.f$weather.WC, f )
     y_condsTM_weatherG[,f] <- yGf[,"Y.sim"]
   }
   
-  # save( y_TM.obs, y_condsTM_weatherC, y_condsTM_weatherG,
-  #       file="y_TM_CG.rda" )
+  # save( y_condsTM_weatherC, y_condsTM_weatherG,
+  #       file="y_TM_weatherCG.rda" )
 ```
   
 ```{r}
-  load( "y_TM_CG.rda" )
+  load( "y_TM_weatherCG.rda" )
 ```
 
 ```{r}
-  r2_condsTM_weatherC <- rep( NA, n_C.f )
-  r2_condsTM_weatherG <- rep( NA, n_G.f )
+  r2_condsTM_weatherC <- r2_condsT_weatherC <- r2_condsM_weatherC <-
+    rep( NA, n_C.f )
+  r2_condsTM_weatherG <- r2_condsT_weatherG <- r2_condsM_weatherG <-
+    rep( NA, n_G.f )
 
   for(f in 1:n_C.f) {
-    yCf.lm <- lm( y_condsTM_weatherC[,f] ~ y_TM.obs )
-    r2_condsTM_weatherC[f] <- summary(yCf.lm)$r.squared
+    yTM_Cf.lm <- lm( y_TM.obs     ~ y_condsTM_weatherC[  ,f] )
+    yT_Cf.lm  <- lm( y_TM.obs[iT] ~ y_condsTM_weatherC[iT,f] )
+    yM_Cf.lm  <- lm( y_TM.obs[iM] ~ y_condsTM_weatherC[iM,f] )
+    r2_condsTM_weatherC[f] <- summary(yTM_Cf.lm)$r.squared
+    r2_condsT_weatherC [f] <- summary(yT_Cf.lm )$r.squared
+    r2_condsM_weatherC [f] <- summary(yM_Cf.lm )$r.squared
   }
 
   for(f in 1:n_G.f) {
-    yGf.lm <- lm( y_condsTM_weatherG[,f] ~ y_TM.obs )
-    r2_condsTM_weatherG[f] <- summary(yGf.lm)$r.squared
+    yTM_Gf.lm <- lm( y_TM.obs     ~ y_condsTM_weatherG[  ,f] )
+    yT_Gf.lm  <- lm( y_TM.obs[iT] ~ y_condsTM_weatherG[iT,f] )
+    yM_Gf.lm  <- lm( y_TM.obs[iM] ~ y_condsTM_weatherG[iM,f] )
+    r2_condsTM_weatherG[f] <- summary(yTM_Gf.lm)$r.squared
+    r2_condsT_weatherG [f] <- summary(yT_Gf.lm )$r.squared
+    r2_condsM_weatherG [f] <- summary(yM_Gf.lm )$r.squared
   }
 ```
 
-```{r}
-  par( mfrow=c(1,1) )
-  ymax <- max( r2_condsTM_weatherC, r2_condsTM_weatherG )
-  plot  ( 1:n_G.f, r2_condsTM_weatherG, col="red", ylim=c(0,1.2*ymax) )
-  points( 1:n_C.f, r2_condsTM_weatherC )
-  legend( "topleft",
-          legend=c("weather farms C","weather farms G"),
-          pch=c(1,1), col=c("black","red"),
+```{r, fig.height=6}
+  par( mfrow=c(3,1), mar=c(4,2,2,2), pty="m", mgp=c(2,1,0) )
+
+  plot  ( 1:n_G.f, r2_condsT_weatherG, main="r2 for Turrialba (n=18)",
+          col="red", xlab="Farm index", ylab="", ylim=c(0,1.15) )
+  points( 1:n_C.f, r2_condsT_weatherC )
+  abline( h=r2_condsT_weatherT, lty=2, col="blue" )
+  legend( "top",
+          legend=c("weather Turrialba","weather farms C","weather farms G"),
+          pch=c(NA,1,1), col=c("blue","black","red"),lty=c(2,NA,NA),
           horiz=T )
-```
+
+  plot  ( 1:n_G.f, r2_condsM_weatherG, main="r2 for Masatepe (n=14)",
+          col="red", xlab="Farm index", ylab="", ylim=c(0,1.15) )
+  points( 1:n_C.f, r2_condsM_weatherC )
+  abline( h=r2_condsM_weatherM, lty=2, col="blue" )
+  legend( "top",
+          legend=c("weather Masatepe","weather farms C","weather farms G"),
+          pch=c(NA,1,1), col=c("blue","black","red"),lty=c(2,NA,NA),
+          horiz=T )
+
+  lonlat_C <- df_C.f[ c("lon","lat") ]
+  lonlat_G <- df_G.f[ c("lon","lat") ]
+  coordsT  <- c( -83.68,  9.89 ) # Longitude, Latitude 
+  coordsM  <- c( -86.15, 11.9  ) # Longitude, Latitude
+  dist_C.T <- distm( coordsT, lonlat_C ) / 1000
+  dist_C.M <- distm( coordsM, lonlat_C ) / 1000
+  dist_G.T <- distm( coordsT, lonlat_G ) / 1000
+  dist_G.M <- distm( coordsM, lonlat_G ) / 1000
   
-```{r}
-  iC.r2max     <- which.max( r2_condsTM_weatherC )
-  iG.r2max     <- which.max( r2_condsTM_weatherG )
-  df_C.f[ iC.r2max, c("lat","lon","altitude")]
-  df_G.f[ iG.r2max, c("lat","lon","altitude")]
+  plot  ( dist_C.T, r2_condsT_weatherC, main="r2 for Turrialba using weather from C.R. farms",
+          xlab="distance (km)",ylab="", ylim=c(0,1.15))
+  abline( h=r2_condsT_weatherT, lty=2, col="blue" )
+  # plot  ( dist_C.M, r2_condsM_weatherC )
+  # plot  ( dist_G.T, r2_condsT_weatherG )
+  # plot  ( dist_G.M, r2_condsM_weatherG )
 ```
 
 Yields per farm (averaged over the 32 treatments).
@@ -943,12 +986,33 @@ Yields per farm (averaged over the 32 treatments).
   ysd_G.f_condsTM   <- apply   ( y_condsTM_weatherG, 2, sd )
 ```
 
-```{r, fig.height=8}
-  par( mfrow=c(2,2) )
+```{r, fig.height=6}
+  par( mfrow=c(2,2), mar=c(4,2,3,2) )
 
   ymax <- max( ymax_C.f_condsTM, ymax_G.f_condsTM )
 
-  plot  ( df_C.f$altitude, ymean_C.f_condsTM, main="Costa Rica",
+  plot  ( df_C.f$altitude, df_C.f$yield,
+          main="COSTA RICA\n(obs.)",
+          xlab="", ylab="", ylim=c(0,ymax), pch=20 )
+  y.lm <- lm( df_C.f$yield ~ df_C.f$altitude )
+  r2   <- round( summary(y.lm)$r.squared, 2 )
+  abline( y.lm$coefficients[1], y.lm$coefficients[2], col="blue" )
+  legend( "topright",
+          legend=paste("r2= ",as.character(r2)),
+          col=c("blue"), lty=c(1), cex=0.7 )
+  
+  plot  ( df_G.f$altitude, df_G.f$yield,
+          main="GUATEMALA\n(obs.)",
+          xlab="", ylab="", ylim=c(0,ymax), pch=20 )
+  y.lm <- lm( df_G.f$yield ~ df_G.f$altitude )
+  r2   <- round( summary(y.lm)$r.squared, 2 )
+  abline( y.lm$coefficients[1], y.lm$coefficients[2], col="blue" )
+  legend( "topright",
+          legend=paste("r2= ",as.character(r2)),
+          col=c("blue"), lty=c(1), cex=0.7 )
+
+  plot  ( df_C.f$altitude, ymean_C.f_condsTM,
+          main="\n(sim.)",
           xlab="Alt. (m)", ylab="", ylim=c(0,ymax), pch=20 )
   points( df_C.f$altitude, ymax_C.f_condsTM, pch=1, cex=0.5 )
   points( df_C.f$altitude, ymin_C.f_condsTM, pch=1, cex=0.5 )
@@ -959,29 +1023,12 @@ Yields per farm (averaged over the 32 treatments).
           legend=paste("r2= ",as.character(r2)),
           col=c("blue"), lty=c(1), cex=0.7 )
 
-  plot  ( df_G.f$altitude, ymean_G.f_condsTM, main="Guatemala",
+  plot  ( df_G.f$altitude, ymean_G.f_condsTM,
+          main="\n(sim.)",
           xlab="Alt. (m)", ylab="", ylim=c(0,ymax), pch=20 )
   points( df_G.f$altitude, ymax_G.f_condsTM, pch=1, cex=0.5 )
   points( df_G.f$altitude, ymin_G.f_condsTM, pch=1, cex=0.5 )
   y.lm <- lm( ymean_G.f_condsTM ~ df_G.f$altitude )
-  r2   <- round( summary(y.lm)$r.squared, 2 )
-  abline( y.lm$coefficients[1], y.lm$coefficients[2], col="blue" )
-  legend( "topright",
-          legend=paste("r2= ",as.character(r2)),
-          col=c("blue"), lty=c(1), cex=0.7 )
-  
-  plot  ( df_C.f$altitude, df_C.f$yield,
-          xlab="Alt. (m)", ylab="", ylim=c(0,ymax), pch=20 )
-  y.lm <- lm( df_C.f$yield ~ df_C.f$altitude )
-  r2   <- round( summary(y.lm)$r.squared, 2 )
-  abline( y.lm$coefficients[1], y.lm$coefficients[2], col="blue" )
-  legend( "topright",
-          legend=paste("r2= ",as.character(r2)),
-          col=c("blue"), lty=c(1), cex=0.7 )
-  
-  plot  ( df_G.f$altitude, df_G.f$yield,
-          xlab="Alt. (m)", ylab="", ylim=c(0,ymax), pch=20 )
-  y.lm <- lm( df_G.f$yield ~ df_G.f$altitude )
   r2   <- round( summary(y.lm)$r.squared, 2 )
   abline( y.lm$coefficients[1], y.lm$coefficients[2], col="blue" )
   legend( "topright",
@@ -1010,35 +1057,15 @@ Yields per farm (averaged over the 32 treatments).
   n_G.soil.WC     <- length( fcode_G.soil.WC )
 ```
 
-```{r, out.width="100%"}
+```{r, eval=F}
   source('initialisation/initialise_CAF2021_general.R')
-  par( mfrow=c(1,2), mar=c(2,1,3,1) )
-  
+
   ip_CLITT0   <- which( names_params=="CLITT0"  )
   ip_CNLITT0  <- which( names_params=="CNLITT0" )
   ip_CNSOMF0  <- which( names_params=="CNSOMF0" )
   ip_CNSOMS0  <- which( names_params=="CNSOMS0" )
   ip_CSOM0    <- which( names_params=="CSOM0"   )
   ip_FCSOMF0  <- which( names_params=="FCSOMF0" )
-  
-  parMatrix_C <- parMatrix_G <- parMAP
-  
-  fcode_Ci <- 1103 ; df_C.fi <- df_C.f %>% filter( code==fcode_Ci )
-  fcode_Gi <- 2009 ; df_G.fi <- df_G.f %>% filter( code==fcode_Gi )
-  
-  C_C <- df_C.fi$C.soil ; CN_C <- df_C.fi$CN.soil
-  C_G <- df_G.fi$C.soil ; CN_G <- df_G.fi$CN.soil
-  parMatrix_C[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0), ] <- CN_C
-  parMatrix_G[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0), ] <- CN_G
-  parMatrix_C[ ip_CSOM0                           , ] <- C_C
-  parMatrix_G[ ip_CSOM0                           , ] <- C_G
-  
-  yC <- fYieldsTM( parMatrix=parMatrix_C, sfiles=sitesettings_filenames,
-                   WC=TRUE, list_w=df_C.fi$weather.WC )
-  par( pty="s" ) ; plotYieldsTM( yC )
-  yG <- fYieldsTM( parMatrix=parMatrix_G, sfiles=sitesettings_filenames,
-                   WC=TRUE, list_w=df_G.fi$weather.WC )
-  par( pty="s" ) ; plotYieldsTM( yG )
 ```
 
 ```{r, eval=F}
@@ -1055,7 +1082,7 @@ Yields per farm (averaged over the 32 treatments).
     parMatrix_C[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0), ] <- CN_C
     parMatrix_C[ ip_CSOM0                           , ] <- C_C
     yCfi <- fYieldsTM( parMatrix=parMatrix_C, sfiles=sitesettings_filenames,
-                       WC=TRUE, list_w=df_C.f$weather.WC, f=fi )
+                       list_w=df_C.f$weather.WC, f=fi )
     y_soil.WC_C[,fi] <- yCfi[,"Y.sim"]
   }
 
@@ -1065,7 +1092,7 @@ Yields per farm (averaged over the 32 treatments).
     parMatrix_G[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0), ] <- CN_G
     parMatrix_G[ ip_CSOM0                           , ] <- C_G
     yGfi <- fYieldsTM( parMatrix=parMatrix_G, sfiles=sitesettings_filenames,
-                       WC=TRUE, list_w=df_G.f$weather.WC, f=fi )
+                       list_w=df_G.f$weather.WC, f=fi )
     y_soil.WC_G[,fi] <- yGfi[,"Y.sim"]
   }
 
@@ -1077,40 +1104,6 @@ Yields per farm (averaged over the 32 treatments).
   load( "y_soil.WC.rda" )
 ```
   
-  
-```{r}
-  r2_soil.WC_C <- rep( NA, n_C.f )
-  r2_soil.WC_G <- rep( NA, n_G.f )
-
-  for(f in 1:n_C.f) {
-    yCf.lm <- lm( y_soil.WC_C[,f] ~ y_TM.obs )
-    r2_soil.WC_C[f] <- summary(yCf.lm)$r.squared
-  }
-
-  for(f in 1:n_G.f) {
-    yGf.lm <- lm( y_soil.WC_G[,f] ~ y_TM.obs )
-    r2_soil.WC_G[f] <- summary(yGf.lm)$r.squared
-  }
-```
-
-```{r}
-  par( mfrow=c(1,1) )
-  ymax <- max( r2_soil.WC_C, r2_soil.WC_G )
-  plot  ( 1:n_G.f, r2_soil.WC_G, col="red", ylim=c(0,1.2*ymax) )
-  points( 1:n_C.f, r2_soil.WC_C )
-  legend( "topleft",
-          legend=c("soil & weather farms C","soil & weather farms G"),
-          pch=c(1,1), col=c("black","red"),
-          horiz=T )
-```
-  
-```{r}
-  iC.r2max     <- which.max( r2_soil.WC_C )
-  iG.r2max     <- which.max( r2_soil.WC_G )
-  df_C.f[ iC.r2max, c("lat","lon","altitude")]
-  df_G.f[ iG.r2max, c("lat","lon","altitude")]
-```
-
 Yields per farm (averaged over the 32 treatments).
 
 ```{r}
@@ -1125,12 +1118,13 @@ Yields per farm (averaged over the 32 treatments).
   ysd_G.f_soil.WC   <- apply   ( y_soil.WC_G, 2, sd )
 ```
 
-```{r, fig.height=8}
-  par( mfrow=c(2,2) )
+```{r, fig.height=3}
+  par( mfrow=c(1,2), mar=c(4,2,3,2) )
 
   ymax <- max( ymax_C.f_soil.WC, ymax_G.f_soil.WC )
 
-  plot  ( df_C.f$altitude, ymean_C.f_soil.WC, main="Costa Rica",
+  plot  ( df_C.f$altitude, ymean_C.f_soil.WC,
+          main="COSTA RICA\n(sim.)",
           xlab="Alt. (m)", ylab="", ylim=c(0,ymax), pch=20 )
   points( df_C.f$altitude, ymax_C.f_soil.WC, pch=1, cex=0.5 )
   points( df_C.f$altitude, ymin_C.f_soil.WC, pch=1, cex=0.5 )
@@ -1141,7 +1135,8 @@ Yields per farm (averaged over the 32 treatments).
           legend=paste("r2= ",as.character(r2)),
           col=c("blue"), lty=c(1), cex=0.7 )
 
-  plot  ( df_G.f$altitude, ymean_G.f_soil.WC, main="Guatemala",
+  plot  ( df_G.f$altitude, ymean_G.f_soil.WC,
+          main="GUATEMALA\n(sim.)",
           xlab="Alt. (m)", ylab="", ylim=c(0,ymax), pch=20 )
   points( df_G.f$altitude, ymax_G.f_soil.WC, pch=1, cex=0.5 )
   points( df_G.f$altitude, ymin_G.f_soil.WC, pch=1, cex=0.5 )
@@ -1151,25 +1146,14 @@ Yields per farm (averaged over the 32 treatments).
   legend( "topright",
           legend=paste("r2= ",as.character(r2)),
           col=c("blue"), lty=c(1), cex=0.7 )
-  
-  plot  ( df_C.f$altitude, df_C.f$yield,
-          xlab="Alt. (m)", ylab="", ylim=c(0,ymax), pch=20 )
-  y.lm <- lm( df_C.f$yield ~ df_C.f$altitude )
-  r2   <- round( summary(y.lm)$r.squared, 2 )
-  abline( y.lm$coefficients[1], y.lm$coefficients[2], col="blue" )
-  legend( "topright",
-          legend=paste("r2= ",as.character(r2)),
-          col=c("blue"), lty=c(1), cex=0.7 )
-  
-  plot  ( df_G.f$altitude, df_G.f$yield,
-          xlab="Alt. (m)", ylab="", ylim=c(0,ymax), pch=20 )
-  y.lm <- lm( df_G.f$yield ~ df_G.f$altitude )
-  r2   <- round( summary(y.lm)$r.squared, 2 )
-  abline( y.lm$coefficients[1], y.lm$coefficients[2], col="blue" )
-  legend( "topright",
-          legend=paste("r2= ",as.character(r2)),
-          col=c("blue"), lty=c(1), cex=0.7 )
 ```
+
+## Erosion
+
+- [@Ataroff_1997_Soil]
+- [@BlancoSepulveda_2015_Soila]
+- [@Cannavo_2011_Agroforestry]
+- [@Craswell_1998_Agroforestry]
 
 
 
