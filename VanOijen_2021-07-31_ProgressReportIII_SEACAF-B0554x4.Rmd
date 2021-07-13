@@ -780,8 +780,8 @@ Comparing anomalies between a farm in Costa Rica and one in Guatemala:
   # names( df_C.f) ; names( df_G.f)
   # str( df_C.f ) ; str(df_G.f)
   
-  # save( df_C.f, file="df_C.f.rda" )
-  # save( df_G.f, file="df_C.f.rda" )
+  save( df_C.f, file="df_C.f.rda" )
+  save( df_G.f, file="df_G.f.rda" )
 ```
 
 ```{r}
@@ -965,7 +965,7 @@ We use the MAP parameter vector determined by Bayesian calibration in earlier wo
   dist_G.M <- distm( coordsM, lonlat_G ) / 1000
   
   plot  ( dist_C.T, r2_condsT_weatherC, main="r2 for Turrialba using weather from C.R. farms",
-          xlab="distance (km)",ylab="", ylim=c(0,1.15))
+          xlab="Distance from Turrialba (km)",ylab="", ylim=c(0,1.15))
   abline( h=r2_condsT_weatherT, lty=2, col="blue" )
   # plot  ( dist_C.M, r2_condsM_weatherC )
   # plot  ( dist_G.T, r2_condsT_weatherG )
@@ -1047,17 +1047,6 @@ Yields per farm (averaged over the 32 treatments).
 ```
 
 ```{r, eval=F}
-  fcode.soil      <- df_soil.f$code
-  fcode_C.WC      <- names( weather_C.f )
-  fcode_G.WC      <- names( weather_G.f )
-  
-  fcode_C.soil.WC <- df_soil.f$code[ which( fcode.soil %in% fcode_C.WC ) ]
-  fcode_G.soil.WC <- df_soil.f$code[ which( fcode.soil %in% fcode_G.WC ) ]
-  n_C.soil.WC     <- length( fcode_C.soil.WC )
-  n_G.soil.WC     <- length( fcode_G.soil.WC )
-```
-
-```{r, eval=F}
   source('initialisation/initialise_CAF2021_general.R')
 
   ip_CLITT0   <- which( names_params=="CLITT0"  )
@@ -1081,7 +1070,8 @@ Yields per farm (averaged over the 32 treatments).
     CN_C <- df_C.f$CN.soil[ fi ]
     parMatrix_C[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0), ] <- CN_C
     parMatrix_C[ ip_CSOM0                           , ] <- C_C
-    yCfi <- fYieldsTM( parMatrix=parMatrix_C, sfiles=sitesettings_filenames,
+    yCfi <- fYieldsTM( parMatrix=parMatrix_C,
+                       sfiles=sitesettings_filenames,
                        list_w=df_C.f$weather.WC, f=fi )
     y_soil.WC_C[,fi] <- yCfi[,"Y.sim"]
   }
@@ -1091,7 +1081,8 @@ Yields per farm (averaged over the 32 treatments).
     CN_G <- df_G.f$CN.soil[ fi ]
     parMatrix_G[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0), ] <- CN_G
     parMatrix_G[ ip_CSOM0                           , ] <- C_G
-    yGfi <- fYieldsTM( parMatrix=parMatrix_G, sfiles=sitesettings_filenames,
+    yGfi <- fYieldsTM( parMatrix=parMatrix_G,
+                       sfiles=sitesettings_filenames,
                        list_w=df_G.f$weather.WC, f=fi )
     y_soil.WC_G[,fi] <- yGfi[,"Y.sim"]
   }
@@ -1146,6 +1137,187 @@ Yields per farm (averaged over the 32 treatments).
   legend( "topright",
           legend=paste("r2= ",as.character(r2)),
           col=c("blue"), lty=c(1), cex=0.7 )
+```
+
+## Multiple runs for each farm
+
+```{r}
+  outputSummary <- function( output ) {
+    idoy           <- which( outputNames=="doy" )
+    names_vars     <- c(
+      "harvDM_f_hay", "harvCPT_f", "harvCPT_2"  , "harvCST_f", "harvCST_3",
+      "D_Nsoil"     , "D_Csoil"  , "D_C"        , "D_CT"     , "D_Csys"   ,
+      "Shade_f"     , "NfixT_f"  , "Nleaching_f", "Crunoff_f" )
+    
+    fOut           <- matrix( NA, nrow=1, ncol=length(names_vars) )
+    colnames(fOut) <- names_vars
+
+    ih_f_hay   <- which( outputNames=="harvDM_f_hay" ) # kg C ha-1 y-1
+    ihCPT_f    <- which( outputNames=="harvCPT_f"    ) # kg C m-2 d-1
+    ihCPT_2    <- which( outputNames=="harvCPT_t(2)" ) # kg C m-2 d-1
+    ihCST_f    <- which( outputNames=="harvCST_f"    ) # kg C m-2 d-1
+    ihCST_3    <- which( outputNames=="harvCST_t(3)" ) # kg C m-2 d-1
+    iNsoil_f   <- which( outputNames=="Nsoil_f"      ) # kg N m-2
+    iCsoil_f   <- which( outputNames=="Csoil_f"      ) # kg C m-2 
+    iC_f       <- which( outputNames=="C_f"          ) # kg C m-2
+    iCT_f      <- which( outputNames=="CT_f"         ) # kg C m-2
+    
+    iShade_f   <- which( outputNames=="Shade_f"      ) # m2 m-2
+    iNfixT     <- which( outputNames=="NfixT_f"      ) # kg N m-2 d-1
+    iNleaching <- which( outputNames=="Nleaching_f"  ) # kg N m-2 d-1
+    iCrunoff   <- which( outputNames=="Crunoff_f"    ) # kg C m-2 d-1
+
+    c.DM  <- 1 / 0.47          # 'kg C' -> 'kg DM'
+    c.hay <- 1e4 * 365 / NDAYS # 'm-2 over sim. period' -> 'ha-1 y-1'
+    d365  <- which( output[,idoy]==365 )
+    
+    fOut[,"harvDM_f_hay"] <- mean( output[d365,ih_f_hay] )
+    fOut[,"harvCPT_f"   ] <- sum ( output[    ,ihCPT_f ] ) * c.DM * c.hay
+    fOut[,"harvCPT_2"   ] <- sum ( output[    ,ihCPT_2 ] ) * c.DM * c.hay
+    fOut[,"harvCST_f"   ] <- sum ( output[    ,ihCST_f ] ) * c.DM * c.hay
+    fOut[,"harvCST_3"   ] <- sum ( output[    ,ihCST_3 ] ) * c.DM * c.hay
+    
+    D_output         <- output[NDAYS,] - output[1,]
+    fOut[,"D_Nsoil"] <- D_output[iNsoil_f] * c.hay
+    fOut[,"D_Csoil"] <- D_output[iCsoil_f] * c.hay
+    fOut[,"D_C"    ] <- D_output[iC_f    ] * c.hay
+    fOut[,"D_CT"   ] <- D_output[iCT_f   ] * c.hay
+    fOut[,"D_Csys" ] <- fOut[,"D_Csoil"] + fOut[,"D_C"] + fOut[,"D_CT"]
+
+    fOut[,"Shade_f"    ] <- mean( output[,iShade_f  ] )
+    fOut[,"NfixT_f"    ] <- mean( output[,iNfixT    ] ) * 1e4 * 365
+    fOut[,"Nleaching_f"] <- mean( output[,iNleaching] ) * 1e4 * 365
+    fOut[,"Crunoff_f"  ] <- mean( output[,iCrunoff  ] ) * 1e4 * 365
+
+    return( fOut )
+  }
+```
+
+```{r}
+  varnames <- c(
+    "harvDM_f_hay", "harvCPT_f", "harvCPT_2"  , "harvCST_f", "harvCST_3",
+    "D_Nsoil"     , "D_Csoil"  , "D_C"        , "D_CT"     , "D_Csys"   ,
+    "Shade_f"     , "NfixT_f"  , "Nleaching_f", "Crunoff_f" )
+
+  parMatrixTM <- parMAP
+  ip_CNLITT0  <- which( names_params=="CNLITT0" )
+  ip_CNSOMF0  <- which( names_params=="CNSOMF0" )
+  ip_CNSOMS0  <- which( names_params=="CNSOMS0" )
+  ip_CSOM0    <- which( names_params=="CSOM0"   )
+  ip_LAT      <- which( names_params=="LAT"     )
+  ip_SLOPE    <- which( names_params=="SLOPE"   )
+```
+
+```{r}
+  list_outTM_C    <- vector( "list", n_C.f )
+  list_outTypFr_C <- vector( "list", n_C.f )
+  for(fi in 1:n_C.f) {
+    C_C     <- df_C.f$C.soil [ fi ]
+    CN_C    <- df_C.f$CN.soil[ fi ]
+    LAT_C   <- df_C.f$lat    [ fi ]
+    SLOPE_C <- df_C.f$slope  [ fi ]
+    parMatrixTM[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0), ] <- CN_C
+    parMatrixTM[ ip_CSOM0                           , ] <- C_C
+    parMatrixTM[ ip_LAT                             , ] <- LAT_C
+    parMatrixTM[ ip_SLOPE                           , ] <- SLOPE_C
+    source( sitesettings_filenames[1] )
+    matrix_weather_fi <- read_listweather_CAF( df_C.f$weather.WC, fi )
+
+    mat_outTM <- matrix( NA, 32, length(varnames) )
+    colnames( mat_outTM ) <- varnames
+    for(s in 1:32) {
+      source( sitesettings_filenames[s] )
+      params <- parMatrixTM[,s]
+      outTM  <- run_model( params, matrix_weather_fi, calendar_fert,
+        calendar_prunC, calendar_prunT, calendar_thinT, NDAYS )
+      mat_outTM[s,] <- outputSummary( outTM )
+    }
+    list_outTM_C[[fi]] <- mat_outTM
+    
+    mat_outTypFr <- matrix( NA, 12, 2+length(varnames) )
+    colnames( mat_outTypFr ) <- c( "sTM", "Sp.fruit", varnames )
+    s     <- rep( c(13,14,17,18), 3 )
+    sp.fr <- rep( c(0,1,2), each=4 )
+    mat_outTypFr[,"sTM"     ] <- s
+    mat_outTypFr[,"Sp.fruit"] <- sp.fr
+    for(i in 1:12) {
+      source( sitesettings_filenames[ s[i] ] )
+      params <- parMatrixTM[ , s[i] ]
+      if(sp.fr[i]==1) params <- set_par_speciesT( 2, "Avocado" )
+      if(sp.fr[i]==2) params <- set_par_speciesT( 2, "Banana"  )
+      outTypFr <- run_model( params, matrix_weather_fi, calendar_fert,
+        calendar_prunC, calendar_prunT, calendar_thinT, NDAYS )
+      mat_outTypFr[i,2+(1:length(varnames))] <- outputSummary( outTypFr )
+    }
+    list_outTypFr_C[[fi]] <- mat_outTypFr
+  }
+```
+
+```{r}
+  list_outTM_G    <- vector( "list", n_G.f )
+  list_outTypFr_G <- vector( "list", n_G.f )
+  for(fi in 1:n_G.f) {
+    C_G     <- df_G.f$C.soil [ fi ]
+    CN_G    <- df_G.f$CN.soil[ fi ]
+    LAT_G   <- df_G.f$lat    [ fi ]
+    SLOPE_G <- df_G.f$slope  [ fi ]
+    parMatrixTM[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0), ] <- CN_G
+    parMatrixTM[ ip_CSOM0                           , ] <- C_G
+    parMatrixTM[ ip_LAT                             , ] <- LAT_G
+    parMatrixTM[ ip_SLOPE                           , ] <- SLOPE_G
+    source( sitesettings_filenames[1] )
+    matrix_weather_fi <- read_listweather_CAF( df_G.f$weather.WC, fi )
+
+    mat_outTM <- matrix( NA, 32, length(varnames) )
+    colnames( mat_outTM ) <- varnames
+    for(s in 1:32) {
+      source( sitesettings_filenames[s] )
+      params <- parMatrixTM[,s]
+      outTM  <- run_model( params, matrix_weather_fi, calendar_fert,
+        calendar_prunC, calendar_prunT, calendar_thinT, NDAYS )
+      mat_outTM[s,] <- outputSummary( outTM )
+    }
+    list_outTM_G[[fi]] <- mat_outTM
+    
+    mat_outTypFr <- matrix( NA, 12, 2+length(varnames) )
+    colnames( mat_outTypFr ) <- c( "sTM", "Sp.fruit", varnames )
+    s     <- rep( c(13,14,17,18), 3 )
+    sp.fr <- rep( c(0,1,2), each=4 )
+    mat_outTypFr[,"sTM"     ] <- s
+    mat_outTypFr[,"Sp.fruit"] <- sp.fr
+    for(i in 1:12) {
+      source( sitesettings_filenames[ s[i] ] )
+      params <- parMatrixTM[ , s[i] ]
+      if(sp.fr[i]==1) params <- set_par_speciesT( 2, "Avocado" )
+      if(sp.fr[i]==2) params <- set_par_speciesT( 2, "Banana"  )
+      outTypFr <- run_model( params, matrix_weather_fi, calendar_fert,
+        calendar_prunC, calendar_prunT, calendar_thinT, NDAYS )
+      mat_outTypFr[i,2+(1:length(varnames))] <- outputSummary( outTypFr )
+    }
+    list_outTypFr_G[[fi]] <- mat_outTypFr
+  }
+```
+
+```{r}
+  df_C.f_sim <- df_C.f %>%
+    select ( code ) %>%
+    arrange( code ) %>%
+    mutate ( outTM    = list_outTM_C ) %>%
+    mutate ( outTypFr = list_outTypFr_C )
+
+  df_G.f_sim <- df_G.f %>%
+    select ( code ) %>%
+    arrange( code ) %>%
+    mutate ( outTM    = list_outTM_G ) %>%
+    mutate ( outTypFr = list_outTypFr_G )
+  
+  save( df_C.f_sim, file="df_C.f_sim.rda" )
+  save( df_G.f_sim, file="df_G.f_sim.rda" )
+```
+
+```{r}
+  load( "df_C.f_sim.rda" )
+  load( "df_G.f_sim.rda" )
 ```
 
 ## Erosion
