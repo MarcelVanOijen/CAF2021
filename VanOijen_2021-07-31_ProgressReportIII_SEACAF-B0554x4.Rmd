@@ -1036,6 +1036,31 @@ Yields per farm (averaged over the 32 treatments).
           col=c("blue"), lty=c(1), cex=0.7 )
 ```
 
+```{r}
+  par( mfrow=c(1,2), mar=c(4,2,3,2) )
+
+  # ymax <- max( ymean_C.f_condsTM, ymean_G.f_condsTM, df_C.f$yield, df_G.f$yield )
+
+  plot  ( ymean_C.f_condsTM, df_C.f$yield,
+          main="Yield obs.\n(Costa Rica)",
+          xlab="Yield sim.", ylab="", pch=20 )
+  y.lm <- lm( df_C.f$yield ~ ymean_C.f_condsTM )
+  r2   <- round( summary(y.lm)$r.squared, 2 )
+  abline( y.lm$coefficients[1], y.lm$coefficients[2], col="blue" )
+  legend( "topright",
+          legend=paste("r2= ",as.character(r2)),
+          col=c("blue"), lty=c(1), cex=0.7 )
+  
+  plot  ( ymean_G.f_condsTM, df_G.f$yield,
+          main="Yield obs.\n(Guatemala)",
+          xlab="Yield sim.", ylab="", pch=20 )
+  y.lm <- lm( df_G.f$yield ~ ymean_G.f_condsTM )
+  r2   <- round( summary(y.lm)$r.squared, 2 )
+  abline( y.lm$coefficients[1], y.lm$coefficients[2], col="blue" )
+  legend( "topright",
+          legend=paste("r2= ",as.character(r2)),
+          col=c("blue"), lty=c(1), cex=0.7 )
+```
 
 
 \clearpage
@@ -1049,12 +1074,10 @@ Yields per farm (averaged over the 32 treatments).
 ```{r, eval=F}
   source('initialisation/initialise_CAF2021_general.R')
 
-  ip_CLITT0   <- which( names_params=="CLITT0"  )
   ip_CNLITT0  <- which( names_params=="CNLITT0" )
   ip_CNSOMF0  <- which( names_params=="CNSOMF0" )
   ip_CNSOMS0  <- which( names_params=="CNSOMS0" )
   ip_CSOM0    <- which( names_params=="CSOM0"   )
-  ip_FCSOMF0  <- which( names_params=="FCSOMF0" )
 ```
 
 ```{r, eval=F}
@@ -1139,6 +1162,32 @@ Yields per farm (averaged over the 32 treatments).
           col=c("blue"), lty=c(1), cex=0.7 )
 ```
 
+```{r}
+  par( mfrow=c(1,2), mar=c(4,2,3,2) )
+
+  # ymax <- max( ymean_C.f_soil.WC, ymean_G.f_soil.WC, df_C.f$yield, df_G.f$yield )
+
+  plot  ( ymean_C.f_soil.WC, df_C.f$yield,
+          main="Yield obs.\n(Costa Rica)",
+          xlab="Yield sim.", ylab="", pch=20 )
+  y.lm <- lm( df_C.f$yield ~ ymean_C.f_soil.WC )
+  r2   <- round( summary(y.lm)$r.squared, 2 )
+  abline( y.lm$coefficients[1], y.lm$coefficients[2], col="blue" )
+  legend( "topright",
+          legend=paste("r2= ",as.character(r2)),
+          col=c("blue"), lty=c(1), cex=0.7 )
+  
+  plot  ( ymean_G.f_soil.WC, df_G.f$yield,
+          main="Yield obs.\n(Guatemala)",
+          xlab="Yield sim.", ylab="", pch=20 )
+  y.lm <- lm( df_G.f$yield ~ ymean_G.f_soil.WC )
+  r2   <- round( summary(y.lm)$r.squared, 2 )
+  abline( y.lm$coefficients[1], y.lm$coefficients[2], col="blue" )
+  legend( "topright",
+          legend=paste("r2= ",as.character(r2)),
+          col=c("blue"), lty=c(1), cex=0.7 )
+```
+
 ## Multiple runs for each farm
 
 ```{r}
@@ -1163,6 +1212,7 @@ Yields per farm (averaged over the 32 treatments).
     iCT_f      <- which( outputNames=="CT_f"         ) # kg C m-2
     
     iShade_f   <- which( outputNames=="Shade_f"      ) # m2 m-2
+    
     iNfixT     <- which( outputNames=="NfixT_f"      ) # kg N m-2 d-1
     iNleaching <- which( outputNames=="Nleaching_f"  ) # kg N m-2 d-1
     iCrunoff   <- which( outputNames=="Crunoff_f"    ) # kg C m-2 d-1
@@ -1185,9 +1235,11 @@ Yields per farm (averaged over the 32 treatments).
     fOut[,"D_Csys" ] <- fOut[,"D_Csoil"] + fOut[,"D_C"] + fOut[,"D_CT"]
 
     fOut[,"Shade_f"    ] <- mean( output[,iShade_f  ] )
-    fOut[,"NfixT_f"    ] <- mean( output[,iNfixT    ] ) * 1e4 * 365
-    fOut[,"Nleaching_f"] <- mean( output[,iNleaching] ) * 1e4 * 365
-    fOut[,"Crunoff_f"  ] <- mean( output[,iCrunoff  ] ) * 1e4 * 365
+    
+    outputFinalYearMean  <- colMeans( output[ (NDAYS-364):NDAYS, ] )
+    fOut[,"NfixT_f"    ] <- outputFinalYearMean[iNfixT    ] * 1e4 * 365
+    fOut[,"Nleaching_f"] <- outputFinalYearMean[iNleaching] * 1e4 * 365
+    fOut[,"Crunoff_f"  ] <- outputFinalYearMean[iCrunoff  ] * 1e4 * 365
 
     return( fOut )
   }
@@ -1208,14 +1260,16 @@ Yields per farm (averaged over the 32 treatments).
   ip_SLOPE    <- which( names_params=="SLOPE"   )
 ```
 
-```{r}
+```{r, eval=F}
   list_outTM_C    <- vector( "list", n_C.f )
   list_outTypFr_C <- vector( "list", n_C.f )
+  list_outF_C     <- vector( "list", n_C.f )
   for(fi in 1:n_C.f) {
     C_C     <- df_C.f$C.soil [ fi ]
     CN_C    <- df_C.f$CN.soil[ fi ]
     LAT_C   <- df_C.f$lat    [ fi ]
     SLOPE_C <- df_C.f$slope  [ fi ]
+    Nfert_C <- df_C.f$Nfert  [ fi ]
     parMatrixTM[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0), ] <- CN_C
     parMatrixTM[ ip_CSOM0                           , ] <- C_C
     parMatrixTM[ ip_LAT                             , ] <- LAT_C
@@ -1223,18 +1277,23 @@ Yields per farm (averaged over the 32 treatments).
     source( sitesettings_filenames[1] )
     matrix_weather_fi <- read_listweather_CAF( df_C.f$weather.WC, fi )
 
-    mat_outTM <- matrix( NA, 32, length(varnames) )
+    calendar_fert_fi <- matrix( -1, nrow=100, ncol=3 )
+    calendar_fert_fi [ 1:48, 1 ] <- rep( 2002:2017, each=3 )
+    calendar_fert_fi [ 1:48, 2 ] <- c( 135, 289, 350 )
+    calendar_fert_fi [ 1:48, 3 ] <- rep( Nfert_C/3, 3 )
+
+    mat_outTM             <- matrix( NA, 32, length(varnames) )
     colnames( mat_outTM ) <- varnames
     for(s in 1:32) {
       source( sitesettings_filenames[s] )
       params <- parMatrixTM[,s]
-      outTM  <- run_model( params, matrix_weather_fi, calendar_fert,
+      outTM  <- run_model( params, matrix_weather_fi, calendar_fert_fi,
         calendar_prunC, calendar_prunT, calendar_thinT, NDAYS )
       mat_outTM[s,] <- outputSummary( outTM )
     }
     list_outTM_C[[fi]] <- mat_outTM
     
-    mat_outTypFr <- matrix( NA, 12, 2+length(varnames) )
+    mat_outTypFr             <- matrix( NA, 12, 2+length(varnames) )
     colnames( mat_outTypFr ) <- c( "sTM", "Sp.fruit", varnames )
     s     <- rep( c(13,14,17,18), 3 )
     sp.fr <- rep( c(0,1,2), each=4 )
@@ -1245,41 +1304,110 @@ Yields per farm (averaged over the 32 treatments).
       params <- parMatrixTM[ , s[i] ]
       if(sp.fr[i]==1) params <- set_par_speciesT( 2, "Avocado" )
       if(sp.fr[i]==2) params <- set_par_speciesT( 2, "Banana"  )
-      outTypFr <- run_model( params, matrix_weather_fi, calendar_fert,
+      outTypFr <- run_model( params, matrix_weather_fi, calendar_fert_fi,
         calendar_prunC, calendar_prunT, calendar_thinT, NDAYS )
       mat_outTypFr[i,2+(1:length(varnames))] <- outputSummary( outTypFr )
     }
     list_outTypFr_C[[fi]] <- mat_outTypFr
+    
+    mat_outF                 <- matrix( NA, 8, 1+length(varnames) )
+    colnames( mat_outF )     <- c( "FarmSetting", varnames )
+    mat_outF[,"FarmSetting"] <- 1:8
+    for(i in 1:8) {
+      if(i==1) {
+        if(df_C.f$nt[fi]==0)   source(sitesettings_filenames[17]) 
+        if(df_C.f$nt[fi]==1)   source(sitesettings_filenames[ 1]) 
+        if(df_C.f$nt[fi]==2)   source(sitesettings_filenames[11]) 
+        if(df_C.f$nt[fi] >2) { source(sitesettings_filenames[11])
+                               params<-set_par_speciesT(2,"Avocado") } }
+      if(i==2) {
+        if(df_C.f$nt[fi]==0)   source(sitesettings_filenames[17])
+        if(df_C.f$nt[fi]==1)   source(sitesettings_filenames[ 1]) 
+        if(df_C.f$nt[fi]==2)   source(sitesettings_filenames[11]) 
+        if(df_C.f$nt[fi] >2) { source(sitesettings_filenames[11])
+                               params<-set_par_speciesT(2,"Banana" ) } }
+      if(i==3) {
+        if(df_C.f$nt[fi]==0)   source(sitesettings_filenames[17]) 
+        if(df_C.f$nt[fi]==1)   source(sitesettings_filenames[ 1]) 
+        if(df_C.f$nt[fi]==2)   source(sitesettings_filenames[13]) 
+        if(df_C.f$nt[fi] >2) { source(sitesettings_filenames[13])
+                               params<-set_par_speciesT(2,"Avocado") } }
+      if(i==4) {
+        if(df_C.f$nt[fi]==0)   source(sitesettings_filenames[17]) 
+        if(df_C.f$nt[fi]==1)   source(sitesettings_filenames[ 1]) 
+        if(df_C.f$nt[fi]==2)   source(sitesettings_filenames[13])
+        if(df_C.f$nt[fi] >2) { source(sitesettings_filenames[13])
+                               params<-set_par_speciesT(2,"Banana" ) } }
+      if(i==5) {
+        if(df_C.f$nt[fi]==0)   source(sitesettings_filenames[19])
+        if(df_C.f$nt[fi]==1) { source(sitesettings_filenames[27])
+                               params<-set_par("TREEDENS0(3)",0) }
+        if(df_C.f$nt[fi]==2) { source(sitesettings_filenames[27]) } 
+        if(df_C.f$nt[fi] >2) { source(sitesettings_filenames[27])
+                               params<-set_par_speciesT(2,"Avocado") } }
+      if(i==6) {
+        if(df_C.f$nt[fi]==0)   source(sitesettings_filenames[19])
+        if(df_C.f$nt[fi]==1) { source(sitesettings_filenames[27])
+                               params<-set_par("TREEDENS0(3)",0) }
+        if(df_C.f$nt[fi]==2) { source(sitesettings_filenames[27]) } 
+        if(df_C.f$nt[fi] >2) { source(sitesettings_filenames[27])
+                               params<-set_par_speciesT(2,"Banana") } }
+      if(i==7) {
+        if(df_C.f$nt[fi]==0)   source(sitesettings_filenames[19])
+        if(df_C.f$nt[fi]==1) { source(sitesettings_filenames[31])
+                               params<-set_par("TREEDENS0(3)",0) }
+        if(df_C.f$nt[fi]==2) { source(sitesettings_filenames[31]) } 
+        if(df_C.f$nt[fi] >2) { source(sitesettings_filenames[31])
+                               params<-set_par_speciesT(2,"Avocado") } }
+      if(i==8) {
+        if(df_C.f$nt[fi]==0)   source(sitesettings_filenames[19])
+        if(df_C.f$nt[fi]==1) { source(sitesettings_filenames[31])
+                               params<-set_par("TREEDENS0(3)",0) }
+        if(df_C.f$nt[fi]==2) { source(sitesettings_filenames[31]) } 
+        if(df_C.f$nt[fi] >2) { source(sitesettings_filenames[31])
+                               params<-set_par_speciesT(2,"Banana") } }
+      outF <- run_model( params, matrix_weather_fi, calendar_fert_fi,
+        calendar_prunC, calendar_prunT, calendar_thinT, NDAYS )
+      mat_outF[i,1+(1:length(varnames))] <- outputSummary( outF )
+    }
+    list_outF_C[[fi]] <- mat_outF
   }
 ```
 
-```{r}
+```{r, eval=F}
   list_outTM_G    <- vector( "list", n_G.f )
   list_outTypFr_G <- vector( "list", n_G.f )
+  list_outF_G     <- vector( "list", n_G.f )
   for(fi in 1:n_G.f) {
     C_G     <- df_G.f$C.soil [ fi ]
     CN_G    <- df_G.f$CN.soil[ fi ]
     LAT_G   <- df_G.f$lat    [ fi ]
     SLOPE_G <- df_G.f$slope  [ fi ]
+    Nfert_G <- df_G.f$Nfert  [ fi ]
     parMatrixTM[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0), ] <- CN_G
     parMatrixTM[ ip_CSOM0                           , ] <- C_G
     parMatrixTM[ ip_LAT                             , ] <- LAT_G
     parMatrixTM[ ip_SLOPE                           , ] <- SLOPE_G
     source( sitesettings_filenames[1] )
     matrix_weather_fi <- read_listweather_CAF( df_G.f$weather.WC, fi )
+    
+    calendar_fert_fi <- matrix( -1, nrow=100, ncol=3 )
+    calendar_fert_fi [ 1:48, 1 ] <- rep( 2002:2017, each=3 )
+    calendar_fert_fi [ 1:48, 2 ] <- c( 135, 289, 350 )
+    calendar_fert_fi [ 1:48, 3 ] <- rep( Nfert_G/3, 3 )
 
-    mat_outTM <- matrix( NA, 32, length(varnames) )
+    mat_outTM             <- matrix( NA, 32, length(varnames) )
     colnames( mat_outTM ) <- varnames
     for(s in 1:32) {
       source( sitesettings_filenames[s] )
       params <- parMatrixTM[,s]
-      outTM  <- run_model( params, matrix_weather_fi, calendar_fert,
+      outTM  <- run_model( params, matrix_weather_fi, calendar_fert_fi,
         calendar_prunC, calendar_prunT, calendar_thinT, NDAYS )
       mat_outTM[s,] <- outputSummary( outTM )
     }
     list_outTM_G[[fi]] <- mat_outTM
     
-    mat_outTypFr <- matrix( NA, 12, 2+length(varnames) )
+    mat_outTypFr             <- matrix( NA, 12, 2+length(varnames) )
     colnames( mat_outTypFr ) <- c( "sTM", "Sp.fruit", varnames )
     s     <- rep( c(13,14,17,18), 3 )
     sp.fr <- rep( c(0,1,2), each=4 )
@@ -1290,35 +1418,328 @@ Yields per farm (averaged over the 32 treatments).
       params <- parMatrixTM[ , s[i] ]
       if(sp.fr[i]==1) params <- set_par_speciesT( 2, "Avocado" )
       if(sp.fr[i]==2) params <- set_par_speciesT( 2, "Banana"  )
-      outTypFr <- run_model( params, matrix_weather_fi, calendar_fert,
+      outTypFr <- run_model( params, matrix_weather_fi, calendar_fert_fi,
         calendar_prunC, calendar_prunT, calendar_thinT, NDAYS )
       mat_outTypFr[i,2+(1:length(varnames))] <- outputSummary( outTypFr )
     }
     list_outTypFr_G[[fi]] <- mat_outTypFr
+    
+    mat_outF                 <- matrix( NA, 8, 1+length(varnames) )
+    colnames( mat_outF )     <- c( "FarmSetting", varnames )
+    mat_outF[,"FarmSetting"] <- 1:8
+    for(i in 1:8) {
+      if(i==1) {
+        if(df_G.f$nt[fi]==0)   source(sitesettings_filenames[17]) 
+        if(df_G.f$nt[fi]==1)   source(sitesettings_filenames[ 1]) 
+        if(df_G.f$nt[fi]==2)   source(sitesettings_filenames[11]) 
+        if(df_G.f$nt[fi] >2) { source(sitesettings_filenames[11])
+                               params<-set_par_speciesT(2,"Avocado") } }
+      if(i==2) {
+        if(df_G.f$nt[fi]==0)   source(sitesettings_filenames[17])
+        if(df_G.f$nt[fi]==1)   source(sitesettings_filenames[ 1]) 
+        if(df_G.f$nt[fi]==2)   source(sitesettings_filenames[11]) 
+        if(df_G.f$nt[fi] >2) { source(sitesettings_filenames[11])
+                               params<-set_par_speciesT(2,"Banana" ) } }
+      if(i==3) {
+        if(df_G.f$nt[fi]==0)   source(sitesettings_filenames[17]) 
+        if(df_G.f$nt[fi]==1)   source(sitesettings_filenames[ 1]) 
+        if(df_G.f$nt[fi]==2)   source(sitesettings_filenames[13]) 
+        if(df_G.f$nt[fi] >2) { source(sitesettings_filenames[13])
+                               params<-set_par_speciesT(2,"Avocado") } }
+      if(i==4) {
+        if(df_G.f$nt[fi]==0)   source(sitesettings_filenames[17]) 
+        if(df_G.f$nt[fi]==1)   source(sitesettings_filenames[ 1]) 
+        if(df_G.f$nt[fi]==2)   source(sitesettings_filenames[13])
+        if(df_G.f$nt[fi] >2) { source(sitesettings_filenames[13])
+                               params<-set_par_speciesT(2,"Banana" ) } }
+      if(i==5) {
+        if(df_G.f$nt[fi]==0)   source(sitesettings_filenames[19])
+        if(df_G.f$nt[fi]==1) { source(sitesettings_filenames[27])
+                               params<-set_par("TREEDENS0(3)",0) }
+        if(df_G.f$nt[fi]==2) { source(sitesettings_filenames[27]) } 
+        if(df_G.f$nt[fi] >2) { source(sitesettings_filenames[27])
+                               params<-set_par_speciesT(2,"Avocado") } }
+      if(i==6) {
+        if(df_G.f$nt[fi]==0)   source(sitesettings_filenames[19])
+        if(df_G.f$nt[fi]==1) { source(sitesettings_filenames[27])
+                               params<-set_par("TREEDENS0(3)",0) }
+        if(df_G.f$nt[fi]==2) { source(sitesettings_filenames[27]) } 
+        if(df_G.f$nt[fi] >2) { source(sitesettings_filenames[27])
+                               params<-set_par_speciesT(2,"Banana") } }
+      if(i==7) {
+        if(df_G.f$nt[fi]==0)   source(sitesettings_filenames[19])
+        if(df_G.f$nt[fi]==1) { source(sitesettings_filenames[31])
+                               params<-set_par("TREEDENS0(3)",0) }
+        if(df_G.f$nt[fi]==2) { source(sitesettings_filenames[31]) } 
+        if(df_G.f$nt[fi] >2) { source(sitesettings_filenames[31])
+                               params<-set_par_speciesT(2,"Avocado") } }
+      if(i==8) {
+        if(df_G.f$nt[fi]==0)   source(sitesettings_filenames[19])
+        if(df_G.f$nt[fi]==1) { source(sitesettings_filenames[31])
+                               params<-set_par("TREEDENS0(3)",0) }
+        if(df_G.f$nt[fi]==2) { source(sitesettings_filenames[31]) } 
+        if(df_G.f$nt[fi] >2) { source(sitesettings_filenames[31])
+                               params<-set_par_speciesT(2,"Banana") } }
+      outF <- run_model( params, matrix_weather_fi, calendar_fert_fi,
+        calendar_prunC, calendar_prunT, calendar_thinT, NDAYS )
+      mat_outF[i,1+(1:length(varnames))] <- outputSummary( outF )
+    }
+    list_outF_G[[fi]] <- mat_outF
   }
 ```
 
-```{r}
+```{r, eval=F}
   df_C.f_sim <- df_C.f %>%
     select ( code ) %>%
     arrange( code ) %>%
     mutate ( outTM    = list_outTM_C ) %>%
-    mutate ( outTypFr = list_outTypFr_C )
+    mutate ( outTypFr = list_outTypFr_C ) %>%
+    mutate ( outF     = list_outF_C )
 
   df_G.f_sim <- df_G.f %>%
     select ( code ) %>%
     arrange( code ) %>%
     mutate ( outTM    = list_outTM_G ) %>%
-    mutate ( outTypFr = list_outTypFr_G )
+    mutate ( outTypFr = list_outTypFr_G ) %>%
+    mutate ( outF     = list_outF_G )
   
-  save( df_C.f_sim, file="df_C.f_sim.rda" )
-  save( df_G.f_sim, file="df_G.f_sim.rda" )
+  # save( df_C.f_sim, file="df_C.f_sim.rda" )
+  # save( df_G.f_sim, file="df_G.f_sim.rda" )
 ```
 
 ```{r}
   load( "df_C.f_sim.rda" )
   load( "df_G.f_sim.rda" )
 ```
+
+```{r}
+  dfoutFSummary <- function( df=df_C.f_sim, Fi=1 ){
+    nf     <- dim( df )[1]
+    vnames <- colnames( df$outF[[1]] ) ; nv <- length(vnames)
+    matres <- matrix( NA, nf, nv ) ; colnames( matres) <- vnames
+    F.v    <- matres
+    for(fi in 1:nf){
+      F.v[fi,] <- df$outF[[fi]][Fi,]
+    }
+    return( F.v )
+  }
+```
+
+```{r}
+  df <- df_C.f_sim
+  F1_C <- dfoutFSummary( df, Fi=1 ) ; yF1_C.f_sim <- F1_C[,"harvDM_f_hay"]
+  F2_C <- dfoutFSummary( df, Fi=2 ) ; yF2_C.f_sim <- F2_C[,"harvDM_f_hay"]
+  F3_C <- dfoutFSummary( df, Fi=3 ) ; yF3_C.f_sim <- F3_C[,"harvDM_f_hay"]
+  F4_C <- dfoutFSummary( df, Fi=4 ) ; yF4_C.f_sim <- F4_C[,"harvDM_f_hay"]
+  F5_C <- dfoutFSummary( df, Fi=5 ) ; yF5_C.f_sim <- F5_C[,"harvDM_f_hay"]
+  F6_C <- dfoutFSummary( df, Fi=6 ) ; yF6_C.f_sim <- F6_C[,"harvDM_f_hay"]
+  F7_C <- dfoutFSummary( df, Fi=7 ) ; yF7_C.f_sim <- F7_C[,"harvDM_f_hay"]
+  F8_C <- dfoutFSummary( df, Fi=8 ) ; yF8_C.f_sim <- F8_C[,"harvDM_f_hay"]
+
+  df <- df_G.f_sim
+  F1_G <- dfoutFSummary( df, Fi=1 ) ; yF1_G.f_sim <- F1_G[,"harvDM_f_hay"]
+  F2_G <- dfoutFSummary( df, Fi=2 ) ; yF2_G.f_sim <- F2_G[,"harvDM_f_hay"]
+  F3_G <- dfoutFSummary( df, Fi=3 ) ; yF3_G.f_sim <- F3_G[,"harvDM_f_hay"]
+  F4_G <- dfoutFSummary( df, Fi=4 ) ; yF4_G.f_sim <- F4_G[,"harvDM_f_hay"]
+  F5_G <- dfoutFSummary( df, Fi=5 ) ; yF5_G.f_sim <- F5_G[,"harvDM_f_hay"]
+  F6_G <- dfoutFSummary( df, Fi=6 ) ; yF6_G.f_sim <- F6_G[,"harvDM_f_hay"]
+  F7_G <- dfoutFSummary( df, Fi=7 ) ; yF7_G.f_sim <- F7_G[,"harvDM_f_hay"]
+  F8_G <- dfoutFSummary( df, Fi=8 ) ; yF8_G.f_sim <- F8_G[,"harvDM_f_hay"]
+```
+
+```{r}
+add.lmleg <- function(){
+  y.lm <- lm( y ~ x )
+  r2   <- round( summary(y.lm)$r.squared, 2 )
+  abline( y.lm$coefficients[1], y.lm$coefficients[2], col="blue" )
+  legend( "topright",
+          legend=paste("r2= ",as.character(r2)),
+          col=c("blue"), lty=c(1), cex=0.7 ) }
+
+  plotxylm <- function(maintxt="Obs. Costa Rica", xtxt="Sim.") {
+    plot(x,y,xlab=xtxt,ylab="",main=maintxt) ; add.lmleg()
+  }
+```
+
+```{r}
+  par( mfrow=c(2,4), mar=c(4,2,2,2), mgp=c(2,1,0) )
+
+  x=yF1_C.f_sim ; y=df_C.f$yield ; plotxylm("Obs. Costa Rica")
+  x=yF2_C.f_sim ; y=df_C.f$yield ; plotxylm("Obs. Costa Rica")
+  x=yF3_C.f_sim ; y=df_C.f$yield ; plotxylm("Obs. Costa Rica")
+  x=yF4_C.f_sim ; y=df_C.f$yield ; plotxylm("Obs. Costa Rica")
+  x=yF5_C.f_sim ; y=df_C.f$yield ; plotxylm("Obs. Costa Rica")
+  x=yF6_C.f_sim ; y=df_C.f$yield ; plotxylm("Obs. Costa Rica")
+  x=yF7_C.f_sim ; y=df_C.f$yield ; plotxylm("Obs. Costa Rica")
+  x=yF8_C.f_sim ; y=df_C.f$yield ; plotxylm("Obs. Costa Rica")
+```
+
+```{r}
+  par( mfrow=c(2,4), mar=c(4,2,2,2), mgp=c(2,1,0) )
+
+  x=yF1_G.f_sim ; y=df_G.f$yield ; plotxylm("Obs. Guatemala")
+  x=yF2_G.f_sim ; y=df_G.f$yield ; plotxylm("Obs. Guatemala")
+  x=yF3_G.f_sim ; y=df_G.f$yield ; plotxylm("Obs. Guatemala")
+  x=yF4_G.f_sim ; y=df_G.f$yield ; plotxylm("Obs. Guatemala")
+  x=yF5_G.f_sim ; y=df_G.f$yield ; plotxylm("Obs. Guatemala")
+  x=yF6_G.f_sim ; y=df_G.f$yield ; plotxylm("Obs. Guatemala")
+  x=yF7_G.f_sim ; y=df_G.f$yield ; plotxylm("Obs. Guatemala")
+  x=yF8_G.f_sim ; y=df_G.f$yield ; plotxylm("Obs. Guatemala")
+```
+
+```{r}
+  par( mfrow=c(2,4) )
+  
+  plot  ( yF1_C.f_sim, df_C.f$yield,
+          main="Yield obs.",
+          xlab="Yield sim.", ylab="", pch=20 )
+  y.lm <- lm( df_C.f$yield ~ yF1_C.f_sim )
+  r2   <- round( summary(y.lm)$r.squared, 2 )
+  abline( y.lm$coefficients[1], y.lm$coefficients[2], col="blue" )
+  legend( "topright",
+          legend=paste("r2= ",as.character(r2)),
+          col=c("blue"), lty=c(1), cex=0.7 )
+```
+
+```{r}
+dfoutTMSummary <- function( df=df_C.f_sim, TM.f=NULL ){
+  nf     <- dim( df )[1]
+  if(length(TM.f)==1) {TM.f <- rep(TM.f,nf)}
+  vnames <- colnames( df$outTM[[1]] ) ; nv <- length(vnames)
+  matres <- matrix( NA, nf, nv ) ; colnames( matres) <- vnames
+  TM.mean <- TM.min <- TM.max <- TM.sel <- matres
+  for(fi in 1:nf){
+    TM.mean[fi,] <- colMeans( df$outTM[[fi]]         )
+    TM.min [fi,] <- apply   ( df$outTM[[fi]], 2, min )
+    TM.max [fi,] <- apply   ( df$outTM[[fi]], 2, max )
+    if(!is.null(TM.f)) {TM.sel[fi,] <- df$outTM[[fi]][TM.f[fi],] }
+  }
+  return( list( mean=TM.mean, min=TM.min, max=TM.max, sel=TM.sel ) )
+}
+
+# dfoutTMSummary( df_C.f_sim )[["mean"]]
+# dfoutTMSummary( df_C.f_sim )[["min" ]]
+# dfoutTMSummary( df_C.f_sim )[["max" ]]
+# 
+# iTM <- c( rep(1,69), rep(20,4) )
+# dfoutTMSummary( df_C.f_sim, iTM )[["sel"]]
+# dfoutTMSummary( df_C.f_sim, 18  )[["sel"]]
+```
+
+```{r}
+  ymean_C.f_sim <- dfoutTMSummary( df_C.f_sim )[["mean"]][,"harvDM_f_hay"]
+  ymean_G.f_sim <- dfoutTMSummary( df_G.f_sim )[["mean"]][,"harvDM_f_hay"]
+
+  par( mfrow=c(1,2) )
+  
+  plot  ( ymean_C.f_sim, df_C.f$yield,
+          main="Yield obs.\n(Costa Rica)",
+          xlab="Yield sim.", ylab="", pch=20 )
+  y.lm <- lm( df_C.f$yield ~ ymean_C.f_sim )
+  r2   <- round( summary(y.lm)$r.squared, 2 )
+  abline( y.lm$coefficients[1], y.lm$coefficients[2], col="blue" )
+  legend( "topright",
+          legend=paste("r2= ",as.character(r2)),
+          col=c("blue"), lty=c(1), cex=0.7 )
+  
+  plot  ( ymean_G.f_sim, df_G.f$yield,
+          main="Yield obs.\n(Guatemala)",
+          xlab="Yield sim.", ylab="", pch=20 )
+  y.lm <- lm( df_G.f$yield ~ ymean_G.f_sim )
+  r2   <- round( summary(y.lm)$r.squared, 2 )
+  abline( y.lm$coefficients[1], y.lm$coefficients[2], col="blue" )
+  legend( "topright",
+          legend=paste("r2= ",as.character(r2)),
+          col=c("blue"), lty=c(1), cex=0.7 )
+```
+
+For the following plots, we cap Nfert at 500 kg N ha-1 y-1.
+
+```{r}
+  par( mfrow=c(2,3) )
+
+  yield <- df_C.f$yield
+  nt    <- df_C.f$nt
+  shade <- df_C.f$shade
+  Nfert <- pmin( df_C.f$Nfert, 500 )
+
+  x=nt    ; y=yield ; plot(x,y,xlab="nt"   ,ylab="yield") ; add.lmleg()
+  x=shade ; y=yield ; plot(x,y,xlab="shade",ylab="yield") ; add.lmleg()
+  x=Nfert ; y=yield ; plot(x,y,xlab="Nfert",ylab="yield") ; add.lmleg()
+  
+  x=nt    ; y=shade ; plot(x,y,xlab="nt"   ,ylab="shade") ; add.lmleg()
+  x=nt    ; y=Nfert ; plot(x,y,xlab="nt"   ,ylab="Nfert") ; add.lmleg()
+  x=shade ; y=Nfert ; plot(x,y,xlab="shade",ylab="Nfert") ; add.lmleg()
+```
+
+```{r}
+  par( mfrow=c(2,3) )
+
+  yield <- df_G.f$yield
+  nt    <- df_G.f$nt
+  shade <- df_G.f$shade
+  Nfert <- pmin( df_G.f$Nfert, 500 )
+
+  x=nt    ; y=yield ; plot(x,y,xlab="nt"   ,ylab="yield") ; add.lmleg()
+  x=shade ; y=yield ; plot(x,y,xlab="shade",ylab="yield") ; add.lmleg()
+  x=Nfert ; y=yield ; plot(x,y,xlab="Nfert",ylab="yield") ; add.lmleg()
+  
+  x=nt    ; y=shade ; plot(x,y,xlab="nt"   ,ylab="shade") ; add.lmleg()
+  x=nt    ; y=Nfert ; plot(x,y,xlab="nt"   ,ylab="Nfert") ; add.lmleg()
+  x=shade ; y=Nfert ; plot(x,y,xlab="shade",ylab="Nfert") ; add.lmleg()
+```
+
+```{r}
+  iTM_s0_N0 <- 18
+  iTM_s0_N1 <- 17
+  iTM_s1_N0 <- 14
+  iTM_s1_N1 <- 13
+
+  TM_C.f <- rep( NA, n_C.f ) ; TM_G.f <- rep( NA, n_G.f )
+  
+  for( fi in 1:n_C.f ) {
+    if( (df_C.f$nt[fi]<=2) && (df_C.f$Nfert[fi]< 100) ) TM_C.f[fi] <- iTM_s0_N0
+    if( (df_C.f$nt[fi]<=2) && (df_C.f$Nfert[fi]>=100) ) TM_C.f[fi] <- iTM_s0_N1
+    if( (df_C.f$nt[fi]> 2) && (df_C.f$Nfert[fi]< 100) ) TM_C.f[fi] <- iTM_s1_N0
+    if( (df_C.f$nt[fi]> 2) && (df_C.f$Nfert[fi]>=100) ) TM_C.f[fi] <- iTM_s1_N1
+  }
+  
+  for( fi in 1:n_G.f ) {
+    if( (df_G.f$nt[fi]<=2) && (df_G.f$Nfert[fi]< 100) ) TM_G.f[fi] <- iTM_s0_N0
+    if( (df_G.f$nt[fi]<=2) && (df_G.f$Nfert[fi]>=100) ) TM_G.f[fi] <- iTM_s0_N1
+    if( (df_G.f$nt[fi]> 2) && (df_G.f$Nfert[fi]< 100) ) TM_G.f[fi] <- iTM_s1_N0
+    if( (df_G.f$nt[fi]> 2) && (df_G.f$Nfert[fi]>=100) ) TM_G.f[fi] <- iTM_s1_N1
+  }
+```
+
+```{r}
+  ysel_C.f_sim <- dfoutTMSummary( df_C.f_sim, TM_C.f )[["sel"]][,"harvDM_f_hay"]
+  ysel_G.f_sim <- dfoutTMSummary( df_G.f_sim, TM_G.f )[["sel"]][,"harvDM_f_hay"]
+
+  par( mfrow=c(1,2) )
+  
+  plot  ( ysel_C.f_sim, df_C.f$yield,
+          main="Yield obs.\n(Costa Rica)",
+          xlab="Yield sim.", ylab="", pch=20 )
+  y.lm <- lm( df_C.f$yield ~ ysel_C.f_sim )
+  r2   <- round( summary(y.lm)$r.squared, 2 )
+  abline( y.lm$coefficients[1], y.lm$coefficients[2], col="blue" )
+  legend( "topright",
+          legend=paste("r2= ",as.character(r2)),
+          col=c("blue"), lty=c(1), cex=0.7 )
+  
+  plot  ( ysel_G.f_sim, df_G.f$yield,
+          main="Yield obs.\n(Guatemala)",
+          xlab="Yield sim.", ylab="", pch=20 )
+  y.lm <- lm( df_G.f$yield ~ ysel_G.f_sim )
+  r2   <- round( summary(y.lm)$r.squared, 2 )
+  abline( y.lm$coefficients[1], y.lm$coefficients[2], col="blue" )
+  legend( "topright",
+          legend=paste("r2= ",as.character(r2)),
+          col=c("blue"), lty=c(1), cex=0.7 )
+```
+
+
 
 ## Erosion
 
