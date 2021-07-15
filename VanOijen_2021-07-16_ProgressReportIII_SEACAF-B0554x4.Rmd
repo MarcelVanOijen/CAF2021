@@ -1474,30 +1474,172 @@ Farm yield observations vs. simulations where the model in case of 3 or more tre
   x=yF2_G.f_sim ; y=df_G.f$yield ; plotxylm("Obs. Guatemala")
 ```
 
-## Selecting a treatment from TM
+```{r}
+  int1_C <- which(df_C.f$nt <2) ; int1_G <- which(df_G.f$nt <2)
+  int2_C <- which(df_C.f$nt==2) ; int2_G <- which(df_G.f$nt==2)
+  int3_C <- which(df_C.f$nt >2) ; int3_G <- which(df_G.f$nt >2)
+  
+  nnt1_C <- length(int1_C)      ; nnt1_G <- length(int1_G)
+  nnt2_C <- length(int2_C)      ; nnt2_G <- length(int2_G)
+  nnt3_C <- length(int3_C)      ; nnt3_G <- length(int3_G)
+  
+  varnames <- c( "code","slope","nt","Nfert","y.obs",
+    "y.sim","D_Csoil","Shade_f","Nleaching_f","Crunoff_f" )
+  listmat_nt_C <- listmat_nt_G <- vector( "list", 3 )
+  
+  listmat_nt_C[[1]] <- t( sapply( 1:nnt1_C, function(i){ cbind(
+    code    = df_C.f    [int1_C,]$code [[i]]                    ,
+    slope   = df_C.f    [int1_C,]$slope[[i]]                    ,
+    nt      = df_C.f    [int1_C,]$nt   [[i]]                    ,
+    Nfert   = df_C.f    [int1_C,]$Nfert[[i]]                    ,
+    y.obs   = df_C.f    [int1_C,]$yield[[i]]                    ,
+    y.sim   = df_C.f_sim[int1_C,]$outF [[i]][,"harvDM_f_hay"][2],
+    D_Csoil = df_C.f_sim[int1_C,]$outF [[i]][,"D_Csoil"     ][2],
+    shade   = df_C.f_sim[int1_C,]$outF [[i]][,"Shade_f"     ][2],
+    Nleach  = df_C.f_sim[int1_C,]$outF [[i]][,"Nleaching_f" ][2],
+    Crunoff = df_C.f_sim[int1_C,]$outF [[i]][,"Crunoff_f"   ][2]
+    ) } ) )
+  colnames(listmat_nt_C[[1]]) <- varnames
+
+  listmat_nt_C[[2]] <- t( sapply( 1:nnt2_C, function(i){ cbind(
+    code    = df_C.f    [int2_C,]$code [[i]]                    ,
+    slope   = df_C.f    [int2_C,]$slope[[i]]                    ,
+    nt      = df_C.f    [int2_C,]$nt   [[i]]                    ,
+    Nfert   = df_C.f    [int2_C,]$Nfert[[i]]                    ,
+    y.obs   = df_C.f    [int2_C,]$yield[[i]]                    ,
+    y.sim   = df_C.f_sim[int2_C,]$outF [[i]][,"harvDM_f_hay"][2],
+    D_Csoil = df_C.f_sim[int2_C,]$outF [[i]][,"D_Csoil"     ][2],
+    shade   = df_C.f_sim[int2_C,]$outF [[i]][,"Shade_f"     ][2],
+    Nleach  = df_C.f_sim[int2_C,]$outF [[i]][,"Nleaching_f" ][2],
+    Crunoff = df_C.f_sim[int2_C,]$outF [[i]][,"Crunoff_f"   ][2]
+    ) } ) )
+  colnames(listmat_nt_C[[2]]) <- varnames
+
+  listmat_nt_C[[3]] <- t( sapply( 1:nnt3_C, function(i){ cbind(
+    code    = df_C.f    [int3_C,]$code [[i]]                    ,
+    slope   = df_C.f    [int3_C,]$slope[[i]]                    ,
+    nt      = df_C.f    [int3_C,]$nt   [[i]]                    ,
+    Nfert   = df_C.f    [int3_C,]$Nfert[[i]]                    ,
+    y.obs   = df_C.f    [int3_C,]$yield[[i]]                    ,
+    y.sim   = df_C.f_sim[int3_C,]$outF [[i]][,"harvDM_f_hay"][2],
+    D_Csoil = df_C.f_sim[int3_C,]$outF [[i]][,"D_Csoil"     ][2],
+    shade   = df_C.f_sim[int3_C,]$outF [[i]][,"Shade_f"     ][2],
+    Nleach  = df_C.f_sim[int3_C,]$outF [[i]][,"Nleaching_f" ][2],
+    Crunoff = df_C.f_sim[int3_C,]$outF [[i]][,"Crunoff_f"   ][2]
+    ) } ) )
+  colnames(listmat_nt_C[[3]]) <- varnames
+
+  listmat_nt_G[[1]] <- t( sapply( 1:nnt1_G, function(i){ cbind(
+    code    = df_G.f    [int1_G,]$code [[i]]                    ,
+    slope   = df_G.f    [int1_G,]$slope[[i]]                    ,
+    nt      = df_G.f    [int1_G,]$nt   [[i]]                    ,
+    Nfert   = df_G.f    [int1_G,]$Nfert[[i]]                    ,
+    y.obs   = df_G.f    [int1_G,]$yield[[i]]                    ,
+    y.sim   = df_G.f_sim[int1_G,]$outF [[i]][,"harvDM_f_hay"][2],
+    D_Csoil = df_G.f_sim[int1_G,]$outF [[i]][,"D_Csoil"     ][2],
+    shade   = df_G.f_sim[int1_G,]$outF [[i]][,"Shade_f"     ][2],
+    Nleach  = df_G.f_sim[int1_G,]$outF [[i]][,"Nleaching_f" ][2],
+    Crunoff = df_G.f_sim[int1_G,]$outF [[i]][,"Crunoff_f"   ][2]
+    ) } ) )
+  colnames(listmat_nt_G[[1]]) <- varnames
+
+  listmat_nt_G[[2]] <- t( sapply( 1:nnt2_G, function(i){ cbind(
+    code    = df_G.f    [int2_G,]$code [[i]]                    ,
+    slope   = df_G.f    [int2_G,]$slope[[i]]                    ,
+    nt      = df_G.f    [int2_G,]$nt   [[i]]                    ,
+    Nfert   = df_G.f    [int2_G,]$Nfert[[i]]                    ,
+    y.obs   = df_G.f    [int2_G,]$yield[[i]]                    ,
+    y.sim   = df_G.f_sim[int2_G,]$outF [[i]][,"harvDM_f_hay"][2],
+    D_Csoil = df_G.f_sim[int2_G,]$outF [[i]][,"D_Csoil"     ][2],
+    shade   = df_G.f_sim[int2_G,]$outF [[i]][,"Shade_f"     ][2],
+    Nleach  = df_G.f_sim[int2_G,]$outF [[i]][,"Nleaching_f" ][2],
+    Crunoff = df_G.f_sim[int2_G,]$outF [[i]][,"Crunoff_f"   ][2]
+    ) } ) )
+  colnames(listmat_nt_G[[2]]) <- varnames
+
+  listmat_nt_G[[3]] <- t( sapply( 1:nnt3_G, function(i){ cbind(
+    code    = df_G.f    [int3_G,]$code [[i]]                    ,
+    slope   = df_G.f    [int3_G,]$slope[[i]]                    ,
+    nt      = df_G.f    [int3_G,]$nt   [[i]]                    ,
+    Nfert   = df_G.f    [int3_G,]$Nfert[[i]]                    ,
+    y.obs   = df_C.f    [int3_G,]$yield[[i]]                    ,
+    y.sim   = df_G.f_sim[int3_G,]$outF [[i]][,"harvDM_f_hay"][2],
+    D_Csoil = df_G.f_sim[int3_G,]$outF [[i]][,"D_Csoil"     ][2],
+    shade   = df_G.f_sim[int3_G,]$outF [[i]][,"Shade_f"     ][2],
+    Nleach  = df_G.f_sim[int3_G,]$outF [[i]][,"Nleaching_f" ][2],
+    Crunoff = df_G.f_sim[int3_G,]$outF [[i]][,"Crunoff_f"   ][2]
+    ) } ) )
+  colnames(listmat_nt_G[[3]]) <- varnames
+```
 
 ```{r}
+  plotimpacts_nt.Nfert <- function( listmat=listmat_nt_C, var="y.sim" ){
+    plot  ( listmat[[1]][,"Nfert"], listmat[[1]][,var],
+            xlab="Nfert", ylab="",main=var, pch=1 )
+    points( listmat[[2]][,"Nfert"], listmat[[2]][,var], pch=20, col="red"  )
+    points( listmat[[3]][,"Nfert"], listmat[[3]][,var], pch=6, col="blue" )
+    
+    y.lm.nt1 <- lm( listmat[[1]][,var] ~ listmat[[1]][,"Nfert"] )
+    y.lm.nt2 <- lm( listmat[[2]][,var] ~ listmat[[2]][,"Nfert"] )
+    y.lm.nt3 <- lm( listmat[[3]][,var] ~ listmat[[3]][,"Nfert"] )
+    r2.nt1   <- round( summary(y.lm.nt1)$r.squared, 2 )
+    r2.nt2   <- round( summary(y.lm.nt2)$r.squared, 2 )
+    r2.nt3   <- round( summary(y.lm.nt3)$r.squared, 2 )
+    abline( y.lm.nt1$coefficients[1], y.lm.nt1$coefficients[2], col="black" )
+    abline( y.lm.nt2$coefficients[1], y.lm.nt2$coefficients[2], col="red" )
+    abline( y.lm.nt3$coefficients[1], y.lm.nt3$coefficients[2], col="blue" )
+    legend( "bottomright", title="r2",
+            legend=c( paste("n<2:",as.character(r2.nt1)),
+              paste("n=2:",as.character(r2.nt2)),
+              paste("n>2:",as.character(r2.nt3)) ),
+            col=c("black","red","blue"), lty=c(1), cex=0.5 )
+  }
+```
+
+```{r}
+  par(mfrow=c(2,3),mar=c(4,2,2,2), mgp=c(2,1,0))
+  plotimpacts_nt.Nfert( listmat_nt_C, "y.obs" )
+  plotimpacts_nt.Nfert( listmat_nt_C, "y.sim" )
+  plotimpacts_nt.Nfert( listmat_nt_C, "D_Csoil" )
+  plotimpacts_nt.Nfert( listmat_nt_C, "Shade_f" )
+  plotimpacts_nt.Nfert( listmat_nt_C, "Nleaching_f" )
+  plotimpacts_nt.Nfert( listmat_nt_C, "Crunoff_f" )
+```
+
+```{r}
+  par(mfrow=c(2,3),mar=c(4,2,2,2), mgp=c(2,1,0))
+  plotimpacts_nt.Nfert( listmat_nt_G, "y.obs" )
+  plotimpacts_nt.Nfert( listmat_nt_G, "y.sim" )
+  plotimpacts_nt.Nfert( listmat_nt_G, "D_Csoil" )
+  plotimpacts_nt.Nfert( listmat_nt_G, "Shade_f" )
+  plotimpacts_nt.Nfert( listmat_nt_G, "Nleaching_f" )
+  plotimpacts_nt.Nfert( listmat_nt_G, "Crunoff_f" )
+```
+
+
+```{r, eval=F}
+  ## Selecting farm-specific TM-treatments
+
   # iTM_s0_N0 <- 18 ; iTM_s0_N1 <- 17 ; iTM_s1_N0 <- 14 ; iTM_s1_N1 <- 13
   iTM_s0_N0 <- 20 ; iTM_s0_N1 <- 19 ; iTM_s1_N0 <- 30 ; iTM_s1_N1 <- 29
 
   TM_C.f <- rep( NA, n_C.f ) ; TM_G.f <- rep( NA, n_G.f )
   
+  Nthr <- 175
   for( fi in 1:n_C.f ) {
-    if( (df_C.f$nt[fi]<=2) && (df_C.f$Nfert[fi]< 100) ) TM_C.f[fi] <- iTM_s0_N0
-    if( (df_C.f$nt[fi]<=2) && (df_C.f$Nfert[fi]>=100) ) TM_C.f[fi] <- iTM_s0_N1
-    if( (df_C.f$nt[fi]> 2) && (df_C.f$Nfert[fi]< 100) ) TM_C.f[fi] <- iTM_s1_N0
-    if( (df_C.f$nt[fi]> 2) && (df_C.f$Nfert[fi]>=100) ) TM_C.f[fi] <- iTM_s1_N1
+    if( (df_C.f$nt[fi]<=2) && (df_C.f$Nfert[fi]< Nthr) ) TM_C.f[fi] <- iTM_s0_N0
+    if( (df_C.f$nt[fi]<=2) && (df_C.f$Nfert[fi]>=Nthr) ) TM_C.f[fi] <- iTM_s0_N1
+    if( (df_C.f$nt[fi]> 2) && (df_C.f$Nfert[fi]< Nthr) ) TM_C.f[fi] <- iTM_s1_N0
+    if( (df_C.f$nt[fi]> 2) && (df_C.f$Nfert[fi]>=Nthr) ) TM_C.f[fi] <- iTM_s1_N1
   }
   
   for( fi in 1:n_G.f ) {
-    if( (df_G.f$nt[fi]<=2) && (df_G.f$Nfert[fi]< 100) ) TM_G.f[fi] <- iTM_s0_N0
-    if( (df_G.f$nt[fi]<=2) && (df_G.f$Nfert[fi]>=100) ) TM_G.f[fi] <- iTM_s0_N1
-    if( (df_G.f$nt[fi]> 2) && (df_G.f$Nfert[fi]< 100) ) TM_G.f[fi] <- iTM_s1_N0
-    if( (df_G.f$nt[fi]> 2) && (df_G.f$Nfert[fi]>=100) ) TM_G.f[fi] <- iTM_s1_N1
+    if( (df_G.f$nt[fi]<=2) && (df_G.f$Nfert[fi]< Nthr) ) TM_G.f[fi] <- iTM_s0_N0
+    if( (df_G.f$nt[fi]<=2) && (df_G.f$Nfert[fi]>=Nthr) ) TM_G.f[fi] <- iTM_s0_N1
+    if( (df_G.f$nt[fi]> 2) && (df_G.f$Nfert[fi]< Nthr) ) TM_G.f[fi] <- iTM_s1_N0
+    if( (df_G.f$nt[fi]> 2) && (df_G.f$Nfert[fi]>=Nthr) ) TM_G.f[fi] <- iTM_s1_N1
   }
-```
 
-```{r}
   ysel_C.f_sim <- dfoutTMSummary( df_C.f_sim, TM_C.f )[["sel"]][,"harvDM_f_hay"]
   ysel_G.f_sim <- dfoutTMSummary( df_G.f_sim, TM_G.f )[["sel"]][,"harvDM_f_hay"]
 
@@ -1543,6 +1685,14 @@ Farm yield observations vs. simulations where the model in case of 3 or more tre
 - Slope data received from Stefania Cerretelli who used 1-arc-second digital elevation data from NASA's SRTM mission (https://www.usgs.gov/science-support/osqi/yes/resources-teachers/earth-explorer) which she processed with GRASS-GIS.
 - Stefania found some literature comparing the effect of shade on erosion in Central America.
 - Pedotransfer functions?
+
+## Yield prediction and coffee harvest date
+
+- MvO:
+  - "The CAF model simulates time to maturation (from flowering to harvesting) as a function of temperature, and temperature is decreased under shade. So a partly shaded field has two harvesting dates: an early one for the coffee plants not covered by the trees, and a later one for the plants under shade. But even for plants under very cool conditions, the model still forces the harvest to happen before the end of the calendar year. That’s an assumption of convenience: the model code would be more complicated if we allow harvesting into the new year, especially if it could overlap with the next flowering. [Likewise, simulating flowering and harvesting to happen on single days (per shade level) rather than over extended periods keeps the code simple.]
+  - So to simulate the harvest season of 2019 we need no weather data for 2020 even if in reality the harvesting period extended to 2020."
+- JH:
+  - "For high altitude sites with lower temperatures forcing harvest at the end of the calendar year might lead to an underestimation of harvest. Likewise in high dry areas such as Antigua Guatemala harvest may not be until March and flowering in May. I appreciate the convenience of keeping things in the calendar year but it might become a significant source of error in these conditions."
 
 
 
