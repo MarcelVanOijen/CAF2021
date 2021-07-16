@@ -90,9 +90,9 @@ Here we report on (1) assessing impacts of soil water holding capacity, (2) simu
 
 # Reference simulations for Turrialba and Masatepe
 
-We use the MAP parameter vector determined by Bayesian calibration in earlier work.
+The work reported here builds on the earlier development and calibration of model CAF2021 which heavily depended on data from the long-term coffee agroforestry experiments in Turrialba (Costa Rica) and Masatepe (Nicaragua). The experiments will be referred to at various places in this report, so we recall some key results in this section. There were a total of 32 treatments in the experiments, and we show observed vs. simulated average annual coffee dry matter yields for all 32 treatments in Fig. \ref{fig:yObsSimTM}. Various model outputs for the 32 experimental treatments are shown in Fig. \ref{fig:TM}. For simulation of other variables, see the previous Progress Report [@VanOijen_2021_Modellinga]. The simulation results shown in Figures \ref{fig:yObsSimTM} and \ref{fig:TM} were derived with the Maximum A Posteriori (MAP) parameter vector of the model, determined by Bayesian calibration of the model against the experimental data.
 
-We show observed vs. simulated average annual coffee dry matter yields for all 32 treatments in Fig. \ref{fig:YieldsObsSimTM}.
+No further model calibration has taken place apart from minor adjustment of parameter settings for fruit production as we discuss further below. All results shown in this report are from model runs using the MAP parameter vector. The focus is not on general parameters but on site-specific settings for weather, soil conditions, shading and management.
 
 ```{r}
   iT <- 1:18 ; iM <- 19:32
@@ -109,16 +109,14 @@ We show observed vs. simulated average annual coffee dry matter yields for all 3
   r2_condsM_weatherM   <- summary(yM.lm)$r.squared
 ```
 
-```{r, fig.cap="\\label{fig:YieldsObsSimTM}Yields for the 32 treatments in Turrialba (black numbers) and Masatepe (red). Left: Observed yield vs. MAP-simulated yield. Right: as left but with higher soil water holding capacity (FWCWP reduced from 0.47 to 0.20) in the simulations."}
+```{r, fig.height=3, fig.cap="\\label{fig:yObsSimTM}Observed vs. MAP-simulated yields for the 32 treatments in Turrialba (black numbers) and Masatepe (red). Left: Turrialba (n=18). Middle: Masatepe (n=14). Right: both locations (n=32)."}
   par( mfrow=c(1,3), mar=c(2,2,2,2), pty="s" )
   
   y_T <- y_TM[iT,]    ; y_M <- y_TM[iM,]
   plotYieldsTM( y_T ) ; plotYieldsTM( y_M ) ; plotYieldsTM( y_TM )
 ```
 
-Various model outputs for the 32 experimental treatments are shown in Fig. \ref{fig:TM}. 
-
-```{r TM, fig.height=8, fig.cap="\\label{fig:TM}Simulations for Turrialba (grey bars) and Masatepe (red)."}
+```{r TM, fig.height=8, fig.cap="\\label{fig:TM}Summary results of simulations for Turrialba (grey bars) and Masatepe (red)."}
   fOutTM <- fOutputTM( parMatrix=parMAP, sfiles=sitesettings_filenames )
 
   par( mfrow=c(6,1), mar=c(3,2,2,0) )
@@ -129,7 +127,7 @@ Various model outputs for the 32 experimental treatments are shown in Fig. \ref{
 
   barplotTM( fOutTM[,"D_Csys" ], name="System C (kg ha-1 y-1)" )
   barplotTM( fOutTM[,"D_Csoil"], name="Soil C (kg ha-1 y-1)"   )
-  barplotTM( fOutTM[,"D_Nsoil"], name="Soil N (kg ha-1 y-1)"  )
+  barplotTM( fOutTM[,"D_Nsoil"], name="Soil N (kg ha-1 y-1)", xtxt=1:32 )
 ```
 
 
@@ -138,9 +136,11 @@ Various model outputs for the 32 experimental treatments are shown in Fig. \ref{
 
 # Impact of soil water holding capacity
 
-```{r}
+Fig. \ref{fig:yObsSimTMwater} shows simulated vs. observed yields for the Turrialba and Masatepe experiments after increasing the soil water holding capacity (difference between field capcity and wilting point). This change was established by decreasing the water level at which wilting point is reached. When we compare the results of Fig. \ref{fig:yObsSimTMwater} with those of the original simulations (Fig. \ref{fig:yObsSimTM}), we see that the results for Turrialba differed very little but simulated yields for Masatepe increased considerably. This reflects the fact that the conditions in Nicaragua were more drought-prone to begin with.
+
+```{r, fig.height=3, fig.cap="\\label{fig:yObsSimTMwater}Observed vs. simulated yields for the 32 treatments in Turrialba (black numbers) and Masatepe (red). Same figure as above but for simulations with higher soil water holding capacity (FWCWP reduced from 0.47 to 0.20)."}
   source('initialisation/initialise_CAF2021_general.R')
-  par( mfrow=c(1,1) )
+  par( mfrow=c(1,1), mar=c(2,2,2,2), pty="s" )
 
   parMAPmod <- parMAP
   ip        <- which( rownames(parMAPmod) == "FWCWP" ) 
@@ -155,29 +155,25 @@ Various model outputs for the 32 experimental treatments are shown in Fig. \ref{
 
 # Banana
 
-In this section, we study the impact of adding banana plants on various outputs from the model. The reference simulations are those that we looked at above, i.e. those for the long-term experiments in Turrialba (Costa Rica) and Masatepe (Nicaragua), which did not include any fruit trees.
+In this section, we study the impact of adding banana plants on various outputs from the model. The reference simulations are those that we looked at above, i.e. those for the long-term experiments in Turrialba and Masatepe which did not include any fruit trees.
 
 ## Exploring parameter values for banana
 
 Data for coffee agroforestry farms in the Turrialba region with fruit trees were provided by Rolando Cerda (CATIE). Annual N-fertilisation levels were quantified for plots on 51 farms and ranged from 33 to 285 kg N ha-1 y-1, averaging $99 \pm 63$. On the nine plots where the only fruit trees were Musaceae, annual banana yields varied from 20 to 400 bunches ha-1 ($138 \pm 153$). These yields were not correlated with fertilisation rate, nor with the density of the trees which ranged from 30 to 1410 ha-1 ($386 \pm 424$), with the average production per tree ranging from 0.08 to 3.33 ($0.79 \pm 1.09$) bunches. The variation in these numbers is so high that we decided to calibrate banana production in CAF2021 on literature data instead, collected during the literature review reported before [@VanOijen_2021_Modelling].
 
+The key literature information used for parameterising banana was the following:
+
 - @Damour_2012_Simulation: SLA of 0.018 $m^2 g^{-1}$, light extinction coefficient = 0.7, leaf N-content 3-4% of dry matter.
-- @ChavesC._2009_Modeling: plantain (Musa AAB).
-  - Latin American mean yield is 7.3 t ha-1 y-1 (DM?)
-  - DMP fruits ~ 25%.
-  - LUE (1.63 g MJ-1)
-  - critical temperatures of $T_{min}$ = 12.5 $^{\circ}$C, $T_{opt}$ = 25 $^{\circ}$C, $T_{max}$ = 40 $^{\circ}$C []
-  - Allocation about equally to leaves, pseudostem and corm with during later development most going to bunches that ultimately reach up to 45% of aboveground biomass.
+- @ChavesC._2009_Modeling: plantain (Musa AAB). Latin American mean yield is 7.3 t ha-1 y-1. DMP fruits ~ 25%. LUE = 1.63 g MJ-1. Critical temperatures of $T_{min}$ = 12.5 $^{\circ}$C, $T_{opt}$ = 25 $^{\circ}$C, $T_{max}$ = 40 $^{\circ}$C. Allocation about equally to leaves, pseudostem and corm with during later development most going to bunches that ultimately reach up to 45% of aboveground biomass.
 - @VanDenBergh_2012_Climate: critical monthly temperatures: $T_{kill}$ = 0 $^{\circ}$C, $T_{min}$ = 12 $^{\circ}$C, $T_{opt}$ = 17.5 to 26.3 $^{\circ}$C, $T_{max}$ = 33 $^{\circ}$C.
 - @Dold_2007_Musa: Most common coffee agroforestry systems in the Turrialba region were coffee + *Erythrina poeppigiana* + banana/plantain + laurel (*Cordia alliodora*). Typical tree densities were 162 *E.p.* $ha^{-1}$, 179 banana/plantain $ha^{-1}$, 37 laurel $ha^{-1}$. They cite literature where poro density is 130-208 $ha^{-1}$ and banana 149-343 $ha^{-1}$ and state that banana above 120 $ha^{-1}$ would reduce coffee yield too much.
 - @Dold_2010_Improving: mean tree density in central Costa Rican coffee agroforestry systems was 341 $ha^{-1}$ with 579 bananas $ha^{-1}$. In northern Nicaragua the mean tree density was 185 $ha^{-1}$ with 358 bananas $ha^{-1}$.
-- @Ripoche_2012_Modeling:
-  - Up to 10 kg aboveground DM per plant.
+- @Ripoche_2012_Modeling: Up to 10 kg aboveground DM per plant.
 - @Jullien_2001_Withinbunch reported that pulp DMP reaches asymptotically to values of about 30%. 
 - @Mustaffa_2012_Banana: leaf N content about 3% of DM.
-- @MartinezAcosta_2011_Dinamica, final DM per tree, bunch / leaves / pseudostem + corm = 3000 / 1200 / 1800 g DM.
-- @Schaffer_1999_Atmospheric DM of 6-month old vegetative banana (cv. 'Gros Michel'): leaves:pseudostem+rhizome:roots =  19:64:19%.
-- DM-partitioning of cv. 'Williams' in Colombia not affected strongly by level of N-fertilization (0 to 483 kg N $ha^{-1}$), but fruit yields increased from 9 to 12 kg DM [@TorresB._2014_Accumulation]. At harvest after 161 kg N $ha^{-1}$ fertilization: corm+pseudostem/leaves/fruits = 6/1.5/3.5 kg DM per plant. Total plant N-concentration was 1-1.5% of DM.
+- @MartinezAcosta_2011_Dinamica: final DM per tree, bunch / leaves / pseudostem + corm = 3000 / 1200 / 1800 g DM.
+- @Schaffer_1999_Atmospheric: DM of 6-month old vegetative banana (cv. 'Gros Michel'): leaves:pseudostem+rhizome:roots =  19:64:19%.
+- DM-partitioning of cv. 'Williams' in Colombia was not affected strongly by level of N-fertilization (0 to 483 kg N $ha^{-1}$), but fruit yields increased from 9 to 12 kg DM [@TorresB._2014_Accumulation]. At harvest after 161 kg N $ha^{-1}$ fertilization: corm+pseudostem/leaves/fruits = 6/1.5/3.5 kg DM per plant. Total plant N-concentration was 1-1.5% of DM.
 - @Turner_2007_Environmental: LAI ranges from 2 to 5 m2 m-2.
 
 ## Banana simulation in CAF2021
@@ -205,7 +201,8 @@ To make CAF2021 simulate banana in a coffee plantation, we set the initial densi
   plot( Time, YtreesDM , type="l", ylab="", main="Fruit yield (kg DM ha-1)" )
 ```
 
-We now virtually add 100 banana plants per hectare to each of the experimental treatments in Turrialba and Masatepe that we investigated above (Fig. \ref{fig:TM}). We show the *differences* from those earlier results in Fig. \ref{fig:TM.B}. 
+To test the impacts on ecosystem services of including banana in coffee agroforestry systems,
+we now virtually add 100 banana plants per hectare to each of the experimental treatments in Turrialba and Masatepe that we investigated above (Fig. \ref{fig:TM}). We show the *differences* from those earlier results in Fig. \ref{fig:TM.B}. Overall, the impacts are fairly small. There is some reduction in coffee production, especially in the originally shadeless treatments (numbers 17 and 18) at Turrialba, and in timber production with Chloroleucon (treatments 13-16). The addition of banana plants led to some extra storage of carbon in the system in all four shadeless treatments (17-18 in Turrialba, 19-20 in Masatepe).
 
 ```{r TM.B, fig.height=8, fig.cap="\\label{fig:TM.B}Differences between simulations for Turrialba (grey bars) and Masatepe (red) with 100 banana plants per hectare added and default simulations without fruit plants."}
   parMAP.B  <- parMAP
@@ -223,7 +220,7 @@ We now virtually add 100 banana plants per hectare to each of the experimental t
 
   barplotTM( dfOutTM.B[,"D_Csys" ], name="System C (kg ha-1 y-1)" )
   barplotTM( dfOutTM.B[,"D_Csoil"], name="Soil C (kg ha-1 y-1)"   )
-  barplotTM( dfOutTM.B[,"D_Nsoil"], name="Soil N (kg ha-1 y-1)"  )
+  barplotTM( dfOutTM.B[,"D_Nsoil"], name="Soil N (kg ha-1 y-1)", xtxt=1:32 )
 ```
 
 
@@ -232,15 +229,13 @@ We now virtually add 100 banana plants per hectare to each of the experimental t
 
 # Avocado
 
+A similar exercise as for banana was carried out for avocado.
+
 ## Exploring parameter values for avocado
 
 - Avocado production in Mexico is year round [@CIRAD_2019_Country]. Yield ramps up from 0.3-1.6 t ha-1 at age 4 to 12-15 t ha-1 at age 7-8 and older.
-- **Elzebroek & Wind (2008)**:
-  - optimal T (three races): day 20-35C, night 10-25C. [MvO: cv. Hass is on the cold side, so maybe day 25C, night 15C, 24-h optimum 20C?]
-  - First harvests after 4 years (vegetatively propagated) to 5-6 yrs (seedlings)
-- **http://postgrado.fausac.gt/wp-content/uploads/2019/03/Zoila-Monz%C3%B3n.pdf** (Guatemala):
-  - Epocas de cosecha de aguacate (variedad Hass) en Guatemala: July-Sep & Nov-April (so 9 months in total, i.e. all months except May-June & Oct).
-  - Yields in different departments from 4-11.5 t ha-1 y-1, mean 7 t ha-1 y-1.
+- @Elzebroek_2008_Guide: optimal temperature (three races): day 20-35C, night 10-25C. Cultivar Hass is on the cold side, so we estimate optima as day 25C, night 15C, 24-h optimum 20C. First harvests after 4 years (vegetatively propagated) to 5-6 yrs (seedlings).
+- @Monzon-Martinez_2019_Perfil: harvest seasons of avocado in Guatemala: July-Sep & Nov-April (so 9 months in total, i.e. all months except May-June & Oct). Yields in different departments from 4-11.5 t ha-1 y-1, mean 7 t ha-1 y-1.
 
 ## Avocado simulation in CAF2021
 
@@ -269,7 +264,7 @@ See Fig. \ref{fig:SimAvocado}.
   plot( Time, YtreesDM , type="l", ylab="", main="Fruit yield (kg DM ha-1)" )
 ```
 
-We now virtually add 100 avocado trees per hectare to each of the experimental treatments in Turrialba and Masatepe. The new results are shown in Fig. \ref{fig:TM.A}, and we can compare these with the results for the simulations for the experimental conditions without fruit trees (Fig. \ref{fig:TM}).
+We now virtually add 100 avocado trees per hectare to each of the experimental treatments in Turrialba and Masatepe. The new results are shown in Fig. \ref{fig:TM.A}, and we again compare these with the results for the simulations for the experimental conditions without fruit trees (Fig. \ref{fig:TM}). The impact of avocado on other ecosystem services is only very slightly higher than that of banana.
 
 ```{r TM.A, fig.height=8, fig.cap="\\label{fig:TM.A}Differences between simulations for Turrialba (grey bars) and Masatepe (red) with 100 avocado trees per hectare added and default simulations without fruit trees."}
   parMAP.A  <- parMAP
@@ -287,7 +282,7 @@ We now virtually add 100 avocado trees per hectare to each of the experimental t
 
   barplotTM( dfOutTM.A[,"D_Csys" ], name="System C (kg ha-1 y-1)" )
   barplotTM( dfOutTM.A[,"D_Csoil"], name="Soil C (kg ha-1 y-1)"   )
-  barplotTM( dfOutTM.A[,"D_Nsoil"], name="Soil N (kg ha-1 y-1)"  )
+  barplotTM( dfOutTM.A[,"D_Nsoil"], name="Soil N (kg ha-1 y-1)", xtxt=1:32 )
 ```
 
 
@@ -309,6 +304,8 @@ We now virtually add 100 avocado trees per hectare to each of the experimental t
 
 ## Coordinates
 
+The geographcial coordinates for the farms in Costa Rica and Guatemala were taken from SEACAF files **coordinates_CR.csv** and **coordinates_G.csv**.
+
 ```{r}
   df_coords_C.f  <- read.csv( paste0( dir.f, file_coords_C.f ) )
   df_coords_G.f  <- read.csv( paste0( dir.f, file_coords_G.f ) )
@@ -326,6 +323,8 @@ We now virtually add 100 avocado trees per hectare to each of the experimental t
 ```
 
 ## Slopes
+
+Data on field slopes at the farm locations were taken from SEACAF-file **slope_fincas.xlsx**. The slopes were calculated using GRASS-GIS by Stefania Cerretelli (Univ. Greenwich) from 1-arc-second digital elevation data delivered by NASA's SRTM mission (https://www.usgs.gov/science-support/osqi/yes/resources-teachers/earth-explorer).
 
 ```{r}
   df_slope_C.f <- read_excel( paste0(dir.f,file_slope.f),
@@ -349,6 +348,13 @@ We now virtually add 100 avocado trees per hectare to each of the experimental t
 
 ## Typology
 
+Data on farm properties and yields were taken from SEACAF-file **typology.XLSX**. Some of the data required post-processing to make them suitable for use with CAF2021. The following variables were taken from the file:
+
+- *kg_ha* which is fresh coffee bean yield, which we divided by 3 for conversion to dry weight.
+- *spec_trees* which is the numnber of shade tree species.
+- *VisSky* which is the fraction of visible sky from which we calculated shade level as 1-VisSky.
+- *kg N/ha* which is the annual rate of N-fertilisation.
+
 ```{r}
   df_typol.f <- read_excel( paste0(dir.f,file_typol.f),
                             sheet="data_set" )
@@ -371,15 +377,14 @@ We now virtually add 100 avocado trees per hectare to each of the experimental t
 
 ## Soil
 
-Soil measurements were taken in the top 26 cm of the soil. We assume that this layer contains two-thirds of the soil organic matter.
+Soil information was taken from the SEACAF-file **Soil_general.xlsx** provided by Lucie Büchi (Univ. Greenwich). The data required some post-processing for use with CAF2021:
 
-To calculate soil dry matter amounts, we account for the fact that the spreadsheet soil dry matter values were for cylinders of depth 13 cm and radius 5 cm (i.e. area $\pi \, 5^2 = 78.54 \, cm^2$). So dry matter totals in kg m-2 for each soil layer (0-13 cm, 13-26 cm) were found by multiplying the reported values by $0.001 * 10^4 / 78.54$
-
-Note that data corrections were applied in the following code.
-
+- The data in this file refer to the top 26 cm of the soil whereas CAF2021 requires data for the whole rooted zone. For the necessary conversion, we made the assumption that the top 26 cm. contains two-thirds of the soil organic matter.
+- To calculate soil dry matter amounts, we account for the fact that the spreadsheet soil dry matter values were for cylinders of depth 13 cm and radius 5 cm (i.e. area $\pi \, 5^2 = 78.54 \, cm^2$). So dry matter totals in kg m-2 for each soil layer (0-13 cm, 13-26 cm) were found by multiplying the reported values by $0.001 * 10^4 / 78.54$
 - Two farms in Guatemala had increased weights in some subsamples after drying at 105 degC: farm 138 (Excel-file rows 1209,1212:1215,1220) and farm 330 (rows 1833:1838). These after-drying weights were set equal to the before-drying values.
+- We used median values of the six samples taken per soil layer. The difference with taking mean values is overall small.
 
-We used median values of the six samples taken per soil layer. The difference with taking mean values is overall small.
+A summary of the soil data derived this way is shown in the following table.
 
 ```{r}
   df_soil1.f0 <- read_excel( paste0(dir.f,file_soil.f),
@@ -466,7 +471,9 @@ We used median values of the six samples taken per soil layer. The difference wi
 
 # WorldClim climate and weather data
 
-WorldClim provides data for both climate (30-year averages) and weather (2000-2018).
+WorldClim provides monthly data for both climate (30-year averages) and weather (2000-2018). The data is cumbersome: one has to begin by downloading high-spatial resolution data for the whole globe, then truncate these to the regions of interest before storing the truncated files locally. However, the data is useful in that it is freely available, complete (it includes all five weather variables used by CAF2021: radiation, temperature, atmospheric vapour pressure, wind speed, precipitation) and is of apparently high quality without any gaps or ourliers.
+
+WorldClim provides two types of monthly data: climatic data (30-year averages) for all five variables and weather data (years 2000-2018) for temperature and rainfall. The climatic data are at higher spatial resolution (30 seconds) than the weather data (2.5 minutes). We used the weather data as anomalies to refine the climate data temporally.
 
 ```{r}
   dir_WC          <- "weather/WorldClim/"
@@ -538,7 +545,7 @@ WorldClim provides data for both climate (30-year averages) and weather (2000-20
 
 ## Climate data 1970-2000
 
-We import the files in RasterStacks (see https://www.benjaminbell.co.uk/2018/02/rasterstacks-and-rasterplot.html ).
+We import the very large WorldClim climate files into R-data structures called RasterStacks (see https://www.benjaminbell.co.uk/2018/02/rasterstacks-and-rasterplot.html ), which allow for easy parallel post-processing. An example of the data, for rainfall truncated to the extent of Costa Rica, is shown in Fig. \ref{fig:XX2}.
 
 ```{r}
   month <- c( "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -593,7 +600,7 @@ We import the files in RasterStacks (see https://www.benjaminbell.co.uk/2018/02/
   wind_G <- stack( paste0(dir_WC,"WC_wind_G.grd") )
 ```
 
-```{r}
+```{r XX2, fig.cap="\\label{fig:XX2}WorldClim clinatic data for Costa Rica: monthly rainfall (mm)."}
   tempcol <- colorRampPalette( c("purple", "blue", "skyblue", "green" ,
                    "lightgreen", "yellow", "orange", "red", "darkred") )
   plot( prec_C, main=month, col=rainbow(100,end=0.7),
@@ -620,12 +627,12 @@ We import the files in RasterStacks (see https://www.benjaminbell.co.uk/2018/02/
     for(m in 1:12) RAIN_G.f[,m] <- RAIN_G.f[,m] / monl[m]
 ```
 
-The locations of the farms are depicted in Fig. \ref{fig:Maps_CG}.
+For simulations with CAF2021 in project SEACAF, we need weather information for farms in Costa Rica and Guatemala. The locations of the farms are depicted in Fig. \ref{fig:Maps_CG}. We extracted WorldClim climatic data (all variables) for the 30-second boxes containing these farm locations and show the climatic averages for the months of January and July in Fig. \ref{fig:XX3}. The figure shows that temperature and vapour pressure decline markedly with altitude, while wind speed increases, and radiation and rainfall vary independently from altitude. These patterns are similar in the two countries.
 
 ```{r, eval=F}
   par( mfrow=c(1,2), mar=c(3,3,3,5) )
-  plot( alt_C, main="alt_C", addfun=plot_C.f, zlim=c(0,4000) )
-  plot( alt_G, main="alt_G", addfun=plot_G.f, zlim=c(0,4000) )
+  plot( alt_C, main="Costa Rica", addfun=plot_C.f, zlim=c(0,4000) )
+  plot( alt_G, main="Guatemala", addfun=plot_G.f, zlim=c(0,4000) )
 
   # Alternative way of producing a map with the farm locations
   worldmap <- getMap(resolution = "high")
@@ -637,11 +644,11 @@ The locations of the farms are depicted in Fig. \ref{fig:Maps_CG}.
   points( coords_G.f, col="blue", pch=1, cex=0.2 )
 ```
 
-```{r Maps_CG, out.width="400px", fig.align="center", fig.cap="\\label{Maps_CG}Locations of the farms in Costa Rica and Guatemala."}
+```{r Maps_CG, out.width="400px", fig.align="center", fig.cap="\\label{Maps_CG}Altitude maps for Costa Rica and Guatemala with locations of the SEACAF farms."}
   knitr::include_graphics("images/Maps_CG.png")
 ```
 
-```{r}
+```{r XX3, fig.height=3, fig.cap="\\label{fig:XX3}WorldClim data for the locations of the coffee farms plotted against altitude (m). Top row: Costa Rica; bottom row: Guatemala. Monthly averages for January (red) and July (black). Six weather variables: global radiation (GR; MJ m-2 d-1), temperature (TMIN, TMAX; deg. C.), vapour pressure (VP; kPa), wind speed (WN; m s-1), precipitation (RAIN; mm d-1)."}
   par( mfrow=c(2,6), mar=c(2,2,2,1) )
   
   ylim_GR.f   <- range( GR_C.f  , GR_G.f   )
@@ -651,30 +658,30 @@ The locations of the farms are depicted in Fig. \ref{fig:Maps_CG}.
   ylim_WN.f   <- range( WN_C.f  , WN_G.f   )
   ylim_RAIN.f <- range( RAIN_C.f, RAIN_G.f )
 
-  plot  ( alt_C.f, GR_C.f  [,7], ylim=ylim_GR.f  , main="GR_C.f" )
+  plot  ( alt_C.f, GR_C.f  [,7], ylim=ylim_GR.f  , main="GR" )
   points( alt_C.f, GR_C.f  [,1], col="red" )
-  plot  ( alt_C.f, TMIN_C.f[,7], ylim=ylim_TMIN.f, main="TMIN_C.f" )
+  plot  ( alt_C.f, TMIN_C.f[,7], ylim=ylim_TMIN.f, main="TMIN" )
   points( alt_C.f, TMIN_C.f[,1], col="red" )
-  plot  ( alt_C.f, TMAX_C.f[,7], ylim=ylim_TMAX.f, main="TMAX_C.f" )
+  plot  ( alt_C.f, TMAX_C.f[,7], ylim=ylim_TMAX.f, main="TMAX" )
   points( alt_C.f, TMAX_C.f[,1], col="red" )
-  plot  ( alt_C.f, VP_C.f  [,7], ylim=ylim_VP.f  , main="VP_C.f" )
+  plot  ( alt_C.f, VP_C.f  [,7], ylim=ylim_VP.f  , main="VP" )
   points( alt_C.f, VP_C.f  [,1], col="red" )
-  plot  ( alt_C.f, WN_C.f  [,7], ylim=ylim_WN.f  , main="WN_C.f" )
+  plot  ( alt_C.f, WN_C.f  [,7], ylim=ylim_WN.f  , main="WN" )
   points( alt_C.f, WN_C.f  [,1], col="red" )
-  plot  ( alt_C.f, RAIN_C.f[,7], ylim=ylim_RAIN.f, main="RAIN_C.f" )
+  plot  ( alt_C.f, RAIN_C.f[,7], ylim=ylim_RAIN.f, main="RAIN" )
   points( alt_C.f, RAIN_C.f[,1], col="red" )
   
-  plot  ( alt_G.f, GR_G.f  [,7], ylim=ylim_GR.f  , main="GR_G.f" )
+  plot  ( alt_G.f, GR_G.f  [,7], ylim=ylim_GR.f  , main="GR" )
   points( alt_G.f, GR_G.f  [,1], col="red" )
-  plot  ( alt_G.f, TMIN_G.f[,7], ylim=ylim_TMIN.f, main="TMIN_G.f" )
+  plot  ( alt_G.f, TMIN_G.f[,7], ylim=ylim_TMIN.f, main="TMIN" )
   points( alt_G.f, TMIN_G.f[,1], col="red" )
-  plot  ( alt_G.f, TMAX_G.f[,7], ylim=ylim_TMAX.f, main="TMAX_G.f" )
+  plot  ( alt_G.f, TMAX_G.f[,7], ylim=ylim_TMAX.f, main="TMAX" )
   points( alt_G.f, TMAX_G.f[,1], col="red" )
-  plot  ( alt_G.f, VP_G.f  [,7], ylim=ylim_VP.f  , main="VP_G.f" )
+  plot  ( alt_G.f, VP_G.f  [,7], ylim=ylim_VP.f  , main="VP" )
   points( alt_G.f, VP_G.f  [,1], col="red" )
-  plot  ( alt_G.f, WN_G.f  [,7], ylim=ylim_WN.f  , main="WN_G.f" )
+  plot  ( alt_G.f, WN_G.f  [,7], ylim=ylim_WN.f  , main="WN" )
   points( alt_G.f, WN_G.f  [,1], col="red" )
-  plot  ( alt_G.f, RAIN_G.f[,7], ylim=ylim_RAIN.f, main="RAIN_G.f" )
+  plot  ( alt_G.f, RAIN_G.f[,7], ylim=ylim_RAIN.f, main="RAIN" )
   points( alt_G.f, RAIN_G.f[,1], col="red" )
 ```
 
@@ -721,7 +728,7 @@ The locations of the farms are depicted in Fig. \ref{fig:Maps_CG}.
   tmin_G.00_18 <- stack( paste0(dir_WC,"WC_tmin_G.00_18.grd") )
 ```
 
-Monthly total rainfall (mm) in 2000 and 2001 is shown in Fig. \ref{fig:precC.00.01}.
+In contrast to the WorldClim *climate* data for all variables, the WorldClim *weather* data for temperature and rainfall change from year to year over the represented period of 2000-2018. Fig. \ref{fig:precC.00.01} shows for Costa Rica how monthly total rainfall (mm) varies during the two years of 2000 and 2001.
 
 ```{r precC.00.01, fig.height=8, fig.align="center", fig.cap="\\label{precC.00.01}Rainfall in Costa Rica in 2000 and 2001."}
   plot( prec_C.00_18[[ 1:24]],
@@ -788,45 +795,57 @@ Monthly total rainfall (mm) in 2000 and 2001 is shown in Fig. \ref{fig:precC.00.
   }
 ```
 
-Comparing anomalies between two farms in Costa Rica:
+For the locations of the SEACAF farms in Costa Rica and Guatemala, we calculated temperature and rainfall anomalies (deviations from long-term averages) for each month in 2000-2018 from the WorldClim weather data. Fig. \ref{fig:XX4} shows how these anomalies vary over time for two farms in Costa Rica. Because of the proximity of these farms to each other, the anomalies are closely correlated, as shown in the right-hand side panels of Fig. \ref{fig:XX4}. The correlations are much less strong when we compare a farm in Costa Rica with one in Guatemala (Fig. \ref{fig:XX5}).
 
-```{r}
-  par( mfrow=c(3,2) )
+```{r XX4, fig.cap="\\label{fig:XX4}Temperature and rainfall anomalies (differences between WorldClim weather for 2000-2018 and long-term climatic averages) for two farms in Costa Rica. Left: anomalies against month (1=Jan 2000). Right: anomalies of one farm against those of the other."}
+  par( mfrow=c(3,2), mar=c(3,3,2,2), mgp=c(2,1,0) )
 
   iSite1 <- 1 ; iSite2 <- 2
-  plot  ( 1:228, TMIN_C.00_18.anom.f[iSite1,], main="Anomalies TMIN" )
+  plot  ( 1:228, TMIN_C.00_18.anom.f[iSite1,], main="Anomalies TMIN (C)",
+          xlab="Month", ylab="" )
   points( 1:228, TMIN_C.00_18.anom.f[iSite2,], col="red" )
-  plot( TMIN_C.00_18.anom.f[iSite1,], TMIN_C.00_18.anom.f[iSite2,] )
+  plot( TMIN_C.00_18.anom.f[iSite1,], TMIN_C.00_18.anom.f[iSite2,],
+          xlab="C", ylab="C" )
   
-  plot  ( 1:228, TMAX_C.00_18.anom.f[iSite1,], main="Anomalies TMAX" )
+  plot  ( 1:228, TMAX_C.00_18.anom.f[iSite1,], main="Anomalies TMAX (C)",
+          xlab="Month", ylab="" )
   points( 1:228, TMAX_C.00_18.anom.f[iSite2,], col="red" )
-  plot( TMAX_C.00_18.anom.f[iSite1,], TMAX_C.00_18.anom.f[iSite2,] )
+  plot( TMAX_C.00_18.anom.f[iSite1,], TMAX_C.00_18.anom.f[iSite2,],
+          xlab="C", ylab="C" )
   
-  plot  ( 1:228, RAIN_C.00_18.anom.f[iSite1,], main="Anomalies RAIN" )
+  plot  ( 1:228, RAIN_C.00_18.anom.f[iSite1,], main="Anomalies RAIN (mm d-1)",
+          xlab="Month", ylab="" )
   points( 1:228, RAIN_C.00_18.anom.f[iSite2,], col="red" )
-  plot( RAIN_C.00_18.anom.f[iSite1,], RAIN_C.00_18.anom.f[iSite2,] )
+  plot( RAIN_C.00_18.anom.f[iSite1,], RAIN_C.00_18.anom.f[iSite2,],
+          xlab="mm d-1", ylab="mm d-1" )
 ```
 
-Comparing anomalies between a farm in Costa Rica and one in Guatemala:
-
-```{r}
-  par( mfrow=c(3,2) )
+```{r XX5, fig.cap="\\label{fig:XX5}Temperature and rainfall anomalies (differences between WorldClim weather for 2000-2018 and long-term climatic averages) for a farm in Costa Rica (black) and a farm in Guatemala (red). Left: anomalies against month (1=Jan 2000). Right: anomalies of one farm against those of the other."}
+  par( mfrow=c(3,2), mar=c(3,3,2,2), mgp=c(2,1,0) )
 
   iSiteC <- 1 ; iSiteG <- 1
-  plot  ( 1:228, TMIN_C.00_18.anom.f[iSiteC,], main="Anomalies TMIN" )
+  plot  ( 1:228, TMIN_C.00_18.anom.f[iSiteC,], main="Anomalies TMIN (C)",
+          xlab="Month", ylab="" )
   points( 1:228, TMIN_G.00_18.anom.f[iSiteG,], col="red" )
-  plot(TMIN_C.00_18.anom.f[iSiteC,], TMIN_G.00_18.anom.f[iSiteG,] )
+  plot(TMIN_C.00_18.anom.f[iSiteC,], TMIN_G.00_18.anom.f[iSiteG,],
+          xlab="C", ylab="C" )
   
-  plot  ( 1:228, TMAX_C.00_18.anom.f[iSiteC,], main="Anomalies TMAX" )
+  plot  ( 1:228, TMAX_C.00_18.anom.f[iSiteC,], main="Anomalies TMAX (C)",
+          xlab="Month", ylab="" )
   points( 1:228, TMAX_G.00_18.anom.f[iSiteG,], col="red" )
-  plot(TMAX_C.00_18.anom.f[iSiteC,], TMAX_G.00_18.anom.f[iSiteG,] )
+  plot(TMAX_C.00_18.anom.f[iSiteC,], TMAX_G.00_18.anom.f[iSiteG,],
+          xlab="C", ylab="C" )
   
-  plot  ( 1:228, RAIN_C.00_18.anom.f[iSiteC,], main="Anomalies RAIN" )
+  plot  ( 1:228, RAIN_C.00_18.anom.f[iSiteC,], main="Anomalies RAIN (mm d-1)",
+          xlab="Month", ylab="" )
   points( 1:228, RAIN_G.00_18.anom.f[iSiteG,], col="red" )
-  plot(RAIN_C.00_18.anom.f[iSiteC,], RAIN_G.00_18.anom.f[iSiteG,] )
+  plot(RAIN_C.00_18.anom.f[iSiteC,], RAIN_G.00_18.anom.f[iSiteG,],
+          xlab="mm d-1", ylab="mm d-1" )
 ```
 
-## Combining climate and weather
+## Creating CAF2021 daily weather files 2000-2018
+
+We used the monthly WorldClim data to create daily weather files (input files in the format required by CAF2021) for each of the 189 farms in SEACAF. For the climatic variables of global radiation (GR), vapour pressure (VP) and wind speed (WN) this was done by repeating the monthly average value for each day of the month. So the value of GR for any individual farm was the same on all days 1-31 January 2000, 1-31 January 2001, etc. In contrast, for temperature (TMIN, TMAX) and rainfall (RAIN) we created weather files that differed from year to year by adding the weather anomalies to the climatic averages. So the value of TMIN for any individual farm was the same on all days of January 2000 but different in January 2001 etc. We show daily weather files thus created for a farm in Costa Rica and a farm in Guatemala in Figs \ref{fig:XX6} and \ref{fig:XX7}. 
 
 ```{r, eval=F}
   matrix_C.00_18.f <- matrix( NA, nrow=n_coords_C.f, ncol=228 )
@@ -869,8 +888,6 @@ Comparing anomalies between a farm in Costa Rica and one in Guatemala:
   matrix_RAIN_G.00_18.f0 <- round( matrix_RAIN_G.00_18.f + RAIN_G.00_18.anom.f, 2 )
   matrix_RAIN_G.00_18.f  <- pmax(matrix_RAIN_G.00_18.f0, 0)
 ```
-
-## Creating CAF2021 daily weather files 2000-2018
 
 ```{r, eval=F}
          weather_C.f   <- vector( "list", n_coords_C.f )
@@ -946,7 +963,7 @@ Comparing anomalies between a farm in Costa Rica and one in Guatemala:
     mutate( weather.WC = weather_G.f )
 ```
 
-```{r, fig.height=3}
+```{r XX6, fig.height=3, fig.cap="\\label{fig:XX6}Daily weather for a farm in Costa Rica. The time series were constructed by adding spatially coarse monthly weather anomalies to WorldClim climatic averages, followed by downscaling to days."}
   par( mfrow=c(2,2), mar=c(2,2,2,2) )
 
   f <- 1
@@ -964,7 +981,7 @@ Comparing anomalies between a farm in Costa Rica and one in Guatemala:
           xlab="", ylab="", type="l" )
 ```
 
-```{r, fig.height=3}
+```{r XX7, fig.height=3, fig.cap="\\label{fig:XX7}Daily weather for a farm in Guatemala - compare with previous figure."}
   par( mfrow=c(2,2), mar=c(2,2,2,2) )
 
   f <- 1
@@ -986,7 +1003,7 @@ Comparing anomalies between a farm in Costa Rica and one in Guatemala:
 
 \clearpage
 
-# Combining model inputs in an R-dataframe and preliminary data analysis
+# Preliminary data analysis
 
 ```{r}
   df_C.f     <- df_weather_C.f            %>%
@@ -1003,11 +1020,11 @@ Comparing anomalies between a farm in Costa Rica and one in Guatemala:
   # names( df_C.f) ; names( df_G.f)
   # str( df_C.f ) ; str(df_G.f)
   
-  save( df_C.f, file="df_C.f.rda" )
-  save( df_G.f, file="df_G.f.rda" )
+  # save( df_C.f, file="df_C.f.rda" )
+  # save( df_G.f, file="df_G.f.rda" )
 ```
 
-```{r}
+```{r, eval=F}
   # Extracting data for a single farm, say Costa Rica farm 1103
   i <- 1103 ; df_C.fi <- df_C.f %>% filter( code==i )
 
@@ -1034,8 +1051,8 @@ Comparing anomalies between a farm in Costa Rica and one in Guatemala:
             col=c("black","red"), lty=c(1,1), cex=0.7 ) }
 ```
 
-```{r, fig.height=5}
-  par( mfrow=c(2,2), mar=c(4,2,2,2) )
+```{r XX8, fig.height=8, fig.cap="\\label{fig:XX8}Data derived from the SEACAF inventory for farms in Costa Rica (black) and Guatemala (red), plotted against altitude. The bottom four panels show soil variables: density (DM; g dry soil cm-3), carbon-nitrogen ratio (C/N; -), carbon and nitrogen content of the rooted zone (C, N; kg m-2)."}
+  par( mfrow=c(4,2), mar=c(4,2,2,2) )
   
   xtxt <- "Alt. (m)"        ; x_C <- df_C.f$altitude ; x_G <- df_G.f$altitude
   
@@ -1044,14 +1061,10 @@ Comparing anomalies between a farm in Costa Rica and one in Guatemala:
   ytxt <- "# tree spp."     ; y_C <- df_C.f$nt       ; y_G <- df_G.f$nt
   plot_xy_CG( xtxt="" )
   ytxt <- "Shade (-)"       ; y_C <- df_C.f$shade    ; y_G <- df_G.f$shade
-  plot_xy_CG( )
+  plot_xy_CG( xtxt="" )
   ytxt <- "Nfert (kg/ha/y)" ; y_C <- df_C.f$Nfert    ; y_G <- df_G.f$Nfert
-  plot_xy_CG( )
-```
+  plot_xy_CG( xtxt="" )
 
-```{r, fig.height=5}
-  par( mfrow=c(2,2), mar=c(4,2,2,2) )
-  
   xtxt <- "Alt. (m)"   ; x_C <- df_C.f$altitude ; x_G <- df_G.f$altitude
   
   ytxt <- "DM (g/cm3)" ; y_C <- df_C.f$DM.soil  ; y_G <- df_G.f$DM.soil
@@ -1064,12 +1077,14 @@ Comparing anomalies between a farm in Costa Rica and one in Guatemala:
   plot_xy_CG( )
 ```
 
-## More data plots
+We combined all data for simulation of the farms (both agricultural and weather variables) in one large data structure (R data-frame) which facilitated checking data consistency. Fig. \ref{fig:XX8} shows data values for all farms for eight different variables, all plotted against altitude. Correlations with altitude are mostly weak, with only some posive correlation between altitude and coffee yield.
 
-For the following plots, we cap Nfert at 500 kg N ha-1 y-1.
+Some values of N-fertilisation rate seem implausibly high. 
 
-```{r}
-  par( mfrow=c(2,3) )
+We would expect to find some correlation between number of shade tree species, the level of shade that they cause, fertilisation rate and yield, but generally these four variables are only weakly correlated as shown in Fig. \ref{fig:XX10} (where we capped N-fert at 500 kg N ha-1 y-1). Only yield and fertilisation show some positive correlation.
+
+```{r XX10, fig.height=8, fig.cap="\\label{fig:XX10}Correlations within the SEACAF database. Top two rows: Costa Rica. Bottom two rows: Guatemala. The 1st and 3rd row show how yield is correlated with number of shade trees (nt; -), shade level (-), N-fertilisation (Nfert; kg N ha-1 y-1). The 2nd and 4th row show correlations amongst those environmental variables."}
+  par( mfrow=c(4,3), mar=c(4,4,2,1) )
 
   yield <- df_C.f$yield
   nt    <- df_C.f$nt
@@ -1083,23 +1098,19 @@ For the following plots, we cap Nfert at 500 kg N ha-1 y-1.
   x=nt    ; y=shade ; plot(x,y,xlab="nt"   ,ylab="shade") ; add.lmleg()
   x=nt    ; y=Nfert ; plot(x,y,xlab="nt"   ,ylab="Nfert") ; add.lmleg()
   x=shade ; y=Nfert ; plot(x,y,xlab="shade",ylab="Nfert") ; add.lmleg()
-```
-
-```{r}
-  par( mfrow=c(2,3) )
 
   yield <- df_G.f$yield
   nt    <- df_G.f$nt
   shade <- df_G.f$shade
   Nfert <- pmin( df_G.f$Nfert, 500 )
 
-  x=nt    ; y=yield ; plot(x,y,xlab="nt"   ,ylab="yield") ; add.lmleg()
-  x=shade ; y=yield ; plot(x,y,xlab="shade",ylab="yield") ; add.lmleg()
-  x=Nfert ; y=yield ; plot(x,y,xlab="Nfert",ylab="yield") ; add.lmleg()
+  x=nt    ; y=yield ; plot(x,y,xlab="nt"   ,ylab="yield", col="red") ; add.lmleg()
+  x=shade ; y=yield ; plot(x,y,xlab="shade",ylab="yield", col="red") ; add.lmleg()
+  x=Nfert ; y=yield ; plot(x,y,xlab="Nfert",ylab="yield", col="red") ; add.lmleg()
   
-  x=nt    ; y=shade ; plot(x,y,xlab="nt"   ,ylab="shade") ; add.lmleg()
-  x=nt    ; y=Nfert ; plot(x,y,xlab="nt"   ,ylab="Nfert") ; add.lmleg()
-  x=shade ; y=Nfert ; plot(x,y,xlab="shade",ylab="Nfert") ; add.lmleg()
+  x=nt    ; y=shade ; plot(x,y,xlab="nt"   ,ylab="shade", col="red") ; add.lmleg()
+  x=nt    ; y=Nfert ; plot(x,y,xlab="nt"   ,ylab="Nfert", col="red") ; add.lmleg()
+  x=shade ; y=Nfert ; plot(x,y,xlab="shade",ylab="Nfert", col="red") ; add.lmleg()
 ```
 
 
@@ -1341,7 +1352,9 @@ dfoutTMSummary <- function( df=df_C.f_sim, TM.f=NULL ){
 }
 ```
 
-```{r}
+To assess the impact of weather and management in CAF2021, we ran multiple simulations for all 179 farms, where the only difference between farms was their weather. For each farm, we ran all 32 experimental treatments (fertilisation, shading) that were applied in Turrialba and Masatepe. The simulated yields of these 179 x 32 simulations are summarized in Fig. \ref{fig:XX12}. The figure comfirms that the model is responsive to both management and weather. The management effects are seen in the range of values for each individual farm: the 32 multi-annual average yields varied strongly from close to zero up to 2000-3000 kg ha-1 y-1 for most farms. The importance of weather can be assessed from the yield-differences between farms. Because weather is related to altitude, a significant fraction of mean yield variation was accounted for by altitude (r2 = 0.45 in Costa Rica, r2=0.53 in Guatemala).
+
+```{r XX12, fig.height=3.5, fig.cap="\\label{fig:XX12}Simulations of coffee yield for farms in Costa Rica (left) and Guatemala (right). For each farm 32 simulations were carried out using the conditions for Turrialba and Masatepe. The only farm-specific information used was their WorldClim weather. Filled black dots: average of the 32 yields. Circles: maximum and minimum yields."}
   ymean_C.f_sim <- dfoutTMSummary( df_C.f_sim )[["mean"]][,"harvDM_f_hay"]
   ymean_G.f_sim <- dfoutTMSummary( df_G.f_sim )[["mean"]][,"harvDM_f_hay"]
   ymin_C.f_sim  <- dfoutTMSummary( df_C.f_sim )[["min" ]][,"harvDM_f_hay"]
@@ -1349,12 +1362,12 @@ dfoutTMSummary <- function( df=df_C.f_sim, TM.f=NULL ){
   ymax_C.f_sim  <- dfoutTMSummary( df_C.f_sim )[["max" ]][,"harvDM_f_hay"]
   ymax_G.f_sim  <- dfoutTMSummary( df_G.f_sim )[["max" ]][,"harvDM_f_hay"]
 
-  par( mfrow=c(1,2) )
+  par( mfrow=c(1,2), mar=c(4,2,3,2), mgp=c(2,1,0) )
   
   ymax <- max( ymax_C.f_sim, ymax_G.f_sim )
   
   plot  ( df_C.f$altitude, ymean_C.f_sim,
-          main="\n(sim.)",
+          main="Simulated yield\n(Costa Rica)",
           xlab="Alt. (m)", ylab="", ylim=c(0,ymax), pch=20 )
   points( df_C.f$altitude, ymax_C.f_sim, pch=1, cex=0.5 )
   points( df_C.f$altitude, ymin_C.f_sim, pch=1, cex=0.5 )
@@ -1366,7 +1379,7 @@ dfoutTMSummary <- function( df=df_C.f_sim, TM.f=NULL ){
           col=c("blue"), lty=c(1), cex=0.7 )
 
   plot  ( df_G.f$altitude, ymean_G.f_sim,
-          main="\n(sim.)",
+          main="Simulated yield\n(Guatemala)",
           xlab="Alt. (m)", ylab="", ylim=c(0,ymax), pch=20 )
   points( df_G.f$altitude, ymax_G.f_sim, pch=1, cex=0.5 )
   points( df_G.f$altitude, ymin_G.f_sim, pch=1, cex=0.5 )
@@ -1399,7 +1412,9 @@ dfoutTMSummary <- function( df=df_C.f_sim, TM.f=NULL ){
   }
 ```
 
-```{r, fig.height=6}
+These simulations of farm yields using farm-specific weather but management and shading from the Turrialba and Masatepe experiments also allowed us to assess the quality of the weather data that we derived from WorldClim. Because each farm-weather was combined with the 18 Turrialba treatments and the 14 Masatepe treatments, we could calculate how well the observed experimental yields were still accounted for by application of the wrong (farm's) weather instead of the correct experiment weather. With the correct experimental weather, the calibrated CAF2021 model accounted for 75% of observed yield-variation in the Turrialba experiment and also 75% of variation in Masatepe (see the reference simulations of Fig. \ref{fig:yObsSimTM}). With incorrect weather from any of the farms, r2 was always lower as shown in Fig. \ref{fig:XX13}. However, the degree to which the experiment simulations deteriorated when using farm weather varied widely, and in particular the Turrialba experiment could be simulated almost equally well with the weather from some farms. Closer inspection of the yield-simulations for Turrialba showed that these farms were all close to Turrialba, no more than 20 km away (bottom panel of Fig. \ref{fig:yObsSimTM}). This inspires confidence in the use of WorldClim weather data as input for CAF2021.
+
+```{r XX13, fig.height=6, fig.cap="\\label{fig:XX13}Simulating the Turrialba and Masatepe experiments: impact of replacing the weather at the experiments with that from farms in Costa Rica (black) and Guatemala (red). The dashed blue lines indicate the fraction of variance accounted for by the original CAF2021 modelling (r2) when the correct experiment weather was used. Top panel: r2 for Turrialba yield-simulations (n=18) using farm weather, plotted against farm index. Middle panel: same but for Masatepe (n=14). Bottom panel: r2 for Turrialba yield-simulations using Costa Rican farm weather plotted against distance between farm and experiment."}
   par( mfrow=c(3,1), mar=c(4,2,2,2), pty="m", mgp=c(2,1,0) )
 
   plot  ( 1:n_G.f, r2_T_weatherG, main="r2 for yields in Turrialba simulated with weather from farms in C.R. and G.",
@@ -1462,9 +1477,15 @@ dfoutTMSummary <- function( df=df_C.f_sim, TM.f=NULL ){
   F2_G <- dfoutFSummary( df, Fi=2 ) ; yF2_G.f_sim <- F2_G[,"harvDM_f_hay"]
 ```
 
-Farm yield observations vs. simulations where the model in case of 3 or more tree included banana.
+We now finally come to the simulations for all farms that were intended to be more realistic, by using farm-specific information on weather, soil, nitrogen fertilisation rate, and number of shade tree species. In the absence of detailed information on shade tree species and shade management, we made the following assumptions:
 
-```{r}
+- If the number of reported shade tree species was 1, we simulated a system shaded by Inga laurina (managed as in Masatepe experiment treatment 31)
+- If there were 2 species, we added Simarouba glauca (conform Masatepe experiment treatment 31)
+- If there were 3 or more species, we added banana.
+
+Results of these simulations are shown in Figs \ref{fig:XX14}, \ref{fig:XX15}, and \ref{fig:XX16}. Fig. \ref{fig:XX14} shows how the long-term average annual coffee yields simulated by the model for the years 2000-2014 compares to the yield reported for the farms for the year 2019. The correlations are not very strong. Fig. \ref{fig:XX15} shows, for farms in Costa Rica, observations and simulations of multiple variables, all plotted against each farm's N-fertilisation rate. Farms are grouped by number of shade tree species but no clear differences between the groups are visible. Apart from shade, all variables show a positive or negative correlation with fertilisation. The negative correlation in the case of soil carbon loss in runoff is likely due to fertilisation enhancing vegetation LAI, which in the model reduces erosion. The same variables are shown in Fig. \ref{fig:XX16} for Guatemala, with similar results albeit more difficult to see because of the distorting influence of having farms with excessive N-fertilisation rate in the plots.
+
+```{r XX14, fig.height=4, fig.cap="\\label{fig:XX14}Observed yields at the farms in Costa Rica (left) and Guatemala (right) plotted against long-term average simulated yields. The simulations used farm-specific information on weather, soil, N-fertilisation and number of shade tree species, but not site-specific shade management."}
   par( mfrow=c(1,2), mar=c(4,2,2,2), mgp=c(2,1,0) )
 
   # x=yF1_C.f_sim ; y=df_C.f$yield ; plotxylm("Obs. Costa Rica")
@@ -1596,8 +1617,9 @@ Farm yield observations vs. simulations where the model in case of 3 or more tre
   }
 ```
 
-```{r}
+```{r XX15, fig.height=5, fig.cap="\\label{fig:XX15}Yield-observations for farms in Costa Rica (y.obs; kg DM ha-1 y-1) plus simulations of five variables: Long-term average coffee yield (y.obs; kg DM ha-1 y-1), Change in soil carbon (D_Csoil; kg ha-1 y-1), Average shade level (-), Final year nitrogen leaching (kg N ha-1 y-1), Final year carbon loss in run-off (kg C ha-1 y-1)."}
   par(mfrow=c(2,3),mar=c(4,2,2,2), mgp=c(2,1,0))
+
   plotimpacts_nt.Nfert( listmat_nt_C, "y.obs" )
   plotimpacts_nt.Nfert( listmat_nt_C, "y.sim" )
   plotimpacts_nt.Nfert( listmat_nt_C, "D_Csoil" )
@@ -1606,8 +1628,9 @@ Farm yield observations vs. simulations where the model in case of 3 or more tre
   plotimpacts_nt.Nfert( listmat_nt_C, "Crunoff_f" )
 ```
 
-```{r}
+```{r XX16, fig.height=5, fig.cap="\\label{fig:XX16}Yield-observations for farms in Guatemala plus simulations of five variables: see previous figure for explanation of variables."}
   par(mfrow=c(2,3),mar=c(4,2,2,2), mgp=c(2,1,0))
+
   plotimpacts_nt.Nfert( listmat_nt_G, "y.obs" )
   plotimpacts_nt.Nfert( listmat_nt_G, "y.sim" )
   plotimpacts_nt.Nfert( listmat_nt_G, "D_Csoil" )
@@ -1615,7 +1638,6 @@ Farm yield observations vs. simulations where the model in case of 3 or more tre
   plotimpacts_nt.Nfert( listmat_nt_G, "Nleaching_f" )
   plotimpacts_nt.Nfert( listmat_nt_G, "Crunoff_f" )
 ```
-
 
 ```{r, eval=F}
   ## Selecting farm-specific TM-treatments
@@ -1666,101 +1688,64 @@ Farm yield observations vs. simulations where the model in case of 3 or more tre
           col=c("blue"), lty=c(1), cex=0.7 )
 ```
 
-## Erosion
-
-- [@Ataroff_1997_Soil]
-- [@BlancoSepulveda_2015_Soila]
-- [@Cannavo_2011_Agroforestry]
-- [@Craswell_1998_Agroforestry]
-
 
 
 \clearpage
 
 # Discussion and outlook
 
-- Data from weather stations available to the project, gaps and errors present. We choose the simpler option of using the WorldClim data.
-- The information in COSA1 refers to 2008 or 2009?
-- And COSA2 data are for 2018?
-- Slope data received from Stefania Cerretelli who used 1-arc-second digital elevation data from NASA's SRTM mission (https://www.usgs.gov/science-support/osqi/yes/resources-teachers/earth-explorer) which she processed with GRASS-GIS.
-- Stefania found some literature comparing the effect of shade on erosion in Central America.
-- Pedotransfer functions?
+## Impact of water availability
 
-## Yield prediction and coffee harvest date
+The results look plausible as far as the difference between Turrialba (not responsive to increased water availability) and Masatepe (responsive) is concerned. More drought analysis could be carried out, although this is likely of more interest to farms in drier areas such as parts of Nicaragua which are not included in SEACAF.
 
-- MvO:
-  - "The CAF model simulates time to maturation (from flowering to harvesting) as a function of temperature, and temperature is decreased under shade. So a partly shaded field has two harvesting dates: an early one for the coffee plants not covered by the trees, and a later one for the plants under shade. But even for plants under very cool conditions, the model still forces the harvest to happen before the end of the calendar year. That’s an assumption of convenience: the model code would be more complicated if we allow harvesting into the new year, especially if it could overlap with the next flowering. [Likewise, simulating flowering and harvesting to happen on single days (per shade level) rather than over extended periods keeps the code simple.]
-  - So to simulate the harvest season of 2019 we need no weather data for 2020 even if in reality the harvesting period extended to 2020."
-- JH:
-  - "For high altitude sites with lower temperatures forcing harvest at the end of the calendar year might lead to an underestimation of harvest. Likewise in high dry areas such as Antigua Guatemala harvest may not be until March and flowering in May. I appreciate the convenience of keeping things in the calendar year but it might become a significant source of error in these conditions."
+## Simulating fruit production
 
+Due to lack of reliable data, no rigorous Bayesian calibration for fruit production parameters was carried out. Banana production data from farms in the Turrialba region of Costa Rica varied over orders of magnitude and could thus not be used. However, the literature information seemed enough to allow the preliminary modelling of the effects of fruit trees in coffee agroforestry systems on ecosystem services that we reported here.
 
+## Input data for CAF2021
 
-\clearpage
+### SEACAF database
 
-# APPENDIX
+The SEACAF database is rich and impressive. Some information is lacking, including on shade management, properties of soil layers below 28 cm, and uncertainties associated with the data.
 
-```{r, eval=F}
-  sA <- 11 ; sB <- 17 ; sC <- 31 ; sD <- 19
-  source(sitesettings_filenames[sA]) ; output.MAP.A <- run_model( p=parMAP[,sA] )
-  source(sitesettings_filenames[sB]) ; output.MAP.B <- run_model( p=parMAP[,sB] )
-  source(sitesettings_filenames[sC]) ; output.MAP.C <- run_model( p=parMAP[,sC] )
-  source(sitesettings_filenames[sD]) ; output.MAP.D <- run_model( p=parMAP[,sD] )
-```
+### Weather data
 
-```{r, eval=F, out.width="100%", fig.cap="\\label{fig:NBalancesSoil}Soil N-balances for 4 treatments, averaged over the whole simulated period. Top row: Turrialba; bottom row: Masatepe. Simulations using the MAP parameter vector from Bayesian calibration."}
-  par( mfrow=c(2,4) )
+Besides WorldClim data, information from weather stations in both countries is available to the project. However, there are gaps and errors in these data and using them instead of WorldClim to produce CAF2021 daily weather data files for all five variables and all 179 farms locations would constitute a major effort. Results shown in this report suggest that the simpler option of using the WorldClim data is sufficent for the purposes of the project. However, the WorldClim data end at 2018 and we may want to use weather station data to estimate anomalies for 2019 to be added to the long-term climatic averages from WorldClim.
 
-  par(mar=c(3,3,3,0))
-  plot_NbalanceSoil(output.MAP.A, title1="", title2="11 TE-CM  ", ymax=800)
-  par(mar=c(3,3,3,0))
-  plot_NbalanceSoil(output.MAP.B, title1="", title2="17 -CI    ", ymax=800)
-  par(mar=c(3,3,3,0))
-  plot_NbalanceSoil(output.MAP.C, title1="", title2="31 ILSG-CM", ymax=800)
-  par(mar=c(3,3,3,0))
-  plot_NbalanceSoil(output.MAP.D, title1="", title2="19 -CI    ", ymax=800)
-```
+## Simulating farms in Costa Rica and Guatemala
 
-```{r, eval=F}
-## Exploring deciduousness
-  sA            <- 23 # Masatepe_05_SGTR_CI
-  source(sitesettings_filenames[sA])
-  params        <- parMAP[ , sA ]
-  params.MAP.A  <- params
-  params.MAP.A1 <- set_par( c("FTCLMINT(3)","TCLMAXT(3)"),
-                            c( 0.2         , 650        ) )
-  params.MAP.A2 <- set_par( c("FTCLMINT(3)","TCLMAXT(3)"),
-                            c( 0.05        , 650        ) )
-  params.MAP.A3 <- set_par( c("FTCLMINT(3)","TCLMAXT(3)"),
-                            c( 0.2         , 365        ) )
-  output.MAP.A  <- run_model( p=params.MAP.A  )
-  output.MAP.A1 <- run_model( p=params.MAP.A1 )
-  output.MAP.A2 <- run_model( p=params.MAP.A2 )
-  output.MAP.A3 <- run_model( p=params.MAP.A3 )
-  plot_output( list_output=list( output.MAP.A,
-                                 output.MAP.A1, output.MAP.A2 ,output.MAP.A3),
-               vars=c( "fTranT_t(3)", "LAIT_t(3)" ) )
-```
+### Preceding model calibration
 
-```{r Balances2, eval=F, fig.height=6, fig.cap="\\label{fig:Balances2}Soil N- and C-balances at Masatepe in the ILSS_CI system. Top row: tree branches harvested and removed after pruning and thinning. Bottom row: branches left on the field as litter."}
-## Comparison of leaving tree branches on the field after thinning and pruning (default) vs. removing them as harvest
-  sA <- 27 # Masatepe_09_ILSS_CI
-  source(sitesettings_filenames[sA])
-  params        <- parMAP[ , sA ]
-  params.MAP.A  <- params
-  params.MAP.A1 <- set_par( c("FHARVBT(1)","FHARVBT(2)","FHARVBT(3)"),
-                            c( 0          , 0          , 0          ) )
-  output.MAP.A  <- run_model( p=params.MAP.A  )
-  output.MAP.A1 <- run_model( p=params.MAP.A1 )
-  par( mar=c(3,3,3,0), mfrow=c(2,4) )
-  plot_NbalanceSoil( output.MAP.A , title1="Soil N-balance MAP", title2="" )
-  par( mar=c(3,3,3,0) )
-  plot_CbalanceSoil( output.MAP.A , title1="Soil C-balance MAP", title2="" )
-  par( mar=c(3,3,3,0) )
-  plot_NbalanceSoil( output.MAP.A1, title1="Soil N-balance 1", title2="" )
-  par( mar=c(3,3,3,0) )
-  plot_CbalanceSoil( output.MAP.A1, title1="Soil C-balance 1", title2="" )
-```
+The model was previously calibrated on data from Turrialba and Masatepe, and no further calibration was carried out because no other reliable long-term data were available. This means that the model has not been calibrated using data from Guatemala, and not for any high-altitude location. 
+
+### Modelling results
+
+The figures shown in this report suggest that CAF2021 may be a useful 'discussion partner' in the assessment of ecosystem services associated with coffee agroforestry. The model helps analyse the roles of weather, soils and management. Various correlations of system behaviour with altitude and N-fertilisation rate were explored. The impact of fertilisation is shown to be both good (increasing yield and soil carbon, decreasing erosion) and bad (N-leaching). On the other hand, the model analysis found no clear effects of shading, but these were not found in any farm data regression analyses either.
+
+### Caveats and possible improvements in data use and modelling
+
+The status of the simulations reported here remains preliminary and tentative. The model has only been calibrated to very restricted data (two locations, neither at high altitude) and model outputs have not been carefully compared against data.
+
+- The comparisons of observed with simulated yields reported here may be misleading as the data were from the single year 2019 and the model results were averages over 2000-2014. Harmonisation will require extending the WorldClim weather data files (which run to 2018) by a year using information from local weather stations in both countries.
+- Some high yields observed on farms were not matched by the model. One possible explanation for this may be that the model does not allow each year's harvesting season to extend beyond December into the next calendar year. Before changing the model in this respect, we need to analyse the data to check whether observed high yields were indeed associated with slow-maturing coffee in cool high-altitude locations.
+- We also made no explicit comparison of simulated against observed shade levels, but overall the simulated shade levels seem much too high.
+- Some of the shade overestimation may be due to the model using Inga management regimes that were used in Masatepe.
+- The quality of modelling of other ecosystem services has not been evaluated yet. There is limited information from the farms themselves, so a more general comparison with the literature will be needed, e.g. publications on soil processes including erosion in Central America [@Ataroff_1997_Soil; @BlancoSepulveda_2015_Soila; @Cannavo_2011_Agroforestry ; @Craswell_1998_Agroforestry].
+
+## Further work
+
+The amount of future modelling work that can still be carrtied out wihtin the short SEACAF projected is severely time-limited. There are only two project-months left and the last one is reserved for model documentation, training and publication. We therefore suggest the following program of work for the next month:
+
+- No further development of model structure. Leave to a future project the implementation of extended coffee bean maturation beyond the end of the calendar year.
+- No further time spent on data acquisition and Bayesian calibration of the model.
+- But some minor additional data cleaning will be necessary. For example, correction of the impossible nitrogen fertilisation levels at two farms in Guatemala.
+- We need to make more use of farm-specific data as inputs for modelling. This includes the use of information on shade tree species and their management (thinning, pruning), if available.
+- The model is currently driven by external thinning and pruning calendars. We may need to move to simulating shade-level goal-directed management to allow the model to reduce shade levels were appropriate. Alternatively, we may keep the model structure as it is but set the shade management calendars to higher pruning frequency and intensity for some of the farms.
+- For model evaluation of variables not measured in the project, we need to compare model outputs to the published results on coffee agroforestry systems.
+- The main focus of the remaining project time for modelling should be on application of SEACAF:
+  - Extend simulations to include the farm inventory year 2019, which will require collecting farm weather station data for that year to be added as anomalies to the climatic trends.
+  - Analyse impacts of environment vs. management (farm typology analysis).
+  - Analyse interannual variability of yield and other ecosystem services. This includes investigation of the impacts of El Nino and La Nina weather anomalies on system performance. The impact of drought years in the model should be analysed in greater detail than done thus far (in the brief water holding capacity analysis presented in this report).
 
 
 

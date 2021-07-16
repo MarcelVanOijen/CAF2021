@@ -772,7 +772,7 @@ fOutputTM <- function( parMatrix=parMAP, sfiles=sitesettings_filenames ) {
   return( fOut )
 }
 
-barplotTM <- function( y, name=NULL ) {
+barplotTM <- function( y, name=NULL, xtxt="" ) {
   colbars <- c( "gray40"    , "gray80"    , "gray60"    , "gray100"   ,
                 "gray40"    , "gray80"    , "gray60"    , "gray100"   ,
                 "gray80"    , "gray60"    ,
@@ -784,7 +784,7 @@ barplotTM <- function( y, name=NULL ) {
                 "firebrick4", "firebrick2", "firebrick3", "firebrick1", 
                 "firebrick4", "firebrick2", "firebrick3", "firebrick1",
                 "firebrick2", "firebrick3" )
-  barplot( as.matrix(y), main=name, col=colbars, beside=T, names.arg="" )
+  barplot( as.matrix(y), main=name, col=colbars, beside=T, names.arg=xtxt )
 }
 
 # fYieldsTM <- function( parMatrix=parMAP, sfiles=sitesettings_filenames,
