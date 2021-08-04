@@ -148,6 +148,9 @@ yUnits[[20]] <- rep("(-)",nz)
 yNames[[21]] <- "f3up"
 yUnits[[21]] <- "(-)"
 
+yNames[[22]] <- paste0("DayHarv(",1:nc,")")
+yUnits[[22]] <- rep("(-)",nc)
+
 outputNames  <- unlist(yNames) ; outputUnits <- unlist(yUnits)
 NOUT         <- as.integer( length(outputNames) )
 

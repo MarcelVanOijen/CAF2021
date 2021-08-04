@@ -109,14 +109,14 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
     iNleaching <- which( outputNames=="Nleaching_f"  ) # kg N m-2 d-1
     iCrunoff   <- which( outputNames=="Crunoff_f"    ) # kg C m-2 d-1
     
-    iDVS1      <- which( outputNames=="DVS(1)" )
-    iDVS2      <- which( outputNames=="DVS(2)" )
+    idayH1     <- which( outputNames=="DayHarv(1)" )
+    idayH2     <- which( outputNames=="DayHarv(2)" )
 
     c.DM  <- 1 / 0.47          # 'kg C' -> 'kg DM'
     c.hay <- 1e4 * 365 / NDAYS # 'm-2 over sim. period' -> 'ha-1 y-1'
-    d365  <- which( output[,idoy]==365 )
+    d181  <- which( output[,idoy]==181 )
     
-    fOut[,"harvDM_f_hay"] <- mean( output[d365,ih_f_hay] )
+    fOut[,"harvDM_f_hay"] <- mean( output[d181,ih_f_hay] )
     fOut[,"harvCPT_f"   ] <- sum ( output[    ,ihCPT_f ] ) * c.DM * c.hay
     fOut[,"harvCPT_2"   ] <- sum ( output[    ,ihCPT_2 ] ) * c.DM * c.hay
     fOut[,"harvCST_f"   ] <- sum ( output[    ,ihCST_f ] ) * c.DM * c.hay
@@ -138,8 +138,8 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
     
     fOut[,"Csoil_f"    ] <- output[1,iCsoil_f]
 
-    dHarv1      <- which( output[,iDVS1] >= 1 )
-    dHarv2      <- which( output[,iDVS2] >= 1 )
+    dHarv1      <- which( output[,idayH1] == 1 )
+    dHarv2      <- which( output[,idayH2] == 1 )
     doyHarv1    <- output[dHarv1,3]
     doyHarv2    <- output[dHarv2,3]
     doyminHarv1 <- min( doyHarv1, na.rm=T )

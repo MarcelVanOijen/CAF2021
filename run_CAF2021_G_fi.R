@@ -2,7 +2,7 @@
 ## MvO, 2021-08-03
 
 ## INITIALISE SITE
-   fi      <- 90
+   fi      <- 82
    C_G     <- df_G.f$C.soil [ fi ]
    CN_G    <- df_G.f$CN.soil[ fi ]
    LAT_G   <- df_G.f$lat    [ fi ]
@@ -21,7 +21,8 @@
      params<-set_par("TREEDENS0(3)",0) }
    if(df_G.f$nt[fi]==2) { source(sitesettings_filenames[31]) } 
    if(df_G.f$nt[fi] >2) { source(sitesettings_filenames[31])
-     params<-set_par_speciesT(2,"Banana") }
+     params<-set_par_speciesT(2,"Banana")
+   }
    params[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0) ] <- CN_G
    params[ ip_CSOM0                            ] <- C_G
    params[ ip_LAT                              ] <- LAT_G
@@ -29,11 +30,12 @@
    
 ## RUN MODEL
 
-   params <- set_par("TPLUS",-3)
+   # params <- set_par("TPLUS",-3)
    
    output <- run_model( params, matrix_weather_fi, calendar_fert_fi,
                         calendar_prunC, calendar_prunT, calendar_thinT,
                         NDAYS )
+   # outputSummary( output )
 
 ## Temporary extra printed output
    nd    <- dim(output)[1]
@@ -48,7 +50,7 @@
    plot_output( vars=outputNames[ iPhen  ] )
 
    par( mfrow=c(3,1) )
-   days <- 2000:3700
+   days <- 2000:3000
 
    plot  ( output[days,4], type="l", ylim=c(0,0.5) )
    points( output[days,5], type="l", col="red" )
@@ -68,10 +70,23 @@
    points( output[days,29], type="l", col="green" )
    points( output[days,30], type="l", col="yellow" )
    points( output[days,31], type="l", col="brown" )
+   points( output[days,32]/1e5, type="l", col="blue", lty=4 )
+    
+   par( mfrow=c(1,1) )
+   plot( output[days,32]/1e5, type="l", col="blue", lty=4 )
    
-   daysFl12  <- which( output[,125] == 1 )
-   doyFl12   <- output[daysFl12,3]
-   daysHarv1 <- which( output[,122] >= 1 )
-   daysHarv2 <- which( output[,127] >= 1 )
+   daysFl    <- which( output[,125] == 1 )
+   doyFl     <- output[daysFl,3]    ; doyFl
+   daysHarv1 <- which( output[,164] == 1 )
+   daysHarv2 <- which( output[,165] == 1 )
+   daysHarv3 <- which( output[,166] == 1 )
+   daysHarv4 <- which( output[,167] == 1 )
+   daysHarv5 <- which( output[,168] == 1 )
+   daysHarv6 <- which( output[,169] == 1 )
    doyHarv1  <- output[daysHarv1,3] ; doyHarv1
    doyHarv2  <- output[daysHarv2,3] ; doyHarv2
+   doyHarv3  <- output[daysHarv3,3] ; doyHarv3
+   doyHarv4  <- output[daysHarv4,3] ; doyHarv4
+   doyHarv5  <- output[daysHarv5,3] ; doyHarv5
+   doyHarv6  <- output[daysHarv6,3] ; doyHarv6
+   

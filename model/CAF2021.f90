@@ -292,12 +292,14 @@ do day = 1, NDAYS
   CT          = CabgT_f + sum(CRT_t)                  ! kgC  m-2 field
   C_f         = sum(Ac*C )                            ! kgC  m-2 field
   CT_f        = sum(Ac*CT)                            ! kgC  m-2 field
+  
   harvDM_f_ha = sum(Ac*harvCP) * 1E4/CCONC            ! kgDM ha-1 field
-  if (doy==61) then
+  if (doy==182) then
   	harvDM_f_hay = 0
   else
 	  harvDM_f_hay = harvDM_f_hay + harvDM_f_ha ! kgDM m-2 field y-1
   endif
+
   LAI_f       = sum(Ac*LAI)                   ! m2   m-2 field
   LAIT        = sum(LAIT_t)/sum(At)           ! m2   m-2 shade
   Nsoil       = NLITT + NSOMF + NSOMS + NMIN  ! kgN  m-2 c
@@ -485,6 +487,8 @@ do day = 1, NDAYS
 
   y(day,163)     = f3up               ! -
   
+  y(day,164:169) = DayHarv            ! -
+
 ! CALIBRATION VARIABLES IN CAF2021's AND ORIANA's ORIGINAL BC DATA FILES.
 ! ------------------------------------------------------------------------
 ! NAME in CAF2021 ! NAME in original data files   ! UNIT
