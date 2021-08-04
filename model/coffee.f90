@@ -11,7 +11,7 @@ implicit none
 real :: gCW(nc),gCP(nc),gCL(nc),gNL(nc),gCR(nc),gLAI(nc),gSINKP(nc)
 real :: dCL(nc),dCR(nc),dLAI(nc),dNL(nc),Nupt(nc)
 real :: prunLAI(nc),prunNL(nc),prunCL(nc),prunCW(nc),harvCP(nc),harvNP(nc)
-real :: dSENSIT(nc),dDVS(nc),rDVS(nc),DayFl(nc)
+real :: dSENSIT(nc),dDVS(nc),rDVS(nc),DayFl(nc),DayHarv(nc)
 real :: SINKPMAXnew(nc)
 
 ! ALTERNATIVE FLOWERING CALCULATION
@@ -19,7 +19,8 @@ real :: RAINdoy
 
 Contains
 
-  Subroutine Phenology(day,doy,DVS,SENSIT,TCOFFEE,SINKP)
+!  Subroutine Phenology(day,doy,DVS,SENSIT,TCOFFEE,SINKP)
+  Subroutine PhenologyNEW(day,doy,DVS,SENSIT,TCOFFEE,SINKP)
   integer :: day, doy
   integer :: DayFill(nc)
   real    :: dDVSMAX(nc)
@@ -45,15 +46,17 @@ Contains
   endwhere
 ! Development rate
   where ((DayFill==1).or.(DayFl==1))
-    dDVSMAX = max(0., min(1., (TCOFFEE - TMATB) / TMATT ) )
+!    dDVSMAX = max(0., min(1., (TCOFFEE - TMATB) / TMATT ) )
+    dDVS = max(0., min(1., (TCOFFEE - TMATB) / TMATT ) )
   elsewhere
-    dDVSMAX = 0
+!    dDVSMAX = 0
+    dDVS = 0
   endwhere
-  where ((doy>360).and.(dDVSMAX>0))
-    dDVS = (1-DVS) / DELT
-  elsewhere
-    dDVS = dDVSMAX
-  endwhere
+!  where ((doy>360).and.(dDVSMAX>0))
+!    dDVS = (1-DVS) / DELT
+!  elsewhere
+!    dDVS = dDVSMAX
+!  endwhere
 ! Development-resetting
   where (DVS>=1)
     rDVS        = DVS / DELT
@@ -61,6 +64,56 @@ Contains
   elsewhere
     rDVS = 0
   endwhere
+!  end Subroutine Phenology
+  end Subroutine PhenologyNEW
+
+!  Subroutine PhenologyNEW(day,doy,DVS,SENSIT,TCOFFEE,SINKP)
+  Subroutine Phenology(day,doy,DVS,SENSIT,TCOFFEE,SINKP)
+  integer :: day, doy
+  integer :: DayFill(nc)
+  real    :: DVS(:), SENSIT(:), TCOFFEE(:), SINKP(:)
+
+! Days with bean filling
+  where ((DVS>0.).and.(DVS<1.))
+    DayFill = 1  
+  elsewhere
+    DayFill = 0
+  endwhere
+
+! Making the crop sensitive to rainfall in the beginning of the year
+  if ((doy==365).and.(day>TBEFOREP)) then
+    dSENSIT = 1
+  else
+    dSENSIT = 0
+  endif
+  
+! Triggering flowering
+  RAINdoy = RAIN * doy
+  where ((RAINdoy>RAINdoyHI).and.(SENSIT==1))
+    DayFl   = 1
+    dSENSIT = -SENSIT/DELT
+  elsewhere
+    DayFl   = 0
+  endwhere
+
+! Harvest days
+  where (((DayFl==1).and.(DayFill==1)).or.((DayFl==0).and.(DVS>=1.)))
+    DayHarv     = 1
+    rDVS        = DVS / DELT
+	  SINKPMAXnew = SINKPMAX - KSINKPMAX * SINKP
+  elsewhere
+    DayHarv     = 0
+    rDVS        = 0
+  endwhere
+
+! Development rate
+  where ((DayFl==1).or.(DayFill==1))
+    dDVS = max(0., min(1., (TCOFFEE - TMATB) / TMATT ) )
+  elsewhere
+    dDVS = 0
+  endwhere
+
+!  end Subroutine PhenologyNEW
   end Subroutine Phenology
 
   Subroutine Growth(TINP,PARav,PARint,fTran,SINKP,Nsup,PARMA,DVS,fNgrowth)
@@ -153,7 +206,8 @@ Contains
   prunNL  = prunFRC * NL  / DELT
   prunCL  = prunFRC * CL  / DELT
   prunCW  = prunFRC * CW  / DELT  
-  where (DVS>=1.)
+!  where (DVS>=1.)
+  where (DayHarv==1.)
     harvCP = CP / DELT
     harvNP = harvCP * NCP  
 !    adjCP  = 0.

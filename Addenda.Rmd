@@ -1,0 +1,528 @@
+---
+title: 'Modelling Coffee Agroforestry in Central America with CAF2021'
+subtitle: 'Progress report III for project SEACAF, sub-contract B0554x4'
+author:
+- Marcel van Oijen^[Independent researcher, Edinburgh, UK - VanOijenMarcel@gmail.com]
+date: '`r Sys.Date()`'
+output:
+  pdf_document:
+    fig_crop: false
+    fig_caption: yes
+    keep_tex: no
+    number_sections: yes
+    toc: yes
+  word_document:
+    reference_docx: word-styles-reference-01.docx
+  html_document: default
+fontsize: 11pt
+geometry: margin=1in
+csl: environmental-modelling-and-software.csl
+bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
+---
+
+```{r, include=FALSE}
+  knitr::opts_chunk$set(echo=F,results="asis",warning=FALSE,message=FALSE)
+  library( geosphere  )
+  library( rworldmap  )
+  library( rworldxtra )
+  library( raster     )
+  library( readxl     )
+  library( tidyverse  )
+```
+
+```{r}
+  filesTM <- file.info(list.files(pattern="^BC_Turrialba_Masatepe.*\\.RData$"))
+  filesTM <- filesTM[ with(filesTM,order(as.POSIXct(mtime))), ]
+  fileTM  <- tail( rownames(filesTM[1]), 1 )
+  load( fileTM )
+  
+  filesTM_MAP <- file.info(list.files(pattern="^CAF2021_parMAP.*\\.rds$"))
+  filesTM_MAP <- filesTM_MAP[ with(filesTM_MAP,order(as.POSIXct(mtime))), ]
+  fileTM_MAP  <- tail( rownames(filesTM_MAP[1]), 1 )
+  parMAP      <- readRDS( fileTM_MAP )
+```
+
+```{r}
+  add.lmleg <- function(){
+    y.lm <- lm( y ~ x )
+    r2   <- round( summary(y.lm)$r.squared, 2 )
+    abline( y.lm$coefficients[1], y.lm$coefficients[2], col="blue" )
+    legend( "topright",
+            legend=paste("r2= ",as.character(r2)),
+            col=c("blue"), lty=c(1), cex=0.7 )
+  }
+
+  plotxylm <- function(maintxt="Obs. Costa Rica", xtxt="Sim.") {
+    plot(x,y,xlab=xtxt,ylab="",main=maintxt) ; add.lmleg()
+  }
+```
+
+
+
+\clearpage
+
+# Preliminary data analysis
+
+```{r}
+  load( "df_C.f.rda" )
+  load( "df_G.f.rda" )
+```
+
+```{r}
+  n_C.f <- dim(df_C.f)[1] ; n_G.f <- dim(df_G.f)[1]
+```
+
+
+
+\clearpage
+
+# Simulating farms in Costa Rica and Guatemala
+
+We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala, using a variety of parameterisations.
+
+```{r}
+  outputSummary <- function( output ) {
+    idoy           <- which( outputNames=="doy" )
+    names_vars     <- c(
+      "harvDM_f_hay", "harvCPT_f", "harvCPT_2"  , "harvCST_f", "harvCST_3",
+      "D_Nsoil"     , "D_Csoil"  , "D_C"        , "D_CT"     , "D_Csys"   ,
+      "Shade_f"     , "NfixT_f"  , "Nleaching_f", "Crunoff_f",
+      "Csoil_f",
+      "doyminHarv1", "doyminHarv2", "doymaxHarv1", "doymaxHarv2" )
+    
+    fOut           <- matrix( NA, nrow=1, ncol=length(names_vars) )
+    colnames(fOut) <- names_vars
+
+    ih_f_hay   <- which( outputNames=="harvDM_f_hay" ) # kg C ha-1 y-1
+    ihCPT_f    <- which( outputNames=="harvCPT_f"    ) # kg C m-2 d-1
+    ihCPT_2    <- which( outputNames=="harvCPT_t(2)" ) # kg C m-2 d-1
+    ihCST_f    <- which( outputNames=="harvCST_f"    ) # kg C m-2 d-1
+    ihCST_3    <- which( outputNames=="harvCST_t(3)" ) # kg C m-2 d-1
+    iNsoil_f   <- which( outputNames=="Nsoil_f"      ) # kg N m-2
+    iCsoil_f   <- which( outputNames=="Csoil_f"      ) # kg C m-2 
+    iC_f       <- which( outputNames=="C_f"          ) # kg C m-2
+    iCT_f      <- which( outputNames=="CT_f"         ) # kg C m-2
+    
+    iShade_f   <- which( outputNames=="Shade_f"      ) # m2 m-2
+    
+    iNfixT     <- which( outputNames=="NfixT_f"      ) # kg N m-2 d-1
+    iNleaching <- which( outputNames=="Nleaching_f"  ) # kg N m-2 d-1
+    iCrunoff   <- which( outputNames=="Crunoff_f"    ) # kg C m-2 d-1
+    
+    iDVS1      <- which( outputNames=="DVS(1)" )
+    iDVS2      <- which( outputNames=="DVS(2)" )
+
+    c.DM  <- 1 / 0.47          # 'kg C' -> 'kg DM'
+    c.hay <- 1e4 * 365 / NDAYS # 'm-2 over sim. period' -> 'ha-1 y-1'
+    d365  <- which( output[,idoy]==365 )
+    
+    fOut[,"harvDM_f_hay"] <- mean( output[d365,ih_f_hay] )
+    fOut[,"harvCPT_f"   ] <- sum ( output[    ,ihCPT_f ] ) * c.DM * c.hay
+    fOut[,"harvCPT_2"   ] <- sum ( output[    ,ihCPT_2 ] ) * c.DM * c.hay
+    fOut[,"harvCST_f"   ] <- sum ( output[    ,ihCST_f ] ) * c.DM * c.hay
+    fOut[,"harvCST_3"   ] <- sum ( output[    ,ihCST_3 ] ) * c.DM * c.hay
+    
+    D_output         <- output[NDAYS,] - output[1,]
+    fOut[,"D_Nsoil"] <- D_output[iNsoil_f] * c.hay
+    fOut[,"D_Csoil"] <- D_output[iCsoil_f] * c.hay
+    fOut[,"D_C"    ] <- D_output[iC_f    ] * c.hay
+    fOut[,"D_CT"   ] <- D_output[iCT_f   ] * c.hay
+    fOut[,"D_Csys" ] <- fOut[,"D_Csoil"] + fOut[,"D_C"] + fOut[,"D_CT"]
+
+    fOut[,"Shade_f"    ] <- mean( output[,iShade_f  ] )
+    
+    outputFinalYearMean  <- colMeans( output[ (NDAYS-364):NDAYS, ] )
+    fOut[,"NfixT_f"    ] <- outputFinalYearMean[iNfixT    ] * 1e4 * 365
+    fOut[,"Nleaching_f"] <- outputFinalYearMean[iNleaching] * 1e4 * 365
+    fOut[,"Crunoff_f"  ] <- outputFinalYearMean[iCrunoff  ] * 1e4 * 365
+    
+    fOut[,"Csoil_f"    ] <- output[1,iCsoil_f]
+
+    dHarv1      <- which( output[,iDVS1] >= 1 )
+    dHarv2      <- which( output[,iDVS2] >= 1 )
+    doyHarv1    <- output[dHarv1,3]
+    doyHarv2    <- output[dHarv2,3]
+    doyminHarv1 <- min( doyHarv1, na.rm=T )
+    doyminHarv2 <- min( doyHarv2, na.rm=T )
+    doymaxHarv1 <- max( doyHarv1, na.rm=T )
+    doymaxHarv2 <- max( doyHarv2, na.rm=T )
+    fOut[,"doyminHarv1"] <- doyminHarv1
+    fOut[,"doyminHarv2"] <- doyminHarv2
+    fOut[,"doymaxHarv1"] <- doymaxHarv1
+    fOut[,"doymaxHarv2"] <- doymaxHarv2
+
+    return( fOut )
+  }
+```
+
+```{r}
+  varnames <- c(
+    "harvDM_f_hay", "harvCPT_f", "harvCPT_2"  , "harvCST_f", "harvCST_3",
+    "D_Nsoil"     , "D_Csoil"  , "D_C"        , "D_CT"     , "D_Csys"   ,
+    "Shade_f"     , "NfixT_f"  , "Nleaching_f", "Crunoff_f",
+    "Csoil_f",
+    "doyminHarv1", "doyminHarv2", "doymaxHarv1", "doymaxHarv2" )
+
+  ip_CNLITT0  <- which( names_params=="CNLITT0" )
+  ip_CNSOMF0  <- which( names_params=="CNSOMF0" )
+  ip_CNSOMS0  <- which( names_params=="CNSOMS0" )
+  ip_CSOM0    <- which( names_params=="CSOM0"   )
+  ip_LAT      <- which( names_params=="LAT"     )
+  ip_SLOPE    <- which( names_params=="SLOPE"   )
+```
+
+```{r}
+  list_outF_C     <- vector( "list", n_C.f )
+  for(fi in 1:n_C.f) {
+    C_C     <- df_C.f$C.soil [ fi ]
+    CN_C    <- df_C.f$CN.soil[ fi ]
+    LAT_C   <- df_C.f$lat    [ fi ]
+    SLOPE_C <- df_C.f$slope  [ fi ]
+    Nfert_C <- df_C.f$Nfert  [ fi ]
+    source( sitesettings_filenames[1] )
+    matrix_weather_fi <- read_listweather_CAF( df_C.f$weather.WC, fi )
+
+    calendar_fert_fi <- matrix( -1, nrow=100, ncol=3 )
+    calendar_fert_fi [ 1:48, 1 ] <- rep( 2002:2017, each=3 )
+    calendar_fert_fi [ 1:48, 2 ] <- c( 135, 289, 350 )
+    calendar_fert_fi [ 1:48, 3 ] <- rep( Nfert_C/3, 3 )
+
+    mat_outF                 <- matrix( NA, 2, 1+length(varnames) )
+    colnames( mat_outF )     <- c( "FarmSetting", varnames )
+    mat_outF[,"FarmSetting"] <- 1:2
+    # for(i in 1:2) {
+    for(i in 2:2) {
+      if(i==1) {
+        if(df_C.f$nt[fi]==0)   source(sitesettings_filenames[19])
+        if(df_C.f$nt[fi]==1) { source(sitesettings_filenames[31])
+                               params<-set_par("TREEDENS0(3)",0) }
+        if(df_C.f$nt[fi]==2) { source(sitesettings_filenames[31]) } 
+        if(df_C.f$nt[fi] >2) { source(sitesettings_filenames[31])
+                               params<-set_par_speciesT(2,"Avocado") }
+        params[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0) ] <- CN_C
+        params[ ip_CSOM0                            ] <- C_C
+        params[ ip_LAT                              ] <- LAT_C
+        params[ ip_SLOPE                            ] <- SLOPE_C
+      }
+      if(i==2) {
+        if(df_C.f$nt[fi]==0)   source(sitesettings_filenames[19])
+        if(df_C.f$nt[fi]==1) { source(sitesettings_filenames[31])
+                               params<-set_par("TREEDENS0(3)",0) }
+        if(df_C.f$nt[fi]==2) { source(sitesettings_filenames[31]) } 
+        if(df_C.f$nt[fi] >2) { source(sitesettings_filenames[31])
+                               params<-set_par_speciesT(2,"Banana") }
+        params[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0) ] <- CN_C
+        params[ ip_CSOM0                            ] <- C_C
+        params[ ip_LAT                              ] <- LAT_C
+        params[ ip_SLOPE                            ] <- SLOPE_C
+      }
+      outF <- run_model( params, matrix_weather_fi, calendar_fert_fi,
+        calendar_prunC, calendar_prunT, calendar_thinT, NDAYS )
+      mat_outF[i,1+(1:length(varnames))] <- outputSummary( outF )
+    }
+    list_outF_C[[fi]] <- mat_outF
+  }
+```
+
+```{r}
+  list_outF_G     <- vector( "list", n_G.f )
+  for(fi in 1:n_G.f) {
+    C_G     <- df_G.f$C.soil [ fi ]
+    CN_G    <- df_G.f$CN.soil[ fi ]
+    LAT_G   <- df_G.f$lat    [ fi ]
+    SLOPE_G <- df_G.f$slope  [ fi ]
+    Nfert_G <- df_G.f$Nfert  [ fi ]
+    source( sitesettings_filenames[1] )
+    matrix_weather_fi <- read_listweather_CAF( df_G.f$weather.WC, fi )
+    
+    calendar_fert_fi <- matrix( -1, nrow=100, ncol=3 )
+    calendar_fert_fi [ 1:48, 1 ] <- rep( 2002:2017, each=3 )
+    calendar_fert_fi [ 1:48, 2 ] <- c( 135, 289, 350 )
+    calendar_fert_fi [ 1:48, 3 ] <- rep( Nfert_G/3, 3 )
+
+    mat_outF                 <- matrix( NA, 2, 1+length(varnames) )
+    colnames( mat_outF )     <- c( "FarmSetting", varnames )
+    mat_outF[,"FarmSetting"] <- 1:2
+    # for(i in 1:2) {
+    for(i in 2:2) {
+      if(i==1) {
+        if(df_G.f$nt[fi]==0)   source(sitesettings_filenames[19])
+        if(df_G.f$nt[fi]==1) { source(sitesettings_filenames[31])
+                               params<-set_par("TREEDENS0(3)",0) }
+        if(df_G.f$nt[fi]==2) { source(sitesettings_filenames[31]) } 
+        if(df_G.f$nt[fi] >2) { source(sitesettings_filenames[31])
+                               params<-set_par_speciesT(2,"Avocado") }
+        params[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0) ] <- CN_G
+        params[ ip_CSOM0                            ] <- C_G
+        params[ ip_LAT                              ] <- LAT_G
+        params[ ip_SLOPE                            ] <- SLOPE_G
+      }
+      if(i==2) {
+        if(df_G.f$nt[fi]==0)   source(sitesettings_filenames[19])
+        if(df_G.f$nt[fi]==1) { source(sitesettings_filenames[31])
+                               params<-set_par("TREEDENS0(3)",0) }
+        if(df_G.f$nt[fi]==2) { source(sitesettings_filenames[31]) } 
+        if(df_G.f$nt[fi] >2) { source(sitesettings_filenames[31])
+                               params<-set_par_speciesT(2,"Banana") }
+        params[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0) ] <- CN_G
+        params[ ip_CSOM0                            ] <- C_G
+        params[ ip_LAT                              ] <- LAT_G
+        params[ ip_SLOPE                            ] <- SLOPE_G
+      }
+      outF <- run_model( params, matrix_weather_fi, calendar_fert_fi,
+        calendar_prunC, calendar_prunT, calendar_thinT, NDAYS )
+      mat_outF[i,1+(1:length(varnames))] <- outputSummary( outF )
+    }
+    list_outF_G[[fi]] <- mat_outF
+  }
+```
+
+```{r}
+  df_C.f_sim <- df_C.f %>%
+    select ( code ) %>%
+    arrange( code ) %>%
+    mutate ( outF  = list_outF_C )
+
+  df_G.f_sim <- df_G.f %>%
+    select ( code ) %>%
+    arrange( code ) %>%
+    mutate ( outF  = list_outF_G )
+```
+
+## Farm simulations
+
+```{r}
+  dfoutFSummary <- function( df=df_C.f_sim, Fi=1 ){
+    nf     <- dim( df )[1]
+    vnames <- colnames( df$outF[[1]] ) ; nv <- length(vnames)
+    matres <- matrix( NA, nf, nv ) ; colnames( matres) <- vnames
+    F.v    <- matres
+    for(fi in 1:nf){
+      F.v[fi,] <- df$outF[[fi]][Fi,]
+    }
+    return( F.v )
+  }
+```
+
+```{r}
+  par( mfrow=c(1,2) )
+
+  F2_C             <- dfoutFSummary( df_C.f_sim, Fi=2 )
+  Csoil_F2_C.f_sim <- F2_C[,"Csoil_f"]
+  plot( df_C.f$C.soil, Csoil_F2_C.f_sim )
+
+  F2_G             <- dfoutFSummary( df_G.f_sim, Fi=2 )
+  Csoil_F2_G.f_sim <- F2_G[,"Csoil_f"]
+  plot( df_G.f$C.soil, Csoil_F2_G.f_sim )
+
+```
+
+
+```{r}
+  df <- df_C.f_sim
+  F1_C <- dfoutFSummary( df, Fi=1 ) ; yF1_C.f_sim <- F1_C[,"harvDM_f_hay"]
+  F2_C <- dfoutFSummary( df, Fi=2 ) ; yF2_C.f_sim <- F2_C[,"harvDM_f_hay"]
+
+  df <- df_G.f_sim
+  F1_G <- dfoutFSummary( df, Fi=1 ) ; yF1_G.f_sim <- F1_G[,"harvDM_f_hay"]
+  F2_G <- dfoutFSummary( df, Fi=2 ) ; yF2_G.f_sim <- F2_G[,"harvDM_f_hay"]
+```
+
+We now finally come to the simulations for all farms that were intended to be more realistic, by using farm-specific information on weather, soil, nitrogen fertilisation rate, and number of shade tree species. In the absence of detailed information on shade tree species and shade management, we made the following assumptions:
+
+- If the number of reported shade tree species was 1, we simulated a system shaded by Inga laurina (managed as in Masatepe experiment treatment 31)
+- If there were 2 species, we added Simarouba glauca (conform Masatepe experiment treatment 31)
+- If there were 3 or more species, we added banana.
+
+Results of these simulations are shown in Figs \ref{fig:XX14}, \ref{fig:XX15}, and \ref{fig:XX16}. Fig. \ref{fig:XX14} shows how the long-term average annual coffee yields simulated by the model for the years 2000-2014 compares to the yield reported for the farms for the year 2019. The correlations are not very strong. Fig. \ref{fig:XX15} shows, for farms in Costa Rica, observations and simulations of multiple variables, all plotted against each farm's N-fertilisation rate. Farms are grouped by number of shade tree species but no clear differences between the groups are visible. Apart from shade, all variables show a positive or negative correlation with fertilisation. The negative correlation in the case of soil carbon loss in runoff is likely due to fertilisation enhancing vegetation LAI, which in the model reduces erosion. The same variables are shown in Fig. \ref{fig:XX16} for Guatemala, with similar results albeit more difficult to see because of the distorting influence of having farms with excessive N-fertilisation rate in the plots.
+
+```{r XX14, fig.height=4, fig.cap="\\label{fig:XX14}Observed yields at the farms in Costa Rica (left) and Guatemala (right) plotted against long-term average simulated yields. The simulations used farm-specific information on weather, soil, N-fertilisation and number of shade tree species, but not site-specific shade management."}
+  par( mfrow=c(1,2), mar=c(4,2,2,2), mgp=c(2,1,0) )
+
+  # x=yF1_C.f_sim ; y=df_C.f$yield ; plotxylm("Obs. Costa Rica")
+  x=yF2_C.f_sim ; y=df_C.f$yield ; plotxylm("Obs. Costa Rica")
+
+  # x=yF1_G.f_sim ; y=df_G.f$yield ; plotxylm("Obs. Guatemala")
+  x=yF2_G.f_sim ; y=df_G.f$yield ; plotxylm("Obs. Guatemala")
+```
+
+```{r}
+  int1_C <- which(df_C.f$nt <2) ; int1_G <- which(df_G.f$nt <2)
+  int2_C <- which(df_C.f$nt==2) ; int2_G <- which(df_G.f$nt==2)
+  int3_C <- which(df_C.f$nt >2) ; int3_G <- which(df_G.f$nt >2)
+  
+  nnt1_C <- length(int1_C)      ; nnt1_G <- length(int1_G)
+  nnt2_C <- length(int2_C)      ; nnt2_G <- length(int2_G)
+  nnt3_C <- length(int3_C)      ; nnt3_G <- length(int3_G)
+  
+  listmat_nt_C <- listmat_nt_G <- vector( "list", 3 )
+  varnames.listmat <- c( "code","slope","nt","Nfert","y.obs",
+    "y.sim","D_Csoil","Shade_f","Nleaching_f","Crunoff_f",
+    "Csoil_f", "doyminHarv1", "doyminHarv2", "doymaxHarv1", "doymaxHarv2" )
+
+  listmat_nt_C[[1]] <- t( sapply( 1:nnt1_C, function(i){ cbind(
+    code    = df_C.f    [int1_C,]$code [[i]]                    ,
+    slope   = df_C.f    [int1_C,]$slope[[i]]                    ,
+    nt      = df_C.f    [int1_C,]$nt   [[i]]                    ,
+    Nfert   = df_C.f    [int1_C,]$Nfert[[i]]                    ,
+    y.obs   = df_C.f    [int1_C,]$yield[[i]]                    ,
+    y.sim   = df_C.f_sim[int1_C,]$outF [[i]][,"harvDM_f_hay"][2],
+    D_Csoil = df_C.f_sim[int1_C,]$outF [[i]][,"D_Csoil"     ][2],
+    shade   = df_C.f_sim[int1_C,]$outF [[i]][,"Shade_f"     ][2],
+    Nleach  = df_C.f_sim[int1_C,]$outF [[i]][,"Nleaching_f" ][2],
+    Crunoff = df_C.f_sim[int1_C,]$outF [[i]][,"Crunoff_f"   ][2],
+    Csoil   = df_C.f_sim[int1_C,]$outF [[i]][,"Csoil_f"     ][2],
+    doymnH1 = df_C.f_sim[int1_C,]$outF [[i]][,"doyminHarv1" ][2],
+    doymnH2 = df_C.f_sim[int1_C,]$outF [[i]][,"doyminHarv2" ][2],
+    doymxH1 = df_C.f_sim[int1_C,]$outF [[i]][,"doymaxHarv1" ][2],
+    doymxH2 = df_C.f_sim[int1_C,]$outF [[i]][,"doymaxHarv2" ][2]
+  ) } ) )
+  colnames(listmat_nt_C[[1]]) <- varnames.listmat
+
+  listmat_nt_C[[2]] <- t( sapply( 1:nnt2_C, function(i){ cbind(
+    code    = df_C.f    [int2_C,]$code [[i]]                    ,
+    slope   = df_C.f    [int2_C,]$slope[[i]]                    ,
+    nt      = df_C.f    [int2_C,]$nt   [[i]]                    ,
+    Nfert   = df_C.f    [int2_C,]$Nfert[[i]]                    ,
+    y.obs   = df_C.f    [int2_C,]$yield[[i]]                    ,
+    y.sim   = df_C.f_sim[int2_C,]$outF [[i]][,"harvDM_f_hay"][2],
+    D_Csoil = df_C.f_sim[int2_C,]$outF [[i]][,"D_Csoil"     ][2],
+    shade   = df_C.f_sim[int2_C,]$outF [[i]][,"Shade_f"     ][2],
+    Nleach  = df_C.f_sim[int2_C,]$outF [[i]][,"Nleaching_f" ][2],
+    Crunoff = df_C.f_sim[int2_C,]$outF [[i]][,"Crunoff_f"   ][2],
+    Csoil   = df_C.f_sim[int2_C,]$outF [[i]][,"Csoil_f"     ][2],
+    doymnH1 = df_C.f_sim[int2_C,]$outF [[i]][,"doyminHarv1" ][2],
+    doymnH2 = df_C.f_sim[int2_C,]$outF [[i]][,"doyminHarv2" ][2],
+    doymxH1 = df_C.f_sim[int2_C,]$outF [[i]][,"doymaxHarv1" ][2],
+    doymxH2 = df_C.f_sim[int2_C,]$outF [[i]][,"doymaxHarv2" ][2]
+  ) } ) )
+  colnames(listmat_nt_C[[2]]) <- varnames.listmat
+
+  listmat_nt_C[[3]] <- t( sapply( 1:nnt3_C, function(i){ cbind(
+    code    = df_C.f    [int3_C,]$code [[i]]                    ,
+    slope   = df_C.f    [int3_C,]$slope[[i]]                    ,
+    nt      = df_C.f    [int3_C,]$nt   [[i]]                    ,
+    Nfert   = df_C.f    [int3_C,]$Nfert[[i]]                    ,
+    y.obs   = df_C.f    [int3_C,]$yield[[i]]                    ,
+    y.sim   = df_C.f_sim[int3_C,]$outF [[i]][,"harvDM_f_hay"][2],
+    D_Csoil = df_C.f_sim[int3_C,]$outF [[i]][,"D_Csoil"     ][2],
+    shade   = df_C.f_sim[int3_C,]$outF [[i]][,"Shade_f"     ][2],
+    Nleach  = df_C.f_sim[int3_C,]$outF [[i]][,"Nleaching_f" ][2],
+    Crunoff = df_C.f_sim[int3_C,]$outF [[i]][,"Crunoff_f"   ][2],
+    Csoil   = df_C.f_sim[int3_C,]$outF [[i]][,"Csoil_f"     ][2],
+    doymnH1 = df_C.f_sim[int3_C,]$outF [[i]][,"doyminHarv1" ][2],
+    doymnH2 = df_C.f_sim[int3_C,]$outF [[i]][,"doyminHarv2" ][2],
+    doymxH1 = df_C.f_sim[int3_C,]$outF [[i]][,"doymaxHarv1" ][2],
+    doymxH2 = df_C.f_sim[int3_C,]$outF [[i]][,"doymaxHarv2" ][2]
+  ) } ) )
+  colnames(listmat_nt_C[[3]]) <- varnames.listmat
+
+  listmat_nt_G[[1]] <- t( sapply( 1:nnt1_G, function(i){ cbind(
+    code    = df_G.f    [int1_G,]$code [[i]]                    ,
+    slope   = df_G.f    [int1_G,]$slope[[i]]                    ,
+    nt      = df_G.f    [int1_G,]$nt   [[i]]                    ,
+    Nfert   = df_G.f    [int1_G,]$Nfert[[i]]                    ,
+    y.obs   = df_G.f    [int1_G,]$yield[[i]]                    ,
+    y.sim   = df_G.f_sim[int1_G,]$outF [[i]][,"harvDM_f_hay"][2],
+    D_Csoil = df_G.f_sim[int1_G,]$outF [[i]][,"D_Csoil"     ][2],
+    shade   = df_G.f_sim[int1_G,]$outF [[i]][,"Shade_f"     ][2],
+    Nleach  = df_G.f_sim[int1_G,]$outF [[i]][,"Nleaching_f" ][2],
+    Crunoff = df_G.f_sim[int1_G,]$outF [[i]][,"Crunoff_f"   ][2],
+    Csoil   = df_G.f_sim[int1_G,]$outF [[i]][,"Csoil_f"     ][2],
+    doymnH1 = df_G.f_sim[int1_G,]$outF [[i]][,"doyminHarv1" ][2],
+    doymnH2 = df_G.f_sim[int1_G,]$outF [[i]][,"doyminHarv2" ][2],
+    doymxH1 = df_G.f_sim[int1_G,]$outF [[i]][,"doymaxHarv1" ][2],
+    doymxH2 = df_G.f_sim[int1_G,]$outF [[i]][,"doymaxHarv2" ][2]
+  ) } ) )
+  colnames(listmat_nt_G[[1]]) <- varnames.listmat
+
+  listmat_nt_G[[2]] <- t( sapply( 1:nnt2_G, function(i){ cbind(
+    code    = df_G.f    [int2_G,]$code [[i]]                    ,
+    slope   = df_G.f    [int2_G,]$slope[[i]]                    ,
+    nt      = df_G.f    [int2_G,]$nt   [[i]]                    ,
+    Nfert   = df_G.f    [int2_G,]$Nfert[[i]]                    ,
+    y.obs   = df_G.f    [int2_G,]$yield[[i]]                    ,
+    y.sim   = df_G.f_sim[int2_G,]$outF [[i]][,"harvDM_f_hay"][2],
+    D_Csoil = df_G.f_sim[int2_G,]$outF [[i]][,"D_Csoil"     ][2],
+    shade   = df_G.f_sim[int2_G,]$outF [[i]][,"Shade_f"     ][2],
+    Nleach  = df_G.f_sim[int2_G,]$outF [[i]][,"Nleaching_f" ][2],
+    Crunoff = df_G.f_sim[int2_G,]$outF [[i]][,"Crunoff_f"   ][2],
+    Csoil   = df_G.f_sim[int2_G,]$outF [[i]][,"Csoil_f"     ][2],
+    doymnH1 = df_G.f_sim[int2_G,]$outF [[i]][,"doyminHarv1" ][2],
+    doymnH2 = df_G.f_sim[int2_G,]$outF [[i]][,"doyminHarv2" ][2],
+    doymxH1 = df_G.f_sim[int2_G,]$outF [[i]][,"doymaxHarv1" ][2],
+    doymxH2 = df_G.f_sim[int2_G,]$outF [[i]][,"doymaxHarv2" ][2]
+  ) } ) )
+  colnames(listmat_nt_G[[2]]) <- varnames.listmat
+
+  listmat_nt_G[[3]] <- t( sapply( 1:nnt3_G, function(i){ cbind(
+    code    = df_G.f    [int3_G,]$code [[i]]                    ,
+    slope   = df_G.f    [int3_G,]$slope[[i]]                    ,
+    nt      = df_G.f    [int3_G,]$nt   [[i]]                    ,
+    Nfert   = df_G.f    [int3_G,]$Nfert[[i]]                    ,
+    y.obs   = df_C.f    [int3_G,]$yield[[i]]                    ,
+    y.sim   = df_G.f_sim[int3_G,]$outF [[i]][,"harvDM_f_hay"][2],
+    D_Csoil = df_G.f_sim[int3_G,]$outF [[i]][,"D_Csoil"     ][2],
+    shade   = df_G.f_sim[int3_G,]$outF [[i]][,"Shade_f"     ][2],
+    Nleach  = df_G.f_sim[int3_G,]$outF [[i]][,"Nleaching_f" ][2],
+    Crunoff = df_G.f_sim[int3_G,]$outF [[i]][,"Crunoff_f"   ][2],
+    Csoil   = df_G.f_sim[int3_G,]$outF [[i]][,"Csoil_f"     ][2],
+    doymnH1 = df_G.f_sim[int3_G,]$outF [[i]][,"doyminHarv1" ][2],
+    doymnH2 = df_G.f_sim[int3_G,]$outF [[i]][,"doyminHarv2" ][2],
+    doymxH1 = df_G.f_sim[int3_G,]$outF [[i]][,"doymaxHarv1" ][2],
+    doymxH2 = df_G.f_sim[int3_G,]$outF [[i]][,"doymaxHarv2" ][2]
+  ) } ) )
+  colnames(listmat_nt_G[[3]]) <- varnames.listmat
+```
+
+```{r}
+  plotimpacts_nt.Nfert <- function( listmat=listmat_nt_C, var="y.sim" ){
+    plot  ( listmat[[1]][,"Nfert"], listmat[[1]][,var],
+            xlab="Nfert", ylab="",main=var, pch=1 )
+    points( listmat[[2]][,"Nfert"], listmat[[2]][,var], pch=20, col="red"  )
+    points( listmat[[3]][,"Nfert"], listmat[[3]][,var], pch=6, col="blue" )
+    
+    y.lm.nt1 <- lm( listmat[[1]][,var] ~ listmat[[1]][,"Nfert"] )
+    y.lm.nt2 <- lm( listmat[[2]][,var] ~ listmat[[2]][,"Nfert"] )
+    y.lm.nt3 <- lm( listmat[[3]][,var] ~ listmat[[3]][,"Nfert"] )
+    r2.nt1   <- round( summary(y.lm.nt1)$r.squared, 2 )
+    r2.nt2   <- round( summary(y.lm.nt2)$r.squared, 2 )
+    r2.nt3   <- round( summary(y.lm.nt3)$r.squared, 2 )
+    abline( y.lm.nt1$coefficients[1], y.lm.nt1$coefficients[2], col="black" )
+    abline( y.lm.nt2$coefficients[1], y.lm.nt2$coefficients[2], col="red" )
+    abline( y.lm.nt3$coefficients[1], y.lm.nt3$coefficients[2], col="blue" )
+    legend( "bottomright", title="r2",
+            legend=c( paste("n<2:",as.character(r2.nt1)),
+              paste("n=2:",as.character(r2.nt2)),
+              paste("n>2:",as.character(r2.nt3)) ),
+            col=c("black","red","blue"), lty=c(1), cex=0.5 )
+  }
+```
+
+```{r XX15, fig.height=7.5, fig.cap="\\label{fig:XX15}Yield-observations for farms in Costa Rica (y.obs; kg DM ha-1 y-1) plus simulations of five variables: Long-term average coffee yield (y.obs; kg DM ha-1 y-1), Change in soil carbon (D_Csoil; kg ha-1 y-1), Average shade level (-), Final year nitrogen leaching (kg N ha-1 y-1), Final year carbon loss in run-off (kg C ha-1 y-1)."}
+  par(mfrow=c(3,3),mar=c(4,2,2,2), mgp=c(2,1,0))
+
+  plotimpacts_nt.Nfert( listmat_nt_C, "y.obs" )
+  plotimpacts_nt.Nfert( listmat_nt_C, "y.sim" )
+  plotimpacts_nt.Nfert( listmat_nt_C, "D_Csoil" )
+  plotimpacts_nt.Nfert( listmat_nt_C, "Shade_f" )
+  plotimpacts_nt.Nfert( listmat_nt_C, "Nleaching_f" )
+  plotimpacts_nt.Nfert( listmat_nt_C, "Crunoff_f" )
+  plotimpacts_nt.Nfert( listmat_nt_C, "Csoil_f" )
+  plotimpacts_nt.Nfert( listmat_nt_C, "doymaxHarv1" )
+  plotimpacts_nt.Nfert( listmat_nt_C, "doymaxHarv2" )
+```
+
+```{r XX16, fig.height=7.5, fig.cap="\\label{fig:XX16}Yield-observations for farms in Guatemala plus simulations of five variables: see previous figure for explanation of variables."}
+  par(mfrow=c(3,3),mar=c(4,2,2,2), mgp=c(2,1,0))
+
+  plotimpacts_nt.Nfert( listmat_nt_G, "y.obs" )
+  plotimpacts_nt.Nfert( listmat_nt_G, "y.sim" )
+  plotimpacts_nt.Nfert( listmat_nt_G, "D_Csoil" )
+  plotimpacts_nt.Nfert( listmat_nt_G, "Shade_f" )
+  plotimpacts_nt.Nfert( listmat_nt_G, "Nleaching_f" )
+  plotimpacts_nt.Nfert( listmat_nt_G, "Crunoff_f" )
+  plotimpacts_nt.Nfert( listmat_nt_G, "Csoil_f" )
+  plotimpacts_nt.Nfert( listmat_nt_G, "doymaxHarv1" )
+  plotimpacts_nt.Nfert( listmat_nt_G, "doymaxHarv2" )
+```
