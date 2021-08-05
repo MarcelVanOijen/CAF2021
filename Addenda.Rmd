@@ -176,12 +176,13 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
     "Csoil_f",
     "doyminHarv1", "doyminHarv2", "doymaxHarv1", "doymaxHarv2" )
 
-  ip_CNLITT0  <- which( names_params=="CNLITT0" )
-  ip_CNSOMF0  <- which( names_params=="CNSOMF0" )
-  ip_CNSOMS0  <- which( names_params=="CNSOMS0" )
-  ip_CSOM0    <- which( names_params=="CSOM0"   )
-  ip_LAT      <- which( names_params=="LAT"     )
-  ip_SLOPE    <- which( names_params=="SLOPE"   )
+  ip_CNLITT0     <- which( names_params=="CNLITT0"     )
+  ip_CNSOMF0     <- which( names_params=="CNSOMF0"     )
+  ip_CNSOMS0     <- which( names_params=="CNSOMS0"     )
+  ip_CSOM0       <- which( names_params=="CSOM0"       )
+  ip_LAT         <- which( names_params=="LAT"         )
+  ip_SHADETARGET <- which( names_params=="SHADETARGET" )
+  ip_SLOPE       <- which( names_params=="SLOPE"       )
 ```
 
 ```{r}
@@ -192,6 +193,7 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
     LAT_C   <- df_C.f$lat    [ fi ]
     SLOPE_C <- df_C.f$slope  [ fi ]
     Nfert_C <- df_C.f$Nfert  [ fi ]
+    shade_C <- df_C.f$shade  [ fi ]
     source( sitesettings_filenames[1] )
     matrix_weather_fi <- read_listweather_CAF( df_C.f$weather.WC, fi )
 
@@ -224,6 +226,7 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
         params[ ip_CSOM0                            ] <- C_C
         params[ ip_LAT                              ] <- LAT_C
         params[ ip_SLOPE                            ] <- SLOPE_C
+        params[ ip_SHADETARGET                      ] <- shade_C
       }
       if(i==2) {
         if(df_C.f$nt[fi]==0) { source(sitesettings_filenames[19])
@@ -244,6 +247,7 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
         params[ ip_CSOM0                            ] <- C_C
         params[ ip_LAT                              ] <- LAT_C
         params[ ip_SLOPE                            ] <- SLOPE_C
+        params[ ip_SHADETARGET                      ] <- shade_C
       }
       outF <- run_model( params, matrix_weather_fi, calendar_fert_fi,
         calendar_prunC, calendar_prunT, calendar_thinT, NDAYS )
@@ -261,6 +265,7 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
     LAT_G   <- df_G.f$lat    [ fi ]
     SLOPE_G <- df_G.f$slope  [ fi ]
     Nfert_G <- df_G.f$Nfert  [ fi ]
+    shade_G <- df_G.f$shade  [ fi ]
     source( sitesettings_filenames[1] )
     matrix_weather_fi <- read_listweather_CAF( df_G.f$weather.WC, fi )
     
@@ -293,6 +298,7 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
         params[ ip_CSOM0                            ] <- C_G
         params[ ip_LAT                              ] <- LAT_G
         params[ ip_SLOPE                            ] <- SLOPE_G
+        params[ ip_SHADETARGET                      ] <- shade_G
       }
       if(i==2) {
         if(df_G.f$nt[fi]==0) { source(sitesettings_filenames[19])
@@ -313,6 +319,7 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
         params[ ip_CSOM0                            ] <- C_G
         params[ ip_LAT                              ] <- LAT_G
         params[ ip_SLOPE                            ] <- SLOPE_G
+        params[ ip_SHADETARGET                      ] <- shade_G
       }
       outF <- run_model( params, matrix_weather_fi, calendar_fert_fi,
         calendar_prunC, calendar_prunT, calendar_thinT, NDAYS )
@@ -362,6 +369,18 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
 
 ```
 
+```{r}
+  par( mfrow=c(1,2) )
+
+  F2_C             <- dfoutFSummary( df_C.f_sim, Fi=2 )
+  Shade_F2_C.f_sim <- F2_C[,"Shade_f"]
+  plot( df_C.f$shade, Shade_F2_C.f_sim )
+
+  F2_G             <- dfoutFSummary( df_G.f_sim, Fi=2 )
+  Shade_F2_G.f_sim <- F2_G[,"Shade_f"]
+  plot( df_G.f$shade, Shade_F2_G.f_sim )
+
+```
 
 ```{r}
   df <- df_C.f_sim
@@ -401,7 +420,7 @@ Results of these simulations are shown in Figs \ref{fig:XX14}, \ref{fig:XX15}, a
   nnt3_C <- length(int3_C)      ; nnt3_G <- length(int3_G)
   
   listmat_nt_C <- listmat_nt_G <- vector( "list", 3 )
-  varnames.listmat <- c( "code","slope","nt","Nfert","y.obs",
+  varnames.listmat <- c( "code","slope","nt","Nfert","shade","y.obs",
     "y.sim","D_Csoil","Shade_f","Nleaching_f","Crunoff_f",
     "Csoil_f", "doyminHarv1", "doyminHarv2", "doymaxHarv1", "doymaxHarv2" )
 
@@ -410,6 +429,7 @@ Results of these simulations are shown in Figs \ref{fig:XX14}, \ref{fig:XX15}, a
     slope   = df_C.f    [int1_C,]$slope[[i]]                    ,
     nt      = df_C.f    [int1_C,]$nt   [[i]]                    ,
     Nfert   = df_C.f    [int1_C,]$Nfert[[i]]                    ,
+    shade   = df_C.f    [int1_C,]$shade[[i]]                    ,
     y.obs   = df_C.f    [int1_C,]$yield[[i]]                    ,
     y.sim   = df_C.f_sim[int1_C,]$outF [[i]][,"harvDM_f_hay"][2],
     D_Csoil = df_C.f_sim[int1_C,]$outF [[i]][,"D_Csoil"     ][2],
@@ -429,6 +449,7 @@ Results of these simulations are shown in Figs \ref{fig:XX14}, \ref{fig:XX15}, a
     slope   = df_C.f    [int2_C,]$slope[[i]]                    ,
     nt      = df_C.f    [int2_C,]$nt   [[i]]                    ,
     Nfert   = df_C.f    [int2_C,]$Nfert[[i]]                    ,
+    shade   = df_C.f    [int2_C,]$shade[[i]]                    ,
     y.obs   = df_C.f    [int2_C,]$yield[[i]]                    ,
     y.sim   = df_C.f_sim[int2_C,]$outF [[i]][,"harvDM_f_hay"][2],
     D_Csoil = df_C.f_sim[int2_C,]$outF [[i]][,"D_Csoil"     ][2],
@@ -448,6 +469,7 @@ Results of these simulations are shown in Figs \ref{fig:XX14}, \ref{fig:XX15}, a
     slope   = df_C.f    [int3_C,]$slope[[i]]                    ,
     nt      = df_C.f    [int3_C,]$nt   [[i]]                    ,
     Nfert   = df_C.f    [int3_C,]$Nfert[[i]]                    ,
+    shade   = df_C.f    [int3_C,]$shade[[i]]                    ,
     y.obs   = df_C.f    [int3_C,]$yield[[i]]                    ,
     y.sim   = df_C.f_sim[int3_C,]$outF [[i]][,"harvDM_f_hay"][2],
     D_Csoil = df_C.f_sim[int3_C,]$outF [[i]][,"D_Csoil"     ][2],
@@ -467,6 +489,7 @@ Results of these simulations are shown in Figs \ref{fig:XX14}, \ref{fig:XX15}, a
     slope   = df_G.f    [int1_G,]$slope[[i]]                    ,
     nt      = df_G.f    [int1_G,]$nt   [[i]]                    ,
     Nfert   = df_G.f    [int1_G,]$Nfert[[i]]                    ,
+    shade   = df_G.f    [int1_G,]$shade[[i]]                    ,
     y.obs   = df_G.f    [int1_G,]$yield[[i]]                    ,
     y.sim   = df_G.f_sim[int1_G,]$outF [[i]][,"harvDM_f_hay"][2],
     D_Csoil = df_G.f_sim[int1_G,]$outF [[i]][,"D_Csoil"     ][2],
@@ -486,6 +509,7 @@ Results of these simulations are shown in Figs \ref{fig:XX14}, \ref{fig:XX15}, a
     slope   = df_G.f    [int2_G,]$slope[[i]]                    ,
     nt      = df_G.f    [int2_G,]$nt   [[i]]                    ,
     Nfert   = df_G.f    [int2_G,]$Nfert[[i]]                    ,
+    shade   = df_G.f    [int2_G,]$shade[[i]]                    ,
     y.obs   = df_G.f    [int2_G,]$yield[[i]]                    ,
     y.sim   = df_G.f_sim[int2_G,]$outF [[i]][,"harvDM_f_hay"][2],
     D_Csoil = df_G.f_sim[int2_G,]$outF [[i]][,"D_Csoil"     ][2],
@@ -505,6 +529,7 @@ Results of these simulations are shown in Figs \ref{fig:XX14}, \ref{fig:XX15}, a
     slope   = df_G.f    [int3_G,]$slope[[i]]                    ,
     nt      = df_G.f    [int3_G,]$nt   [[i]]                    ,
     Nfert   = df_G.f    [int3_G,]$Nfert[[i]]                    ,
+    shade   = df_G.f    [int3_G,]$shade[[i]]                    ,
     y.obs   = df_G.f    [int3_G,]$yield[[i]]                    ,
     y.sim   = df_G.f_sim[int3_G,]$outF [[i]][,"harvDM_f_hay"][2],
     D_Csoil = df_G.f_sim[int3_G,]$outF [[i]][,"D_Csoil"     ][2],
@@ -547,6 +572,7 @@ Results of these simulations are shown in Figs \ref{fig:XX14}, \ref{fig:XX15}, a
 ```{r XX15, fig.height=7.5, fig.cap="\\label{fig:XX15}Yield-observations for farms in Costa Rica (y.obs; kg DM ha-1 y-1) plus simulations of five variables: Long-term average coffee yield (y.obs; kg DM ha-1 y-1), Change in soil carbon (D_Csoil; kg ha-1 y-1), Average shade level (-), Final year nitrogen leaching (kg N ha-1 y-1), Final year carbon loss in run-off (kg C ha-1 y-1)."}
   par(mfrow=c(3,3),mar=c(4,2,2,2), mgp=c(2,1,0))
 
+  plotimpacts_nt.Nfert( listmat_nt_C, "shade" )
   plotimpacts_nt.Nfert( listmat_nt_C, "y.obs" )
   plotimpacts_nt.Nfert( listmat_nt_C, "y.sim" )
   plotimpacts_nt.Nfert( listmat_nt_C, "D_Csoil" )
@@ -554,13 +580,13 @@ Results of these simulations are shown in Figs \ref{fig:XX14}, \ref{fig:XX15}, a
   plotimpacts_nt.Nfert( listmat_nt_C, "Nleaching_f" )
   plotimpacts_nt.Nfert( listmat_nt_C, "Crunoff_f" )
   plotimpacts_nt.Nfert( listmat_nt_C, "Csoil_f" )
-  plotimpacts_nt.Nfert( listmat_nt_C, "doymaxHarv1" )
   plotimpacts_nt.Nfert( listmat_nt_C, "doymaxHarv2" )
 ```
 
 ```{r XX16, fig.height=7.5, fig.cap="\\label{fig:XX16}Yield-observations for farms in Guatemala plus simulations of five variables: see previous figure for explanation of variables."}
   par(mfrow=c(3,3),mar=c(4,2,2,2), mgp=c(2,1,0))
 
+  plotimpacts_nt.Nfert( listmat_nt_G, "shade" )
   plotimpacts_nt.Nfert( listmat_nt_G, "y.obs" )
   plotimpacts_nt.Nfert( listmat_nt_G, "y.sim" )
   plotimpacts_nt.Nfert( listmat_nt_G, "D_Csoil" )
@@ -568,6 +594,5 @@ Results of these simulations are shown in Figs \ref{fig:XX14}, \ref{fig:XX15}, a
   plotimpacts_nt.Nfert( listmat_nt_G, "Nleaching_f" )
   plotimpacts_nt.Nfert( listmat_nt_G, "Crunoff_f" )
   plotimpacts_nt.Nfert( listmat_nt_G, "Csoil_f" )
-  plotimpacts_nt.Nfert( listmat_nt_G, "doymaxHarv1" )
   plotimpacts_nt.Nfert( listmat_nt_G, "doymaxHarv2" )
 ```

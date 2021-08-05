@@ -182,8 +182,9 @@ do day = 1, NDAYS
                   SAT_t,h_t,hC_t,z,dz,LAIT_tcz)
 
 ! Management
-  call fert_prun_thin(year,doy,DAYS_FERT ,NFERTV ,DAYS_PRUNC,FRPRUNC, &
-                                DAYS_PRUNT,FRPRUNT,DAYS_THINT,FRTHINT)
+  call fert_prun_thin(year,doy,Shade_f,                      &
+                      DAYS_FERT ,NFERTV ,DAYS_PRUNC,FRPRUNC, &
+                      DAYS_PRUNT,FRPRUNT,DAYS_THINT,FRTHINT)
   treedens_t = treedens_t - thintreedens_t
   
 ! Trees continued

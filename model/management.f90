@@ -10,9 +10,11 @@ real :: treedens_t(nt), thintreedens_t(nt)
 
 Contains     
 
-  Subroutine fert_prun_thin(year,doy,DAYS_FERT ,NFERTV ,DAYS_PRUNC,FRPRUNC, &
-                                      DAYS_PRUNT,FRPRUNT,DAYS_THINT,FRTHINT)
+  Subroutine fert_prun_thin(year,doy,Shade_f, &
+    DAYS_FERT ,NFERTV ,DAYS_PRUNC,FRPRUNC, &
+    DAYS_PRUNT,FRPRUNT,DAYS_THINT,FRTHINT )
   integer                    :: year,doy,i,t
+  real                       :: Shade_f
   integer,dimension(  100,2) :: DAYS_FERT , DAYS_PRUNC
   real   ,dimension(  100  ) ::             FRPRUNC
   integer,dimension(3,100,2) :: DAYS_PRUNT, DAYS_THINT
@@ -32,6 +34,9 @@ Contains
 	    do t=1,nt
         if ( (year==DAYS_PRUNT(t,i,1)) .and. (doy==DAYS_PRUNT(t,i,2)) ) then
           prunFRT(t) = FRPRUNT(t,i)
+          if ((SHADETARGET>=0).and.(Shade_f>0)) then
+            prunFRT(t) = 1 - SHADETARGET / Shade_f
+          endif
 	      endif
         if ( (year==DAYS_THINT(t,i,1)) .and. (doy==DAYS_THINT(t,i,2)) ) then
           thinFRT(t) = FRTHINT(t,i)
@@ -39,6 +44,8 @@ Contains
 	    enddo
     enddo
     thintreedens_t = treedens_t * thinFRT
+    
+    
   end Subroutine fert_prun_thin
     
 end module management      

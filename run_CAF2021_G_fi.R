@@ -73,6 +73,7 @@
 ## RUN MODEL
 
    params <- set_par("TPLUS",1.5)
+   params <- set_par("SHADETARGET",-1)
    
    output <- run_model( params, matrix_weather_fi, calendar_fert_fi,
                         calendar_prunC, calendar_prunT, calendar_thinT,
