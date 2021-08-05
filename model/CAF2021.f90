@@ -40,7 +40,7 @@ integer :: day, doy, i, ic, it, NDAYS, NOUT, year
 ! State variables
 real :: CBT_t(nt)  , CLT_t(nt)  , CPT_t (nt)  , CRT_t(nt)  , CST_t(nt), NLT_t(nt)
 real :: CL   (nc)=0, CP   (nc)=0, CR    (nc)=0, CW   (nc)=0, NL   (nc)=0
-real :: DVS  (nc)=0, LAI  (nc)=0, SENSIT(nc)  , SINKP(nc)
+real :: DVS  (nc)=0, LAI  (nc)=0, SENSIT      , SINKP(nc)
 real :: CLITT(nc)  , CSOMF(nc)  , CSOMS (nc)
 real :: NLITT(nc)  , NMIN (nc)  , NSOMF (nc)  , NSOMS(nc)  , WA   (nc)
 
@@ -217,7 +217,13 @@ do day = 1, NDAYS
   call water_flux(Pevap,Ptran,TRANCO,WA, Evap,fTran,RWA,Tran)
   call Nsupply(CR,NMIN,Nsup)
   call abovegroundres(LAI,PARCOFFEE,PARav,PARint)
-  call Phenology(Day,doy,DVS,SENSIT,TCOFFEE,SINKP)
+  
+  ! Making the crop sensitive to rainfall (capable of flowering) in the
+  ! beginning of the year, and resetting to zero when flowering occurs.
+  if ((doy==1).and.(day>TBEFOREP)) SENSIT = 1
+  if (DayFl==1)                    SENSIT = 0
+
+  call Phenology(doy,DVS,SENSIT,TCOFFEE,SINKP)
   call growth(TCOFFEE,PARav,PARint,fTran,SINKP,Nsup,PARMA,DVS,fNgrowth)
   call Foliage(fTran)  
   call Senescence(CR,NL,CL,LAI,fTran)
@@ -242,7 +248,7 @@ do day = 1, NDAYS
   CW     = CW     + adjCW   + gCW         - prunCW
   CR     = CR     + adjCR   + gCR  - dCR
   CP     = CP     + adjCP   + gCP         - harvCP
-  SENSIT = SENSIT + dSENSIT
+!  SENSIT = SENSIT + dSENSIT
   DVS    = DVS    + dDVS    - rDVS
 
 ! Trees (arrays: m-2 field)
@@ -384,110 +390,109 @@ do day = 1, NDAYS
 ! c4 = shaded by tree sp. 3     (upper-stratum tree sp.)
 ! c5 = shaded by tree sp. 1 & 3 (lower- and upper-stratum tree spp.)
 ! c6 = shaded by tree sp. 2 & 3 (lower- and upper-stratum tree spp.)
-  y(day, 1   ) = year + (doy-0.5)/366 ! "Time" = Decimal year (approx.)
-  y(day, 2   ) = year
-  y(day, 3   ) = doy
-  y(day, 4: 9) = Ac                   ! m2 c m-2
-  y(day,10:12) = At                   ! m2 t m-2
-  y(day,13:18) = fNgrowth             ! -
-  y(day,19:24) = fTran                ! -
-  y(day,25   ) = Cabg_f  		          ! kgC  m-2
-  y(day,26:31) = harvCP               ! kgC  m-2 c
-  y(day,32   ) = harvDM_f_hay         ! kgDM ha-1 y-1
-  y(day,33:38) = LAI                  ! m2   m-2 c
-  y(day,39   ) = CabgT_f 		          ! kgC  m-2
-  y(day,40:42) = CAtree_t             ! m2   tree-1
-  y(day,43:45) = h_t                  ! m
-  y(day,46:51) = LAIT_c               ! m2   m-2 c
-  y(day,52:54) = treedens_t           ! m-2
-  y(day,55   ) = Csoil_f              ! kgC  m-2
-  y(day,56   ) = Nsoil_f              ! kgN  m-2
-  y(day,57:59) = CST_t                ! kgC  m-2
-  y(day,60:62) = SAT_t                ! m2   m-2
+  y(day,  1    ) = year + (doy-0.5)/366 ! "Time" = Decimal year (approx.)
+  y(day,  2    ) = year
+  y(day,  3    ) = doy
+  y(day,  4:  9) = Ac                 ! m2 c m-2
+  y(day, 10: 12) = At                 ! m2 t m-2
+  y(day, 13: 18) = fNgrowth           ! -
+  y(day, 19: 24) = fTran              ! -
+  y(day, 25    ) = Cabg_f  		        ! kgC  m-2
+  y(day, 26: 31) = harvCP             ! kgC  m-2 c
+  y(day, 32    ) = harvDM_f_hay       ! kgDM ha-1 y-1
+  y(day, 33: 38) = LAI                ! m2   m-2 c
+  y(day, 39    ) = CabgT_f 		        ! kgC  m-2
+  y(day, 40: 42) = CAtree_t           ! m2   tree-1
+  y(day, 43: 45) = h_t                ! m
+  y(day, 46: 51) = LAIT_c             ! m2   m-2 c
+  y(day, 52: 54) = treedens_t         ! m-2
+  y(day, 55    ) = Csoil_f            ! kgC  m-2
+  y(day, 56    ) = Nsoil_f            ! kgN  m-2
+  y(day, 57: 59) = CST_t              ! kgC  m-2
+  y(day, 60: 62) = SAT_t              ! m2   m-2
   
-  y(day,63   ) = Nfert_f              ! kgN  m-2 d-1
-  y(day,64   ) = NfixT_f              ! kgN  m-2 d-1
-  y(day,65   ) = NsenprunT_f          ! kgN  m-2 d-1
-  y(day,66   ) = Nsenprun_f           ! kgN  m-2 d-1
-  y(day,67   ) = Nleaching_f          ! kgN  m-2 d-1
-  y(day,68   ) = Nemission_f          ! kgN  m-2 d-1
-  y(day,69   ) = Nrunoff_f            ! kgN  m-2 d-1
-  y(day,70   ) = Nupt_f               ! kgN  m-2 d-1
-  y(day,71   ) = NuptT_f              ! kgN  m-2 d-1
+  y(day, 63    ) = Nfert_f            ! kgN  m-2 d-1
+  y(day, 64    ) = NfixT_f            ! kgN  m-2 d-1
+  y(day, 65    ) = NsenprunT_f        ! kgN  m-2 d-1
+  y(day, 66    ) = Nsenprun_f         ! kgN  m-2 d-1
+  y(day, 67    ) = Nleaching_f        ! kgN  m-2 d-1
+  y(day, 68    ) = Nemission_f        ! kgN  m-2 d-1
+  y(day, 69    ) = Nrunoff_f          ! kgN  m-2 d-1
+  y(day, 70    ) = Nupt_f             ! kgN  m-2 d-1
+  y(day, 71    ) = NuptT_f            ! kgN  m-2 d-1
   
-  y(day,72:77) = CLITT                ! kgC  m-2 c
-  y(day,78:83) = NLITT                ! kgN  m-2 c
-  y(day,84:86) = harvCST_t            ! kgC  m-2 d-1
-  y(day,87:89) = harvNST_t            ! kgN  m-2 d-1
+  y(day, 72: 77) = CLITT              ! kgC  m-2 c
+  y(day, 78: 83) = NLITT              ! kgN  m-2 c
+  y(day, 84: 86) = harvCST_t          ! kgC  m-2 d-1
+  y(day, 87: 89) = harvNST_t          ! kgN  m-2 d-1
   
-  y(day,90   ) = CsenprunT_f          ! kgC  m-2 d-1
-  y(day,91   ) = Csenprun_f           ! kgC  m-2 d-1
-  y(day,92   ) = Rsoil_f              ! kgC  m-2 d-1
-  y(day,93   ) = Crunoff_f            ! kgC  m-2 d-1
+  y(day, 90    ) = CsenprunT_f        ! kgC  m-2 d-1
+  y(day, 91    ) = Csenprun_f         ! kgC  m-2 d-1
+  y(day, 92    ) = Rsoil_f            ! kgC  m-2 d-1
+  y(day, 93    ) = Crunoff_f          ! kgC  m-2 d-1
   
-  y(day,94   ) = WA_f                 ! mm
-  y(day,95   ) = Rain_f               ! mm   d-1
-  y(day,96   ) = Drain_f              ! mm   d-1
-  y(day,97   ) = Runoff_f             ! mm   d-1
-  y(day,98   ) = Evap_f               ! mm   d-1
-  y(day,99   ) = Tran_f               ! mm   d-1
-  y(day,100  ) = TranT_f              ! mm   d-1
-  y(day,101  ) = Rainint_f            ! mm   d-1
-  y(day,102  ) = RainintT_f           ! mm   d-1
+  y(day, 94    ) = WA_f               ! mm
+  y(day, 95    ) = Rain_f             ! mm   d-1
+  y(day, 96    ) = Drain_f            ! mm   d-1
+  y(day, 97    ) = Runoff_f           ! mm   d-1
+  y(day, 98    ) = Evap_f             ! mm   d-1
+  y(day, 99    ) = Tran_f             ! mm   d-1
+  y(day,100    ) = TranT_f            ! mm   d-1
+  y(day,101    ) = Rainint_f          ! mm   d-1
+  y(day,102    ) = RainintT_f         ! mm   d-1
   
-  y(day,103  ) = C_f                  ! kgC  m-2
-  y(day,104  ) = gC_f                 ! kgC  m-2 d-1
-  y(day,105  ) = dC_f                 ! kgC  m-2 d-1
-  y(day,106  ) = prunC_f              ! kgC  m-2 d-1
-  y(day,107  ) = harvCP_f             ! kgC  m-2 d-1
+  y(day,103    ) = C_f                ! kgC  m-2
+  y(day,104    ) = gC_f               ! kgC  m-2 d-1
+  y(day,105    ) = dC_f               ! kgC  m-2 d-1
+  y(day,106    ) = prunC_f            ! kgC  m-2 d-1
+  y(day,107    ) = harvCP_f           ! kgC  m-2 d-1
   
-  y(day,108  ) = CT_f                 ! kgC  m-2
-  y(day,109  ) = gCT_f                ! kgC  m-2 d-1
-  y(day,110  ) = harvCBT_f            ! kgC  m-2 d-1
-  y(day,111  ) = harvCPT_f            ! kgC  m-2 d-1
-  y(day,112  ) = harvCST_f            ! kgC  m-2 d-1
+  y(day,108    ) = CT_f               ! kgC  m-2
+  y(day,109    ) = gCT_f              ! kgC  m-2 d-1
+  y(day,110    ) = harvCBT_f          ! kgC  m-2 d-1
+  y(day,111    ) = harvCPT_f          ! kgC  m-2 d-1
+  y(day,112    ) = harvCST_f          ! kgC  m-2 d-1
   
   y(day,113:115) = CPT_t              ! kgC  m-2
   y(day,116:118) = harvCPT_t          ! kgC  m-2 d-1
   y(day,119:121) = harvNPT_t          ! kgN  m-2 d-1
   
-  y(day,122    ) = DVS(1)             ! -
-  y(day,123    ) = SINKP(1)           ! -
-  y(day,124    ) = SINKPMAXnew(1)     ! -
-  y(day,125    ) = DayFl(1)           ! -
+  y(day,122    ) = DayFl              ! -
+  y(day,123    ) = DVS(1)             ! -
+  y(day,124    ) = SINKP(1)           ! -
+  y(day,125    ) = SINKPMAXnew(1)     ! -
   y(day,126    ) = PARMA(1)           ! MJ   m-2 d-1
   y(day,127    ) = DVS(2)             ! -
   y(day,128    ) = SINKP(2)           ! -
   y(day,129    ) = SINKPMAXnew(2)     ! -
-  y(day,130    ) = DayFl(2)           ! -
-  y(day,131    ) = PARMA(2)           ! MJ   m-2 d-1
+  y(day,130    ) = PARMA(2)           ! MJ   m-2 d-1
 
-  y(day,132    ) = CR_f               ! kgC  m-2
-  y(day,133    ) = CW_f               ! kgC  m-2
-  y(day,134    ) = CL_f               ! kgC  m-2
-  y(day,135    ) = CP_f               ! kgC  m-2
+  y(day,131    ) = CR_f               ! kgC  m-2
+  y(day,132    ) = CW_f               ! kgC  m-2
+  y(day,133    ) = CL_f               ! kgC  m-2
+  y(day,134    ) = CP_f               ! kgC  m-2
 
-  y(day,136:138) = CRT_t              ! kgC  m-2
-  y(day,139:141) = CBT_t              ! kgC  m-2
-  y(day,142:144) = CLT_t              ! kgC  m-2
+  y(day,135:137) = CRT_t              ! kgC  m-2
+  y(day,138:140) = CBT_t              ! kgC  m-2
+  y(day,141:143) = CLT_t              ! kgC  m-2
 
-  y(day,145:147) = LAIT_t             ! m2 t m-2
-  y(day,148:150) = fTranT_t           ! -
+  y(day,144:146) = LAIT_t             ! m2 t m-2
+  y(day,147:149) = fTranT_t           ! -
   
-  y(day,151)     = D_Csoil_f_hay      ! kgC  ha-1 y-1
-  y(day,152)     = D_Csys_f_hay       ! kgC  ha-1 y-1
-  y(day,153)     = D_Nsoil_f_hay      ! kgN  ha-1 y-1
+  y(day,150    ) = D_Csoil_f_hay      ! kgC  ha-1 y-1
+  y(day,151    ) = D_Csys_f_hay       ! kgC  ha-1 y-1
+  y(day,152    ) = D_Nsoil_f_hay      ! kgN  ha-1 y-1
   
-  y(day,154)     = NfixT_f_hay        ! kgN  ha-1 y-1
-  y(day,155)     = Nleaching_f_hay    ! kgN  ha-1 y-1
+  y(day,153    ) = NfixT_f_hay        ! kgN  ha-1 y-1
+  y(day,154    ) = Nleaching_f_hay    ! kgN  ha-1 y-1
   
-  y(day,156)     = Shade_f            ! -
+  y(day,155    ) = Shade_f            ! -
   
-  y(day,157:162) = z                  ! m
+  y(day,156:161) = z                  ! m
 
-  y(day,163)     = f3up               ! -
+  y(day,162    ) = f3up               ! -
   
-  y(day,164:169) = DayHarv            ! -
+  y(day,163:168) = DayHarv            ! -
 
 ! CALIBRATION VARIABLES IN CAF2021's AND ORIANA's ORIGINAL BC DATA FILES.
 ! ------------------------------------------------------------------------

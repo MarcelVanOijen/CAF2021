@@ -39,7 +39,20 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   filesTM_MAP <- file.info(list.files(pattern="^CAF2021_parMAP.*\\.rds$"))
   filesTM_MAP <- filesTM_MAP[ with(filesTM_MAP,order(as.POSIXct(mtime))), ]
   fileTM_MAP  <- tail( rownames(filesTM_MAP[1]), 1 )
-  parMAP      <- readRDS( fileTM_MAP )
+  # parMAP      <- readRDS( fileTM_MAP )
+  parMAP.old  <- readRDS( fileTM_MAP ) ; np.old <- dim(parMAP.old)[1]
+  
+  # Construct the parMAP (with more parameters than stored in fileTM_MAP)
+  source('initialisation/set_CAF2021_Turrialba.R')
+  np               <- length( params )
+  parMAP           <- matrix( params, nrow=np, ncol=nSites, byrow=F )
+  rownames(parMAP) <- names_params
+  colnames(parMAP) <- paste0( "s", 1:nSites )
+  for(p in 1:np.old) {
+    prow          <- which( startsWith( rownames(parMAP),
+                                        rownames(parMAP.old)[p] ) )
+    for(r in prow) { parMAP[r,] <- parMAP.old[p,] }
+  }
 ```
 
 ```{r}
@@ -47,9 +60,9 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
     y.lm <- lm( y ~ x )
     r2   <- round( summary(y.lm)$r.squared, 2 )
     abline( y.lm$coefficients[1], y.lm$coefficients[2], col="blue" )
-    legend( "topright",
+    legend( "bottomright",
             legend=paste("r2= ",as.character(r2)),
-            col=c("blue"), lty=c(1), cex=0.7 )
+            col=c("blue"), lty=c(1), cex=0.7, bg="transparent" )
   }
 
   plotxylm <- function(maintxt="Obs. Costa Rica", xtxt="Sim.") {
@@ -193,24 +206,40 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
     # for(i in 1:2) {
     for(i in 2:2) {
       if(i==1) {
-        if(df_C.f$nt[fi]==0)   source(sitesettings_filenames[19])
+        if(df_C.f$nt[fi]==0) { source(sitesettings_filenames[19])
+          params <- parMAP[,19]
+        }
         if(df_C.f$nt[fi]==1) { source(sitesettings_filenames[31])
-                               params<-set_par("TREEDENS0(3)",0) }
-        if(df_C.f$nt[fi]==2) { source(sitesettings_filenames[31]) } 
+          params <- parMAP[,31]
+          params <- set_par("TREEDENS0(3)",0)
+        }
+        if(df_C.f$nt[fi]==2) { source(sitesettings_filenames[31])
+          params <- parMAP[,31]
+        } 
         if(df_C.f$nt[fi] >2) { source(sitesettings_filenames[31])
-                               params<-set_par_speciesT(2,"Avocado") }
+          params <- parMAP[,31]
+          params <- set_par_speciesT(2,"Avocado")
+        }
         params[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0) ] <- CN_C
         params[ ip_CSOM0                            ] <- C_C
         params[ ip_LAT                              ] <- LAT_C
         params[ ip_SLOPE                            ] <- SLOPE_C
       }
       if(i==2) {
-        if(df_C.f$nt[fi]==0)   source(sitesettings_filenames[19])
+        if(df_C.f$nt[fi]==0) { source(sitesettings_filenames[19])
+          params <- parMAP[,19]
+        }
         if(df_C.f$nt[fi]==1) { source(sitesettings_filenames[31])
-                               params<-set_par("TREEDENS0(3)",0) }
-        if(df_C.f$nt[fi]==2) { source(sitesettings_filenames[31]) } 
+          params <- parMAP[,31]
+          params <- set_par("TREEDENS0(3)",0)
+        }
+        if(df_C.f$nt[fi]==2) { source(sitesettings_filenames[31])
+          params <- parMAP[,31]
+        } 
         if(df_C.f$nt[fi] >2) { source(sitesettings_filenames[31])
-                               params<-set_par_speciesT(2,"Banana") }
+          params <- parMAP[,31]
+          params <- set_par_speciesT(2,"Banana")
+        }
         params[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0) ] <- CN_C
         params[ ip_CSOM0                            ] <- C_C
         params[ ip_LAT                              ] <- LAT_C
@@ -246,24 +275,40 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
     # for(i in 1:2) {
     for(i in 2:2) {
       if(i==1) {
-        if(df_G.f$nt[fi]==0)   source(sitesettings_filenames[19])
+        if(df_G.f$nt[fi]==0) { source(sitesettings_filenames[19])
+          params <- parMAP[,19]
+        }
         if(df_G.f$nt[fi]==1) { source(sitesettings_filenames[31])
-                               params<-set_par("TREEDENS0(3)",0) }
-        if(df_G.f$nt[fi]==2) { source(sitesettings_filenames[31]) } 
+          params <- parMAP[,31]
+          params <- set_par("TREEDENS0(3)",0)
+        }
+        if(df_G.f$nt[fi]==2) { source(sitesettings_filenames[31])
+          params <- parMAP[,31]
+        } 
         if(df_G.f$nt[fi] >2) { source(sitesettings_filenames[31])
-                               params<-set_par_speciesT(2,"Avocado") }
+          params <- parMAP[,31]
+          params <- set_par_speciesT(2,"Avocado")
+        }
         params[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0) ] <- CN_G
         params[ ip_CSOM0                            ] <- C_G
         params[ ip_LAT                              ] <- LAT_G
         params[ ip_SLOPE                            ] <- SLOPE_G
       }
       if(i==2) {
-        if(df_G.f$nt[fi]==0)   source(sitesettings_filenames[19])
+        if(df_G.f$nt[fi]==0) { source(sitesettings_filenames[19])
+          params <- parMAP[,19]
+        }
         if(df_G.f$nt[fi]==1) { source(sitesettings_filenames[31])
-                               params<-set_par("TREEDENS0(3)",0) }
-        if(df_G.f$nt[fi]==2) { source(sitesettings_filenames[31]) } 
+          params <- parMAP[,31]
+          params <- set_par("TREEDENS0(3)",0)
+        }
+        if(df_G.f$nt[fi]==2) { source(sitesettings_filenames[31])
+          params <- parMAP[,31]
+        } 
         if(df_G.f$nt[fi] >2) { source(sitesettings_filenames[31])
-                               params<-set_par_speciesT(2,"Banana") }
+          params <- parMAP[,31]
+          params <- set_par_speciesT(2,"Banana")
+        }
         params[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0) ] <- CN_G
         params[ ip_CSOM0                            ] <- C_G
         params[ ip_LAT                              ] <- LAT_G
@@ -460,7 +505,7 @@ Results of these simulations are shown in Figs \ref{fig:XX14}, \ref{fig:XX15}, a
     slope   = df_G.f    [int3_G,]$slope[[i]]                    ,
     nt      = df_G.f    [int3_G,]$nt   [[i]]                    ,
     Nfert   = df_G.f    [int3_G,]$Nfert[[i]]                    ,
-    y.obs   = df_C.f    [int3_G,]$yield[[i]]                    ,
+    y.obs   = df_G.f    [int3_G,]$yield[[i]]                    ,
     y.sim   = df_G.f_sim[int3_G,]$outF [[i]][,"harvDM_f_hay"][2],
     D_Csoil = df_G.f_sim[int3_G,]$outF [[i]][,"D_Csoil"     ][2],
     shade   = df_G.f_sim[int3_G,]$outF [[i]][,"Shade_f"     ][2],
