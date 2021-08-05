@@ -29,7 +29,8 @@ real :: NFERTMULT
 
 ! TREES
 real :: CBTREE0(nt), CLTREE0(nt), CRTREE0(nt), CSTREE0(nt)
-real :: FHARVBT(nt), FLTMAX(nt), FPT(nt), FST(nt), FTCLMINT(nt), FWT(nt)
+real :: FHARVBT(nt), FHARVLT(nt), FLTMAX(nt)
+real :: FPT(nt), FST(nt), FTCLMINT(nt), FWT(nt)
 real :: KAC(nt), KACEXP(nt), KH(nt), KHEXP(nt), KNFIX(nt)
 real :: LAIMAXT(nt), LUEMAX(nt), NCLMAXT(nt), SLAT(nt)
 real :: TBEFOREPT(nt), TCBT(nt), TCLMAXT(nt), TCRT(nt), TCST(nt)

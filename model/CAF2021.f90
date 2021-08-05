@@ -60,9 +60,9 @@ real :: Evap(nc) , fTran    (nc), Nsup(nc)   , Tran(nc) , RWA(nc)
 real :: PARav(nc), PARint   (nc), Rainint(nc), TCOFFEE(nc)
 real :: PARMA(nc), PARCOFFEE(nc), PARold(nc,30)
 real :: harvDM_f_ha
-real :: dCLT_c(nc)=0 , dCBlitt_c(nc)=0, dCRT_c(nc)=0
+real :: dCLTlitt_c(nc)=0, dCBTlitt_c(nc)=0, dCRT_c(nc)=0
 real :: sCSTsen_c(nc)=0
-real :: dNLT_c (nc)=0, dNBlitt_c(nc)=0, dNSlitt_c(nc)=0, dNRsomf_c(nc)=0
+real :: dNLTlitt_c(nc)=0, dNBTlitt_c(nc)=0, dNSTlitt_c(nc)=0, dNRsomf_c(nc)=0
 real :: NuptT_c(nc)=0, NfixT_c(nc)=0
 
 ! EXTRA OUTPUT VARIABLES
@@ -263,30 +263,30 @@ do day = 1, NDAYS
   endwhere
   
 ! Splitting tree field-fluxes over different land cover classes
-  call RescaleExt_t_tcc(dCLT_t   ,At,Atc, DUMMY_tc,dCLT_c   )
-  call RescaleExt_t_tcc(dCBlitt_t,At,Atc, DUMMY_tc,dCBlitt_c)
-  call RescaleExt_t_tcc(sCSTsen_t,At,Atc, DUMMY_tc,sCSTsen_c)
-  call RescaleExt_t_tcc(dCRT_t   ,At,Atc, DUMMY_tc,dCRT_c   )
-  call RescaleExt_t_tcc(dNLT_t   ,At,Atc, DUMMY_tc,dNLT_c   )
-  call RescaleExt_t_tcc(dNBlitt_t,At,Atc, DUMMY_tc,dNBlitt_c)
-  call RescaleExt_t_tcc(dNSlitt_t,At,Atc, DUMMY_tc,dNSlitt_c)
-  call RescaleExt_t_tcc(dNRsomf_t,At,Atc, DUMMY_tc,dNRsomf_c)
-  call RescaleExt_t_tcc(NfixT_t  ,At,Atc, DUMMY_tc,NfixT_c  )
-  call RescaleExt_t_tcc(NuptT_t  ,At,Atc, DUMMY_tc,NuptT_c  )
+  call RescaleExt_t_tcc(dCLT_t    ,At,Atc, DUMMY_tc,dCLTlitt_c)
+  call RescaleExt_t_tcc(dCBTlitt_t,At,Atc, DUMMY_tc,dCBTlitt_c)
+  call RescaleExt_t_tcc(sCSTsen_t ,At,Atc, DUMMY_tc,sCSTsen_c )
+  call RescaleExt_t_tcc(dCRT_t    ,At,Atc, DUMMY_tc,dCRT_c    )
+  call RescaleExt_t_tcc(dNLT_t    ,At,Atc, DUMMY_tc,dNLTlitt_c)
+  call RescaleExt_t_tcc(dNBTlitt_t,At,Atc, DUMMY_tc,dNBTlitt_c)
+  call RescaleExt_t_tcc(dNSTlitt_t,At,Atc, DUMMY_tc,dNSTlitt_c)
+  call RescaleExt_t_tcc(dNRsomf_t ,At,Atc, DUMMY_tc,dNRsomf_c )
+  call RescaleExt_t_tcc(NfixT_t   ,At,Atc, DUMMY_tc,NfixT_c   )
+  call RescaleExt_t_tcc(NuptT_t   ,At,Atc, DUMMY_tc,NuptT_c   )
 
 ! Soil (arrays: [m-2 sun, m-2 shade])
-  WA    = WA    + adjWA    + RAIN       - Rainint   - RainintT_c - Runoff &
-                - Drain    - Evap       - Tran      - TranT_c
-  CLITT = CLITT + adjCLITT + dCL        + dCLT_c    + dCBlitt_c + sCSTsen_c &
-                - rCLITT   - dCLITT     + prunCL    + prunCW
-  CSOMF = CSOMF + adjCSOMF + dCLITTsomf + dCR       + dCRT_c - rCSOMF - dCSOMF
+  WA    = WA    + adjWA    + RAIN       - Rainint    - RainintT_c - Runoff &
+                - Drain    - Evap       - Tran       - TranT_c
+  CLITT = CLITT + adjCLITT + dCL        + dCLTlitt_c + dCBTlitt_c + sCSTsen_c &
+                - rCLITT   - dCLITT     + prunCL     + prunCW
+  CSOMF = CSOMF + adjCSOMF + dCLITTsomf + dCR        + dCRT_c - rCSOMF - dCSOMF
   CSOMS = CSOMS + adjCSOMS + dCSOMFsoms - dCSOMS
-  NLITT = NLITT + adjNLITT + dNLT_c     + dNBlitt_c + dNL   + prunNL &
-                + prunCW*NCW - rNLITT   - dNLITT    + dNSlitt_c
-  NSOMF = NSOMF + adjNSOMF + dCR*NCR    + dNRsomf_c + NLITTsomf - rNSOMF - dNSOMF
+  NLITT = NLITT + adjNLITT + dNLTlitt_c + dNBTlitt_c + dNL   + prunNL &
+                + prunCW*NCW - rNLITT   - dNLITT     + dNSTlitt_c
+  NSOMF = NSOMF + adjNSOMF + dCR*NCR    + dNRsomf_c  + NLITTsomf - rNSOMF - dNSOMF
   NSOMS = NSOMS + adjNSOMS + NSOMFsoms  - dNSOMS
   NMIN  = NMIN  + adjNMIN  + Nfert      + Nmineralisation &
-                + NfixT_c  - Nupt       - NuptT_c   - Nleaching - Nemission
+                + NfixT_c  - Nupt       - NuptT_c    - Nleaching - Nemission
 
 ! Additional output variables
 
@@ -316,7 +316,7 @@ do day = 1, NDAYS
 ! N-balance soil (kgN m-2 field d-1): Change in NLITT+NSOMF+NSOMS+NMIN
   Nfert_f     = Nfert                         ! Fertilisation
   NfixT_f     = sum(Ac*NfixT_c)               ! N-fixation trees
-  NsenprunT_f = sum(Ac*(dNLT_c + dNBlitt_c + dNSlitt_c + dNRsomf_c))
+  NsenprunT_f = sum(Ac*(dNLTlitt_c + dNBTlitt_c + dNSTlitt_c + dNRsomf_c))
                                               ! Senescence + pruning trees
   Nsenprun_f  = sum(Ac*(dNL + prunNL + prunCW*NCW + dCR*NCR))
                                               ! Senescence + pruning coffee
@@ -327,7 +327,7 @@ do day = 1, NDAYS
   NuptT_f     = sum(Ac*NuptT_c)               ! N-uptake trees
   
 ! C-balance soil (kgC m-2 field d-1): Change in CLITT+CSOMF+CSOMS
-  CsenprunT_f = sum(Ac*(dCLT_c + dCBlitt_c + sCSTsen_c + dCRT_c))
+  CsenprunT_f = sum(Ac*(dCLTlitt_c + dCBTlitt_c + sCSTsen_c + dCRT_c))
                                               ! Senescence + pruning trees
   Csenprun_f  = sum(Ac*(dCL + prunCL + prunCW + dCR))
                                               ! Senescence + pruning coffee

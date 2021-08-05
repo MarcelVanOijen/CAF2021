@@ -38,15 +38,15 @@ real :: NCLTnew_t(nt)=0, NdemT_t(nt)=0, NuptT_t  (nt)=0
 real :: NfixT_t  (nt)=0
 
 ! CNtree
-real :: dCBlitt_t(nt)=0, dCBT_t   (nt)=0, dCLT_t   (nt)=0
-real :: dCPT_t   (nt)=0, dCRT_t   (nt)=0, dCST_t   (nt)=0
-real :: dNBlitt_t(nt)=0, dNSlitt_t(nt)=0, dNLT_t   (nt)=0
-real :: dNPT_t   (nt)=0, dNRsomf_t(nt)=0
-real :: harvCBT_t(nt)=0, harvCPT_t(nt)=0, harvCST_t(nt)=0
-real :: harvNBT_t(nt)=0, harvNPT_t(nt)=0, harvNST_t(nt)=0
-real :: NCLT_t   (nt)
-real :: sCBTman_t(nt)=0, sCLTman_t(nt)=0, sCRTman_t(nt)=0, sCSTman_t(nt)=0
-real :: sCBTsen_t(nt)=0, sCLTsen_t(nt)=0, sCRTsen_t(nt)=0, sCSTsen_t(nt)=0
+real :: dCLTlitt_t(nt)=0, dCBTlitt_t(nt)=0, dCBT_t    (nt)=0, dCLT_t   (nt)=0
+real :: dCPT_t    (nt)=0, dCRT_t    (nt)=0, dCST_t    (nt)=0
+real :: dNLTlitt_t(nt)=0, dNBTlitt_t(nt)=0, dNSTlitt_t(nt)=0, dNLT_t   (nt)=0
+real :: dNPT_t    (nt)=0, dNRsomf_t (nt)=0
+real :: harvCLT_t (nt)=0, harvCBT_t (nt)=0, harvCPT_t (nt)=0, harvCST_t(nt)=0
+real :: harvNLT_t (nt)=0, harvNBT_t (nt)=0, harvNPT_t (nt)=0, harvNST_t(nt)=0
+real :: NCLT_t    (nt)
+real :: sCBTman_t (nt)=0, sCLTman_t (nt)=0, sCRTman_t (nt)=0, sCSTman_t(nt)=0
+real :: sCBTsen_t (nt)=0, sCLTsen_t (nt)=0, sCRTsen_t (nt)=0, sCSTsen_t(nt)=0
 
 Contains
 
@@ -122,21 +122,8 @@ Contains
   real, intent(in)  :: Atc(nt,nc), LAIT_tc(nt,nc), LAIT_tcz(nt,nc,nz)
   real, intent(out) :: PARintT_c(nc), PARintT_t(nt)
   real, intent(out) :: PAR_cz(nc,nz), PARintT_tcz(nt,nc,nz)
-!  real              :: PARbelowT3_c(nc)
   real              :: PARintT_tc(nt,nc)
   integer           :: ic,it,iz
-!  PARintT_tc      = 0
-!  PARintT_tc(3,:) = PAR * (1. - exp(-KEXTT*LAIT_tc(3,:)))
-!  PARbelowT3_c    = PAR-PARintT_tc(3,:)
-!  do it=1,ntlow
-!    PARintT_tc(it,:) = PARbelowT3_c * &
-!	                   (1. - exp(-KEXTT*LAIT_tc(it,:)))
-!  enddo
-!  PARintT_c = sum( PARintT_tc, dim=1 )
-!  do it=1,nt
-!    PARintT_t(it) = sum( Atc(it,:) * PARintT_tc(it,:) )
-!  enddo
-  
   PAR_cz      = 0
   PAR_cz(:,1) = PAR
   do ic=1,nc
@@ -145,7 +132,6 @@ Contains
                       exp( -sum(KEXTT*LAIT_tcz(:,ic,iz-1)) )
     enddo
   enddo
-  
   PARintT_tcz = 0
   PARintT_tc  = 0
   do it=1,nt
@@ -164,7 +150,6 @@ Contains
   do it=1,nt
     PARintT_t(it) = sum( Atc(it,:) * PARintT_tc(it,:) )
   enddo
-
   end Subroutine PARintT
 
   Subroutine NPP(fTranT_t,PARintT_t)
@@ -239,34 +224,38 @@ Contains
   real :: CBT_t(nt), CLT_t(nt), CPT_t(nt), CRT_t(nt), CST_t(nt)
   real :: fTranT_t(nt), NLT_t(nt)
 ! Leaves
-  sCLTman_t    = (thinFRT + prunFRT) * CLT_t
-  sCLTsen_t    = ( CLT_t / (fTranT_t+FTCLminT*(1-fTranT_t)) ) / TCLmaxT
-  dCLT_t       = sCLTman_t + sCLTsen_t
-  dNLT_t       = dCLT_t * NCLT_t
+  sCLTman_t  = (thinFRT + prunFRT) * CLT_t
+  sCLTsen_t  = ( CLT_t / (fTranT_t+FTCLminT*(1-fTranT_t)) ) / TCLmaxT
+  dCLT_t     = sCLTman_t + sCLTsen_t
+  harvCLT_t  = sCLTman_t * FHARVLT
+  dCLTlitt_t = dCLT_t - harvCLT_t
+  harvNLT_t  = harvCLT_t * NCLT_t
+  dNLTlitt_t = dCLTlitt_t * NCLT_t
+  dNLT_t     = dCLT_t * NCLT_t
 ! Stems 
-  sCSTman_t    = thinFRT * CST_t
-  sCSTsen_t    = CST_t / TCST
-  dCST_t       = sCSTman_t + sCSTsen_t
-  harvCST_t    = sCSTman_t
-  harvNST_t    = sCSTman_t * NCWT
-  dNSlitt_t    = sCSTsen_t * NCWT
+  sCSTman_t  = thinFRT * CST_t
+  sCSTsen_t  = CST_t / TCST
+  dCST_t     = sCSTman_t + sCSTsen_t
+  harvCST_t  = sCSTman_t
+  harvNST_t  = sCSTman_t * NCWT
+  dNSTlitt_t = sCSTsen_t * NCWT
 ! Branches
-  sCBTman_t    = (thinFRT + prunFRT) * CBT_t
-  sCBTsen_t    = CBT_t / TCBT
-  dCBT_t       = sCBTman_t + sCBTsen_t
-  harvCBT_t    = sCBTman_t * FHARVBT
-  harvNBT_t    = sCBTman_t * FHARVBT * NCWT
-  dCBlitt_t    = dCBT_t - harvCBT_t
-  dNBlitt_t    = dCBlitt_t * NCWT
+  sCBTman_t  = (thinFRT + prunFRT) * CBT_t
+  sCBTsen_t  = CBT_t / TCBT
+  dCBT_t     = sCBTman_t + sCBTsen_t
+  harvCBT_t  = sCBTman_t * FHARVBT
+  dCBTlitt_t = dCBT_t - harvCBT_t
+  harvNBT_t  = harvCBT_t  * NCWT
+  dNBTlitt_t = dCBTlitt_t * NCWT
 ! Products (fruit)
-  dCPT_t       = CPT_t / TCPTHARV
-  harvCPT_t    = dCPT_t
-  harvNPT_t    = dCPT_t * NCPT
+  dCPT_t    = CPT_t / TCPTHARV
+  harvCPT_t = dCPT_t
+  harvNPT_t = dCPT_t * NCPT
 ! Roots  
-  sCRTman_t    = thinFRT * CRT_t
-  sCRTsen_t    = CRT_t / TCRT
-  dCRT_t       = sCRTman_t + sCRTsen_t
-  dNRsomf_t    = dCRT_t * NCRT
+  sCRTman_t = thinFRT * CRT_t
+  sCRTsen_t = CRT_t / TCRT
+  dCRT_t    = sCRTman_t + sCRTsen_t
+  dNRsomf_t = dCRT_t * NCRT
   end Subroutine CNtree
   
 end Module tree 
