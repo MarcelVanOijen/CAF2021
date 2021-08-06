@@ -79,7 +79,11 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
 ```{r}
   load( "df_C.f.rda" )
   load( "df_G.f.rda" )
-  
+
+  n_C.f <- dim(df_C.f)[1] ; n_G.f <- dim(df_G.f)[1]
+```
+
+```{r}
   iN500_C <- which(df_C.f$Nfert > 500 )
   iN500_G <- which(df_G.f$Nfert > 500 )
   
@@ -90,10 +94,150 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   df_G.f$Nfert[iN500_G] <- 500
 ```
 
+
+
+\clearpage
+
+# Pedotransfer functions
+
 ```{r}
-  n_C.f <- dim(df_C.f)[1] ; n_G.f <- dim(df_G.f)[1]
+  dir.f           <- "data/Farms SEACAF/"
+  file_soil.f     <- "Soil_general.xlsx"
 ```
 
+```{r}
+  df_soil1.f0 <- read_excel( paste0(dir.f,file_soil.f),
+                             sheet="Apparent density", guess_max=3000 )
+
+  df_soil1.f  <- df_soil1.f0 %>%
+    mutate( code = ifelse(country=="Costa Rica", 1000,
+                   ifelse(country=="Guatemala" , 2000,
+                          NA )) ) %>%
+    mutate( code = code + farm_number ) %>%
+    arrange( code ) %>%
+    rename( DM.soil.sample_C     = "weight 105"        ) %>%
+    rename( FW.soil.sample_G     = "Fresh weight"      ) %>%
+    rename( FW.soil.subsample1_G = "sub sample weight" ) %>%
+    rename( AD.soil.subsample1_G = "airdry weight"     ) %>%
+    rename( AD.soil.subsample2_G = "Gsubsample_105C"   ) %>%
+    rename( DM.soil.subsample2_G = "Gweight_105C"      ) %>%
+    mutate( DM.soil.subsample2_G =
+              ifelse( DM.soil.subsample2_G < AD.soil.subsample2_G,
+                      DM.soil.subsample2_G,
+                      AD.soil.subsample2_G ) ) %>%
+    mutate( DM.soil.sample =
+              ifelse( country=="Costa Rica", DM.soil.sample_C,
+              ifelse( country=="Guatemala" , FW.soil.sample_G *
+                      (AD.soil.subsample1_G / FW.soil.subsample1_G) *
+                      (DM.soil.subsample2_G / AD.soil.subsample2_G),
+                      NA )) ) %>%
+    group_by( code, Profundity ) %>%
+    # summarise( DM.soil.layer = mean(DM.soil.sample,na.rm=T) * 
+    summarise( DM.soil.layer = median(DM.soil.sample,na.rm=T) *
+                               0.001 * (10000/78.54) ) %>% # kg DM m-2 per layer
+    summarise( DM.soil.00_26 = sum(DM.soil.layer) ) %>% # kg DM m-2 in top 26 cm
+    mutate( DM.soil = DM.soil.00_26 / (2.6 * 100) ) # DM in kg l-1 in top 26 cm
+```
+
+```{r}
+  df_soil2.f0 <- read_excel( paste0(dir.f,file_soil.f),
+                             sheet="physical_chemical" )
+
+  df_soil2.f <- df_soil2.f0 %>%
+    mutate( code = ifelse( startsWith(farm_code,"Costa Rica"), 1000,
+                   ifelse( startsWith(farm_code,"Guatemala" ), 2000,
+                           NA )) ) %>%
+    mutate( code = code + farm_number ) %>%
+    arrange( code ) %>%
+    rename( Cperc.soil.00_13 = "0-13_%Carbon"    ) %>%
+    rename( Cperc.soil.13_26 = "13-26_%Carbon"   ) %>%
+    rename( Nperc.soil.00_13 = "0-13_%Nitrogen"  ) %>%
+    rename( Nperc.soil.13_26 = "13-26_%Nitrogen" ) %>%
+    rename( sand.00_13_C     = "0-13_Sand"       ) %>%
+    rename( sand.13_26_C     = "13-26_Sand"      ) %>%
+    rename( silt.00_13_C     = "0-13_Silt"       ) %>%
+    rename( silt.13_26_C     = "13-26_Silt"      ) %>%
+    rename( clay.00_13_C     = "0-13_Clay"       ) %>%
+    rename( clay.13_26_C     = "13-26_Clay"      ) %>%
+    mutate( sand_C           = 0.5 * (sand.00_13_C + sand.13_26_C) ) %>%
+    mutate( silt_C           = 0.5 * (silt.00_13_C + silt.13_26_C) ) %>%
+    mutate( clay_C           = 0.5 * (clay.00_13_C + clay.13_26_C) ) %>%
+    rename( sand_G           = "General_sand"    ) %>%
+    rename( silt_G           = "General_silt"    ) %>%
+    rename( clay_G           = "General_clay"    ) %>%
+    mutate( sand             = pmax( sand_C, sand_G, na.rm=T )) %>%
+    mutate( silt             = pmax( silt_C, silt_G, na.rm=T )) %>%
+    mutate( clay             = pmax( clay_C, clay_G, na.rm=T )) %>%
+    mutate( Cperc.soil.00_26 = 0.5 * (Cperc.soil.00_13 + Cperc.soil.13_26) ) %>%
+    mutate( Nperc.soil.00_26 = 0.5 * (Nperc.soil.00_13 + Nperc.soil.13_26) ) %>%
+    mutate( CN.soil          = Cperc.soil.00_26 / Nperc.soil.00_26 ) %>%
+    select( code, CN.soil, Cperc.soil.00_26, Nperc.soil.00_26,
+            sand, silt, clay )
+```
+
+```{r}
+  df_soil.f <- df_soil1.f %>%
+    inner_join( df_soil2.f, by="code" ) %>%
+    mutate( C.soil.00_26 = DM.soil.00_26 * Cperc.soil.00_26 / 100 ) %>%
+    mutate( N.soil.00_26 = DM.soil.00_26 * Nperc.soil.00_26 / 100 ) %>%
+    mutate( C.soil       = C.soil.00_26  * 1.5 ) %>% # Assuming 2/3 of SM is in top 26 cm
+    mutate( N.soil       = N.soil.00_26  * 1.5 ) %>% # Assuming 2/3 of SM is in top 26 cm
+    select( code, DM.soil, CN.soil, C.soil, N.soil, sand, silt, clay )
+```
+
+```{r}
+  # Pedotransfer function derived by Tomasella et al. (2003)
+  # as presented and evaluated by Tomasella et al. (2004)
+  # We have no data for "Moisture equivalence (Me)" and set it at Me=0.4.
+  # Me also add minimum bounds (WP>=0.05, FC>=WP+0.10)
+  fTomasella2003 <- function(DM,SI,CL){
+    Me  = 0.4
+    x14 = -1.05501 + 0.0650857 * SI
+    x15 = -2.07588 + 0.0423954 * CL
+    x16 = -6.03402 + 4.80572   * DM
+    x17 = -2.18409 + 8.84963   * Me
+    z9  =  0.175202 + 1.18513 * x17 - 0.0996042 * x17^2 +
+           0.327915 * x16 - 0.0758657 * x16^2
+    z10 =  0.929344 * z9 + 0.132519 * x14
+    z13 =  0.235084 + 0.33033 * x15 - 0.191838 * x15^2 + 0.0543679 * x15^3 +
+           0.977685 * x17 + 0.304174 * x15 * x17 - 0.218857 * x17^2 -
+           0.164373 * x15 * x17^2 + 0.0415057 * x17^3 +
+           0.373361 * x16 + 0.0811861 * x17 * x16 - 0.0768087 * x15 * x17 * x16
+    WP  =  pmax( 0.05  , 0.214008 + 0.0862945 * z13 )
+    FC  =  pmax( WP+0.1, 0.339255 + 0.112526  * z10 )
+    return( list(WP=WP,FC=FC) ) }
+
+    df_water.f <- df_soil.f %>%
+      mutate( WP = fTomasella2003(DM.soil,silt,clay)$WP ) %>%
+      mutate( FC = fTomasella2003(DM.soil,silt,clay)$FC ) %>%
+      select( code, WP, FC )
+
+    summary( df_water.f$WP )
+    summary( df_water.f$FC )
+    summary( df_water.f$FC - df_water.f$WP )
+```
+
+```{r}
+  df_water_C.f <- df_water.f %>% subset( df_water.f$code <  2000 )
+  df_water_G.f <- df_water.f %>% subset( df_water.f$code >= 2000 )
+```
+
+```{r}
+  df_C.f <- df_C.f %>% inner_join( df_water_C.f, by="code" )
+  df_G.f <- df_G.f %>% inner_join( df_water_G.f, by="code" )
+```
+
+```{r, eval=F}
+# Tropical Andosols (Hodnett & Tomasella 2002)
+  VanGenuchten <- function(psi=-1600,a=0.53,n=1.502,thetaR=0.251,thetaS=0.633) {
+    theta <- thetaR + (thetaS-thetaR) / (1 + (a*abs(psi))^n)^(1-1/n)
+    return( theta ) }
+
+  VanGenuchten( -Inf) # WCAD 0.25
+  VanGenuchten(-1600) # WCWP 0.26
+  VanGenuchten(  -10) # WCFC 0.41
+  VanGenuchten(    0) # WCST 0.63
+```
 
 
 \clearpage
@@ -192,6 +336,12 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
   ip_LAT         <- which( names_params=="LAT"         )
   ip_SHADETARGET <- which( names_params=="SHADETARGET" )
   ip_SLOPE       <- which( names_params=="SLOPE"       )
+  
+  ip_FWCAD  <- which( names_params=="FWCAD"  )
+  ip_FWCFC  <- which( names_params=="FWCFC"  )
+  ip_FWCWET <- which( names_params=="FWCWET" )
+  ip_FWCWP  <- which( names_params=="FWCWP"  )
+  ip_WCST   <- which( names_params== "WCST"  )
 ```
 
 ```{r}
@@ -203,6 +353,13 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
     SLOPE_C <- df_C.f$slope  [ fi ]
     Nfert_C <- df_C.f$Nfert  [ fi ]
     shade_C <- df_C.f$shade  [ fi ]
+    
+    WCWP_C  <- df_C.f$WP     [ fi ]
+    WCFC_C  <- df_C.f$FC     [ fi ]
+    WCAD_C  <- 0.01
+    WCST_C  <- min( 1, WCFC_C+0.1 )
+    WCWET_C <- 0.5 * (WCFC_C + WCST_C)
+    
     source( sitesettings_filenames[1] )
     matrix_weather_fi <- read_listweather_CAF( df_C.f$weather.WC, fi )
 
@@ -236,6 +393,12 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
         params[ ip_LAT                              ] <- LAT_C
         params[ ip_SLOPE                            ] <- SLOPE_C
         params[ ip_SHADETARGET                      ] <- shade_C
+        
+        params[ ip_FWCAD  ] <- WCAD_C  / WCST_C
+        params[ ip_FWCWP  ] <- WCWP_C  / WCST_C
+        params[ ip_FWCFC  ] <- WCFC_C  / WCST_C
+        params[ ip_FWCWET ] <- WCWET_C / WCST_C
+        params[ ip_WCST   ] <- WCST_C
       }
       if(i==2) {
         if(df_C.f$nt[fi]==0) { source(sitesettings_filenames[19])
@@ -257,6 +420,12 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
         params[ ip_LAT                              ] <- LAT_C
         params[ ip_SLOPE                            ] <- SLOPE_C
         params[ ip_SHADETARGET                      ] <- shade_C
+        
+        params[ ip_FWCAD  ] <- WCAD_C  / WCST_C
+        params[ ip_FWCWP  ] <- WCWP_C  / WCST_C
+        params[ ip_FWCFC  ] <- WCFC_C  / WCST_C
+        params[ ip_FWCWET ] <- WCWET_C / WCST_C
+        params[ ip_WCST   ] <- WCST_C
       }
       outF <- run_model( params, matrix_weather_fi, calendar_fert_fi,
         calendar_prunC, calendar_prunT, calendar_thinT, NDAYS )
@@ -275,6 +444,13 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
     SLOPE_G <- df_G.f$slope  [ fi ]
     Nfert_G <- df_G.f$Nfert  [ fi ]
     shade_G <- df_G.f$shade  [ fi ]
+    
+    WCWP_G  <- df_G.f$WP     [ fi ]
+    WCFC_G  <- df_G.f$FC     [ fi ]
+    WCAD_G  <- 0.01
+    WCST_G  <- min( 1, WCFC_G+0.1 )
+    WCWET_G <- 0.5 * (WCFC_G + WCST_G)
+    
     source( sitesettings_filenames[1] )
     matrix_weather_fi <- read_listweather_CAF( df_G.f$weather.WC, fi )
     
@@ -308,6 +484,12 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
         params[ ip_LAT                              ] <- LAT_G
         params[ ip_SLOPE                            ] <- SLOPE_G
         params[ ip_SHADETARGET                      ] <- shade_G
+        
+        params[ ip_FWCAD  ] <- WCAD_G  / WCST_G
+        params[ ip_FWCWP  ] <- WCWP_G  / WCST_G
+        params[ ip_FWCFC  ] <- WCFC_G  / WCST_G
+        params[ ip_FWCWET ] <- WCWET_G / WCST_G
+        params[ ip_WCST   ] <- WCST_G
       }
       if(i==2) {
         if(df_G.f$nt[fi]==0) { source(sitesettings_filenames[19])
@@ -329,6 +511,12 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
         params[ ip_LAT                              ] <- LAT_G
         params[ ip_SLOPE                            ] <- SLOPE_G
         params[ ip_SHADETARGET                      ] <- shade_G
+        
+        params[ ip_FWCAD  ] <- WCAD_G  / WCST_G
+        params[ ip_FWCWP  ] <- WCWP_G  / WCST_G
+        params[ ip_FWCFC  ] <- WCFC_G  / WCST_G
+        params[ ip_FWCWET ] <- WCWET_G / WCST_G
+        params[ ip_WCST   ] <- WCST_G
       }
       outF <- run_model( params, matrix_weather_fi, calendar_fert_fi,
         calendar_prunC, calendar_prunT, calendar_thinT, NDAYS )
