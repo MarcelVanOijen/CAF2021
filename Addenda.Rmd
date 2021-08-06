@@ -79,6 +79,15 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
 ```{r}
   load( "df_C.f.rda" )
   load( "df_G.f.rda" )
+  
+  iN500_C <- which(df_C.f$Nfert > 500 )
+  iN500_G <- which(df_G.f$Nfert > 500 )
+  
+  cbind( df_C.f$code[iN500_C], df_C.f$Nfert[iN500_C] )
+  cbind( df_G.f$code[iN500_G], df_G.f$Nfert[iN500_G] )
+  
+  df_C.f$Nfert[iN500_C] <- 500
+  df_G.f$Nfert[iN500_G] <- 500
 ```
 
 ```{r}
@@ -357,30 +366,24 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
 ```
 
 ```{r}
-  par( mfrow=c(1,2) )
+  par( mfrow=c(2,2), mar=c(3,3,1,1) )
 
   F2_C             <- dfoutFSummary( df_C.f_sim, Fi=2 )
   Csoil_F2_C.f_sim <- F2_C[,"Csoil_f"]
   plot( df_C.f$C.soil, Csoil_F2_C.f_sim )
-
   F2_G             <- dfoutFSummary( df_G.f_sim, Fi=2 )
   Csoil_F2_G.f_sim <- F2_G[,"Csoil_f"]
   plot( df_G.f$C.soil, Csoil_F2_G.f_sim )
 
-```
-
-```{r}
-  par( mfrow=c(1,2) )
-
   F2_C             <- dfoutFSummary( df_C.f_sim, Fi=2 )
   Shade_F2_C.f_sim <- F2_C[,"Shade_f"]
   plot( df_C.f$shade, Shade_F2_C.f_sim )
-
   F2_G             <- dfoutFSummary( df_G.f_sim, Fi=2 )
   Shade_F2_G.f_sim <- F2_G[,"Shade_f"]
   plot( df_G.f$shade, Shade_F2_G.f_sim )
-
 ```
+
+Note that Costa Rica farm 1157 achieves a shade of 0.23 despite having nt=0 shade trees!
 
 ```{r}
   df <- df_C.f_sim
@@ -548,7 +551,11 @@ Results of these simulations are shown in Figs \ref{fig:XX14}, \ref{fig:XX15}, a
 ```{r}
   plotimpacts_nt.Nfert <- function( listmat=listmat_nt_C, var="y.sim" ){
     plot  ( listmat[[1]][,"Nfert"], listmat[[1]][,var],
-            xlab="Nfert", ylab="",main=var, pch=1 )
+      xlab="Nfert", ylab="",main=var, pch=1,
+      xlim=c(0,max(listmat[[1]][,"Nfert"],listmat[[2]][,"Nfert"],
+                   listmat[[3]][,"Nfert"])),
+      ylim=c(min(0,listmat[[1]][,var],listmat[[2]][,var],listmat[[3]][,var]),
+             max(  listmat[[1]][,var],listmat[[2]][,var],listmat[[3]][,var])) )
     points( listmat[[2]][,"Nfert"], listmat[[2]][,var], pch=20, col="red"  )
     points( listmat[[3]][,"Nfert"], listmat[[3]][,var], pch=6, col="blue" )
     

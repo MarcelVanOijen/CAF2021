@@ -34,7 +34,7 @@ Contains
 	    do t=1,nt
         if ( (year==DAYS_PRUNT(t,i,1)) .and. (doy==DAYS_PRUNT(t,i,2)) ) then
           prunFRT(t) = FRPRUNT(t,i)
-          if ((SHADETARGET>=0).and.(Shade_f>0)) then
+          if ((SHADETARGET>0).and.(Shade_f>0)) then
             prunFRT(t) = 1 - SHADETARGET / Shade_f
           endif
 	      endif
