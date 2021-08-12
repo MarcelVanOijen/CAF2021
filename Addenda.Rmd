@@ -53,25 +53,24 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
 ```
 
 ```{r}
-  add.lmleg <- function(){
-    y.lm <- lm( y ~ x )
+  add.lmleg <- function(orig=FALSE){
+    if(orig) { y.lm <- lm( y ~ 0 + x ) }
+    else     { y.lm <- lm( y ~ x ) }
     r2   <- round( summary(y.lm)$r.squared, 2 )
-    abline( y.lm$coefficients[1], y.lm$coefficients[2], col="blue" )
+    if(orig) {
+      abline( 0, y.lm$coefficients[1], col="blue" )
+    } else {
+      abline( y.lm$coefficients[1], y.lm$coefficients[2], col="blue" )
+    }
     legend( "bottomright",
             legend=paste("r2= ",as.character(r2)),
             col=c("blue"), lty=c(1), cex=0.7, bg="transparent" )
   }
 
-  plotxylm <- function(maintxt="Obs. Costa Rica", xtxt="Sim.") {
-    plot(x,y,xlab=xtxt,ylab="",main=maintxt) ; add.lmleg()
+  plotxylm <- function(maintxt="Obs. Costa Rica", xtxt="Sim.", orig=FALSE) {
+    plot(x,y,xlab=xtxt,ylab="",main=maintxt) ; add.lmleg(orig)
   }
 ```
-
-
-
-\clearpage
-
-# Preliminary data analysis
 
 ```{r}
   load( "df_C.f.rda" )
@@ -79,6 +78,14 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
 
   n_C.f <- dim(df_C.f)[1] ; n_G.f <- dim(df_G.f)[1]
 ```
+
+
+
+\clearpage
+
+# Correcting errors in df_C.f and df_G.f
+
+## Capping excessive fertilisation rates
 
 ```{r}
   iN500_C <- which(df_C.f$Nfert > 500 )
@@ -91,15 +98,27 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   df_G.f$Nfert[iN500_G] <- 500
 ```
 
+## Correcting inconsistencies in reported tree and shade variables
+
+```{r}
+  if1104 <- which( df_C.f$code==1104 ) # nt=8 but tree densities all 0
+  if1157 <- which( df_C.f$code==1157 ) # nt=0 but shade>0 (VisSky<1)
+  
+  c( df_C.f$nt[if1104], df_C.f$shade[if1104] )
+  c( df_C.f$nt[if1157], df_C.f$shade[if1157] )
+  
+  df_C.f$nt[if1157] <- 1
+```
+
 
 
 \clearpage
 
-# Pedotransfer functions
+# Pedotransfer functions and updating df_C|G.f
 
 ```{r}
-  dir.f           <- "data/Farms SEACAF/"
-  file_soil.f     <- "Soil_general.xlsx"
+  dir.f       <- "data/Farms SEACAF/"
+  file_soil.f <- "Soil_general.xlsx"
 ```
 
 ```{r}
@@ -208,7 +227,9 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
       mutate( WP = fTomasella2003(DM.soil,silt,clay)$WP ) %>%
       mutate( FC = fTomasella2003(DM.soil,silt,clay)$FC ) %>%
       select( code, WP, FC )
+```
 
+```{r, echo=T}
     summary( df_water.f$WP )
     summary( df_water.f$FC )
     summary( df_water.f$FC - df_water.f$WP )
@@ -222,6 +243,8 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
 ```{r}
   df_C.f <- df_C.f %>% inner_join( df_water_C.f, by="code" )
   df_G.f <- df_G.f %>% inner_join( df_water_G.f, by="code" )
+  
+  n_C.f  <- dim(df_C.f)[1] ; n_G.f <- dim(df_G.f)[1]
 ```
 
 ```{r, eval=F}
@@ -235,6 +258,585 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   VanGenuchten(  -10) # WCFC 0.41
   VanGenuchten(    0) # WCST 0.63
 ```
+
+
+
+\clearpage
+
+# Weather data 2019-2020 and updating df_C|G.f
+
+```{r}
+  dir_weatherstations <- "weather/Climatic_Data/"
+    dir_C_Icafe   <- "CostaRica/Icafe/"
+    dir_C_IMN     <- "CostaRica/IMN/"
+    dir_G_Anacafe <- "Guatemala/Anacafe/"
+
+  dir_Icafe     <- paste0( dir_weatherstations, dir_C_Icafe   ) 
+  dir_IMN       <- paste0( dir_weatherstations, dir_C_IMN     )
+  dir_Anacafe   <- paste0( dir_weatherstations, dir_G_Anacafe ) 
+  
+  file_Icafe    <- "Datos confidenciales CLIMA-ICAFE- Convenio CATIE.xlsx"
+  files_IMN.TMIN <- list.files( dir_IMN, pattern="*TMIN_TMAX_RAIN.xlsx" )
+  files_IMN.TMAX <- list.files( dir_IMN, pattern="*TMIN_TMAX_RAIN.xlsx" )
+  files_IMN.RAIN <- list.files( dir_IMN, pattern="*RAIN.xlsx" )
+    n_IMN.TMIN   <- length( files_IMN.TMIN )
+    n_IMN.TMAX   <- length( files_IMN.TMAX )
+    n_IMN.RAIN   <- length( files_IMN.RAIN )
+  files_Anacafe <- list.files( dir_Anacafe )
+    n_Anacafe   <- length( files_Anacafe )
+```
+
+```{r}
+  df_Icafe       <- read_excel( paste0(dir_Icafe,file_Icafe) )
+  stations_Icafe <- unique(df_Icafe$Estacion) ; n_Icafe <- length(stations_Icafe)
+
+  list_Icafe.a    <- list_Icafe    <- vector( "list", n_Icafe    )
+  list_IMN.TMIN.a <- list_IMN.TMIN <- vector( "list", n_IMN.TMIN )
+  list_IMN.TMAX.a <- list_IMN.TMAX <- vector( "list", n_IMN.TMAX )
+  list_IMN.RAIN.a <- list_IMN.RAIN <- vector( "list", n_IMN.RAIN )
+  list_Anacafe.a  <- list_Anacafe  <- vector( "list", n_Anacafe  )
+
+  for( s in 1:n_Icafe ) {
+    list_Icafe[[s]]   <- df_Icafe %>% filter( Estacion==stations_Icafe[s] ) }
+  for( s in 1:n_IMN.TMIN ) {
+    fs <- paste0(dir_IMN,files_IMN.TMIN[s])
+    list_IMN.TMIN[[s]] <- read_excel( fs, sheet="TMIN", skip=1,
+                                      col_type="numeric" ) }
+  for( s in 1:n_IMN.TMAX ) {
+    fs <- paste0(dir_IMN,files_IMN.TMAX[s])
+    list_IMN.TMAX[[s]] <- read_excel( fs, sheet="TMAX", skip=1,
+                                      col_type="numeric" ) }
+  for( s in 1:n_IMN.RAIN ) {
+    fs <- paste0(dir_IMN,files_IMN.RAIN[s])
+    list_IMN.RAIN[[s]] <- read_excel( fs, sheet="RAIN", skip=1,
+                                      col_type="numeric" ) }
+  for( s in 1:n_Anacafe ) {
+    list_Anacafe[[s]] <- read_csv( paste0(dir_Anacafe,files_Anacafe[s]) ) }
+```
+
+```{r}
+  for( s in 1:n_Icafe ) {
+    list_Icafe.a[[s]] <- list_Icafe[[s]] %>%
+      rename( ST = Estacion ) %>%
+      rename( TMAX    = "Temperatura máxima °C" ) %>%
+      rename( TMIN    = "Temperatura mínima °C" ) %>%
+      rename( RAIN    = "Lluvia mm" ) %>%
+      select( ST, year, month, TMIN, TMAX, RAIN ) %>%
+      group_by( ST, year, month ) %>%
+      summarize( TMIN = mean(TMIN,na.rm=T),
+                 TMAX = mean(TMAX,na.rm=T),
+                 RAIN = sum (RAIN,na.rm=T) ) %>%
+      group_by ( month ) %>%
+      mutate( TMIN.m = mean(TMIN,na.rm=T) ) %>%
+      mutate( TMAX.m = mean(TMAX,na.rm=T) ) %>%
+      mutate( RAIN.m = mean(RAIN,na.rm=T) ) %>%
+      filter( year>=2019 ) %>%
+      mutate( TMIN.a = TMIN - TMIN.m ) %>%
+      mutate( TMAX.a = TMAX - TMAX.m ) %>%
+      mutate( RAIN.a = RAIN - RAIN.m ) %>%
+      mutate( lat    = ifelse(ST=="Orosi"      ,  9.78529,
+                       ifelse(ST=="Atirro"     ,  9.8612 ,
+                       ifelse(ST=="Santa Rosa" ,  9.92852,
+                       ifelse(ST=="San Ramón"  , 10.06455,
+                       ifelse(ST=="Naranjo"    , 10.10778,
+                       ifelse(ST=="Frailes"    ,  9.75   ,
+                       ifelse(ST=="San Carlos" ,  9.62661,
+                       ifelse(ST=="San Lorenzo",  9.6414 ,
+                       ifelse(ST=="Dota"       ,  9.65056,
+                              NA ))))))))) ) %>%
+      mutate( lon    = ifelse(ST=="Orosi"      , -83.84652,
+                       ifelse(ST=="Atirro"     , -83.6358 ,
+                       ifelse(ST=="Santa Rosa" , -83.69964,
+                       ifelse(ST=="San Ramón"  , -84.47379,
+                       ifelse(ST=="Naranjo"    , -84.38361,
+                       ifelse(ST=="Frailes"    , -84.05306,
+                       ifelse(ST=="San Carlos" , -84.09163,
+                       ifelse(ST=="San Lorenzo", -84.02354,
+                       ifelse(ST=="Dota"       , -83.9575 ,
+                              NA ))))))))) ) %>%
+      dplyr::select( ST, lat, lon, year, month, TMIN.a, TMAX.a, RAIN.a )
+  }
+  # for( s in 1:n_Icafe ) { list_Icafe.a[[s]] %>% print(n = 1) }
+```
+
+```{r}
+  for(s in 1:n_IMN.TMIN) {
+    list_IMN.TMIN.a[[s]] <- list_IMN.TMIN[[s]] %>%
+      rename( month = Mes ) %>%
+      rename( year = Año ) %>%
+      mutate( TMIN = rowMeans( select(.,starts_with("D")), na.rm=T) ) %>%
+      dplyr::select( year, month, TMIN ) %>%
+      group_by ( month ) %>%
+      mutate( TMIN.m = mean(TMIN,na.rm=T) ) %>%
+      filter( year>=2019 ) %>%
+      mutate( TMIN.a = TMIN - TMIN.m ) %>%
+      mutate( ST = substr(files_IMN.TMAX[s],1,5) ) %>%
+      dplyr::select( ST, year, month, TMIN.a ) }
+
+  for(s in 1:n_IMN.TMAX) {
+    list_IMN.TMAX.a[[s]] <- list_IMN.TMAX[[s]] %>%
+      rename( month = Mes ) %>%
+      rename( year = Año ) %>%
+      mutate( TMAX = rowMeans( select(.,starts_with("D")), na.rm=T) ) %>%
+      dplyr::select( year, month, TMAX ) %>%
+      group_by ( month ) %>%
+      mutate( TMAX.m = mean(TMAX,na.rm=T) ) %>%
+      filter( year>=2019 ) %>%
+      mutate( TMAX.a = TMAX - TMAX.m ) %>%
+      mutate( ST = substr(files_IMN.TMAX[s],1,5) ) %>%
+      dplyr::select( ST, year, month, TMAX.a ) }
+
+  for(s in 1:n_IMN.RAIN) {
+    list_IMN.RAIN.a[[s]] <- list_IMN.RAIN[[s]] %>%
+      rename( month = Mes ) %>%
+      rename( year = Año ) %>%
+      mutate( RAIN = rowSums( select(.,starts_with("D")), na.rm=T) ) %>%
+      dplyr::select( year, month, RAIN ) %>%
+      group_by ( month ) %>%
+      mutate( RAIN.m = mean(RAIN,na.rm=T) ) %>%
+      filter( year>=2019 ) %>%
+      mutate( RAIN.a = RAIN - RAIN.m ) %>%
+      mutate( ST = substr(files_IMN.RAIN[s],1,5) ) %>%
+      dplyr::select( ST, year, month, RAIN.a ) }
+
+  list_IMN.a <- list_IMN.RAIN.a
+  for(s in 1:n_IMN.RAIN) {
+    list_IMN.a[[s]] <- list_IMN.a[[s]] %>%
+      mutate( lat = ifelse(ST==73048,  9.838611,
+                    ifelse(ST==73123,  9.852222,
+                    ifelse(ST==84187, 10.005   ,
+                    ifelse(ST==84189, 10.13733 ,
+                    ifelse(ST==88039,  9.766667,
+                    ifelse(ST==88047,  9.736667,
+                           NA )))))) ) %>%
+      mutate( lon = ifelse(ST==73048, -83.90722,
+                    ifelse(ST==73123, -83.90861,
+                    ifelse(ST==84187, -84.26556,
+                    ifelse(ST==84189, -84.1935 ,
+                    ifelse(ST==88039, -84.09056,
+                    ifelse(ST==88047, -84.00056,
+                           NA )))))) ) %>%
+      dplyr::select( ST, lat, lon, year, month, RAIN.a )
+    }
+  for(s in 1:n_IMN.RAIN) {
+    sTMIN <- which( files_IMN.RAIN[s] == files_IMN.TMIN )
+    if (length(sTMIN>0)) {
+      list_IMN.a[[s]] <- list_IMN.a[[s]] %>%
+        inner_join( list_IMN.TMIN.a[[sTMIN]], by=c("ST","year","month") ) %>%
+        dplyr::select(ST,lat,lon,year,month,TMIN.a,RAIN.a)
+    }
+    sTMAX <- which( files_IMN.RAIN[s] == files_IMN.TMAX )
+    if (length(sTMAX>0)) {
+      list_IMN.a[[s]] <- list_IMN.a[[s]] %>%
+        inner_join( list_IMN.TMAX.a[[sTMAX]], by=c("ST","year","month") ) %>%
+        dplyr::select(ST,lat,lon,year,month,TMIN.a,TMAX.a,RAIN.a)
+    }
+  }
+```
+
+```{r}
+  for( s in 1:n_Anacafe ) {
+    list_Anacafe.a[[s]] <- list_Anacafe[[s]] %>%
+      rename( ST    = ID_ESTACION ) %>%
+      rename( lat   = LATITUD     ) %>%
+      rename( lon   = LONGITUD    ) %>%
+      rename( TMEAN = "TMP" ) %>%
+      rename( RAIN  = "RNF" ) %>%
+      select( ST, lat, lon, year, month, TMEAN, RAIN ) %>%
+      group_by( ST, lat, lon, year, month ) %>%
+      summarize( TMEAN = mean(TMEAN,na.rm=T),
+                 RAIN  = sum (RAIN ,na.rm=T) ) %>%
+      group_by ( month ) %>%
+      mutate( TMEAN.m = mean(TMEAN,na.rm=T) ) %>%
+      mutate( RAIN.m  = mean(RAIN ,na.rm=T) ) %>%
+      filter( year>=2019 ) %>%
+      mutate( TMEAN.a = TMEAN - TMEAN.m ) %>%
+      mutate( RAIN.a  = RAIN  - RAIN.m  ) %>%
+      dplyr::select( ST, lat, lon, year, month, TMEAN.a, RAIN.a )
+  }
+  # for( s in 1:n_Anacafe ) { list_Anacafe.a[[s]] %>% print(n = 20, width=Inf) }
+```
+
+```{r}
+  Icafe.a <- list_Icafe.a[[1]]
+  for(s in 2:n_Icafe   ) { Icafe.a <- rbind(Icafe.a,list_Icafe.a[[s]]) }
+  IMN.a   <- list_IMN.a  [[1]]
+  for(s in 2:n_IMN.RAIN) { IMN.a <- rbind( IMN.a, list_IMN.a[[s]] ) }
+
+  C.a     <- rbind( Icafe.a, IMN.a )
+  # C.a %>% print(width=Inf,n=Inf)
+  
+  G.a     <- list_Anacafe.a[[1]]
+  for(s in 2:n_Anacafe) { G.a <- rbind( G.a, list_Anacafe.a[[s]] ) }
+  ioutlier.TMEAN_G <- which( abs(G.a$TMEAN.a)>5 )
+  G.a$TMEAN.a[ioutlier.TMEAN_G] <- NA
+
+  # G.a %>% print(width=Inf,n=Inf)
+```
+
+```{r}
+  df.ym <- function(df,y,m) {df %>% filter(year==y) %>% filter(month==m)}
+```
+
+```{r}
+  # Weather stations Costa Rica and their distance from Turrialba
+  df=C.a
+
+  lonlat_C.ST <- df[ c("lon","lat") ]
+  coordsT     <- c( -83.68,  9.89  ) # Longitude, Latitude
+  dist.T      <- as.vector( distm( coordsT, lonlat_C.ST ) ) / 1000
+  df          <- df %>% add_column( dist=dist.T )
+
+  par( mfrow=c(3,4), mar=c(2,2,1,1) )
+
+  country="C" ; xvar="dist"
+  
+  yvar="TMIN.a" ; yrange <- range( df[[yvar]], na.rm=T )
+  for(m in 1:12) {
+    df.m <- df.ym(df,2019,m) ; x = df.m[[xvar]] ; y = df.m[[yvar]]
+    plot( x, y, main=paste0(country,":",yvar," ",m),
+          xlab=xvar, ylab="", ylim=yrange )
+    abline(h=0,col="black")
+    lm <- lm( y ~ x )
+    abline( lm$coefficients[1], lm$coefficients[2], col="blue" )
+  }
+  
+  yvar="TMAX.a" ; yrange <- range( df[[yvar]], na.rm=T )
+  for(m in 1:12) {
+    df.m <- df.ym(df,2019,m) ; x = df.m[[xvar]] ; y = df.m[[yvar]]
+    plot( x, y, main=paste0(country,":",yvar," ",m),
+          xlab=xvar, ylab="", ylim=yrange )
+    abline(h=0,col="black")
+    lm <- lm( y ~ x )
+    abline( lm$coefficients[1], lm$coefficients[2], col="blue" )
+  }
+  
+  yvar="RAIN.a" ; yrange <- range( df[[yvar]], na.rm=T )
+  for(m in 1:12) {
+    df.m <- df.ym(df,2019,m) ; x = df.m[[xvar]] ; y = df.m[[yvar]]
+    plot( x, y, main=paste0(country,":",yvar," ",m),
+          xlab=xvar, ylab="", ylim=yrange )
+    abline(h=0,col="black")
+    lm <- lm( y ~ x )
+    abline( lm$coefficients[1], lm$coefficients[2], col="blue" )
+  }
+```
+
+```{r}
+  # Weather stations Guatemala and their distance from farm 170
+  df=G.a
+
+  lonlat_G.ST <- df[ c("lon","lat") ]
+  coordsG170  <- c( -90.44, 14.429 ) # Longitude, Latitude
+  dist.170    <- as.vector( distm( coordsG170, lonlat_G.ST ) ) / 1000
+  df          <- df %>% add_column( dist=dist.170 )
+
+  par( mfrow=c(3,4), mar=c(2,2,1,1) )
+
+  country="G" ; xvar="dist"
+  
+  yvar="TMEAN.a" ; yrange <- range( df[[yvar]], na.rm=T )
+  for(m in 1:12) {
+    df.m <- df.ym(df,2019,m) ; x = df.m[[xvar]] ; y = df.m[[yvar]]
+    plot( x, y, main=paste0(country,":",yvar," ",m),
+          xlab=xvar, ylab="", ylim=yrange )
+    abline(h=0,col="black")
+    lm <- lm( y ~ x )
+    abline( lm$coefficients[1], lm$coefficients[2], col="blue" )
+  }
+  
+  yvar="RAIN.a" ; yrange <- range( df[[yvar]], na.rm=T )
+  for(m in 1:12) {
+    df.m <- df.ym(df,2019,m) ; x = df.m[[xvar]] ; y = df.m[[yvar]]
+    plot( x, y, main=paste0(country,":",yvar," ",m),
+          xlab=xvar, ylab="", ylim=yrange )
+    abline(h=0,col="black")
+    lm <- lm( y ~ x )
+    abline( lm$coefficients[1], lm$coefficients[2], col="blue" )
+  }
+```
+
+```{r}
+  C.a.mean2019mon <- C.a %>%
+    filter( year == 2019 ) %>%
+    group_by( month ) %>%
+    summarize( TMIN.a = mean(TMIN.a,na.rm=T),
+               TMAX.a = mean(TMAX.a,na.rm=T),
+               RAIN.a = mean(RAIN.a,na.rm=T) ) %>%
+    as.matrix()
+  
+  knitr::kable( C.a.mean2019mon )
+```
+
+```{r}
+  G.a.mean2019mon <- G.a %>%
+    filter( year == 2019 ) %>%
+    group_by( month ) %>%
+    summarize( TMEAN.a = mean(TMEAN.a,na.rm=T),
+               RAIN.a  = mean(RAIN.a ,na.rm=T) ) %>%
+    as.matrix()
+  
+  knitr::kable( G.a.mean2019mon )
+```
+
+## Extending farm weather files by two years (2019, 2020)
+
+For 2019 we use the country-average monthly anomalies, for 2020 the climatic average.
+
+```{r}
+  monl   <- c( 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 )
+  monend <- cumsum( monl ) ; monstart <- c( 1, head(monend+1,-1) )
+  mon    <- function(doy) { which((doy>=monstart) & (doy<=monend)) }
+```
+
+```{r}
+  nf <- length( df_C.f$code )
+
+  for(f in 1:nf) {
+    w.f                <- df_C.f$weather.WC[[f]]
+    ncol               <- dim(w.f)[2]
+    meanyear           <- matrix( NA, 365, ncol )
+    colnames(meanyear) <- colnames(w.f)
+    for(d in 1:365) {
+      meanyear[d,] <- colMeans( w.f[ which(w.f[,"doy"]==d), ] )
+    }
+    anom2019 <- matrix(0,365,ncol) ; colnames(anom2019) <- colnames(w.f)
+    for(d in 1:365) {
+      anom2019[d,"TMIN"] <- C.a.mean2019mon[ mon(d), "TMIN.a" ]
+      anom2019[d,"TMAX"] <- C.a.mean2019mon[ mon(d), "TMAX.a" ]
+      anom2019[d,"RAIN"] <- C.a.mean2019mon[ mon(d), "RAIN.a" ] / monl[mon(d)]
+    }
+    year2020          <- meanyear            ; year2020[,"year"] <- 2020
+    year2019          <- meanyear + anom2019 ; year2019[,"year"] <- 2019
+    year2019[,"RAIN"] <- pmax( year2019[,"RAIN"], 0 )
+    w.f               <- rbind( w.f, year2019, year2020 )
+    df_C.f$weather.WC[[f]] <- w.f
+    # y20    <- year2020[,"RAIN"] ; y19 <- year2019[,"RAIN"]
+    # yrange <- range(y20,y19)
+    # plot( y20, main=paste0("RAIN(",f,")"), ylim=yrange, xlab="", ylab="" )
+    # points( y19,col="red" )
+  }
+```
+
+```{r}
+  nf <- length( df_G.f$code )
+
+  par( mfrow=c(5,5), mar=c(2,1,1,1) )
+
+  for(f in 1:nf) {
+    w.f                <- df_G.f$weather.WC[[f]]
+    ncol               <- dim(w.f)[2]
+    meanyear           <- matrix( NA, 365, ncol )
+    colnames(meanyear) <- colnames(w.f)
+    for(d in 1:365) {
+      meanyear[d,] <- colMeans( w.f[ which(w.f[,"doy"]==d), ] )
+    }
+    anom2019 <- matrix(0,365,ncol) ; colnames(anom2019) <- colnames(w.f)
+    for(d in 1:365) {
+      anom2019[d,"TMIN"] <- G.a.mean2019mon[ mon(d), "TMEAN.a" ]
+      anom2019[d,"TMAX"] <- G.a.mean2019mon[ mon(d), "TMEAN.a" ]
+      anom2019[d,"RAIN"] <- G.a.mean2019mon[ mon(d), "RAIN.a"  ] / monl[mon(d)]
+    }
+    year2020          <- meanyear            ; year2020[,"year"] <- 2020
+    year2019          <- meanyear + anom2019 ; year2019[,"year"] <- 2019
+    year2019[,"RAIN"] <- pmax( year2019[,"RAIN"], 0 )
+    w.f               <- rbind( w.f, year2019, year2020 )
+    df_G.f$weather.WC[[f]] <- w.f
+    # y20    <- year2020[,"TMIN"] ; y19 <- year2019[,"TMIN"]
+    # yrange <- range(y20,y19)
+    # plot( y20, main=paste0("TMIN(",f,")"), ylim=yrange, xlab="", ylab="" )
+    # points( y19,col="red" )
+  }
+```
+
+
+
+\clearpage
+
+# Yields from second harvest season (2019-2020) and updating df_C|G.f
+
+```{r}
+  dir.f            <- "data/Farms SEACAF/"
+  file_yield1920.f <- "Database SEACAF - Net income.xlsx"
+```
+
+```{r}
+  df_yield1920.f <- read_excel( paste0(dir.f,file_yield1920.f) )
+
+  df_yield1920.f <- df_yield1920.f %>%
+    mutate( code      = ifelse(country=="Costa Rica", 1000,
+                        ifelse(country=="Guatemala" , 2000,
+                               NA )) ) %>%
+    mutate( code_farm = as.numeric( substring(code_farm,first=3) ) ) %>%
+    mutate( code      = code + code_farm ) %>%
+    mutate( yield1920 = prodcafe_ha / 3 ) %>%
+    dplyr::select( code, yield1920 )
+```
+
+```{r}
+  df_yield1920_C.f <- df_yield1920.f %>% subset( df_yield1920.f$code <  2000 )
+  df_yield1920_G.f <- df_yield1920.f %>% subset( df_yield1920.f$code >= 2000 )
+```
+
+```{r}
+  lonlat_C.f  <- df_C.f[ c("lon","lat") ]
+  lonlat_G.f  <- df_G.f[ c("lon","lat") ]
+  coords.T    <- c( -83.68,  9.89  ) # Longitude, Latitude
+  coords.2170 <- c( -90.44, 14.429 ) # Longitude, Latitude
+  dist_C.T    <- as.vector( distm( coords.T   , lonlat_C.f ) ) / 1000
+  dist_G.2170 <- as.vector( distm( coords.2170, lonlat_G.f ) ) / 1000
+```
+
+```{r}
+  df_C.f <- df_C.f %>%
+    rename( yield1819=yield ) %>%
+    inner_join( df_yield1920_C.f, by=c("code") ) %>%
+    mutate( dist=dist_C.T ) %>%
+    dplyr::select( code, lat, lon, dist, slope, altitude, alt.WC, weather.WC,
+                   DM.soil, CN.soil, C.soil, N.soil, Nfert, WP, FC,
+                   nt, shade, yield1819, yield1920 )
+    
+  df_G.f <- df_G.f %>%
+    rename( yield1819=yield ) %>%
+    inner_join( df_yield1920_G.f, by=c("code") ) %>%
+    mutate( dist=dist_G.2170) %>%
+    dplyr::select( code, lat, lon, dist, slope, altitude, alt.WC, weather.WC,
+                   DM.soil, CN.soil, C.soil, N.soil, Nfert, WP, FC,
+                   nt, shade, yield1819, yield1920 )
+  
+  n_C.f <- dim(df_C.f)[1] ; n_G.f <- dim(df_G.f)[1]
+```
+
+```{r}
+  par( mfrow=c(2,2), mar=c(2,2,3,2) )
+
+  x = df_C.f$yield1819 ; y = df_C.f$yield1920
+  plotxylm( "Yields 19/20 vs. 18/19\nCosta Rica", ""  )
+
+  x = df_G.f$yield1819 ; y = df_G.f$yield1920
+  plotxylm( "Yields 19/20 vs. 18/19\nGuatemala", ""  )
+
+  x = df_C.f$dist      ; y = df_C.f$yield1920 - df_C.f$yield1819
+  ynna <- which(!is.na(y))
+  x <- x[ynna] ; y <- y[ynna]
+  plotxylm( "Yield-change vs. dist. Turrialba", ""  )
+
+  x = df_G.f$dist      ; y = df_G.f$yield1920 - df_G.f$yield1819
+  ynna <- which(!is.na(y))
+  x <- x[ynna] ; y <- y[ynna]
+  plotxylm( "Yield-change vs. dist. G170", ""  )
+```
+
+
+
+\clearpage
+
+# Data on tree densities
+
+```{r}
+  dir.f        <- "data/Farms SEACAF/"
+  file_trees.f <- "Copy of class_marcel JH.xlsx"
+```
+
+```{r}
+  df_trees.f <- read_excel( paste0(dir.f,file_trees.f) )
+
+  df_trees.f <- df_trees.f %>%
+    mutate ( code = ifelse(cod_country=="Costa Rica", 1000,
+                    ifelse(cod_country=="Guatemala" , 2000,
+                           NA )) ) %>%
+    mutate ( code = code + num_farm    ) %>%
+    arrange( code ) %>%
+    mutate ( dens_Erythrina = Erythina2     ) %>%
+    mutate ( dens_Inga      = Legume2       ) %>%
+    mutate ( dens_Avocado   = Fruit2        ) %>%
+    mutate ( dens_Banana    = Musacea2      ) %>%
+    mutate ( dens_Grevillea = `non-Legume2` ) %>%
+    mutate ( dens_Cordia    = Timber2       ) %>%
+    mutate ( dens_timber    = dens_Grevillea + dens_Cordia ) %>%
+    mutate ( dens_Grevillea = ifelse(dens_Grevillea>dens_Cordia,dens_timber,0) ) %>%
+    mutate ( dens_Cordia    = ifelse(dens_Grevillea>dens_Cordia,0,dens_timber) ) %>%
+    dplyr::select( code, dens_Erythrina, dens_Inga,
+                         dens_Avocado  , dens_Banana,
+                         dens_Grevillea, dens_Cordia )
+  # df_trees.f %>% print( n=Inf, width=Inf)
+```
+
+```{r}
+  df_trees_C.f <- df_trees.f %>% subset( df_trees.f$code <  2000 )
+  df_trees_G.f <- df_trees.f %>% subset( df_trees.f$code >= 2000 )
+```
+
+```{r}
+  df_C.f <- df_C.f %>%
+    inner_join( df_trees_C.f, by=c("code") ) %>%
+    dplyr::select( code, lat, lon, dist, slope, altitude, alt.WC, weather.WC,
+                   DM.soil, CN.soil, C.soil, N.soil, Nfert, WP, FC, nt, shade,
+                   dens_Erythrina, dens_Inga, dens_Avocado, dens_Banana,
+                   dens_Grevillea, dens_Cordia, yield1819, yield1920 )
+    
+  df_G.f <- df_G.f %>%
+    inner_join( df_trees_G.f, by=c("code") ) %>%
+    dplyr::select( code, lat, lon, dist, slope, altitude, alt.WC, weather.WC,
+                   DM.soil, CN.soil, C.soil, N.soil, Nfert, WP, FC, nt, shade,
+                   dens_Erythrina, dens_Inga, dens_Avocado, dens_Banana,
+                   dens_Grevillea, dens_Cordia, yield1819, yield1920 )
+  
+  n_C.f <- dim(df_C.f)[1] ; n_G.f <- dim(df_G.f)[1]
+```
+
+```{r}
+  par( mfrow=c(2,3), mar=c(4,2,3,2) )
+
+  y1a_C = df_C.f$dens_Erythrina ; y1b_C = df_C.f$dens_Inga
+  y1a_G = df_G.f$dens_Erythrina ; y1b_G = df_G.f$dens_Inga
+  ymax1 = max( y1a_C, y1b_C, y1a_G, y1b_G )
+  
+  y2a_C = df_C.f$dens_Avocado   ; y2b_C = df_C.f$dens_Banana
+  y2a_G = df_G.f$dens_Avocado   ; y2b_G = df_G.f$dens_Banana
+  ymax2 = max( y2a_C, y2b_C, y2a_G, y2b_G )
+  
+  y3a_C = df_C.f$dens_Grevillea ; y3b_C = df_C.f$dens_Cordia
+  y3a_G = df_G.f$dens_Grevillea ; y3b_G = df_G.f$dens_Cordia
+  ymax3 = max( y3a_C, y3b_C, y3a_G, y3b_G )
+  
+  plot  ( y1a_C, main="Costa Rica trees [1]",
+          xlab="farm index", ylab="", ylim=c(0,1.25*ymax1))
+  points( y1b_C, col="red" )
+  legend( "top",legend=c("Erythrina","Inga"),
+          horiz=T, pch=1, col=c("black","red"), bg="transparent" )
+
+  plot  ( y2a_C, main="Costa Rica trees [2]",
+          xlab="farm index", ylab="", ylim=c(0,1.25*ymax2))
+  points( y2b_C, col="red" )
+  legend( "top",legend=c("Avocado","Banana"),
+          horiz=T, pch=1, col=c("black","red"), bg="transparent" )
+
+  plot  ( y3a_C, main="Costa Rica trees [3]",
+          xlab="farm index", ylab="", ylim=c(0,1.25*ymax3))
+  points( y3b_C, col="red" )
+  legend( "top",legend=c("Grevillea","Cordia"),
+          horiz=T, pch=1, col=c("black","red"), bg="transparent" )
+
+  plot  ( y1a_G, main="Guatemala trees [1]",
+          xlab="farm index", ylab="", ylim=c(0,1.25*ymax1))
+  points( y1b_G, col="red" )
+  legend( "top",legend=c("Erythrina","Inga"),
+          horiz=T, pch=1, col=c("black","red"), bg="transparent" )
+
+  plot  ( y2a_G, main="Guatemala trees [2]",
+          xlab="farm index", ylab="", ylim=c(0,1.25*ymax2))
+  points( y2b_G, col="red" )
+  legend( "top",legend=c("Avocado","Banana"),
+          horiz=T, pch=1, col=c("black","red"), bg="transparent" )
+
+  plot  ( y3a_G, main="Guatemala trees [3]",
+          xlab="farm index", ylab="", ylim=c(0,1.25*ymax3))
+  points( y3b_G, col="red" )
+  legend( "top",legend=c("Grevillea","Cordia"),
+          horiz=T, pch=1, col=c("black","red"), bg="transparent" )
+```
+
 
 
 \clearpage
@@ -576,16 +1178,49 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
   plot( df_G.f$shade, Shade_F2_G.f_sim )
 ```
 
-Note that Costa Rica farm 1157 achieves a shade of 0.23 despite having nt=0 shade trees!
-
 ```{r}
   df <- df_C.f_sim
-  F1_C <- dfoutFSummary( df, Fi=1 ) ; yF1_C.f_sim <- F1_C[,"harvDM_f_ha1819"]
-  F2_C <- dfoutFSummary( df, Fi=2 ) ; yF2_C.f_sim <- F2_C[,"harvDM_f_ha1819"]
+
+  F1_C <- dfoutFSummary( df, Fi=1 ) ; F2_C <- dfoutFSummary( df, Fi=2 )
+  
+  yF1_C.f_sim     <- F1_C[,"harvDM_f_hay"   ]
+  yF1_C.f_sim1819 <- F1_C[,"harvDM_f_ha1819"]
+  yF1_C.f_sim1920 <- F1_C[,"harvDM_f_ha1920"]
+  yF2_C.f_sim     <- F2_C[,"harvDM_f_hay"   ]
+  yF2_C.f_sim1819 <- F2_C[,"harvDM_f_ha1819"]
+  yF2_C.f_sim1920 <- F2_C[,"harvDM_f_ha1920"]
 
   df <- df_G.f_sim
-  F1_G <- dfoutFSummary( df, Fi=1 ) ; yF1_G.f_sim <- F1_G[,"harvDM_f_ha1819"]
-  F2_G <- dfoutFSummary( df, Fi=2 ) ; yF2_G.f_sim <- F2_G[,"harvDM_f_ha1819"]
+  F1_G <- dfoutFSummary( df, Fi=1 ) ; F2_G <- dfoutFSummary( df, Fi=2 )
+  
+  yF1_G.f_sim     <- F1_G[,"harvDM_f_hay"   ]
+  yF1_G.f_sim1819 <- F1_G[,"harvDM_f_ha1819"]
+  yF1_G.f_sim1920 <- F1_G[,"harvDM_f_ha1920"]
+  yF2_G.f_sim     <- F2_G[,"harvDM_f_hay"   ]
+  yF2_G.f_sim1819 <- F2_G[,"harvDM_f_ha1819"]
+  yF2_G.f_sim1920 <- F2_G[,"harvDM_f_ha1920"]
+```
+
+Fig. \ref{fig:XX13} shows that, in the simulations, yields in 2018-19 were slightly below the long-term average for many farms in Costa Rica, but above-average in Guatemala.
+
+```{r XX13, fig.height=4, fig.cap="\\label{fig:XX13}Simulated yields in 2018-19 vs. long-term average yields in the same simulations."}
+  par( mfrow=c(1,2), mar=c(3,3,2,2) )
+
+  plot( yF2_C.f_sim, yF2_C.f_sim1819, main="Costa Rica (sim.)",
+        xlab="mean yield", ylab="kg DM ha-1 y-1")
+  points( yF2_C.f_sim, yF2_C.f_sim1920, col="red" )
+  abline(1,1,lty=2)
+  legend( "bottomright",legend=c("y=x","18/19","19/20"),
+          lty=c(2,NA,NA), pch=c(NA,1,1), col=c("black","black","red"),
+          bg="transparent" )
+  
+  plot( yF2_G.f_sim, yF2_G.f_sim1819, main="Guatemala (sim.)",
+        xlab="mean yield", ylab="yield 2018/19")
+  points( yF2_G.f_sim, yF2_G.f_sim1920, col="red" )
+  abline(1,1,lty=2)
+  legend( "bottomright",legend=c("y=x","18/19","19/20"),
+          lty=c(2,NA,NA), pch=c(NA,1,1), col=c("black","black","red"),
+          bg="transparent" )
 ```
 
 We now finally come to the simulations for all farms that were intended to be more realistic, by using farm-specific information on weather, soil, nitrogen fertilisation rate, and number of shade tree species. In the absence of detailed information on shade tree species and shade management, we made the following assumptions:
@@ -596,14 +1231,18 @@ We now finally come to the simulations for all farms that were intended to be mo
 
 Results of these simulations are shown in Figs \ref{fig:XX14}, \ref{fig:XX15}, and \ref{fig:XX16}. Fig. \ref{fig:XX14} shows how the long-term average annual coffee yields simulated by the model for the years 2000-2014 compares to the yield reported for the farms for the year 2019. The correlations are not very strong. Fig. \ref{fig:XX15} shows, for farms in Costa Rica, observations and simulations of multiple variables, all plotted against each farm's N-fertilisation rate. Farms are grouped by number of shade tree species but no clear differences between the groups are visible. Apart from shade, all variables show a positive or negative correlation with fertilisation. The negative correlation in the case of soil carbon loss in runoff is likely due to fertilisation enhancing vegetation LAI, which in the model reduces erosion. The same variables are shown in Fig. \ref{fig:XX16} for Guatemala, with similar results albeit more difficult to see because of the distorting influence of having farms with excessive N-fertilisation rate in the plots.
 
-```{r XX14, fig.height=4, fig.cap="\\label{fig:XX14}Observed yields at the farms in Costa Rica (left) and Guatemala (right) plotted against long-term average simulated yields. The simulations used farm-specific information on weather, soil, N-fertilisation and number of shade tree species, but not site-specific shade management."}
-  par( mfrow=c(1,2), mar=c(4,2,2,2), mgp=c(2,1,0) )
+```{r XX14, fig.height=4, fig.cap="\\label{fig:XX14}Observed vs. simulated yields in 2018-19 and 2019-20 at the farms in Costa Rica (left) and Guatemala (right)."}
+  par( mfrow=c(2,2), mar=c(4,2,2,2), mgp=c(2,1,0) )
 
-  # x=yF1_C.f_sim ; y=df_C.f$yield ; plotxylm("Obs. Costa Rica")
-  x=yF2_C.f_sim ; y=df_C.f$yield ; plotxylm("Obs. Costa Rica")
+  x=yF2_C.f_sim1819 ; y=df_C.f$yield1819
+    plotxylm("Yields Costa Rica 18/19", orig=F)
+  x=yF2_G.f_sim1819 ; y=df_G.f$yield1819
+    plotxylm("Yields Guatemala 18/19" , orig=F)
 
-  # x=yF1_G.f_sim ; y=df_G.f$yield ; plotxylm("Obs. Guatemala")
-  x=yF2_G.f_sim ; y=df_G.f$yield ; plotxylm("Obs. Guatemala")
+  x=yF2_C.f_sim1920 ; y=df_C.f$yield1920
+    plotxylm("Yields Costa Rica 19/20", orig=F)
+  x=yF2_G.f_sim1920 ; y=df_G.f$yield1920
+    plotxylm("Yields Guatemala 19/20" , orig=F)
 ```
 
 ```{r}
@@ -616,119 +1255,125 @@ Results of these simulations are shown in Figs \ref{fig:XX14}, \ref{fig:XX15}, a
   nnt3_C <- length(int3_C)      ; nnt3_G <- length(int3_G)
   
   listmat_nt_C <- listmat_nt_G <- vector( "list", 3 )
-  varnames.listmat <- c( "code","slope","nt","Nfert","shade","y.obs",
-    "y.sim","y.sim1819","y.sim1920",
-    "D_Csoil","Shade_f","Nleaching_f","Crunoff_f","Csoil_f" )
+  varnames.listmat <- c( "code","slope","Nfert","nt","shade",
+    "y1819","y1920",  "y1819.sim","y1920.sim","y.sim",
+    "D_Csoil.sim","shade.sim","Nleach.sim","Crunoff.sim","Csoil.sim" )
 ```
 
 ```{r}
   listmat_nt_C[[1]] <- t( sapply( 1:nnt1_C, function(i){ cbind(
-    code    = df_C.f    [int1_C,]$code [[i]]                    ,
-    slope   = df_C.f    [int1_C,]$slope[[i]]                    ,
-    nt      = df_C.f    [int1_C,]$nt   [[i]]                    ,
-    Nfert   = df_C.f    [int1_C,]$Nfert[[i]]                    ,
-    shade   = df_C.f    [int1_C,]$shade[[i]]                    ,
-    y.obs   = df_C.f    [int1_C,]$yield[[i]]                    ,
-    y.sim   = df_C.f_sim[int1_C,]$outF [[i]][,"harvDM_f_hay"][2],
-    y.sim1819 = df_C.f_sim[int1_C,]$outF [[i]][,"harvDM_f_ha1819"][2],
-    y.sim1920 = df_C.f_sim[int1_C,]$outF [[i]][,"harvDM_f_ha1920"][2],
-    D_Csoil = df_C.f_sim[int1_C,]$outF [[i]][,"D_Csoil"     ][2],
-    shade   = df_C.f_sim[int1_C,]$outF [[i]][,"Shade_f"     ][2],
-    Nleach  = df_C.f_sim[int1_C,]$outF [[i]][,"Nleaching_f" ][2],
-    Crunoff = df_C.f_sim[int1_C,]$outF [[i]][,"Crunoff_f"   ][2],
-    Csoil   = df_C.f_sim[int1_C,]$outF [[i]][,"Csoil_f"     ][2]
+    df_C.f    [int1_C,]$code     [[i]],
+    df_C.f    [int1_C,]$slope    [[i]],
+    df_C.f    [int1_C,]$Nfert    [[i]],
+    df_C.f    [int1_C,]$nt       [[i]],
+    df_C.f    [int1_C,]$shade    [[i]],
+    df_C.f    [int1_C,]$yield1819[[i]],
+    df_C.f    [int1_C,]$yield1920[[i]],
+    df_C.f_sim[int1_C,]$outF     [[i]][,"harvDM_f_ha1819"][2],
+    df_C.f_sim[int1_C,]$outF     [[i]][,"harvDM_f_ha1920"][2],
+    df_C.f_sim[int1_C,]$outF     [[i]][,"harvDM_f_hay"   ][2],
+    df_C.f_sim[int1_C,]$outF     [[i]][,"D_Csoil"        ][2],
+    df_C.f_sim[int1_C,]$outF     [[i]][,"Shade_f"        ][2],
+    df_C.f_sim[int1_C,]$outF     [[i]][,"Nleaching_f"    ][2],
+    df_C.f_sim[int1_C,]$outF     [[i]][,"Crunoff_f"      ][2],
+    df_C.f_sim[int1_C,]$outF     [[i]][,"Csoil_f"        ][2]
   ) } ) )
   colnames(listmat_nt_C[[1]]) <- varnames.listmat
 
   listmat_nt_C[[2]] <- t( sapply( 1:nnt2_C, function(i){ cbind(
-    code    = df_C.f    [int2_C,]$code [[i]]                    ,
-    slope   = df_C.f    [int2_C,]$slope[[i]]                    ,
-    nt      = df_C.f    [int2_C,]$nt   [[i]]                    ,
-    Nfert   = df_C.f    [int2_C,]$Nfert[[i]]                    ,
-    shade   = df_C.f    [int2_C,]$shade[[i]]                    ,
-    y.obs   = df_C.f    [int2_C,]$yield[[i]]                    ,
-    y.sim   = df_C.f_sim[int2_C,]$outF [[i]][,"harvDM_f_hay"][2],
-    y.sim1819 = df_C.f_sim[int2_C,]$outF [[i]][,"harvDM_f_ha1819"][2],
-    y.sim1920 = df_C.f_sim[int2_C,]$outF [[i]][,"harvDM_f_ha1920"][2],
-    D_Csoil = df_C.f_sim[int2_C,]$outF [[i]][,"D_Csoil"     ][2],
-    shade   = df_C.f_sim[int2_C,]$outF [[i]][,"Shade_f"     ][2],
-    Nleach  = df_C.f_sim[int2_C,]$outF [[i]][,"Nleaching_f" ][2],
-    Crunoff = df_C.f_sim[int2_C,]$outF [[i]][,"Crunoff_f"   ][2],
-    Csoil   = df_C.f_sim[int2_C,]$outF [[i]][,"Csoil_f"     ][2]
+    df_C.f    [int2_C,]$code     [[i]],
+    df_C.f    [int2_C,]$slope    [[i]],
+    df_C.f    [int2_C,]$Nfert    [[i]],
+    df_C.f    [int2_C,]$nt       [[i]],
+    df_C.f    [int2_C,]$shade    [[i]],
+    df_C.f    [int2_C,]$yield1819[[i]],
+    df_C.f    [int2_C,]$yield1920[[i]],
+    df_C.f_sim[int2_C,]$outF     [[i]][,"harvDM_f_ha1819"][2],
+    df_C.f_sim[int2_C,]$outF     [[i]][,"harvDM_f_ha1920"][2],
+    df_C.f_sim[int2_C,]$outF     [[i]][,"harvDM_f_hay"   ][2],
+    df_C.f_sim[int2_C,]$outF     [[i]][,"D_Csoil"        ][2],
+    df_C.f_sim[int2_C,]$outF     [[i]][,"Shade_f"        ][2],
+    df_C.f_sim[int2_C,]$outF     [[i]][,"Nleaching_f"    ][2],
+    df_C.f_sim[int2_C,]$outF     [[i]][,"Crunoff_f"      ][2],
+    df_C.f_sim[int2_C,]$outF     [[i]][,"Csoil_f"        ][2]
   ) } ) )
   colnames(listmat_nt_C[[2]]) <- varnames.listmat
 
   listmat_nt_C[[3]] <- t( sapply( 1:nnt3_C, function(i){ cbind(
-    code    = df_C.f    [int3_C,]$code [[i]]                    ,
-    slope   = df_C.f    [int3_C,]$slope[[i]]                    ,
-    nt      = df_C.f    [int3_C,]$nt   [[i]]                    ,
-    Nfert   = df_C.f    [int3_C,]$Nfert[[i]]                    ,
-    shade   = df_C.f    [int3_C,]$shade[[i]]                    ,
-    y.obs   = df_C.f    [int3_C,]$yield[[i]]                    ,
-    y.sim   = df_C.f_sim[int3_C,]$outF [[i]][,"harvDM_f_hay"][2],
-    y.sim1819 = df_C.f_sim[int3_C,]$outF [[i]][,"harvDM_f_ha1819"][2],
-    y.sim1920 = df_C.f_sim[int3_C,]$outF [[i]][,"harvDM_f_ha1920"][2],
-    D_Csoil = df_C.f_sim[int3_C,]$outF [[i]][,"D_Csoil"     ][2],
-    shade   = df_C.f_sim[int3_C,]$outF [[i]][,"Shade_f"     ][2],
-    Nleach  = df_C.f_sim[int3_C,]$outF [[i]][,"Nleaching_f" ][2],
-    Crunoff = df_C.f_sim[int3_C,]$outF [[i]][,"Crunoff_f"   ][2],
-    Csoil   = df_C.f_sim[int3_C,]$outF [[i]][,"Csoil_f"     ][2]
+    df_C.f    [int3_C,]$code     [[i]],
+    df_C.f    [int3_C,]$slope    [[i]],
+    df_C.f    [int3_C,]$Nfert    [[i]],
+    df_C.f    [int3_C,]$nt       [[i]],
+    df_C.f    [int3_C,]$shade    [[i]],
+    df_C.f    [int3_C,]$yield1819[[i]],
+    df_C.f    [int3_C,]$yield1920[[i]],
+    df_C.f_sim[int3_C,]$outF     [[i]][,"harvDM_f_ha1819"][2],
+    df_C.f_sim[int3_C,]$outF     [[i]][,"harvDM_f_ha1920"][2],
+    df_C.f_sim[int3_C,]$outF     [[i]][,"harvDM_f_hay"   ][2],
+    df_C.f_sim[int3_C,]$outF     [[i]][,"D_Csoil"        ][2],
+    df_C.f_sim[int3_C,]$outF     [[i]][,"Shade_f"        ][2],
+    df_C.f_sim[int3_C,]$outF     [[i]][,"Nleaching_f"    ][2],
+    df_C.f_sim[int3_C,]$outF     [[i]][,"Crunoff_f"      ][2],
+    df_C.f_sim[int3_C,]$outF     [[i]][,"Csoil_f"        ][2]
   ) } ) )
   colnames(listmat_nt_C[[3]]) <- varnames.listmat
 ```
 
 ```{r}
   listmat_nt_G[[1]] <- t( sapply( 1:nnt1_G, function(i){ cbind(
-    code    = df_G.f    [int1_G,]$code [[i]]                    ,
-    slope   = df_G.f    [int1_G,]$slope[[i]]                    ,
-    nt      = df_G.f    [int1_G,]$nt   [[i]]                    ,
-    Nfert   = df_G.f    [int1_G,]$Nfert[[i]]                    ,
-    shade   = df_G.f    [int1_G,]$shade[[i]]                    ,
-    y.obs   = df_G.f    [int1_G,]$yield[[i]]                    ,
-    y.sim   = df_G.f_sim[int1_G,]$outF [[i]][,"harvDM_f_hay"][2],
-    y.sim1819 = df_G.f_sim[int1_G,]$outF [[i]][,"harvDM_f_ha1819"][2],
-    y.sim1819 = df_G.f_sim[int1_G,]$outF [[i]][,"harvDM_f_ha1920"][2],
-    D_Csoil = df_G.f_sim[int1_G,]$outF [[i]][,"D_Csoil"     ][2],
-    shade   = df_G.f_sim[int1_G,]$outF [[i]][,"Shade_f"     ][2],
-    Nleach  = df_G.f_sim[int1_G,]$outF [[i]][,"Nleaching_f" ][2],
-    Crunoff = df_G.f_sim[int1_G,]$outF [[i]][,"Crunoff_f"   ][2],
-    Csoil   = df_G.f_sim[int1_G,]$outF [[i]][,"Csoil_f"     ][2]
+    df_G.f    [int1_G,]$code     [[i]],
+    df_G.f    [int1_G,]$slope    [[i]],
+    df_G.f    [int1_G,]$Nfert    [[i]],
+    df_G.f    [int1_G,]$nt       [[i]],
+    df_G.f    [int1_G,]$shade    [[i]],
+    df_G.f    [int1_G,]$yield1819[[i]],
+    df_G.f    [int1_G,]$yield1920[[i]],
+    df_G.f_sim[int1_G,]$outF     [[i]][,"harvDM_f_ha1819"][2],
+    df_G.f_sim[int1_G,]$outF     [[i]][,"harvDM_f_ha1920"][2],
+    df_G.f_sim[int1_G,]$outF     [[i]][,"harvDM_f_hay"   ][2],
+    df_G.f_sim[int1_G,]$outF     [[i]][,"D_Csoil"        ][2],
+    df_G.f_sim[int1_G,]$outF     [[i]][,"Shade_f"        ][2],
+    df_G.f_sim[int1_G,]$outF     [[i]][,"Nleaching_f"    ][2],
+    df_G.f_sim[int1_G,]$outF     [[i]][,"Crunoff_f"      ][2],
+    df_G.f_sim[int1_G,]$outF     [[i]][,"Csoil_f"        ][2]
   ) } ) )
   colnames(listmat_nt_G[[1]]) <- varnames.listmat
 
   listmat_nt_G[[2]] <- t( sapply( 1:nnt2_G, function(i){ cbind(
-    code    = df_G.f    [int2_G,]$code [[i]]                    ,
-    slope   = df_G.f    [int2_G,]$slope[[i]]                    ,
-    nt      = df_G.f    [int2_G,]$nt   [[i]]                    ,
-    Nfert   = df_G.f    [int2_G,]$Nfert[[i]]                    ,
-    shade   = df_G.f    [int2_G,]$shade[[i]]                    ,
-    y.obs   = df_G.f    [int2_G,]$yield[[i]]                    ,
-    y.sim   = df_G.f_sim[int2_G,]$outF [[i]][,"harvDM_f_hay"][2],
-    y.sim1819 = df_G.f_sim[int2_G,]$outF [[i]][,"harvDM_f_ha1819"][2],
-    y.sim1920 = df_G.f_sim[int2_G,]$outF [[i]][,"harvDM_f_ha1920"][2],
-    D_Csoil = df_G.f_sim[int2_G,]$outF [[i]][,"D_Csoil"     ][2],
-    shade   = df_G.f_sim[int2_G,]$outF [[i]][,"Shade_f"     ][2],
-    Nleach  = df_G.f_sim[int2_G,]$outF [[i]][,"Nleaching_f" ][2],
-    Crunoff = df_G.f_sim[int2_G,]$outF [[i]][,"Crunoff_f"   ][2],
-    Csoil   = df_G.f_sim[int2_G,]$outF [[i]][,"Csoil_f"     ][2]
+    df_G.f    [int2_G,]$code     [[i]],
+    df_G.f    [int2_G,]$slope    [[i]],
+    df_G.f    [int2_G,]$Nfert    [[i]],
+    df_G.f    [int2_G,]$nt       [[i]],
+    df_G.f    [int2_G,]$shade    [[i]],
+    df_G.f    [int2_G,]$yield1819[[i]],
+    df_G.f    [int2_G,]$yield1920[[i]],
+    df_G.f_sim[int2_G,]$outF     [[i]][,"harvDM_f_ha1819"][2],
+    df_G.f_sim[int2_G,]$outF     [[i]][,"harvDM_f_ha1920"][2],
+    df_G.f_sim[int2_G,]$outF     [[i]][,"harvDM_f_hay"   ][2],
+    df_G.f_sim[int2_G,]$outF     [[i]][,"D_Csoil"        ][2],
+    df_G.f_sim[int2_G,]$outF     [[i]][,"Shade_f"        ][2],
+    df_G.f_sim[int2_G,]$outF     [[i]][,"Nleaching_f"    ][2],
+    df_G.f_sim[int2_G,]$outF     [[i]][,"Crunoff_f"      ][2],
+    df_G.f_sim[int2_G,]$outF     [[i]][,"Csoil_f"        ][2]
   ) } ) )
   colnames(listmat_nt_G[[2]]) <- varnames.listmat
 
   listmat_nt_G[[3]] <- t( sapply( 1:nnt3_G, function(i){ cbind(
-    code    = df_G.f    [int3_G,]$code [[i]]                    ,
-    slope   = df_G.f    [int3_G,]$slope[[i]]                    ,
-    nt      = df_G.f    [int3_G,]$nt   [[i]]                    ,
-    Nfert   = df_G.f    [int3_G,]$Nfert[[i]]                    ,
-    shade   = df_G.f    [int3_G,]$shade[[i]]                    ,
-    y.obs   = df_G.f    [int3_G,]$yield[[i]]                    ,
-    y.sim   = df_G.f_sim[int3_G,]$outF [[i]][,"harvDM_f_hay"][2],
-    y.sim1819 = df_G.f_sim[int3_G,]$outF [[i]][,"harvDM_f_ha1819"][2],
-    y.sim1920 = df_G.f_sim[int3_G,]$outF [[i]][,"harvDM_f_ha1920"][2],
-    D_Csoil = df_G.f_sim[int3_G,]$outF [[i]][,"D_Csoil"     ][2],
-    shade   = df_G.f_sim[int3_G,]$outF [[i]][,"Shade_f"     ][2],
-    Nleach  = df_G.f_sim[int3_G,]$outF [[i]][,"Nleaching_f" ][2],
-    Crunoff = df_G.f_sim[int3_G,]$outF [[i]][,"Crunoff_f"   ][2],
-    Csoil   = df_G.f_sim[int3_G,]$outF [[i]][,"Csoil_f"     ][2]
+    df_G.f    [int3_G,]$code     [[i]],
+    df_G.f    [int3_G,]$slope    [[i]],
+    df_G.f    [int3_G,]$Nfert    [[i]],
+    df_G.f    [int3_G,]$nt       [[i]],
+    df_G.f    [int3_G,]$shade    [[i]],
+    df_G.f    [int3_G,]$yield1819[[i]],
+    df_G.f    [int3_G,]$yield1920[[i]],
+    df_G.f_sim[int3_G,]$outF     [[i]][,"harvDM_f_ha1819"][2],
+    df_G.f_sim[int3_G,]$outF     [[i]][,"harvDM_f_ha1920"][2],
+    df_G.f_sim[int3_G,]$outF     [[i]][,"harvDM_f_hay"   ][2],
+    df_G.f_sim[int3_G,]$outF     [[i]][,"D_Csoil"        ][2],
+    df_G.f_sim[int3_G,]$outF     [[i]][,"Shade_f"        ][2],
+    df_G.f_sim[int3_G,]$outF     [[i]][,"Nleaching_f"    ][2],
+    df_G.f_sim[int3_G,]$outF     [[i]][,"Crunoff_f"      ][2],
+    df_G.f_sim[int3_G,]$outF     [[i]][,"Csoil_f"        ][2]
   ) } ) )
   colnames(listmat_nt_G[[3]]) <- varnames.listmat
 ```
@@ -739,8 +1384,10 @@ Results of these simulations are shown in Figs \ref{fig:XX14}, \ref{fig:XX15}, a
       xlab="Nfert", ylab="",main=var, pch=1,
       xlim=c(0,max(listmat[[1]][,"Nfert"],listmat[[2]][,"Nfert"],
                    listmat[[3]][,"Nfert"])),
-      ylim=c(min(0,listmat[[1]][,var],listmat[[2]][,var],listmat[[3]][,var]),
-             max(  listmat[[1]][,var],listmat[[2]][,var],listmat[[3]][,var])) )
+      ylim=c(min(0,listmat[[1]][,var],listmat[[2]][,var],listmat[[3]][,var],
+                 na.rm=T),
+             max(  listmat[[1]][,var],listmat[[2]][,var],listmat[[3]][,var],
+                 na.rm=T)) )
     points( listmat[[2]][,"Nfert"], listmat[[2]][,var], pch=20, col="red"  )
     points( listmat[[3]][,"Nfert"], listmat[[3]][,var], pch=6, col="blue" )
     
@@ -761,870 +1408,30 @@ Results of these simulations are shown in Figs \ref{fig:XX14}, \ref{fig:XX15}, a
   }
 ```
 
-```{r XX15, fig.height=7.5, fig.cap="\\label{fig:XX15}Yield-observations for farms in Costa Rica (y.obs; kg DM ha-1 y-1) plus simulations of five variables: Long-term average coffee yield (y.obs; kg DM ha-1 y-1), Change in soil carbon (D_Csoil; kg ha-1 y-1), Average shade level (-), Final year nitrogen leaching (kg N ha-1 y-1), Final year carbon loss in run-off (kg C ha-1 y-1)."}
+```{r XX15, fig.height=7.5, fig.cap="\\label{fig:XX15}Observations of shade and yield for farms in Costa Rica plus simulations of seven variables: Long-term average coffee yield, Yield in 2018-19, Change in soil carbon, Average shade level, Final year nitrogen leaching, Final year carbon loss in run-off, Soil carbon."}
   par(mfrow=c(3,3),mar=c(4,2,2,2), mgp=c(2,1,0))
 
-  plotimpacts_nt.Nfert( listmat_nt_C, "shade" )
-  plotimpacts_nt.Nfert( listmat_nt_C, "y.obs" )
-  plotimpacts_nt.Nfert( listmat_nt_C, "y.sim" )
-  plotimpacts_nt.Nfert( listmat_nt_C, "y.sim1819" )
-  plotimpacts_nt.Nfert( listmat_nt_C, "D_Csoil" )
-  plotimpacts_nt.Nfert( listmat_nt_C, "Shade_f" )
-  plotimpacts_nt.Nfert( listmat_nt_C, "Nleaching_f" )
-  plotimpacts_nt.Nfert( listmat_nt_C, "Crunoff_f" )
-  plotimpacts_nt.Nfert( listmat_nt_C, "Csoil_f" )
+  plotimpacts_nt.Nfert( listmat_nt_C, "shade"       )
+  plotimpacts_nt.Nfert( listmat_nt_C, "y1819"       )
+  plotimpacts_nt.Nfert( listmat_nt_C, "y1920"       )
+  plotimpacts_nt.Nfert( listmat_nt_C, "shade.sim"   )
+  plotimpacts_nt.Nfert( listmat_nt_C, "y1819.sim"   )
+  plotimpacts_nt.Nfert( listmat_nt_C, "y1920.sim"   )
+  plotimpacts_nt.Nfert( listmat_nt_C, "D_Csoil.sim" )
+  plotimpacts_nt.Nfert( listmat_nt_C, "Nleach.sim"  )
+  plotimpacts_nt.Nfert( listmat_nt_C, "Crunoff.sim" )
 ```
 
-```{r XX16, fig.height=7.5, fig.cap="\\label{fig:XX16}Yield-observations for farms in Guatemala plus simulations of five variables: see previous figure for explanation of variables."}
+```{r XX16, fig.height=7.5, fig.cap="\\label{fig:XX16}Shade- and yield-observations for farms in Guatemala plus simulations of seven variables: see previous figure for explanation of variables."}
   par(mfrow=c(3,3),mar=c(4,2,2,2), mgp=c(2,1,0))
 
-  plotimpacts_nt.Nfert( listmat_nt_G, "shade" )
-  plotimpacts_nt.Nfert( listmat_nt_G, "y.obs" )
-  plotimpacts_nt.Nfert( listmat_nt_G, "y.sim" )
-  plotimpacts_nt.Nfert( listmat_nt_G, "y.sim1819" )
-  plotimpacts_nt.Nfert( listmat_nt_G, "D_Csoil" )
-  plotimpacts_nt.Nfert( listmat_nt_G, "Shade_f" )
-  plotimpacts_nt.Nfert( listmat_nt_G, "Nleaching_f" )
-  plotimpacts_nt.Nfert( listmat_nt_G, "Crunoff_f" )
-  plotimpacts_nt.Nfert( listmat_nt_G, "Csoil_f" )
+  plotimpacts_nt.Nfert( listmat_nt_G, "shade"       )
+  plotimpacts_nt.Nfert( listmat_nt_G, "y1819"       )
+  plotimpacts_nt.Nfert( listmat_nt_G, "y1920"       )
+  plotimpacts_nt.Nfert( listmat_nt_G, "shade.sim"   )
+  plotimpacts_nt.Nfert( listmat_nt_G, "y1819.sim"   )
+  plotimpacts_nt.Nfert( listmat_nt_G, "y1920.sim"   )
+  plotimpacts_nt.Nfert( listmat_nt_G, "D_Csoil.sim" )
+  plotimpacts_nt.Nfert( listmat_nt_G, "Nleach.sim"  )
+  plotimpacts_nt.Nfert( listmat_nt_G, "Crunoff.sim" )
 ```
-
-
-
-\clearpage
-
-# Weather data 2019-2020
-
-```{r}
-  dir_weatherstations <- "weather/Climatic_Data/"
-    dir_C_Icafe   <- "CostaRica/Icafe/"
-    dir_C_IMN     <- "CostaRica/IMN/"
-    dir_G_Anacafe <- "Guatemala/Anacafe/"
-
-  dir_Icafe     <- paste0( dir_weatherstations, dir_C_Icafe   ) 
-  dir_IMN       <- paste0( dir_weatherstations, dir_C_IMN     )
-  dir_Anacafe   <- paste0( dir_weatherstations, dir_G_Anacafe ) 
-  
-  file_Icafe    <- "Datos confidenciales CLIMA-ICAFE- Convenio CATIE.xlsx"
-  files_IMN.TMIN <- list.files( dir_IMN, pattern="*TMIN_TMAX_RAIN.xlsx" )
-  files_IMN.TMAX <- list.files( dir_IMN, pattern="*TMIN_TMAX_RAIN.xlsx" )
-  files_IMN.RAIN <- list.files( dir_IMN, pattern="*RAIN.xlsx" )
-    n_IMN.TMIN   <- length( files_IMN.TMIN )
-    n_IMN.TMAX   <- length( files_IMN.TMAX )
-    n_IMN.RAIN   <- length( files_IMN.RAIN )
-  files_Anacafe <- list.files( dir_Anacafe )
-    n_Anacafe   <- length( files_Anacafe )
-```
-
-```{r}
-  df_Icafe       <- read_excel( paste0(dir_Icafe,file_Icafe) )
-  stations_Icafe <- unique(df_Icafe$Estacion) ; n_Icafe <- length(stations_Icafe)
-
-  list_Icafe.a    <- list_Icafe    <- vector( "list", n_Icafe    )
-  list_IMN.TMIN.a <- list_IMN.TMIN <- vector( "list", n_IMN.TMIN )
-  list_IMN.TMAX.a <- list_IMN.TMAX <- vector( "list", n_IMN.TMAX )
-  list_IMN.RAIN.a <- list_IMN.RAIN <- vector( "list", n_IMN.RAIN )
-  list_Anacafe.a  <- list_Anacafe  <- vector( "list", n_Anacafe  )
-
-  for( s in 1:n_Icafe ) {
-    list_Icafe[[s]]   <- df_Icafe %>% filter( Estacion==stations_Icafe[s] ) }
-  for( s in 1:n_IMN.TMIN ) {
-    fs <- paste0(dir_IMN,files_IMN.TMIN[s])
-    list_IMN.TMIN[[s]] <- read_excel( fs, sheet="TMIN", skip=1,
-                                      col_type="numeric" ) }
-  for( s in 1:n_IMN.TMAX ) {
-    fs <- paste0(dir_IMN,files_IMN.TMAX[s])
-    list_IMN.TMAX[[s]] <- read_excel( fs, sheet="TMAX", skip=1,
-                                      col_type="numeric" ) }
-  for( s in 1:n_IMN.RAIN ) {
-    fs <- paste0(dir_IMN,files_IMN.RAIN[s])
-    list_IMN.RAIN[[s]] <- read_excel( fs, sheet="RAIN", skip=1,
-                                      col_type="numeric" ) }
-  for( s in 1:n_Anacafe ) {
-    list_Anacafe[[s]] <- read_csv( paste0(dir_Anacafe,files_Anacafe[s]) ) }
-```
-
-```{r}
-  for( s in 1:n_Icafe ) {
-    list_Icafe.a[[s]] <- list_Icafe[[s]] %>%
-      rename( ST = Estacion ) %>%
-      rename( TMAX    = "Temperatura máxima °C" ) %>%
-      rename( TMIN    = "Temperatura mínima °C" ) %>%
-      rename( RAIN    = "Lluvia mm" ) %>%
-      select( ST, year, month, TMIN, TMAX, RAIN ) %>%
-      group_by( ST, year, month ) %>%
-      summarize( TMIN = mean(TMIN,na.rm=T),
-                 TMAX = mean(TMAX,na.rm=T),
-                 RAIN = sum (RAIN,na.rm=T) ) %>%
-      group_by ( month ) %>%
-      mutate( TMIN.m = mean(TMIN,na.rm=T) ) %>%
-      mutate( TMAX.m = mean(TMAX,na.rm=T) ) %>%
-      mutate( RAIN.m = mean(RAIN,na.rm=T) ) %>%
-      filter( year>=2019 ) %>%
-      mutate( TMIN.a = TMIN - TMIN.m ) %>%
-      mutate( TMAX.a = TMAX - TMAX.m ) %>%
-      mutate( RAIN.a = RAIN - RAIN.m ) %>%
-      mutate( lat    = ifelse(ST=="Orosi"      ,  9.78529,
-                       ifelse(ST=="Atirro"     ,  9.8612 ,
-                       ifelse(ST=="Santa Rosa" ,  9.92852,
-                       ifelse(ST=="San Ramón"  , 10.06455,
-                       ifelse(ST=="Naranjo"    , 10.10778,
-                       ifelse(ST=="Frailes"    ,  9.75   ,
-                       ifelse(ST=="San Carlos" ,  9.62661,
-                       ifelse(ST=="San Lorenzo",  9.6414 ,
-                       ifelse(ST=="Dota"       ,  9.65056,
-                              NA ))))))))) ) %>%
-      mutate( lon    = ifelse(ST=="Orosi"      , -83.84652,
-                       ifelse(ST=="Atirro"     , -83.6358 ,
-                       ifelse(ST=="Santa Rosa" , -83.69964,
-                       ifelse(ST=="San Ramón"  , -84.47379,
-                       ifelse(ST=="Naranjo"    , -84.38361,
-                       ifelse(ST=="Frailes"    , -84.05306,
-                       ifelse(ST=="San Carlos" , -84.09163,
-                       ifelse(ST=="San Lorenzo", -84.02354,
-                       ifelse(ST=="Dota"       , -83.9575 ,
-                              NA ))))))))) ) %>%
-      dplyr::select( ST, lat, lon, year, month, TMIN.a, TMAX.a, RAIN.a )
-  }
-  # for( s in 1:n_Icafe ) { list_Icafe.a[[s]] %>% print(n = 1) }
-```
-
-```{r}
-  for(s in 1:n_IMN.TMIN) {
-    list_IMN.TMIN.a[[s]] <- list_IMN.TMIN[[s]] %>%
-      rename( month = Mes ) %>%
-      rename( year = Año ) %>%
-      mutate( TMIN = rowMeans( select(.,starts_with("D")), na.rm=T) ) %>%
-      dplyr::select( year, month, TMIN ) %>%
-      group_by ( month ) %>%
-      mutate( TMIN.m = mean(TMIN,na.rm=T) ) %>%
-      filter( year>=2019 ) %>%
-      mutate( TMIN.a = TMIN - TMIN.m ) %>%
-      mutate( ST = substr(files_IMN.TMAX[s],1,5) ) %>%
-      dplyr::select( ST, year, month, TMIN.a ) }
-
-  for(s in 1:n_IMN.TMAX) {
-    list_IMN.TMAX.a[[s]] <- list_IMN.TMAX[[s]] %>%
-      rename( month = Mes ) %>%
-      rename( year = Año ) %>%
-      mutate( TMAX = rowMeans( select(.,starts_with("D")), na.rm=T) ) %>%
-      dplyr::select( year, month, TMAX ) %>%
-      group_by ( month ) %>%
-      mutate( TMAX.m = mean(TMAX,na.rm=T) ) %>%
-      filter( year>=2019 ) %>%
-      mutate( TMAX.a = TMAX - TMAX.m ) %>%
-      mutate( ST = substr(files_IMN.TMAX[s],1,5) ) %>%
-      dplyr::select( ST, year, month, TMAX.a ) }
-
-  for(s in 1:n_IMN.RAIN) {
-    list_IMN.RAIN.a[[s]] <- list_IMN.RAIN[[s]] %>%
-      rename( month = Mes ) %>%
-      rename( year = Año ) %>%
-      mutate( RAIN = rowSums( select(.,starts_with("D")), na.rm=T) ) %>%
-      dplyr::select( year, month, RAIN ) %>%
-      group_by ( month ) %>%
-      mutate( RAIN.m = mean(RAIN,na.rm=T) ) %>%
-      filter( year>=2019 ) %>%
-      mutate( RAIN.a = RAIN - RAIN.m ) %>%
-      mutate( ST = substr(files_IMN.RAIN[s],1,5) ) %>%
-      dplyr::select( ST, year, month, RAIN.a ) }
-
-  list_IMN.a <- list_IMN.RAIN.a
-  for(s in 1:n_IMN.RAIN) {
-    list_IMN.a[[s]] <- list_IMN.a[[s]] %>%
-      mutate( lat = ifelse(ST==73048,  9.838611,
-                    ifelse(ST==73123,  9.852222,
-                    ifelse(ST==84187, 10.005   ,
-                    ifelse(ST==84189, 10.13733 ,
-                    ifelse(ST==88039,  9.766667,
-                    ifelse(ST==88047,  9.736667,
-                           NA )))))) ) %>%
-      mutate( lon = ifelse(ST==73048, -83.90722,
-                    ifelse(ST==73123, -83.90861,
-                    ifelse(ST==84187, -84.26556,
-                    ifelse(ST==84189, -84.1935 ,
-                    ifelse(ST==88039, -84.09056,
-                    ifelse(ST==88047, -84.00056,
-                           NA )))))) ) %>%
-      dplyr::select( ST, lat, lon, year, month, RAIN.a )
-    }
-  for(s in 1:n_IMN.RAIN) {
-    sTMIN <- which( files_IMN.RAIN[s] == files_IMN.TMIN )
-    if (length(sTMIN>0)) {
-      list_IMN.a[[s]] <- list_IMN.a[[s]] %>%
-        inner_join( list_IMN.TMIN.a[[sTMIN]], by=c("ST","year","month") ) %>%
-        dplyr::select(ST,lat,lon,year,month,TMIN.a,RAIN.a)
-    }
-    sTMAX <- which( files_IMN.RAIN[s] == files_IMN.TMAX )
-    if (length(sTMAX>0)) {
-      list_IMN.a[[s]] <- list_IMN.a[[s]] %>%
-        inner_join( list_IMN.TMAX.a[[sTMAX]], by=c("ST","year","month") ) %>%
-        dplyr::select(ST,lat,lon,year,month,TMIN.a,TMAX.a,RAIN.a)
-    }
-  }
-```
-
-```{r}
-  for( s in 1:n_Anacafe ) {
-    list_Anacafe.a[[s]] <- list_Anacafe[[s]] %>%
-      rename( ST    = ID_ESTACION ) %>%
-      rename( lat   = LATITUD     ) %>%
-      rename( lon   = LONGITUD    ) %>%
-      rename( TMEAN = "TMP" ) %>%
-      rename( RAIN  = "RNF" ) %>%
-      select( ST, lat, lon, year, month, TMEAN, RAIN ) %>%
-      group_by( ST, lat, lon, year, month ) %>%
-      summarize( TMEAN = mean(TMEAN,na.rm=T),
-                 RAIN  = sum (RAIN ,na.rm=T) ) %>%
-      group_by ( month ) %>%
-      mutate( TMEAN.m = mean(TMEAN,na.rm=T) ) %>%
-      mutate( RAIN.m  = mean(RAIN ,na.rm=T) ) %>%
-      filter( year>=2019 ) %>%
-      mutate( TMEAN.a = TMEAN - TMEAN.m ) %>%
-      mutate( RAIN.a  = RAIN  - RAIN.m  ) %>%
-      dplyr::select( ST, lat, lon, year, month, TMEAN.a, RAIN.a )
-  }
-  # for( s in 1:n_Anacafe ) { list_Anacafe.a[[s]] %>% print(n = 20, width=Inf) }
-```
-
-```{r}
-  Icafe.a <- list_Icafe.a[[1]]
-  for(s in 2:n_Icafe   ) { Icafe.a <- rbind(Icafe.a,list_Icafe.a[[s]]) }
-  IMN.a   <- list_IMN.a  [[1]]
-  for(s in 2:n_IMN.RAIN) { IMN.a <- rbind( IMN.a, list_IMN.a[[s]] ) }
-
-  C.a     <- rbind( Icafe.a, IMN.a )
-  # C.a %>% print(width=Inf,n=Inf)
-  
-  G.a     <- list_Anacafe.a[[1]]
-  for(s in 2:n_Anacafe) { G.a <- rbind( G.a, list_Anacafe.a[[s]] ) }
-  ioutlier.TMEAN_G <- which( abs(G.a$TMEAN.a)>5 )
-  G.a$TMEAN.a[ioutlier.TMEAN_G] <- NA
-
-  # G.a %>% print(width=Inf,n=Inf)
-```
-
-```{r}
-  df.ym <- function(df,y,m) {df %>% filter(year==y) %>% filter(month==m)}
-```
-
-```{r}
-  par( mfrow=c(3,4), mar=c(2,2,1,1) )
-
-  country="C" ; df=C.a ; xvar="lat"
-  
-  yvar="TMIN.a" ; yrange <- range( df[[yvar]], na.rm=T )
-  for(m in 1:12) {
-    df.m <- df.ym(df,2019,m) ; x = df.m[[xvar]] ; y = df.m[[yvar]]
-    plot( x, y, main=paste0(country,":",yvar," ",m),
-          xlab=xvar, ylab="", ylim=yrange )
-    abline(h=0,col="black")
-    lm <- lm( y ~ x )
-    abline( lm$coefficients[1], lm$coefficients[2], col="blue" )
-  }
-  
-  yvar="TMAX.a" ; yrange <- range( df[[yvar]], na.rm=T )
-  for(m in 1:12) {
-    df.m <- df.ym(df,2019,m) ; x = df.m[[xvar]] ; y = df.m[[yvar]]
-    plot( x, y, main=paste0(country,":",yvar," ",m),
-          xlab=xvar, ylab="", ylim=yrange )
-    abline(h=0,col="black")
-    lm <- lm( y ~ x )
-    abline( lm$coefficients[1], lm$coefficients[2], col="blue" )
-  }
-  
-  yvar="RAIN.a" ; yrange <- range( df[[yvar]], na.rm=T )
-  for(m in 1:12) {
-    df.m <- df.ym(df,2019,m) ; x = df.m[[xvar]] ; y = df.m[[yvar]]
-    plot( x, y, main=paste0(country,":",yvar," ",m),
-          xlab=xvar, ylab="", ylim=yrange )
-    abline(h=0,col="black")
-    lm <- lm( y ~ x )
-    abline( lm$coefficients[1], lm$coefficients[2], col="blue" )
-  }
-```
-
-```{r}
-  par( mfrow=c(3,4), mar=c(2,2,1,1) )
-
-  country="C" ; df=C.a ; xvar="lon"
-  
-  yvar="TMIN.a" ; yrange <- range( df[[yvar]], na.rm=T )
-  for(m in 1:12) {
-    df.m <- df.ym(df,2019,m) ; x = df.m[[xvar]] ; y = df.m[[yvar]]
-    plot( x, y, main=paste0(country,":",yvar," ",m),
-          xlab=xvar, ylab="", ylim=yrange )
-    abline(h=0,col="black")
-    lm <- lm( y ~ x )
-    abline( lm$coefficients[1], lm$coefficients[2], col="blue" )
-  }
-  
-  yvar="TMAX.a" ; yrange <- range( df[[yvar]], na.rm=T )
-  for(m in 1:12) {
-    df.m <- df.ym(df,2019,m) ; x = df.m[[xvar]] ; y = df.m[[yvar]]
-    plot( x, y, main=paste0(country,":",yvar," ",m),
-          xlab=xvar, ylab="", ylim=yrange )
-    abline(h=0,col="black")
-    lm <- lm( y ~ x )
-    abline( lm$coefficients[1], lm$coefficients[2], col="blue" )
-  }
-  
-  yvar="RAIN.a" ; yrange <- range( df[[yvar]], na.rm=T )
-  for(m in 1:12) {
-    df.m <- df.ym(df,2019,m) ; x = df.m[[xvar]] ; y = df.m[[yvar]]
-    plot( x, y, main=paste0(country,":",yvar," ",m),
-          xlab=xvar, ylab="", ylim=yrange )
-    abline(h=0,col="black")
-    lm <- lm( y ~ x )
-    abline( lm$coefficients[1], lm$coefficients[2], col="blue" )
-  }
-```
-
-```{r}
-  # Weather stations Costa Rica and their distance from Turrialba
-  df=C.a
-
-  lonlat_C.ST <- df[ c("lon","lat") ]
-  coordsT     <- c( -83.68,  9.89  ) # Longitude, Latitude
-  dist.T      <- as.vector( distm( coordsT, lonlat_C.ST ) ) / 1000
-  df          <- df %>% add_column( dist=dist.T )
-
-  par( mfrow=c(3,4), mar=c(2,2,1,1) )
-
-  country="C" ; xvar="dist"
-  
-  yvar="TMIN.a" ; yrange <- range( df[[yvar]], na.rm=T )
-  for(m in 1:12) {
-    df.m <- df.ym(df,2019,m) ; x = df.m[[xvar]] ; y = df.m[[yvar]]
-    plot( x, y, main=paste0(country,":",yvar," ",m),
-          xlab=xvar, ylab="", ylim=yrange )
-    abline(h=0,col="black")
-    lm <- lm( y ~ x )
-    abline( lm$coefficients[1], lm$coefficients[2], col="blue" )
-  }
-  
-  yvar="TMAX.a" ; yrange <- range( df[[yvar]], na.rm=T )
-  for(m in 1:12) {
-    df.m <- df.ym(df,2019,m) ; x = df.m[[xvar]] ; y = df.m[[yvar]]
-    plot( x, y, main=paste0(country,":",yvar," ",m),
-          xlab=xvar, ylab="", ylim=yrange )
-    abline(h=0,col="black")
-    lm <- lm( y ~ x )
-    abline( lm$coefficients[1], lm$coefficients[2], col="blue" )
-  }
-  
-  yvar="RAIN.a" ; yrange <- range( df[[yvar]], na.rm=T )
-  for(m in 1:12) {
-    df.m <- df.ym(df,2019,m) ; x = df.m[[xvar]] ; y = df.m[[yvar]]
-    plot( x, y, main=paste0(country,":",yvar," ",m),
-          xlab=xvar, ylab="", ylim=yrange )
-    abline(h=0,col="black")
-    lm <- lm( y ~ x )
-    abline( lm$coefficients[1], lm$coefficients[2], col="blue" )
-  }
-```
-
-```{r}
-  par( mfrow=c(3,4), mar=c(2,2,1,1) )
-
-  country="G" ; df=G.a ; xvar="lat"
-  
-  yvar="TMEAN.a" ; yrange <- range( df[[yvar]], na.rm=T )
-  for(m in 1:12) {
-    df.m <- df.ym(df,2019,m) ; x = df.m[[xvar]] ; y = df.m[[yvar]]
-    plot( x, y, main=paste0(country,":",yvar," ",m),
-          xlab=xvar, ylab="", ylim=yrange )
-    abline(h=0,col="black")
-    lm <- lm( y ~ x )
-    abline( lm$coefficients[1], lm$coefficients[2], col="blue" )
-  }
-  
-  yvar="RAIN.a" ; yrange <- range( df[[yvar]], na.rm=T )
-  for(m in 1:12) {
-    df.m <- df.ym(df,2019,m) ; x = df.m[[xvar]] ; y = df.m[[yvar]]
-    plot( x, y, main=paste0(country,":",yvar," ",m),
-          xlab=xvar, ylab="", ylim=yrange )
-    abline(h=0,col="black")
-    lm <- lm( y ~ x )
-    abline( lm$coefficients[1], lm$coefficients[2], col="blue" )
-  }
-```
-
-```{r}
-  par( mfrow=c(3,4), mar=c(2,2,1,1) )
-
-  country="G" ; df=G.a ; xvar="lon"
-  
-  yvar="TMEAN.a" ; yrange <- range( df[[yvar]], na.rm=T )
-  for(m in 1:12) {
-    df.m <- df.ym(df,2019,m) ; x = df.m[[xvar]] ; y = df.m[[yvar]]
-    plot( x, y, main=paste0(country,":",yvar," ",m),
-          xlab=xvar, ylab="", ylim=yrange )
-    abline(h=0,col="black")
-    lm <- lm( y ~ x )
-    abline( lm$coefficients[1], lm$coefficients[2], col="blue" )
-  }
-  
-  yvar="RAIN.a" ; yrange <- range( df[[yvar]], na.rm=T )
-  for(m in 1:12) {
-    df.m <- df.ym(df,2019,m) ; x = df.m[[xvar]] ; y = df.m[[yvar]]
-    plot( x, y, main=paste0(country,":",yvar," ",m),
-          xlab=xvar, ylab="", ylim=yrange )
-    abline(h=0,col="black")
-    lm <- lm( y ~ x )
-    abline( lm$coefficients[1], lm$coefficients[2], col="blue" )
-  }
-```
-
-```{r}
-  # Weather stations Guatemala and their distance from farm 170
-  df=G.a
-
-  lonlat_G.ST <- df[ c("lon","lat") ]
-  coordsG170  <- c( -90.44, 14.429 ) # Longitude, Latitude
-  dist.170    <- as.vector( distm( coordsG170, lonlat_G.ST ) ) / 1000
-  df          <- df %>% add_column( dist=dist.170 )
-
-  par( mfrow=c(3,4), mar=c(2,2,1,1) )
-
-  country="G" ; xvar="dist"
-  
-  yvar="TMEAN.a" ; yrange <- range( df[[yvar]], na.rm=T )
-  for(m in 1:12) {
-    df.m <- df.ym(df,2019,m) ; x = df.m[[xvar]] ; y = df.m[[yvar]]
-    plot( x, y, main=paste0(country,":",yvar," ",m),
-          xlab=xvar, ylab="", ylim=yrange )
-    abline(h=0,col="black")
-    lm <- lm( y ~ x )
-    abline( lm$coefficients[1], lm$coefficients[2], col="blue" )
-  }
-  
-  yvar="RAIN.a" ; yrange <- range( df[[yvar]], na.rm=T )
-  for(m in 1:12) {
-    df.m <- df.ym(df,2019,m) ; x = df.m[[xvar]] ; y = df.m[[yvar]]
-    plot( x, y, main=paste0(country,":",yvar," ",m),
-          xlab=xvar, ylab="", ylim=yrange )
-    abline(h=0,col="black")
-    lm <- lm( y ~ x )
-    abline( lm$coefficients[1], lm$coefficients[2], col="blue" )
-  }
-```
-
-```{r}
-  C.a.mean2019mon <- C.a %>%
-    filter( year == 2019 ) %>%
-    group_by( month ) %>%
-    summarize( TMIN.a = mean(TMIN.a,na.rm=T),
-               TMAX.a = mean(TMAX.a,na.rm=T),
-               RAIN.a = mean(RAIN.a,na.rm=T) ) %>%
-    as.matrix()
-  
-  print( C.a.mean2019mon  )
-```
-
-```{r}
-  G.a.mean2019mon <- G.a %>%
-    filter( year == 2019 ) %>%
-    group_by( month ) %>%
-    summarize( TMEAN.a = mean(TMEAN.a,na.rm=T),
-               RAIN.a  = mean(RAIN.a ,na.rm=T) ) %>%
-    as.matrix()
-  
-  print( G.a.mean2019mon )
-```
-
-
-
-\clearpage
-
-# Extending farm weather files by two years (2019, 2020)
-
-For 2019 we use the country-average monthly anomalies, for 2020 the climatic average.
-
-```{r}
-  monl   <- c( 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 )
-  monend <- cumsum( monl ) ; monstart <- c( 1, head(monend+1,-1) )
-  mon    <- function(doy) { which((doy>=monstart) & (doy<=monend)) }
-```
-
-```{r}
-  nf <- length( df_C.f$code )
-
-  for(f in 1:nf) {
-    w.f                <- df_C.f$weather.WC[[f]]
-    ncol               <- dim(w.f)[2]
-    meanyear           <- matrix( NA, 365, ncol )
-    colnames(meanyear) <- colnames(w.f)
-    for(d in 1:365) {
-      meanyear[d,] <- colMeans( w.f[ which(w.f[,"doy"]==d), ] )
-    }
-    anom2019 <- matrix(0,365,ncol) ; colnames(anom2019) <- colnames(w.f)
-    for(d in 1:365) {
-      anom2019[d,"TMIN"] <- C.a.mean2019mon[ mon(d), "TMIN.a" ]
-      anom2019[d,"TMAX"] <- C.a.mean2019mon[ mon(d), "TMAX.a" ]
-      anom2019[d,"RAIN"] <- C.a.mean2019mon[ mon(d), "RAIN.a" ] / monl[mon(d)]
-    }
-    year2020          <- meanyear            ; year2020[,"year"] <- 2020
-    year2019          <- meanyear + anom2019 ; year2019[,"year"] <- 2019
-    year2019[,"RAIN"] <- pmax( year2019[,"RAIN"], 0 )
-    w.f               <- rbind( w.f, year2019, year2020 )
-    df_C.f$weather.WC[[f]] <- w.f
-    # y20    <- year2020[,"RAIN"] ; y19 <- year2019[,"RAIN"]
-    # yrange <- range(y20,y19)
-    # plot( y20, main=paste0("RAIN(",f,")"), ylim=yrange, xlab="", ylab="" )
-    # points( y19,col="red" )
-  }
-```
-
-```{r}
-  nf <- length( df_G.f$code )
-
-  par( mfrow=c(5,5), mar=c(2,1,1,1) )
-
-  for(f in 1:nf) {
-    w.f                <- df_G.f$weather.WC[[f]]
-    ncol               <- dim(w.f)[2]
-    meanyear           <- matrix( NA, 365, ncol )
-    colnames(meanyear) <- colnames(w.f)
-    for(d in 1:365) {
-      meanyear[d,] <- colMeans( w.f[ which(w.f[,"doy"]==d), ] )
-    }
-    anom2019 <- matrix(0,365,ncol) ; colnames(anom2019) <- colnames(w.f)
-    for(d in 1:365) {
-      anom2019[d,"TMIN"] <- G.a.mean2019mon[ mon(d), "TMEAN.a" ]
-      anom2019[d,"TMAX"] <- G.a.mean2019mon[ mon(d), "TMEAN.a" ]
-      anom2019[d,"RAIN"] <- G.a.mean2019mon[ mon(d), "RAIN.a"  ] / monl[mon(d)]
-    }
-    year2020          <- meanyear            ; year2020[,"year"] <- 2020
-    year2019          <- meanyear + anom2019 ; year2019[,"year"] <- 2019
-    year2019[,"RAIN"] <- pmax( year2019[,"RAIN"], 0 )
-    w.f               <- rbind( w.f, year2019, year2020 )
-    df_G.f$weather.WC[[f]] <- w.f
-    # y20    <- year2020[,"TMIN"] ; y19 <- year2019[,"TMIN"]
-    # yrange <- range(y20,y19)
-    # plot( y20, main=paste0("TMIN(",f,")"), ylim=yrange, xlab="", ylab="" )
-    # points( y19,col="red" )
-  }
-```
-
-
-
-\clearpage
-
-# Running 2005-2020
-
-```{r}
-  list_outF_C <- vector( "list", n_C.f )
-  for(fi in 1:n_C.f) {
-    C_C     <- df_C.f$C.soil [ fi ]
-    CN_C    <- df_C.f$CN.soil[ fi ]
-    LAT_C   <- df_C.f$lat    [ fi ]
-    SLOPE_C <- df_C.f$slope  [ fi ]
-    Nfert_C <- df_C.f$Nfert  [ fi ]
-    shade_C <- df_C.f$shade  [ fi ]
-    
-    WCWP_C  <- df_C.f$WP     [ fi ]
-    WCFC_C  <- df_C.f$FC     [ fi ]
-    WCAD_C  <- 0.01
-    WCST_C  <- min( 1, WCFC_C+0.1 )
-    WCWET_C <- 0.5 * (WCFC_C + WCST_C)
-    
-    source( sitesettings_filenames[1] )
-    NDAYS_fi          <- as.integer(15*365)
-    year_start_fi     <- as.integer(2005)
-    doy_start_fi      <- as.integer( 214)
-    matrix_weather_fi <- read_listweather_CAF( list_w = df_C.f$weather.WC,
-                                               f      = fi,
-                                               y1     = year_start_fi,
-                                               d1     = doy_start_fi,
-                                               nd     = NDAYS_fi )
-
-    calendar_fert_fi <- matrix( -1, nrow=100, ncol=3 )
-    calendar_fert_fi [ 1:57, 1 ] <- rep( 2002:2020, each=3 )
-    calendar_fert_fi [ 1:57, 2 ] <- c( 135, 289, 350 )
-    calendar_fert_fi [ 1:57, 3 ] <- rep( Nfert_C/3, 3 )
-
-    mat_outF                 <- matrix( NA, 2, 1+length(varnames) )
-    colnames( mat_outF )     <- c( "FarmSetting", varnames )
-    mat_outF[,"FarmSetting"] <- 1:2
-    # for(i in 1:2) {
-    for(i in 2:2) {
-      if(i==1) {
-        if(df_C.f$nt[fi]==0) { source(sitesettings_filenames[19])
-          params <- parMAP[,19]
-        }
-        if(df_C.f$nt[fi]==1) { source(sitesettings_filenames[31])
-          params <- parMAP[,31]
-          params <- set_par("TREEDENS0(3)",0)
-        }
-        if(df_C.f$nt[fi]==2) { source(sitesettings_filenames[31])
-          params <- parMAP[,31]
-        } 
-        if(df_C.f$nt[fi] >2) { source(sitesettings_filenames[31])
-          params <- parMAP[,31]
-          params <- set_par_speciesT(2,"Avocado")
-        }
-        params[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0) ] <- CN_C
-        params[ ip_CSOM0                            ] <- C_C
-        params[ ip_LAT                              ] <- LAT_C
-        params[ ip_SLOPE                            ] <- SLOPE_C
-        params[ ip_SHADETARGET                      ] <- shade_C
-        
-        params[ ip_FWCAD  ] <- WCAD_C  / WCST_C
-        params[ ip_FWCWP  ] <- WCWP_C  / WCST_C
-        params[ ip_FWCFC  ] <- WCFC_C  / WCST_C
-        params[ ip_FWCWET ] <- WCWET_C / WCST_C
-        params[ ip_WCST   ] <- WCST_C
-      }
-      if(i==2) {
-        if(df_C.f$nt[fi]==0) { source(sitesettings_filenames[19])
-          params <- parMAP[,19]
-        }
-        if(df_C.f$nt[fi]==1) { source(sitesettings_filenames[31])
-          params <- parMAP[,31]
-          params <- set_par("TREEDENS0(3)",0)
-        }
-        if(df_C.f$nt[fi]==2) { source(sitesettings_filenames[31])
-          params <- parMAP[,31]
-        } 
-        if(df_C.f$nt[fi] >2) { source(sitesettings_filenames[31])
-          params <- parMAP[,31]
-          params <- set_par_speciesT(2,"Banana")
-        }
-        params[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0) ] <- CN_C
-        params[ ip_CSOM0                            ] <- C_C
-        params[ ip_LAT                              ] <- LAT_C
-        params[ ip_SLOPE                            ] <- SLOPE_C
-        params[ ip_SHADETARGET                      ] <- shade_C
-        
-        params[ ip_FWCAD  ] <- WCAD_C  / WCST_C
-        params[ ip_FWCWP  ] <- WCWP_C  / WCST_C
-        params[ ip_FWCFC  ] <- WCFC_C  / WCST_C
-        params[ ip_FWCWET ] <- WCWET_C / WCST_C
-        params[ ip_WCST   ] <- WCST_C
-      }
-      outF <- run_model( params, matrix_weather_fi, calendar_fert_fi,
-        calendar_prunC, calendar_prunT, calendar_thinT, NDAYS_fi )
-      mat_outF[i,1+(1:length(varnames))] <- outputSummary( outF )
-    }
-    list_outF_C[[fi]] <- mat_outF
-  }
-```
-
-```{r}
-  list_outF_G <- vector( "list", n_G.f )
-  for(fi in 1:n_G.f) {
-    C_G     <- df_G.f$C.soil [ fi ]
-    CN_G    <- df_G.f$CN.soil[ fi ]
-    LAT_G   <- df_G.f$lat    [ fi ]
-    SLOPE_G <- df_G.f$slope  [ fi ]
-    Nfert_G <- df_G.f$Nfert  [ fi ]
-    shade_G <- df_G.f$shade  [ fi ]
-    
-    WCWP_G  <- df_G.f$WP     [ fi ]
-    WCFC_G  <- df_G.f$FC     [ fi ]
-    WCAD_G  <- 0.01
-    WCST_G  <- min( 1, WCFC_G+0.1 )
-    WCWET_G <- 0.5 * (WCFC_G + WCST_G)
-    
-    source( sitesettings_filenames[1] )
-    NDAYS_fi          <- as.integer(15*365)
-    year_start_fi     <- as.integer(2005)
-    doy_start_fi      <- as.integer( 214)
-    matrix_weather_fi <- read_listweather_CAF( list_w = df_G.f$weather.WC,
-                                               f      = fi,
-                                               y1     = year_start_fi,
-                                               d1     = doy_start_fi,
-                                               nd     = NDAYS_fi )
-
-    calendar_fert_fi <- matrix( -1, nrow=100, ncol=3 )
-    calendar_fert_fi [ 1:57, 1 ] <- rep( 2002:2020, each=3 )
-    calendar_fert_fi [ 1:57, 2 ] <- c( 135, 289, 350 )
-    calendar_fert_fi [ 1:57, 3 ] <- rep( Nfert_G/3, 3 )
-
-    mat_outF                 <- matrix( NA, 2, 1+length(varnames) )
-    colnames( mat_outF )     <- c( "FarmSetting", varnames )
-    mat_outF[,"FarmSetting"] <- 1:2
-    # for(i in 1:2) {
-    for(i in 2:2) {
-      if(i==1) {
-        if(df_G.f$nt[fi]==0) { source(sitesettings_filenames[19])
-          params <- parMAP[,19]
-        }
-        if(df_G.f$nt[fi]==1) { source(sitesettings_filenames[31])
-          params <- parMAP[,31]
-          params <- set_par("TREEDENS0(3)",0)
-        }
-        if(df_G.f$nt[fi]==2) { source(sitesettings_filenames[31])
-          params <- parMAP[,31]
-        } 
-        if(df_G.f$nt[fi] >2) { source(sitesettings_filenames[31])
-          params <- parMAP[,31]
-          params <- set_par_speciesT(2,"Avocado")
-        }
-        params[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0) ] <- CN_G
-        params[ ip_CSOM0                            ] <- C_G
-        params[ ip_LAT                              ] <- LAT_G
-        params[ ip_SLOPE                            ] <- SLOPE_G
-        params[ ip_SHADETARGET                      ] <- shade_G
-        
-        params[ ip_FWCAD  ] <- WCAD_G  / WCST_G
-        params[ ip_FWCWP  ] <- WCWP_G  / WCST_G
-        params[ ip_FWCFC  ] <- WCFC_G  / WCST_G
-        params[ ip_FWCWET ] <- WCWET_G / WCST_G
-        params[ ip_WCST   ] <- WCST_G
-      }
-      if(i==2) {
-        if(df_G.f$nt[fi]==0) { source(sitesettings_filenames[19])
-          params <- parMAP[,19]
-        }
-        if(df_G.f$nt[fi]==1) { source(sitesettings_filenames[31])
-          params <- parMAP[,31]
-          params <- set_par("TREEDENS0(3)",0)
-        }
-        if(df_G.f$nt[fi]==2) { source(sitesettings_filenames[31])
-          params <- parMAP[,31]
-        } 
-        if(df_G.f$nt[fi] >2) { source(sitesettings_filenames[31])
-          params <- parMAP[,31]
-          params <- set_par_speciesT(2,"Banana")
-        }
-        params[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0) ] <- CN_G
-        params[ ip_CSOM0                            ] <- C_G
-        params[ ip_LAT                              ] <- LAT_G
-        params[ ip_SLOPE                            ] <- SLOPE_G
-        params[ ip_SHADETARGET                      ] <- shade_G
-        
-        params[ ip_FWCAD  ] <- WCAD_G  / WCST_G
-        params[ ip_FWCWP  ] <- WCWP_G  / WCST_G
-        params[ ip_FWCFC  ] <- WCFC_G  / WCST_G
-        params[ ip_FWCWET ] <- WCWET_G / WCST_G
-        params[ ip_WCST   ] <- WCST_G
-      }
-      outF <- run_model( params, matrix_weather_fi, calendar_fert_fi,
-        calendar_prunC, calendar_prunT, calendar_thinT, NDAYS_fi )
-      mat_outF[i,1+(1:length(varnames))] <- outputSummary( outF )
-    }
-    list_outF_G[[fi]] <- mat_outF
-  }
-```
-
-```{r}
-  df_C.f_sim <- df_C.f %>%
-    select ( code ) %>%
-    arrange( code ) %>%
-    mutate ( outF  = list_outF_C )
-
-  df_G.f_sim <- df_G.f %>%
-    select ( code ) %>%
-    arrange( code ) %>%
-    mutate ( outF  = list_outF_G )
-```
-
-```{r}
-  df <- df_C.f_sim
-
-  F1_C <- dfoutFSummary( df, Fi=1 ) ; F2_C <- dfoutFSummary( df, Fi=2 )
-  
-  yF1_C.f_sim     <- F1_C[,"harvDM_f_hay"   ]
-  yF1_C.f_sim1819 <- F1_C[,"harvDM_f_ha1819"]
-  yF2_C.f_sim     <- F2_C[,"harvDM_f_hay"   ]
-  yF2_C.f_sim1819 <- F2_C[,"harvDM_f_ha1819"]
-
-  df <- df_G.f_sim
-  F1_G <- dfoutFSummary( df, Fi=1 ) ; F2_G <- dfoutFSummary( df, Fi=2 )
-  
-  yF1_G.f_sim     <- F1_G[,"harvDM_f_hay"   ]
-  yF1_G.f_sim1819 <- F1_G[,"harvDM_f_ha1819"]
-  yF2_G.f_sim     <- F2_G[,"harvDM_f_hay"   ]
-  yF2_G.f_sim1819 <- F2_G[,"harvDM_f_ha1819"]
-  
-  # plot(yF2_C.f_sim,yF2_C.f_sim1819)
-  # plot(yF2_G.f_sim,yF2_G.f_sim1819)
-```
-
-```{r XX17, fig.height=4, fig.cap="\\label{fig:XX17}Observed yields at the farms in Costa Rica (left) and Guatemala (right) plotted against long-term average simulated yields 2005-2020. The simulations used farm-specific information on weather, soil, N-fertilisation and number of shade tree species and site-specific shade management."}
-  par( mfrow=c(1,2), mar=c(4,2,2,2), mgp=c(2,1,0) )
-
-  # x=yF1_C.f_sim ; y=df_C.f$yield ; plotxylm("Obs. Costa Rica")
-  x=yF2_C.f_sim ; y=df_C.f$yield ; plotxylm("Obs. Costa Rica")
-
-  # x=yF1_G.f_sim ; y=df_G.f$yield ; plotxylm("Obs. Guatemala")
-  x=yF2_G.f_sim ; y=df_G.f$yield ; plotxylm("Obs. Guatemala")
-```
-
-```{r XX18, fig.height=4, fig.cap="\\label{fig:XX18}Observed yields at the farms in Costa Rica (left) and Guatemala (right) plotted against simulated yields for the 2018-2019 harvest season. The simulations used farm-specific information on weather, soil, N-fertilisation and number of shade tree species and site-specific shade management."}
-  par( mfrow=c(1,2), mar=c(4,2,2,2), mgp=c(2,1,0) )
-
-  x=yF2_C.f_sim1819 ; y=df_C.f$yield ; plotxylm("Obs. Costa Rica 18/19")
-
-  x=yF2_G.f_sim1819 ; y=df_G.f$yield ; plotxylm("Obs. Guatemala 18/19")
-```
-
-```{r, eval=F}
-  colnames( outF ) <- outputNames
-  d <- (NDAYS_fi-730) : NDAYS_fi
-  plot( outF[d,"Time"], outF[d,"harvDM_f_hay"] )
-```
-
-
-\clearpage
-
-# Yields from second harvest season (2019/2020)
-
-```{r}
-  dir.f         <- "data/Farms SEACAF/"
-
-  file_yield2.f <- "Database SEACAF - Net income.xlsx"
-```
-
-```{r}
-  df_yield2.f <- read_excel( paste0(dir.f,file_yield2.f) )
-
-  df_yield2.f <- df_yield2.f %>%
-    mutate( code      = ifelse(country=="Costa Rica", 1000,
-                        ifelse(country=="Guatemala" , 2000,
-                               NA )) ) %>%
-    mutate( code_farm = as.numeric( substring(code_farm,first=3) ) ) %>%
-    mutate( code      = code + code_farm ) %>%
-    mutate( yield2    = prodcafe_ha / 3 ) %>%
-    dplyr::select( code, yield2 )
-```
-
-```{r}
-  df_yield2_C.f <- df_yield2.f %>% subset( df_yield2.f$code <  2000 )
-  df_yield2_G.f <- df_yield2.f %>% subset( df_yield2.f$code >= 2000 )
-
-  df_C12.f      <- df_C.f %>% inner_join( df_yield2_C.f, by=c("code") )
-  df_G12.f      <- df_G.f %>% inner_join( df_yield2_G.f, by=c("code") )
-```
-
-```{r}
-  lonlat_C12.f <- df_C12.f[ c("lon","lat") ]
-  lonlat_G12.f <- df_G12.f[ c("lon","lat") ]
-  coordsT      <- c( -83.68,  9.89  ) # Longitude, Latitude
-  coordsG170   <- c( -90.44, 14.429 ) # Longitude, Latitude
-  dist_C12.T   <- distm( coordsT   , lonlat_C12.f ) / 1000
-  dist_G12.170 <- distm( coordsG170, lonlat_G12.f ) / 1000
-```
-
-```{r}
-  par( mfrow=c(2,2), mar=c(2,2,3,2) )
-
-  x = df_C12.f$yield ; y = df_C12.f$yield2
-  plotxylm( "Yields 19/20 vs. 18/19\nCosta Rica", ""  )
-
-  x = df_G12.f$yield ; y = df_G12.f$yield2
-  plotxylm( "Yields 19/20 vs. 18/19\nGuatemala", ""  )
-
-  x = dist_C12.T   ; y = df_C12.f$yield2 - df_C12.f$yield
-  ynna <- which(!is.na(y))
-  x <- x[ynna] ; y <- y[ynna]
-  plotxylm( "Yield-change vs. dist. Turrialba", ""  )
-
-  x = dist_G12.170 ; y = df_G12.f$yield2 - df_G12.f$yield
-  ynna <- which(!is.na(y))
-  x <- x[ynna] ; y <- y[ynna]
-  plotxylm( "Yield-change vs. dist. G170", ""  )
-```
-
