@@ -34,12 +34,15 @@ Contains
 	    do t=1,nt
         if ( (year==DAYS_PRUNT(t,i,1)) .and. (doy==DAYS_PRUNT(t,i,2)) ) then
           prunFRT(t) = FRPRUNT(t,i)
-          if ((SHADETARGET>0).and.(Shade_f>0)) then
+          if ((SHADETARGET>0).and.(PRUNTARGET(t)==1).and.(Shade_f>0)) then
             prunFRT(t) = 1 - SHADETARGET / Shade_f
           endif
 	      endif
         if ( (year==DAYS_THINT(t,i,1)) .and. (doy==DAYS_THINT(t,i,2)) ) then
           thinFRT(t) = FRTHINT(t,i)
+          if ((SHADETARGET>0).and.(THINTARGET(t)==1).and.(Shade_f>0)) then
+            thinFRT(t) = 1 - SHADETARGET / Shade_f
+          endif
 	      endif
 	    enddo
     enddo

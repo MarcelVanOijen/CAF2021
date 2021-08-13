@@ -841,9 +841,98 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
 
 \clearpage
 
+# Trees
+
+## Tree management
+
+```{r}
+  namesdfscalars <- names(df_C.f)[ !(names(df_C.f) %in% "weather.WC") ]
+  
+  df_C.f$dens_service <- df_C.f$dens_Erythrina  + df_C.f$dens_Inga
+  df_C.f$dens_fruit   <- df_C.f$dens_Banana     + df_C.f$dens_Avocado
+  df_C.f$dens_timber  <- df_C.f$dens_Grevillea  + df_C.f$dens_Cordia
+  i.s <- which( df_C.f$dens_service >
+               max( df_C.f$dens_Erythrina , df_C.f$dens_Inga ) )
+  i.f <- which( df_C.f$dens_fruit   >
+               max( df_C.f$dens_Banana    , df_C.f$dens_Avocado ) )
+  i.t <- which( df_C.f$dens_service >
+                max( df_C.f$dens_Grevillea, df_C.f$dens_Cordia ) )
+  df_C.f[i.s,namesdfscalars]
+  
+  df_G.f$dens_service <- df_G.f$dens_Erythrina  + df_G.f$dens_Inga
+  df_G.f$dens_fruit   <- df_G.f$dens_Banana     + df_G.f$dens_Avocado
+  df_G.f$dens_timber  <- df_G.f$dens_Grevillea  + df_G.f$dens_Cordia
+  i.s <- which( df_G.f$dens_service >
+               max( df_G.f$dens_Erythrina , df_G.f$dens_Inga ) )
+  i.f <- which( df_G.f$dens_fruit   >
+               max( df_G.f$dens_Banana    , df_G.f$dens_Avocado ) )
+  i.t <- which( df_G.f$dens_service >
+                max( df_G.f$dens_Grevillea, df_G.f$dens_Cordia ) )
+```
+
+### Erythrina
+- Pruning, no thinning
+- Prescribed pruning intensity of 90% twice a year (at coffee flowering and pre-harvest). Say doy 140 and 350.
+- Pruned material always stays on site
+
+### Inga
+- Pruning, no thinning
+- Pruning once a year (at flowering or just before). Say doy 140.
+- Pruning intensity for shade-target
+- Pruned branches stay on site in CRI but are removed in GTM
+
+### Avocado
+- Pruning, no thinning
+- Prescribed pruning intensity ?
+
+### Banana
+- No pruning or thinning
+- Annual senescence modelled through TC-parameters
+- Dead material always stays on site
+
+### Grevillea
+- Pruning, no thinning
+- Pruning once a year (at flowering or just before). Say doy 140.
+- Pruning intensity for shade-target
+- Pruned branches stay on site in CRI but are removed in GTM
+
+### Cordia
+- Thinning, no pruning. Say once every five years.
+- Thinning intensity for shade-target
+- Thinned trunks always removed
+- Branches from thinned trees stay on site in CRI but are removed in GTM !!
+
+
+## Tree allometry & other parameters
+
+### Erythrina
+- Calibration Turrialba
+- N-fixing
+
+### Inga
+- Calibration Masatepe
+- Edwin's report, Table 8 on p. 19
+- N-fixing
+
+### Avocado
+- My progress report
+
+### Banana
+- My progress report
+
+### Grevillea
+- Edwin's report, Table 10 on p. 21
+
+### Cordia
+- My report of ~2007
+
+
+
+\clearpage
+
 # Simulating farms in Costa Rica and Guatemala
 
-We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala, using a variety of parameterisations.
+We run the model for each of the farm locations in Costa Rica and Guatemala, using a variety of parameterisations.
 
 ```{r}
   outputSummary <- function( output ) {
@@ -935,6 +1024,20 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
   ip_FWCWET <- which( names_params=="FWCWET" )
   ip_FWCWP  <- which( names_params=="FWCWP"  )
   ip_WCST   <- which( names_params== "WCST"  )
+  
+  ip_FHARVBT1 <- which( names_params== "FHARVBT(1)" )
+  ip_FHARVBT2 <- which( names_params== "FHARVBT(2)" )
+  ip_FHARVBT3 <- which( names_params== "FHARVBT(3)" )
+  ip_FHARVLT1 <- which( names_params== "FHARVLT(1)" )
+  ip_FHARVLT2 <- which( names_params== "FHARVLT(2)" )
+  ip_FHARVLT3 <- which( names_params== "FHARVLT(3)" )
+  
+  ip_PRUNTARGET1 <- which( names_params== "PRUNTARGET(1)" )
+  ip_PRUNTARGET2 <- which( names_params== "PRUNTARGET(2)" )
+  ip_PRUNTARGET3 <- which( names_params== "PRUNTARGET(3)" )
+  ip_THINTARGET1 <- which( names_params== "THINTARGET(1)" )
+  ip_THINTARGET2 <- which( names_params== "THINTARGET(2)" )
+  ip_THINTARGET3 <- which( names_params== "THINTARGET(3)" )
 ```
 
 ```{r list_outF_C}
@@ -947,11 +1050,18 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
     Nfert_C <- df_C.f$Nfert  [ fi ]
     shade_C <- df_C.f$shade  [ fi ]
     
-    WCWP_C  <- df_C.f$WP     [ fi ]
-    WCFC_C  <- df_C.f$FC     [ fi ]
+    WCWP_C  <- df_C.f$WP[ fi ]
+    WCFC_C  <- df_C.f$FC[ fi ]
     WCAD_C  <- 0.01
     WCST_C  <- min( 1, WCFC_C+0.1 )
     WCWET_C <- 0.5 * (WCFC_C + WCST_C)
+    
+    densE_C <- df_C.f$dens_Erythrina[ fi ]
+    densI_C <- df_C.f$dens_Inga     [ fi ]
+    densB_C <- df_C.f$dens_Banana   [ fi ]
+    densA_C <- df_C.f$dens_Avocado  [ fi ]
+    densG_C <- df_C.f$dens_Grevillea[ fi ]
+    densC_C <- df_C.f$dens_Cordia   [ fi ]
     
     source( sitesettings_filenames[1] )
     NDAYS_fi          <- as.integer(15*365)
@@ -971,62 +1081,72 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
     mat_outF                 <- matrix( NA, 2, 1+length(varnames) )
     colnames( mat_outF )     <- c( "FarmSetting", varnames )
     mat_outF[,"FarmSetting"] <- 1:2
+    
+    source(sitesettings_filenames[31])
+    
+    years.prun1     <- calendar_prunT[1,,1]
+    years.prun3     <- calendar_prunT[3,,1]
+    doys.prun1      <- calendar_prunT[1,,2]
+    doys.prun3      <- calendar_prunT[3,,2]
+    fractions.prun1 <- calendar_prunT[1,,3]
+    fractions.prun3 <- calendar_prunT[3,,3]
+    calendar_prunT  <- set_calendar_prunT( 1,
+      years=years.prun1, doys=doys.prun1, fractions=fractions.prun1 )
+    calendar_prunT  <- set_calendar_prunT( 2 )
+    calendar_prunT  <- set_calendar_prunT( 3,
+      years=years.prun3, doys=doys.prun3, fractions=fractions.prun3 )
+    
+    years.thin1     <- calendar_thinT[1,,1]
+    years.thin3     <- calendar_thinT[3,,1]
+    doys.thin1      <- calendar_thinT[1,,2]
+    doys.thin3      <- calendar_thinT[3,,2]
+    fractions.thin1 <- calendar_thinT[1,,3]
+    fractions.thin3 <- calendar_thinT[3,,3]
+    calendar_thinT  <- set_calendar_thinT( 1,
+      years=years.thin1, doys=doys.thin1, fractions=fractions.thin1 )
+    calendar_thinT  <- set_calendar_thinT( 2 )
+    calendar_thinT  <- set_calendar_thinT( 3,
+      years=years.thin3, doys=doys.thin3, fractions=fractions.thin3 )
+    
+    calendar_prunT <- set_prunT("C", densE_C, densI_C, densB_C, densA_C, 
+                                     densG_C, densC_C, calendar_prunT )
+    calendar_thinT <- set_thinT("C", densE_C, densI_C, densB_C, densA_C,
+                                     densG_C, densC_C, calendar_thinT )
+
+    params <- parMAP[,31]
+    params <- set_parT( "C", densE_C, densI_C, densB_C,
+                             densA_C, densG_C, densC_C )
+    
     # for(i in 1:2) {
     for(i in 2:2) {
-      if(i==1) {
-        if(df_C.f$nt[fi]==0) { source(sitesettings_filenames[19])
-          params <- parMAP[,19]
-        }
-        if(df_C.f$nt[fi]==1) { source(sitesettings_filenames[31])
-          params <- parMAP[,31]
-          params <- set_par("TREEDENS0(3)",0)
-        }
-        if(df_C.f$nt[fi]==2) { source(sitesettings_filenames[31])
-          params <- parMAP[,31]
-        } 
-        if(df_C.f$nt[fi] >2) { source(sitesettings_filenames[31])
-          params <- parMAP[,31]
-          params <- set_par_speciesT(2,"Avocado")
-        }
-        params[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0) ] <- CN_C
-        params[ ip_CSOM0                            ] <- C_C
-        params[ ip_LAT                              ] <- LAT_C
-        params[ ip_SLOPE                            ] <- SLOPE_C
-        params[ ip_SHADETARGET                      ] <- shade_C
-        
-        params[ ip_FWCAD  ] <- WCAD_C  / WCST_C
-        params[ ip_FWCWP  ] <- WCWP_C  / WCST_C
-        params[ ip_FWCFC  ] <- WCFC_C  / WCST_C
-        params[ ip_FWCWET ] <- WCWET_C / WCST_C
-        params[ ip_WCST   ] <- WCST_C
-      }
       if(i==2) {
-        if(df_C.f$nt[fi]==0) { source(sitesettings_filenames[19])
-          params <- parMAP[,19]
-        }
-        if(df_C.f$nt[fi]==1) { source(sitesettings_filenames[31])
-          params <- parMAP[,31]
-          params <- set_par("TREEDENS0(3)",0)
-        }
-        if(df_C.f$nt[fi]==2) { source(sitesettings_filenames[31])
-          params <- parMAP[,31]
-        } 
-        if(df_C.f$nt[fi] >2) { source(sitesettings_filenames[31])
-          params <- parMAP[,31]
-          params <- set_par_speciesT(2,"Banana")
-        }
-        params[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0) ] <- CN_C
-        params[ ip_CSOM0                            ] <- C_C
-        params[ ip_LAT                              ] <- LAT_C
-        params[ ip_SLOPE                            ] <- SLOPE_C
-        params[ ip_SHADETARGET                      ] <- shade_C
-        
-        params[ ip_FWCAD  ] <- WCAD_C  / WCST_C
-        params[ ip_FWCWP  ] <- WCWP_C  / WCST_C
-        params[ ip_FWCFC  ] <- WCFC_C  / WCST_C
-        params[ ip_FWCWET ] <- WCWET_C / WCST_C
-        params[ ip_WCST   ] <- WCST_C
+        if(df_C.f$nt[fi]==0) { params <- set_par("TREEDENS0(1)",0)
+                               params <- set_par("TREEDENS0(3)",0) }
+        if(df_C.f$nt[fi]==1) { params <- set_par("TREEDENS0(3)",0) }
+        if(df_C.f$nt[fi] >2) { params <- set_par_speciesT(2,"Banana") }
       }
+      params[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0) ] <- CN_C
+      params[ ip_CSOM0                            ] <- C_C
+      params[ ip_LAT                              ] <- LAT_C
+      params[ ip_SLOPE                            ] <- SLOPE_C
+      params[ ip_SHADETARGET                      ] <- shade_C
+      params[ ip_FWCAD  ] <- WCAD_C  / WCST_C
+      params[ ip_FWCWP  ] <- WCWP_C  / WCST_C
+      params[ ip_FWCFC  ] <- WCFC_C  / WCST_C
+      params[ ip_FWCWET ] <- WCWET_C / WCST_C
+      params[ ip_WCST   ] <- WCST_C
+      params[ ip_FHARVBT1 ] <- 1
+      params[ ip_FHARVBT2 ] <- 1
+      params[ ip_FHARVBT3 ] <- 1
+      params[ ip_FHARVLT1 ] <- 0
+      params[ ip_FHARVLT2 ] <- 0
+      params[ ip_FHARVLT3 ] <- 0
+      params[ ip_PRUNTARGET1 ] <- 1
+      params[ ip_PRUNTARGET2 ] <- 1
+      params[ ip_PRUNTARGET3 ] <- 1
+      params[ ip_THINTARGET1 ] <- 0
+      params[ ip_THINTARGET2 ] <- 0
+      params[ ip_THINTARGET3 ] <- 0
       outF <- run_model( params, matrix_weather_fi, calendar_fert_fi,
         calendar_prunC, calendar_prunT, calendar_thinT, NDAYS_fi )
       mat_outF[i,1+(1:length(varnames))] <- outputSummary( outF )
@@ -1051,6 +1171,13 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
     WCST_G  <- min( 1, WCFC_G+0.1 )
     WCWET_G <- 0.5 * (WCFC_G + WCST_G)
     
+    densE_G <- df_G.f$dens_Erythrina[ fi ]
+    densI_G <- df_G.f$dens_Inga     [ fi ]
+    densB_G <- df_G.f$dens_Banana   [ fi ]
+    densA_G <- df_G.f$dens_Avocado  [ fi ]
+    densG_G <- df_G.f$dens_Grevillea[ fi ]
+    densC_G <- df_G.f$dens_Cordia   [ fi ]
+    
     source( sitesettings_filenames[1] )
     NDAYS_fi          <- as.integer(15*365)
     year_start_fi     <- as.integer(2005)
@@ -1069,62 +1196,40 @@ We ran the model for each of 89 farm locations in Costa Rica and 90 in Guatemala
     mat_outF                 <- matrix( NA, 2, 1+length(varnames) )
     colnames( mat_outF )     <- c( "FarmSetting", varnames )
     mat_outF[,"FarmSetting"] <- 1:2
+    
+    source(sitesettings_filenames[31])
+    params <- parMAP[,31]
+    
     # for(i in 1:2) {
     for(i in 2:2) {
-      if(i==1) {
-        if(df_G.f$nt[fi]==0) { source(sitesettings_filenames[19])
-          params <- parMAP[,19]
-        }
-        if(df_G.f$nt[fi]==1) { source(sitesettings_filenames[31])
-          params <- parMAP[,31]
-          params <- set_par("TREEDENS0(3)",0)
-        }
-        if(df_G.f$nt[fi]==2) { source(sitesettings_filenames[31])
-          params <- parMAP[,31]
-        } 
-        if(df_G.f$nt[fi] >2) { source(sitesettings_filenames[31])
-          params <- parMAP[,31]
-          params <- set_par_speciesT(2,"Avocado")
-        }
-        params[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0) ] <- CN_G
-        params[ ip_CSOM0                            ] <- C_G
-        params[ ip_LAT                              ] <- LAT_G
-        params[ ip_SLOPE                            ] <- SLOPE_G
-        params[ ip_SHADETARGET                      ] <- shade_G
-        
-        params[ ip_FWCAD  ] <- WCAD_G  / WCST_G
-        params[ ip_FWCWP  ] <- WCWP_G  / WCST_G
-        params[ ip_FWCFC  ] <- WCFC_G  / WCST_G
-        params[ ip_FWCWET ] <- WCWET_G / WCST_G
-        params[ ip_WCST   ] <- WCST_G
-      }
       if(i==2) {
-        if(df_G.f$nt[fi]==0) { source(sitesettings_filenames[19])
-          params <- parMAP[,19]
-        }
-        if(df_G.f$nt[fi]==1) { source(sitesettings_filenames[31])
-          params <- parMAP[,31]
-          params <- set_par("TREEDENS0(3)",0)
-        }
-        if(df_G.f$nt[fi]==2) { source(sitesettings_filenames[31])
-          params <- parMAP[,31]
-        } 
-        if(df_G.f$nt[fi] >2) { source(sitesettings_filenames[31])
-          params <- parMAP[,31]
-          params <- set_par_speciesT(2,"Banana")
-        }
-        params[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0) ] <- CN_G
-        params[ ip_CSOM0                            ] <- C_G
-        params[ ip_LAT                              ] <- LAT_G
-        params[ ip_SLOPE                            ] <- SLOPE_G
-        params[ ip_SHADETARGET                      ] <- shade_G
-        
-        params[ ip_FWCAD  ] <- WCAD_G  / WCST_G
-        params[ ip_FWCWP  ] <- WCWP_G  / WCST_G
-        params[ ip_FWCFC  ] <- WCFC_G  / WCST_G
-        params[ ip_FWCWET ] <- WCWET_G / WCST_G
-        params[ ip_WCST   ] <- WCST_G
+        if(df_G.f$nt[fi]==0) { params <- set_par("TREEDENS0(1)",0)
+                               params <- set_par("TREEDENS0(3)",0) }
+        if(df_G.f$nt[fi]==1) { params <- set_par("TREEDENS0(3)",0) }
+        if(df_G.f$nt[fi] >2) { params <- set_par_speciesT(2,"Banana") }
       }
+      params[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0) ] <- CN_G
+      params[ ip_CSOM0                            ] <- C_G
+      params[ ip_LAT                              ] <- LAT_G
+      params[ ip_SLOPE                            ] <- SLOPE_G
+      params[ ip_SHADETARGET                      ] <- shade_G
+      params[ ip_FWCAD  ] <- WCAD_G  / WCST_G
+      params[ ip_FWCWP  ] <- WCWP_G  / WCST_G
+      params[ ip_FWCFC  ] <- WCFC_G  / WCST_G
+      params[ ip_FWCWET ] <- WCWET_G / WCST_G
+      params[ ip_WCST   ] <- WCST_G
+      params[ ip_FHARVBT1 ] <- 1
+      params[ ip_FHARVBT2 ] <- 1
+      params[ ip_FHARVBT3 ] <- 1
+      params[ ip_FHARVLT1 ] <- 0
+      params[ ip_FHARVLT2 ] <- 0
+      params[ ip_FHARVLT3 ] <- 0
+      params[ ip_PRUNTARGET1 ] <- 1
+      params[ ip_PRUNTARGET2 ] <- 1
+      params[ ip_PRUNTARGET3 ] <- 1
+      params[ ip_THINTARGET1 ] <- 0
+      params[ ip_THINTARGET2 ] <- 0
+      params[ ip_THINTARGET3 ] <- 0
       outF <- run_model( params, matrix_weather_fi, calendar_fert_fi,
         calendar_prunC, calendar_prunT, calendar_thinT, NDAYS_fi )
       mat_outF[i,1+(1:length(varnames))] <- outputSummary( outF )

@@ -2,8 +2,8 @@ Subroutine set_params(pa)
 
 use declare_parameters
 implicit none
-! As long as the total number of parameters stays below 170, the next line need not be changed
-real pa(170)
+! As long as the total number of parameters stays below 180, the next line need not be changed
+real pa(180)
 
 !! COFFEE
 ! Initial constants
@@ -132,7 +132,9 @@ TCST       = pa(153:155) ! (d)
 TOPTT      = pa(156:158) ! (degC)
 TTOLT      = pa(159:161) ! (degC)
 HMAX       = pa(162:164) ! (m)
-TREEDENS0  = pa(165:167) ! (m-2)
+PRUNTARGET = pa(165:167) ! (-)
+THINTARGET = pa(168:170) ! (-)
+TREEDENS0  = pa(171:173) ! (m-2)
 
 ! FTCLMINT (1) Ep: medium (non-pollarded) - high (poll.)
 !          (3) {Ca,Gs,Ti}: low, Ed: medium

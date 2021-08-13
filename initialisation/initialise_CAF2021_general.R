@@ -218,6 +218,56 @@ set_par_speciesT <- function( it, species="E. poeppigiana", p.old=params ) {
   return( p.new )
 }
 
+set_parT <- function( country="C", densE_C=0, densI_C=0, densB_C=0,
+                      densA_C=0, densG_C=0, densC_C=0, p.old=params ) {
+  if(country %in% c("C", "C.R.", "CRI","Costa Rica")) {
+    p.new <- p.old }
+  else if(country %in% c("G", "GTM","Guatemala")) {
+    p.new <- p.old }
+  else { stop( paste("Parameters for", country, "not provided.") ) }
+  return( p.new )
+}
+
+set_calendar_prunT <- function( it,
+  years=rep(-1,100), doys=rep(-1,100), fractions=-1, cp.old=calendar_prunT ) {
+  nprun <- length( years )
+  cp.new <- cp.old
+  cp.new[ it, 1:nprun, 1 ] <- years
+  cp.new[ it, 1:nprun, 2 ] <- doys
+  cp.new[ it, 1:nprun, 3 ] <- fractions
+  return( cp.new )
+}
+
+set_calendar_thinT <- function( it,
+  years=rep(-1,100), doys=rep(-1,100), fractions=-1, ct.old=calendar_thinT ) {
+  nprun <- length( years )
+  ct.new <- ct.old
+  ct.new[ it, 1:nprun, 1 ] <- years
+  ct.new[ it, 1:nprun, 2 ] <- doys
+  ct.new[ it, 1:nprun, 3 ] <- fractions
+  return( ct.new )
+}
+
+set_prunT <- function( country="C", densE_C=0, densI_C=0, densB_C=0,
+                       densA_C=0, densG_C=0, densC_C=0, cp.old=calendar_prunT ) {
+  if(country %in% c("C", "C.R.", "CRI","Costa Rica")) {
+    cp.new <- cp.old }
+  else if(country %in% c("G", "GTM","Guatemala")) {
+    cp.new <- cp.old }
+  else { stop( paste("Pruning calendar for", country, "not provided.") ) }
+  return( cp.new )
+}
+
+set_thinT <- function( country="C", densE_C=0, densI_C=0, densB_C=0,
+                       densA_C=0, densG_C=0, densC_C=0, ct.old=calendar_thinT ) {
+  if(country %in% c("C", "C.R.", "CRI","Costa Rica")) {
+    ct.new <- ct.old }
+  else if(country %in% c("G", "GTM","Guatemala")) {
+    ct.new <- ct.old }
+  else { stop( paste("Thinning calendar for", country, "not provided.") ) }
+  return( ct.new )
+}
+
 ################################################################################
 ### 5. FUNCTIONS FOR EXPORTING THE RESULTS TO FILE (pdf with plots, txt with table)
 ################################################################################
