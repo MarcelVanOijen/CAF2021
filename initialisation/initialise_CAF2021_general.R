@@ -170,11 +170,45 @@ set_par <- function( names=names_params[1], vals=params[1], p.old=params ) {
 
 set_par_speciesT <- function( it, species="E. poeppigiana", p.old=params ) {
   names <- vals <- NULL
-  if (species %in% c("Erythrina poeppigiana","E. poeppigiana","Erythrina",
+  if (species %in% c("Erythrina","Erythrina poeppigiana","E. poeppigiana",
                      "Poro","poro")) {
-    stop( paste("Default parameterisation for", species, "is not provided.") )
-  } else if (species %in% c("Musa sp.", "Musa",
-                            "Banana", "banana")) {
+    names[ 1] <- paste0("CBtree0("  ,it,")") ; vals[ 1] <-     0.1
+    names[ 2] <- paste0("CLtree0("  ,it,")") ; vals[ 2] <-     0.1
+    names[ 3] <- paste0("CRtree0("  ,it,")") ; vals[ 3] <-     0.1
+    names[ 4] <- paste0("CStree0("  ,it,")") ; vals[ 4] <-     0.1
+    names[ 5] <- paste0("FWT("      ,it,")") ; vals[ 5] <-     0.83
+    names[ 6] <- paste0("FST("      ,it,")") ; vals[ 6] <-     0.55
+    names[ 7] <- paste0("FPT("      ,it,")") ; vals[ 7] <-     0
+    names[ 8] <- paste0("KH("       ,it,")") ; vals[ 8] <-     3.7
+    names[ 9] <- paste0("KAC("      ,it,")") ; vals[ 9] <-     9.1
+    names[10] <- paste0("TBEFOREPT(",it,")") ; vals[10] <-  1825
+    names[11] <- paste0("TCBT("     ,it,")") ; vals[11] <-  2100
+    names[12] <- paste0("TCRT("     ,it,")") ; vals[12] <-  4000
+    names[13] <- paste0("TCST("     ,it,")") ; vals[13] <- 99999
+    names[14] <- paste0("TOPTT("    ,it,")") ; vals[14] <-    24.4
+    names[15] <- paste0("TTOLT("    ,it,")") ; vals[15] <-     8
+    names[16] <- paste0("HMAX("     ,it,")") ; vals[16] <-    99
+    p.new <- set_par( names, vals, p.old=p.old )    
+  } else if (species %in% c("Inga","Inga sp.")) {
+    names[ 1] <- paste0("CBtree0("  ,it,")") ; vals[ 1] <-     0.1
+    names[ 2] <- paste0("CLtree0("  ,it,")") ; vals[ 2] <-     0.1
+    names[ 3] <- paste0("CRtree0("  ,it,")") ; vals[ 3] <-     0.1
+    names[ 4] <- paste0("CStree0("  ,it,")") ; vals[ 4] <-     0.1
+    names[ 5] <- paste0("FWT("      ,it,")") ; vals[ 5] <-     0.65
+    names[ 6] <- paste0("FST("      ,it,")") ; vals[ 6] <-     0.42
+    names[ 7] <- paste0("FPT("      ,it,")") ; vals[ 7] <-     0
+    names[ 8] <- paste0("KH("       ,it,")") ; vals[ 8] <-     5.2
+    names[ 9] <- paste0("KAC("      ,it,")") ; vals[ 9] <-     6.0
+    names[10] <- paste0("TBEFOREPT(",it,")") ; vals[10] <-  1825
+    names[11] <- paste0("TCBT("     ,it,")") ; vals[11] <-  1100
+    names[12] <- paste0("TCRT("     ,it,")") ; vals[12] <-  3400
+    names[13] <- paste0("TCST("     ,it,")") ; vals[13] <- 99999
+    names[14] <- paste0("TOPTT("    ,it,")") ; vals[14] <-    25.9
+    names[15] <- paste0("TTOLT("    ,it,")") ; vals[15] <-     8
+    names[16] <- paste0("HMAX("     ,it,")") ; vals[16] <-     8
+    p.new <- set_par( names, vals, p.old=p.old )    
+  } else if (species %in% c("Banana", "banana",
+                            "Musa sp.","Musa")) {
     names[ 1] <- paste0("CBtree0("  ,it,")") ; vals[ 1] <-    0.1
     names[ 2] <- paste0("CLtree0("  ,it,")") ; vals[ 2] <-    0.1
     names[ 3] <- paste0("CRtree0("  ,it,")") ; vals[ 3] <-    0.1
@@ -190,10 +224,10 @@ set_par_speciesT <- function( it, species="E. poeppigiana", p.old=params ) {
     names[13] <- paste0("TCST("     ,it,")") ; vals[13] <-  365
     names[14] <- paste0("TOPTT("    ,it,")") ; vals[14] <-   22
     names[15] <- paste0("TTOLT("    ,it,")") ; vals[15] <-    8
-    names[16] <- paste0("TREEDENS0(",it,")") ; vals[16] <-    0.01
+    names[16] <- paste0("HMAX("     ,it,")") ; vals[16] <-   99
     p.new <- set_par( names, vals, p.old=p.old )    
-  } else if (species %in% c("Persea americana", "P. americana",
-                            "Avocado", "avocado")) {
+  } else if (species %in% c("Avocado", "avocado",
+                            "Persea americana","P. americana")) {
     names[ 1] <- paste0("CBtree0("  ,it,")") ; vals[ 1] <-    0.1
     names[ 2] <- paste0("CLtree0("  ,it,")") ; vals[ 2] <-    0.1
     names[ 3] <- paste0("CRtree0("  ,it,")") ; vals[ 3] <-    0.1
@@ -210,21 +244,74 @@ set_par_speciesT <- function( it, species="E. poeppigiana", p.old=params ) {
     names[14] <- paste0("TOPTT("    ,it,")") ; vals[14] <-   20
     names[15] <- paste0("TTOLT("    ,it,")") ; vals[15] <-    8
     names[16] <- paste0("HMAX("     ,it,")") ; vals[16] <-    5
-    names[17] <- paste0("TREEDENS0(",it,")") ; vals[17] <-    0.01
     p.new <- set_par( names, vals, p.old=p.old )    
-  } else {
-    stop( paste("Default parameterisation for", species, "is not provided.") )
-  }
+  } else if (species %in% c("Grevillea", "G. robusta")) {
+    names[ 1] <- paste0("CBtree0("  ,it,")") ; vals[ 1] <-     0.1
+    names[ 2] <- paste0("CLtree0("  ,it,")") ; vals[ 2] <-     0.1
+    names[ 3] <- paste0("CRtree0("  ,it,")") ; vals[ 3] <-     0.1
+    names[ 4] <- paste0("CStree0("  ,it,")") ; vals[ 4] <-     0.1
+    names[ 5] <- paste0("FWT("      ,it,")") ; vals[ 5] <-     0.54
+    names[ 6] <- paste0("FST("      ,it,")") ; vals[ 6] <-     0.28
+    names[ 7] <- paste0("FPT("      ,it,")") ; vals[ 7] <-     0
+    names[ 8] <- paste0("KH("       ,it,")") ; vals[ 8] <-     3.8
+    names[ 9] <- paste0("KAC("      ,it,")") ; vals[ 9] <-     6.7
+    names[10] <- paste0("TBEFOREPT(",it,")") ; vals[10] <-  1825
+    names[11] <- paste0("TCBT("     ,it,")") ; vals[11] <-  2600
+    names[12] <- paste0("TCRT("     ,it,")") ; vals[12] <-  5200
+    names[13] <- paste0("TCST("     ,it,")") ; vals[13] <- 99999
+    names[14] <- paste0("TOPTT("    ,it,")") ; vals[14] <-    25.0
+    names[15] <- paste0("TTOLT("    ,it,")") ; vals[15] <-     8
+    names[16] <- paste0("HMAX("     ,it,")") ; vals[16] <-    99
+    p.new <- set_par( names, vals, p.old=p.old )    
+  } else if (species %in% c("Cordia", "C. alliodora")) {
+    names[ 1] <- paste0("CBtree0("  ,it,")") ; vals[ 1] <-     0.1
+    names[ 2] <- paste0("CLtree0("  ,it,")") ; vals[ 2] <-     0.1
+    names[ 3] <- paste0("CRtree0("  ,it,")") ; vals[ 3] <-     0.1
+    names[ 4] <- paste0("CStree0("  ,it,")") ; vals[ 4] <-     0.1
+    names[ 5] <- paste0("FWT("      ,it,")") ; vals[ 5] <-     0.54
+    names[ 6] <- paste0("FST("      ,it,")") ; vals[ 6] <-     0.28
+    names[ 7] <- paste0("FPT("      ,it,")") ; vals[ 7] <-     0
+    names[ 8] <- paste0("KH("       ,it,")") ; vals[ 8] <-     3.8
+    names[ 9] <- paste0("KAC("      ,it,")") ; vals[ 9] <-     6.7
+    names[10] <- paste0("TBEFOREPT(",it,")") ; vals[10] <-  1825
+    names[11] <- paste0("TCBT("     ,it,")") ; vals[11] <-  2600
+    names[12] <- paste0("TCRT("     ,it,")") ; vals[12] <-  5200
+    names[13] <- paste0("TCST("     ,it,")") ; vals[13] <- 99999
+    names[14] <- paste0("TOPTT("    ,it,")") ; vals[14] <-    25.0
+    names[15] <- paste0("TTOLT("    ,it,")") ; vals[15] <-     8
+    names[16] <- paste0("HMAX("     ,it,")") ; vals[16] <-    99
+    p.new <- set_par( names, vals, p.old=p.old )    
+  } else { stop( paste("Parameterisation for", species, "is not provided.") ) }
   return( p.new )
 }
 
-set_parT <- function( country="C", densE_C=0, densI_C=0, densB_C=0,
-                      densA_C=0, densG_C=0, densC_C=0, p.old=params ) {
-  if(country %in% c("C", "C.R.", "CRI","Costa Rica")) {
-    p.new <- p.old }
-  else if(country %in% c("G", "GTM","Guatemala")) {
-    p.new <- p.old }
-  else { stop( paste("Parameters for", country, "not provided.") ) }
+set_parT <- function( country="C", densE=0, densI=0, densB=0, densA=0,
+                                   densG=0, densC=0, p.old=params ) {
+  p.new <- p.old
+  if(densE>0)            { p.new <- set_par("TREEDENS0(1)", densE/1e4, p.new)
+                           p.new <- set_par_speciesT(1,"Erythrina",p.new) }
+  if(densI>0 & densE==0) { p.new <- set_par("TREEDENS0(1)", densI/1e4, p.new)
+                           p.new <- set_par_speciesT(1,"Inga"     ,p.new) }
+  if(densI>0 & densE >0) { p.new <- set_par("TREEDENS0(2)", densI/1e4, p.new)
+                           p.new <- set_par_speciesT(2,"Inga"     ,p.new) }
+  if(densB>0)            { p.new <- set_par("TREEDENS0(2)", densB/1e4, p.new)
+                           p.new <- set_par_speciesT(2,"Banana"   ,p.new) }
+  if(densA>0)            { p.new <- set_par("TREEDENS0(2)", densA/1e4, p.new)
+                           p.new <- set_par_speciesT(2,"Avocado"  ,p.new) }
+  if(densG>0)            { p.new <- set_par("TREEDENS0(3)", densG/1e4, p.new)
+                           p.new <- set_par_speciesT(3,"Grevillea",p.new) }
+  if(densC>0)            { p.new <- set_par("TREEDENS0(3)", densC/1e4, p.new)
+                           p.new <- set_par_speciesT(3,"Cordia"   ,p.new) }
+  
+  if(country %in% c("C", "C.R.", "CRI", "Costa Rica")) {
+    p.new <- set_par( c("FHARVBT(1)","FHARVBT(2)","FHARVBT(3)"), c(0,0,0), p.new )
+    p.new <- set_par( c("FHARVLT(1)","FHARVLT(2)","FHARVLT(3)"), c(0,0,0), p.new )
+  } else if(country %in% c("G", "GTM", "Guatemala")) {
+    p.new <- set_par( c("FHARVBT(1)","FHARVBT(2)","FHARVBT(3)"), c(1,1,1), p.new )
+    p.new <- set_par( c("FHARVLT(1)","FHARVLT(2)","FHARVLT(3)"), c(1,1,1), p.new )
+    if(densE>0){ p.new <- set_par( c("FHARVBT(1)","FHARVLT(1)"), c(0,0  ), p.new ) }
+  } else { stop( paste("Parameterisation for", country, "not provided.") ) }
+  
   return( p.new )
 }
 
@@ -240,32 +327,42 @@ set_calendar_prunT <- function( it,
 
 set_calendar_thinT <- function( it,
   years=rep(-1,100), doys=rep(-1,100), fractions=-1, ct.old=calendar_thinT ) {
-  nprun <- length( years )
+  nthin <- length( years )
   ct.new <- ct.old
-  ct.new[ it, 1:nprun, 1 ] <- years
-  ct.new[ it, 1:nprun, 2 ] <- doys
-  ct.new[ it, 1:nprun, 3 ] <- fractions
+  ct.new[ it, 1:nthin, 1 ] <- years
+  ct.new[ it, 1:nthin, 2 ] <- doys
+  ct.new[ it, 1:nthin, 3 ] <- fractions
   return( ct.new )
 }
 
-set_prunT <- function( country="C", densE_C=0, densI_C=0, densB_C=0,
-                       densA_C=0, densG_C=0, densC_C=0, cp.old=calendar_prunT ) {
-  if(country %in% c("C", "C.R.", "CRI","Costa Rica")) {
-    cp.new <- cp.old }
-  else if(country %in% c("G", "GTM","Guatemala")) {
-    cp.new <- cp.old }
-  else { stop( paste("Pruning calendar for", country, "not provided.") ) }
-  return( cp.new )
+set_prunT <- function( densE=0, densI=0, densB=0, densA=0, densG=0, densC=0 ) {
+  cp <- array( -1, c(3,100,3) )
+  yE <- rep( 2008:2020, each=2 ) ; nE <- length( yE )
+  dE <- rep( c(140,350), nE/2 )
+  fE <- rep( 0.9, nE )
+  yI <- yG <- yC <- 2008:2020 ; nI <- nG <- nC <- length( yC )
+  dI <- dG <- dC <- rep(140,nI) 
+  fI <- fG <- fC <- rep( 0.1, nI )
+  if(densE>0) {
+    cp[1,1:nE,1] <- yE ; cp[1,1:nE,2] <- dE ; cp[1,1:nE,3] <- fE }
+  if(densI>0 & densE==0) {
+    cp[1,1:nI,1] <- yI ; cp[1,1:nI,2] <- dI ; cp[1,1:nI,3] <- fI }
+  if(densI>0 & densE >0) {
+    cp[2,1:nI,1] <- yI ; cp[2,1:nI,2] <- dI ; cp[2,1:nI,3] <- fI }
+  if(densG>0) {
+    cp[3,1:nG,1] <- yG ; cp[3,1:nG,2] <- dG ; cp[3,1:nG,3] <- fG }
+  # REMOVE NEXT TWO LINES (timber like Cordia not pruned) ?
+  if(densC>0) {
+    cp[3,1:nC,1] <- yC ; cp[3,1:nC,2] <- dC ; cp[3,1:nC,3] <- fC }
+  return( cp )
 }
 
-set_thinT <- function( country="C", densE_C=0, densI_C=0, densB_C=0,
-                       densA_C=0, densG_C=0, densC_C=0, ct.old=calendar_thinT ) {
-  if(country %in% c("C", "C.R.", "CRI","Costa Rica")) {
-    ct.new <- ct.old }
-  else if(country %in% c("G", "GTM","Guatemala")) {
-    ct.new <- ct.old }
-  else { stop( paste("Thinning calendar for", country, "not provided.") ) }
-  return( ct.new )
+set_thinT <- function( densE=0, densI=0, densB=0, densA=0, densG=0, densC=0 ) {
+  ct <- array( -1, c(3,100,3) )
+  yC <- seq(2010,2020,by=5) ; dC <- 124 ; fC <- 0.3 ; nC <- length( yC )
+  if(densC>0) {
+    ct[3,1:nC,1] <- yC ; ct[3,1:nC,2] <- dC ; ct[3,1:nC,3] <- fC }
+  return( ct )
 }
 
 ################################################################################
