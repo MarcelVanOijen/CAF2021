@@ -60,3 +60,35 @@
   legend( "bottomright", c("IL","SG"),
           lty=1, col=c("black","red") )
   
+  ###############################################
+  # Data report Edwin
+  
+  library( readxl )
+  library( tidyverse )
+  
+  dir.f              <- "data/Trees/"
+  file_TreeAllometry <- "Inga_Gravillea_ANACAFE.xlsx"
+  
+  df_AlloI <- read_excel( paste0(dir.f,file_TreeAllometry), sheet="Inga" ) %>%
+              arrange( Fuste )
+  df_AlloG <- read_excel( paste0(dir.f,file_TreeAllometry), sheet="Grevillea" ) %>%
+              arrange( Fuste )
+  
+  xI <- df_AlloI$Fuste * 0.47 # kg carbon per tree 
+  yI <- df_AlloI$Altura       # m
+  xG <- df_AlloG$Fuste * 0.47 # kg carbon per tree 
+  yG <- df_AlloG$Altura       # m
+  
+  par( mfrow=c(1,2) )
+  
+  KH_I <- 5 ; KHEXP_I <- 0.25
+  # KH_I <- 5.2 ; KHEXP_I <- 0.4
+  KH_G <- 5 ; KHEXP_G <- 0.25
+  
+  plot( xI,yI, xlim=c(0,max(xI)), ylim=c(0,max(yI)) )
+  points( c(0,xI), fh( c(0,xI), KH_I, KHEXP_I ), type='l', col="red" )
+  
+  plot( xG,yG, xlim=c(0,max(xG)), ylim=c(0,max(yG)) )
+  points( c(0,xG), fh( c(0,xG), KH_G, KHEXP_G ), type='l', col="red" )
+
+  

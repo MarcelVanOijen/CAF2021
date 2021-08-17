@@ -765,15 +765,15 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
     arrange( code ) %>%
     mutate ( dens_Erythrina = Erythina2     ) %>%
     mutate ( dens_Inga      = Legume2       ) %>%
-    mutate ( dens_Avocado   = Fruit2        ) %>%
     mutate ( dens_Banana    = Musacea2      ) %>%
+    mutate ( dens_Avocado   = Fruit2        ) %>%
     mutate ( dens_Grevillea = `non-Legume2` ) %>%
     mutate ( dens_Cordia    = Timber2       ) %>%
     mutate ( dens_timber    = dens_Grevillea + dens_Cordia ) %>%
     mutate ( dens_Grevillea = ifelse(dens_Grevillea>dens_Cordia,dens_timber,0) ) %>%
     mutate ( dens_Cordia    = ifelse(dens_Grevillea>dens_Cordia,0,dens_timber) ) %>%
     dplyr::select( code, dens_Erythrina, dens_Inga,
-                         dens_Avocado  , dens_Banana,
+                         dens_Banana   , dens_Avocado, 
                          dens_Grevillea, dens_Cordia )
   # df_trees.f %>% print( n=Inf, width=Inf)
 ```
@@ -792,7 +792,7 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
     inner_join( df_trees_C.f, by=c("code") ) %>%
     dplyr::select( code, lat, lon, dist, slope, altitude, alt.WC, weather.WC,
                    DM.soil, CN.soil, C.soil, N.soil, Nfert, WP, FC, nt, shade,
-                   dens_Erythrina, dens_Inga, dens_Avocado, dens_Banana,
+                   dens_Erythrina, dens_Inga, dens_Banana, dens_Avocado,
                    dens_Grevillea, dens_Cordia, yield1819, yield1920 ) %>%
     arrange( code )
     
@@ -800,7 +800,7 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
     inner_join( df_trees_G.f, by=c("code") ) %>%
     dplyr::select( code, lat, lon, dist, slope, altitude, alt.WC, weather.WC,
                    DM.soil, CN.soil, C.soil, N.soil, Nfert, WP, FC, nt, shade,
-                   dens_Erythrina, dens_Inga, dens_Avocado, dens_Banana,
+                   dens_Erythrina, dens_Inga, dens_Banana, dens_Avocado,
                    dens_Grevillea, dens_Cordia, yield1819, yield1920 ) %>%
     arrange( code )
   
@@ -814,8 +814,8 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
   y1a_G = df_G.f$dens_Erythrina ; y1b_G = df_G.f$dens_Inga
   ymax1 = max( y1a_C, y1b_C, y1a_G, y1b_G )
   
-  y2a_C = df_C.f$dens_Avocado   ; y2b_C = df_C.f$dens_Banana
-  y2a_G = df_G.f$dens_Avocado   ; y2b_G = df_G.f$dens_Banana
+  y2a_C = df_C.f$dens_Banana   ; y2b_C = df_C.f$dens_Avocado
+  y2a_G = df_G.f$dens_Banana   ; y2b_G = df_G.f$dens_Avocado
   ymax2 = max( y2a_C, y2b_C, y2a_G, y2b_G )
   
   y3a_C = df_C.f$dens_Grevillea ; y3b_C = df_C.f$dens_Cordia
@@ -831,7 +831,7 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
   plot  ( y2a_C, main="Costa Rica trees [2]",
           xlab="farm index", ylab="", ylim=c(0,1.25*ymax2))
   points( y2b_C, col="red" )
-  legend( "top",legend=c("Avocado","Banana"),
+  legend( "top",legend=c("Banana","Avocado"),
           horiz=T, pch=1, col=c("black","red"), bg="transparent" )
 
   plot  ( y3a_C, main="Costa Rica trees [3]",
@@ -849,7 +849,7 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
   plot  ( y2a_G, main="Guatemala trees [2]",
           xlab="farm index", ylab="", ylim=c(0,1.25*ymax2))
   points( y2b_G, col="red" )
-  legend( "top",legend=c("Avocado","Banana"),
+  legend( "top",legend=c("Banana","Avocado"),
           horiz=T, pch=1, col=c("black","red"), bg="transparent" )
 
   plot  ( y3a_G, main="Guatemala trees [3]",
@@ -868,7 +868,7 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
 ## Tree management
 
 ```{r}
-  namesdfscalars <- names(df_C.f)[ !(names(df_C.f) %in% "weather.WC") ]
+  inamesdfscalars <- names(df_C.f)[ !(names(df_C.f) %in% "weather.WC") ]
   
   df_C.f$dens_service <- df_C.f$dens_Erythrina  + df_C.f$dens_Inga
   df_C.f$dens_fruit   <- df_C.f$dens_Banana     + df_C.f$dens_Avocado
@@ -879,7 +879,7 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
                max( df_C.f$dens_Banana    , df_C.f$dens_Avocado ) )
   i.t <- which( df_C.f$dens_service >
                 max( df_C.f$dens_Grevillea, df_C.f$dens_Cordia ) )
-  df_C.f[i.s,namesdfscalars]
+  df_C.f[i.s,inamesdfscalars]
   
   df_G.f$dens_service <- df_G.f$dens_Erythrina  + df_G.f$dens_Inga
   df_G.f$dens_fruit   <- df_G.f$dens_Banana     + df_G.f$dens_Avocado
@@ -903,14 +903,14 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
 - Pruning intensity for shade-target
 - Pruned branches stay on site in CRI but are removed in GTM
 
-### Avocado
-- Pruning, no thinning
-- Prescribed pruning intensity ?
-
 ### Banana
 - No pruning or thinning
 - Annual senescence modelled through TC-parameters
 - Dead material always stays on site
+
+### Avocado
+- Pruning, no thinning
+- Prescribed pruning intensity ?
 
 ### Grevillea
 - Pruning, no thinning
@@ -936,10 +936,10 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
 - Edwin's report, Table 8 on p. 19
 - N-fixing
 
-### Avocado
+### Banana
 - My progress report
 
-### Banana
+### Avocado
 - My progress report
 
 ### Grevillea
@@ -1037,6 +1037,7 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
   ip_CNSOMF0     <- which( names_params=="CNSOMF0"     )
   ip_CNSOMS0     <- which( names_params=="CNSOMS0"     )
   ip_CSOM0       <- which( names_params=="CSOM0"       )
+  ip_FCSOMF0     <- which( names_params=="FCSOMF0"     )
   ip_LAT         <- which( names_params=="LAT"         )
   ip_SHADETARGET <- which( names_params=="SHADETARGET" )
   ip_SLOPE       <- which( names_params=="SLOPE"       )
@@ -1112,15 +1113,9 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
                                     densG_C, densC_C )
     
     for(iF in 1:nF_C) {
-      if ( iF==1 ) {
-        params_fi <- parMAP[,31]
-      } else if ( iF==2 ) {
-        params_fi <- parMAP[,11]
-      } else {
-        stop(paste("Farm setting",iF,"not specified."))
-      }
-      params_fi <- set_parT( "C", densE_C, densI_C, densB_C,
-                                  densA_C, densG_C, densC_C, p.old=params_fi )
+      params_fi <- parMAP[,31]
+      params_fi <- set_parT( "C", densE_C, densI_C, densB_C, densA_C,
+                                  densG_C, densC_C, p.old=params_fi )
       params_fi[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0) ] <- CN_C
       params_fi[ ip_CSOM0                            ] <- C_C
       params_fi[ ip_LAT                              ] <- LAT_C
@@ -1131,24 +1126,127 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
       params_fi[ ip_FWCFC  ] <- WCFC_C  / WCST_C
       params_fi[ ip_FWCWET ] <- WCWET_C / WCST_C
       params_fi[ ip_WCST   ] <- WCST_C
+      
       params_fi[ ip_PRUNTARGET1 ] <- 1
       params_fi[ ip_PRUNTARGET2 ] <- 1
       params_fi[ ip_PRUNTARGET3 ] <- 1
       params_fi[ ip_THINTARGET1 ] <- 0
       params_fi[ ip_THINTARGET2 ] <- 0
       params_fi[ ip_THINTARGET3 ] <- 0
-      # if( iF>1 ) { } # Include other farm settings here
+      
+      if( iF==2 ) {
+        params_fi[ ip_FCSOMF0 ] <- 0.5
+        params_fi[ ip_CSOM0   ] <- 20
+        params_fi[ ip_FWCWP   ] <- 0.1
+      }
+      
       outF <- run_model( params_fi, matrix_weather_fi, calendar_fert_fi,
         calendar_prunC, calendar_prunT_fi, calendar_thinT_fi, NDAYS_fi )
       mat_outF[iF,1+(1:length(varnames))] <- outputSummary( outF )
     }
     list_outF_C[[fi]] <- mat_outF
   }
+
+  df_C.f_sim <- df_C.f %>%
+    select ( code ) %>%
+    arrange( code ) %>%
+    mutate ( outF  = list_outF_C )
+```
+
+Verifying the list of farm-specific summary outputs:
+
+```{r}
+  dfoutFSummary <- function( df=df_C.f_sim, Fi=1 ){
+    nf     <- dim( df )[1]
+    vnames <- colnames( df$outF[[1]] ) ; nv <- length(vnames)
+    matres <- matrix( NA, nf, nv ) ; colnames( matres) <- vnames
+    F.v    <- matres
+    for(fi in 1:nf){
+      F.v[fi,] <- df$outF[[fi]][Fi,]
+    }
+    return( F.v )
+  }
+```
+
+```{r}
+  F1_C <- dfoutFSummary( df_C.f_sim, Fi=1 )
+  F2_C <- dfoutFSummary( df_C.f_sim, Fi=2 )
+```
+
+```{r}
+  par( mfrow=c(2,2), mar=c(4,4,1,1) )
+
+  plot( df_C.f$C.soil, F1_C[,"Csoil_f"] ) ; abline(a=0,b=1,lty=2)
+  plot( df_C.f$shade , F1_C[,"Shade_f"] ) ; abline(a=0,b=1,lty=2)
+  
+  plot( df_C.f$C.soil, F2_C[,"Csoil_f"] ) ; abline(a=0,b=1,lty=2)
+  plot( df_C.f$shade , F2_C[,"Shade_f"] ) ; abline(a=0,b=1,lty=2)
+```
+
+```{r XX14C, fig.height=4, fig.cap="\\label{fig:XX14C}Observed vs. simulated yields in 2018-19 and 2019-20 at the farms in Costa Rica."}
+  par( mfrow=c(2,2), mar=c(4,2,2,2), mgp=c(2,1,0) )
+
+  x=F1_C[,"harvDM_f_ha1819"] ; y=df_C.f$yield1819
+    plotxylm("Yields Costa Rica 18/19", orig=F) ; abline(a=0,b=1,lty=2)
+  x=F1_C[,"harvDM_f_ha1920"] ; y=df_C.f$yield1920
+    plotxylm("Yields Costa Rica 19/20", orig=F) ; abline(a=0,b=1,lty=2)
+    
+  x=F2_C[,"harvDM_f_ha1819"] ; y=df_C.f$yield1819
+    plotxylm("Yields Costa Rica 18/19", orig=F) ; abline(a=0,b=1,lty=2)
+  x=F2_C[,"harvDM_f_ha1920"] ; y=df_C.f$yield1920
+    plotxylm("Yields Costa Rica 19/20", orig=F) ; abline(a=0,b=1,lty=2)
+```
+
+```{r}
+  iscalars <- which( names(df_C.f) != "weather.WC")
+
+  iptest   <- which( names_params %in% c(
+    "SHADETARGET",
+    "FWT(1)"      ,"FWT(2)"      ,"FWT(3)"      ,
+    "FST(1)"      ,"FST(2)"      ,"FST(3)"      ,
+    "FPT(1)"      ,"FPT(2)"      ,"FPT(3)"      ,
+    "KH(1)"       ,"KH(2)"       ,"KH(3)"       ,
+    "KAC(1)"      ,"KAC(2)"      ,"KAC(3)"      ,
+    "TCBT(1)"     ,"TCBT(2)"     ,"TCBT(3)"     ,
+    "TCRT(1)"     ,"TCRT(2)"     ,"TCRT(3)"     ,
+    "TCST(1)"     ,"TCST(2)"     ,"TCST(3)"     ,
+    "TOPTT(1)"    ,"TOPTT(2)"    ,"TOPTT(3)"    ,
+    "TTOLT(1)"    ,"TTOLT(2)"    ,"TTOLT(3)"    ,
+    "TREEDENS0(1)","TREEDENS0(2)","TREEDENS0(3)",
+    "HMAX(1)"     ,"HMAX(2)"     ,"HMAX(3)"     ) )
+```
+
+```{r, echo=T}
+  ptest <- params_fi[iptest] ; names(ptest) <- names_params[iptest]
+  
+  fi
+  knitr::kable( t(df_C.f[fi,iscalars]) )
+  knitr::kable( ptest )
+```
+
+```{r}
+   # iEnv   <- c( 4:24, 55) ; iCoffee   <-  25: 38
+   # iTrees <- c(39:54,155) ; iCBT_t    <- 138:140
+   # plot_output( outF, vars=outputNames[ iEnv   ] )
+   # plot_output( outF, vars=outputNames[ iCoffee ] )
+   # plot_output( outF, vars=outputNames[ iTrees  ] )
+   # plot_output( outF, vars=outputNames[ iCBT_t  ] )
+```
+
+Farm 1073, with 80 avocado trees per hectare, has a simulated shade level of about 0.05 despite a measured value of about 0.24. In the model, the short branch turnover time TCBT_t(2) of 1000 days keeps the crowns small. If this is a systematic error, we need to increase the longevity of avocado branches (and perhaps leaves).
+
+```{r}
+  # ierr <- which( df_C.f$shade > 0.2 & F1_C[,"Shade_f"] < 0.1 )
+  # 
+  # ierr
+  # df_C.f[ierr,iscalars]
+  # F1_C  [ierr,        ]
 ```
 
 ```{r list_outF_G}
   list_outF_G     <- vector( "list", n_G.f )
   for(fi in 1:n_G.f) {
+  # for(fi in 1:65) {
     C_G     <- df_G.f$C.soil [ fi ]
     CN_G    <- df_G.f$CN.soil[ fi ]
     LAT_G   <- df_G.f$lat    [ fi ]
@@ -1196,15 +1294,9 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
                                     densG_G, densC_G )
 
     for(iF in 1:nF_G) {
-      if ( iF==1 ) {
-        params_fi <- parMAP[,31]
-      } else if ( iF==2 ) {
-        params_fi <- parMAP[,11]
-      } else {
-        stop(paste("Farm setting",iF,"not specified."))
-      }
-      params_fi <- set_parT( "G", densE_G, densI_G, densB_G,
-                                  densA_G, densG_G, densC_G, p.old=params_fi )
+      params_fi <- parMAP[,31]
+      params_fi <- set_parT( "G", densE_G, densI_G, densB_G, densA_G,
+                                  densG_G, densC_G, p.old=params_fi )
       params_fi[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0) ] <- CN_G
       params_fi[ ip_CSOM0                            ] <- C_G
       params_fi[ ip_LAT                              ] <- LAT_G
@@ -1221,21 +1313,19 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
       params_fi[ ip_THINTARGET1 ] <- 0
       params_fi[ ip_THINTARGET2 ] <- 0
       params_fi[ ip_THINTARGET3 ] <- 0
-      # if( iF>1 ) { } # Include other farm settings here
+      
+      if( iF==2 ) {
+        params_fi[ ip_FCSOMF0 ] <- 0.5
+        params_fi[ ip_CSOM0   ] <- 20
+        params_fi[ ip_FWCWP   ] <- 0.1
+      }
+      
       outF <- run_model( params_fi, matrix_weather_fi, calendar_fert_fi,
         calendar_prunC, calendar_prunT_fi, calendar_thinT_fi, NDAYS_fi )
       mat_outF[iF,1+(1:length(varnames))] <- outputSummary( outF )
     }
     list_outF_G[[fi]] <- mat_outF
   }
-```
-
-
-```{r df_CG.f_sim}
-  df_C.f_sim <- df_C.f %>%
-    select ( code ) %>%
-    arrange( code ) %>%
-    mutate ( outF  = list_outF_C )
 
   df_G.f_sim <- df_G.f %>%
     select ( code ) %>%
@@ -1243,130 +1333,135 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
     mutate ( outF  = list_outF_G )
 ```
 
-## Summary results
-
 ```{r}
-  dfoutFSummary <- function( df=df_C.f_sim, Fi=1 ){
-    nf     <- dim( df )[1]
-    vnames <- colnames( df$outF[[1]] ) ; nv <- length(vnames)
-    matres <- matrix( NA, nf, nv ) ; colnames( matres) <- vnames
-    F.v    <- matres
-    for(fi in 1:nf){
-      F.v[fi,] <- df$outF[[fi]][Fi,]
-    }
-    return( F.v )
-  }
+  F1_G <- dfoutFSummary( df_G.f_sim, Fi=1 )
+  F2_G <- dfoutFSummary( df_G.f_sim, Fi=2 )
 ```
 
 ```{r}
-  F1_C             <- dfoutFSummary( df_C.f_sim, Fi=1 )
-  F1_G             <- dfoutFSummary( df_G.f_sim, Fi=1 )
+  par( mfrow=c(2,2), mar=c(4,4,1,1) )
+
+  plot( df_G.f$C.soil, F1_G[,"Csoil_f"] ) ; abline(a=0,b=1,lty=2)
+  plot( df_G.f$shade , F1_G[,"Shade_f"] ) ; abline(a=0,b=1,lty=2)
+
+  plot( df_G.f$C.soil, F2_G[,"Csoil_f"] ) ; abline(a=0,b=1,lty=2)
+  plot( df_G.f$shade , F2_G[,"Shade_f"] ) ; abline(a=0,b=1,lty=2)
+```
+
+```{r XX14G, fig.height=4, fig.cap="\\label{fig:XX14G}Observed vs. simulated yields in 2018-19 and 2019-20 at the farms in Guatemala."}
+  par( mfrow=c(2,2), mar=c(4,2,2,2), mgp=c(2,1,0) )
+
+  x=F1_G[,"harvDM_f_ha1819"] ; y=df_G.f$yield1819
+    plotxylm("Yields Guatemala 18/19" , orig=F) ; abline(a=0,b=1,lty=2)
+  x=F1_G[,"harvDM_f_ha1920"] ; y=df_G.f$yield1920
+    plotxylm("Yields Guatemala 19/20" , orig=F) ; abline(a=0,b=1,lty=2)
+
+  x=F2_G[,"harvDM_f_ha1819"] ; y=df_G.f$yield1819
+    plotxylm("Yields Guatemala 18/19" , orig=F) ; abline(a=0,b=1,lty=2)
+  x=F2_G[,"harvDM_f_ha1920"] ; y=df_G.f$yield1920
+    plotxylm("Yields Guatemala 19/20" , orig=F) ; abline(a=0,b=1,lty=2)
+```
+
+```{r, echo=T}
+  ptest <- params_fi[iptest] ; names(ptest) <- names_params[iptest]
   
-  Csoil_F1_C.f_sim <- F1_C[,"Csoil_f"]
-  Shade_F1_C.f_sim <- F1_C[,"Shade_f"]
-  yF1_C.f_sim      <- F1_C[,"harvDM_f_hay"   ]
-  yF1_C.f_sim1819  <- F1_C[,"harvDM_f_ha1819"]
-  yF1_C.f_sim1920  <- F1_C[,"harvDM_f_ha1920"]
-
-  Csoil_F1_G.f_sim <- F1_G[,"Csoil_f"]
-  Shade_F1_G.f_sim <- F1_G[,"Shade_f"]
-  yF1_G.f_sim      <- F1_G[,"harvDM_f_hay"   ]
-  yF1_G.f_sim1819  <- F1_G[,"harvDM_f_ha1819"]
-  yF1_G.f_sim1920  <- F1_G[,"harvDM_f_ha1920"]
+  fi
+  knitr::kable( t(df_G.f[fi,iscalars]) )
+  knitr::kable( ptest )
 ```
 
 ```{r}
-  F2_C             <- dfoutFSummary( df_C.f_sim, Fi=2 )
-  F2_G             <- dfoutFSummary( df_G.f_sim, Fi=2 )
+   # iEnv   <- c( 4:24, 55) ; iCoffee   <-  25: 38
+   # iTrees <- c(39:54,155) ; iCBT_t    <- 138:140
+   # plot_output( outF, vars=outputNames[ iEnv   ] )
+   # plot_output( outF, vars=outputNames[ iCoffee ] )
+   # plot_output( outF, vars=outputNames[ iTrees  ] )
+   # plot_output( outF, vars=outputNames[ iCBT_t  ] )
+```
+
+The model underestimates shade in Guatemala for almost all farms. Possible explanations:
+
+- Inconsistent data for tree densities and shade.
+- Prevalence in Guatemala of Inga coupled with erroneous Inga parameterisation.
+- Excessive drought stress because of underestimated soil water holding capacity, as a result of using wrong pedotransfer functions.
+
+We examine a farm where measured shade is very high and simulated shade is very low.
+
+```{r}
+  # ierr <- which( df_G.f$shade > 0.8 & F1_G[,"Shade_f"] < 0.05 )
+  # 
+  # params_fi[ip_WCST] * params_fi[ c(ip_FWCWP,ip_FWCFC) ] # Farm 79: 0.207,0.364
+  # 
+  # ierr
+  # df_G.f[ierr,iscalars]
+  # F1_G  [ierr,        ]
+```
+
+Further analysis of the differences between Costa Rica and Guatemala, to find out why shade and coffee yields were especially in Guatemala poorly simulated and generally underestimated.
+
+When we run the following code, we see that Guatemala has:
+
+- Lower Csoil
+- Lower Nsoil
+- Lower Nfert
+- Lower soil water holding capacity
+
+We also see that our initial parameterisation parMAP[,31] sets the SOM mineralisation rate very low: it assigns only a small fraction (FCSOMF0=0.2936, copied from the Masatepe experiment) to fast turnover. Compare the higher value in the Turrialba experiment (e.g. parMAP[,11]): FCSOMF0=0.7185.
+
+These settings make coffee and trees in Guatemala in the model - and likely in reality too if the data are reliable - often severely water- and N-limited. Still, observed yields in Guatemala are not strongly correlated with N-fertilisation rate, which is puzzling. 
+
+```{r}
+  knitr::kable( cbind( names_params,
+                       round(parMAP[,11],4),
+                       round(parMAP[,31],4),
+                       round(params_fi,4) ) )
+
+  knitr::kable( rbind( c("C",round(summary(df_C.f$C.soil),3)),
+                       c("G",round(summary(df_G.f$C.soil),3)) ) )
+
+  knitr::kable( rbind( c("C",round(summary(df_C.f$N.soil),3)),
+                       c("G",round(summary(df_G.f$N.soil),3)) ) )
+
+  knitr::kable( rbind( c("C",round(summary(df_C.f$Nfert),3)),
+                       c("G",round(summary(df_G.f$Nfert),3)) ) )
+
+  knitr::kable( rbind( c("C",round(summary(df_C.f$FC),3)),
+                       c("G",round(summary(df_G.f$FC),3)) ) )
+
+  knitr::kable( rbind( c("C",round(summary(df_C.f$WP),3)),
+                       c("G",round(summary(df_G.f$WP),3)) ) )
   
-  Csoil_F2_C.f_sim <- F2_C[,"Csoil_f"]
-  Shade_F2_C.f_sim <- F2_C[,"Shade_f"]
-  yF2_C.f_sim      <- F2_C[,"harvDM_f_hay"   ]
-  yF2_C.f_sim1819  <- F2_C[,"harvDM_f_ha1819"]
-  yF2_C.f_sim1920  <- F2_C[,"harvDM_f_ha1920"]
-
-  Csoil_F2_G.f_sim <- F2_G[,"Csoil_f"]
-  Shade_F2_G.f_sim <- F2_G[,"Shade_f"]
-  yF2_G.f_sim      <- F2_G[,"harvDM_f_hay"   ]
-  yF2_G.f_sim1819  <- F2_G[,"harvDM_f_ha1819"]
-  yF2_G.f_sim1920  <- F2_G[,"harvDM_f_ha1920"]
+  knitr::kable( rbind( c("C",round(summary(df_C.f$FC-df_C.f$WP),3)),
+                       c("G",round(summary(df_G.f$FC-df_G.f$WP),3)) ) )
 ```
 
-```{r}
-  par( mfrow=c(2,2), mar=c(3,3,1,1) )
-
-  plot( df_C.f$C.soil, Csoil_F1_C.f_sim )
-  plot( df_G.f$C.soil, Csoil_F1_G.f_sim )
-  plot( df_C.f$shade , Shade_F1_C.f_sim )
-  plot( df_G.f$shade , Shade_F1_G.f_sim )
-```
-
-```{r}
-  par( mfrow=c(2,2), mar=c(3,3,1,1) )
-
-  plot( df_C.f$C.soil, Csoil_F2_C.f_sim )
-  plot( df_G.f$C.soil, Csoil_F2_G.f_sim )
-  plot( df_C.f$shade , Shade_F2_C.f_sim )
-  plot( df_G.f$shade , Shade_F2_G.f_sim )
-```
-
-Fig. \ref{fig:XX13} shows that, in the simulations, yields in 2018-19 and 2019-20 were slightly below the long-term average for many farms in Costa Rica, but above-average in Guatemala.
+Fig. \ref{fig:XX13} shows that, in the simulations, the annual yields in 2018-19 and 2019-20 varied more between farms than the long-term average yields did.
 
 ```{r XX13, fig.height=4, fig.cap="\\label{fig:XX13}Simulated yields in 2018-19 and 2019-20 vs. long-term average yields in the same simulations."}
   par( mfrow=c(1,2), mar=c(3,3,2,2) )
 
-  plot( yF1_C.f_sim, yF1_C.f_sim1819, main="Costa Rica (sim.)",
-        xlab="mean yield", ylab="kg DM ha-1 y-1")
-  points( yF1_C.f_sim, yF1_C.f_sim1920, col="red" )
-  abline(1,1,lty=2)
+  plot  ( F1_C[,"harvDM_f_hay"], F1_C[,"harvDM_f_ha1819"],
+          main="Costa Rica (sim.)",
+          xlab="mean yield", ylab="kg DM ha-1 y-1")
+  points( F1_C[,"harvDM_f_hay"], F1_C[,"harvDM_f_ha1920"], col="red" )
+  abline( 1, 1, lty=2 )
   legend( "bottomright",legend=c("y=x","18/19","19/20"),
           lty=c(2,NA,NA), pch=c(NA,1,1), col=c("black","black","red"),
           bg="transparent" )
   
-  plot( yF1_G.f_sim, yF1_G.f_sim1819, main="Guatemala (sim.)",
-        xlab="mean yield", ylab="yield 2018/19")
-  points( yF1_G.f_sim, yF1_G.f_sim1920, col="red" )
-  abline(1,1,lty=2)
+  plot  ( F1_G[,"harvDM_f_hay"], F1_G[,"harvDM_f_ha1819"],
+          main="Guatemala (sim.)",
+          xlab="mean yield", ylab="yield 2018/19")
+  points( F1_G[,"harvDM_f_hay"], F1_G[,"harvDM_f_ha1920"], col="red" )
+  abline( 1, 1, lty=2 )
   legend( "bottomright",legend=c("y=x","18/19","19/20"),
           lty=c(2,NA,NA), pch=c(NA,1,1), col=c("black","black","red"),
           bg="transparent" )
 ```
 
-We now finally come to the simulations for all farms that were intended to be more realistic, by using farm-specific information on weather, soil, nitrogen fertilisation rate, and number of shade tree species. In the absence of detailed information on shade tree species and shade management, we made the following assumptions:
+We now come to the simulations for all farms that used farm-specific information on weather, soil, nitrogen fertilisation rate, tree species and shade-level.
 
-- If the number of reported shade tree species was 1, we simulated a system shaded by Inga laurina (managed as in Masatepe experiment treatment 31)
-- If there were 2 species, we added Simarouba glauca (conform Masatepe experiment treatment 31)
-- If there were 3 or more species, we added banana.
-
-Results of these simulations are shown in Figs \ref{fig:XX14}, \ref{fig:XX15}, and \ref{fig:XX16}. Fig. \ref{fig:XX14} shows how the long-term average annual coffee yields simulated by the model for the years 2000-2014 compares to the yield reported for the farms for the year 2019. The correlations are not very strong. Fig. \ref{fig:XX15} shows, for farms in Costa Rica, observations and simulations of multiple variables, all plotted against each farm's N-fertilisation rate. Farms are grouped by number of shade tree species but no clear differences between the groups are visible. Apart from shade, all variables show a positive or negative correlation with fertilisation. The negative correlation in the case of soil carbon loss in runoff is likely due to fertilisation enhancing vegetation LAI, which in the model reduces erosion. The same variables are shown in Fig. \ref{fig:XX16} for Guatemala, with similar results albeit more difficult to see because of the distorting influence of having farms with excessive N-fertilisation rate in the plots.
-
-```{r XX14, fig.height=4, fig.cap="\\label{fig:XX14}Observed vs. simulated yields in 2018-19 and 2019-20 at the farms in Costa Rica (left) and Guatemala (right)."}
-  par( mfrow=c(2,2), mar=c(4,2,2,2), mgp=c(2,1,0) )
-
-  x=yF1_C.f_sim1819 ; y=df_C.f$yield1819
-    plotxylm("Yields Costa Rica 18/19", orig=F)
-  x=yF1_G.f_sim1819 ; y=df_G.f$yield1819
-    plotxylm("Yields Guatemala 18/19" , orig=F)
-
-  x=yF1_C.f_sim1920 ; y=df_C.f$yield1920
-    plotxylm("Yields Costa Rica 19/20", orig=F)
-  x=yF1_G.f_sim1920 ; y=df_G.f$yield1920
-    plotxylm("Yields Guatemala 19/20" , orig=F)
-```
-
-```{r XX14b, fig.height=4, fig.cap="\\label{fig:XX14b}Observed vs. simulated yields in 2018-19 and 2019-20 at the farms in Costa Rica (left) and Guatemala (right). Farm setting 2."}
-  par( mfrow=c(2,2), mar=c(4,2,2,2), mgp=c(2,1,0) )
-
-  x=yF2_C.f_sim1819 ; y=df_C.f$yield1819
-    plotxylm("Yields Costa Rica 18/19", orig=F)
-  x=yF2_G.f_sim1819 ; y=df_G.f$yield1819
-    plotxylm("Yields Guatemala 18/19" , orig=F)
-
-  x=yF2_C.f_sim1920 ; y=df_C.f$yield1920
-    plotxylm("Yields Costa Rica 19/20", orig=F)
-  x=yF2_G.f_sim1920 ; y=df_G.f$yield1920
-    plotxylm("Yields Guatemala 19/20" , orig=F)
-```
+Results of these simulations are shown in Figs \ref{fig:XX14C}, \ref{fig:XX14G}, \ref{fig:XX15}, and \ref{fig:XX16}. Fig. \ref{fig:XX15} shows, for farms in Costa Rica, observations and simulations of multiple variables, all plotted against each farm's N-fertilisation rate. Farms are grouped by number of shade tree species but no clear differences between the groups are visible. Apart from shade, all variables show a positive or negative correlation with fertilisation. The negative correlation in the case of soil carbon loss in runoff is likely due to fertilisation enhancing vegetation LAI, which in the model reduces erosion. The same variables are shown in Fig. \ref{fig:XX16} for Guatemala.
 
 ```{r}
   int1_C <- which(df_C.f$nt <2) ; int1_G <- which(df_G.f$nt <2)
