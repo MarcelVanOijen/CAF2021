@@ -1,0 +1,588 @@
+---
+title: 'Weather files for SEACAF farms in Costa Rica and Guatemala'
+author:
+- Marcel van Oijen^[Independent researcher, Edinburgh, UK - VanOijenMarcel@gmail.com]
+date: '`r Sys.Date()`'
+output:
+  pdf_document:
+    fig_crop: false
+    fig_caption: yes
+    keep_tex: no
+    number_sections: yes
+    toc: yes
+  word_document:
+    reference_docx: word-styles-reference-01.docx
+  html_document: default
+fontsize: 11pt
+geometry: margin=1in
+csl: environmental-modelling-and-software.csl
+bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
+---
+
+```{r, include=FALSE}
+  knitr::opts_chunk$set(echo=F,results="asis",warning=FALSE,message=FALSE)
+  # library( geosphere  )
+  # library( rworldmap  )
+  # library( rworldxtra )
+  # library( raster     )
+  # library( readxl     )
+  # library( tidyverse  )
+```
+
+
+
+\clearpage
+
+# SEACAF farms database
+
+```{r}
+  dir.f           <- "data/Farms SEACAF/"
+  file_coords_C.f <- "coordinates_CR.csv"
+  file_coords_G.f <- "coordinates_G.csv"
+```
+
+## Coordinates
+
+The geographcial coordinates for the farms in Costa Rica and Guatemala were taken from SEACAF files **coordinates_CR.csv** and **coordinates_G.csv**.
+
+```{r}
+  df_coords_C.f  <- read.csv( paste0( dir.f, file_coords_C.f ) )
+  df_coords_G.f  <- read.csv( paste0( dir.f, file_coords_G.f ) )
+  
+  df_coords_C.f  <- df_coords_C.f %>%
+    rename( code=code_farm_new, lat=Latitud    , lon=Longitud ) %>%
+    mutate( code=code+1000 ) %>%
+    dplyr::select( code, lat, lon ) %>%
+    arrange( code )
+  df_coords_G.f  <- df_coords_G.f %>%
+    rename( code=CODIGO.SEACAF, lat=decimal_LAT, lon=decimal_LONG ) %>%
+    mutate( code=code+2000 ) %>%
+    dplyr::select( code, lat, lon ) %>%
+    arrange( code )
+```
+
+# WorldClim climate and weather data
+
+WorldClim provides monthly data for both climate (30-year averages) and weather (2000-2018). The data is cumbersome: one has to begin by downloading high-spatial resolution data for the whole globe, then truncate these to the regions of interest before storing the truncated files locally. However, the data is useful in that it is freely available, complete (it includes all five weather variables used by CAF2021: radiation, temperature, atmospheric vapour pressure, wind speed, precipitation) and is of apparently high quality without any gaps or ourliers.
+
+WorldClim provides two types of monthly data: climatic data (30-year averages) for all five variables and weather data (years 2000-2018) for temperature and rainfall. The climatic data are at higher spatial resolution (30 seconds) than the weather data (2.5 minutes). We used the weather data as anomalies to refine the climate data temporally.
+
+```{r}
+  dir_WC          <- "weather/WorldClim/"
+  
+  # Monthly climatic means 1970-2000 (scale 30 seconds)
+  dir_WC_prec <- paste0( dir_WC, "prec/" ) 
+  dir_WC_srad <- paste0( dir_WC, "srad/" )
+  dir_WC_tmax <- paste0( dir_WC, "tmax/" )
+  dir_WC_tmin <- paste0( dir_WC, "tmin/" )
+  dir_WC_vapr <- paste0( dir_WC, "vapr/" )
+  dir_WC_wind <- paste0( dir_WC, "wind/" )
+  
+  # Monthly weather 2000-2018 (scale 2.5 minutes)
+  dir_WC_prec.2000_2009 <- paste0( dir_WC, "prec_2000_2009/" )
+  dir_WC_prec.2010_2018 <- paste0( dir_WC, "prec_2010_2018/" )
+  dir_WC_tmax.2000_2009 <- paste0( dir_WC, "tmax_2000_2009/" )
+  dir_WC_tmax.2010_2018 <- paste0( dir_WC, "tmax_2010_2018/" )
+  dir_WC_tmin.2000_2009 <- paste0( dir_WC, "tmin_2000_2009/" )
+  dir_WC_tmin.2010_2018 <- paste0( dir_WC, "tmin_2010_2018/" )
+```
+
+```{r}
+  spdf_C   <- getData('GADM', country="CRI", level=0)
+  spdf_C   <- crop(spdf_C, extent(-86,-82, 8, 12)) # Removing outlying islands
+  spdf_G   <- getData('GADM', country="GTM", level=0)
+  ext_C    <- extent( spdf_C ) ; ext_G <- extent( spdf_G )
+
+  # spdf_C.f <- crop(spdf_C, extent(-84.6,-83.5, 9.5, 10.2))
+  # spdf_G.f <- crop(spdf_G, extent(-92.1,-90.4,14.4, 15.1))
+  
+  r_worldclim_alt_SE <- getData( 'worldclim', var='alt',
+                                 res=0.5, lon=-83.51, lat= 9.58 )
+  r_worldclim_alt_NW <- getData( 'worldclim', var='alt',
+                                 res=0.5, lon=-92.07, lat=15.09 )
+  alt_C    <- crop( r_worldclim_alt_SE, ext_C )
+  alt_G    <- crop( r_worldclim_alt_NW, ext_G )
+```
+
+```{r}
+  coords_C.f  <- cbind( lon=df_coords_C.f$lon, lat=df_coords_C.f$lat )
+    row.names( coords_C.f ) <- df_coords_C.f$code
+  coords_G.f  <- cbind( lon=df_coords_G.f$lon, lat=df_coords_G.f$lat )
+    row.names( coords_G.f ) <- df_coords_G.f$code
+
+  n_coords_C.f <- dim(coords_C.f)[1] ; n_coords_G.f <- dim(coords_G.f)[1]
+
+  alt_C.f  <- raster::extract( alt_C, coords_C.f )
+  alt_G.f  <- raster::extract( alt_G, coords_G.f )
+```
+    
+```{r}
+  code_C.f <- df_coords_C.f$code - 1000
+  code_G.f <- df_coords_G.f$code - 2000
+  x_C.f <- coords_C.f[,"lon"] ; y_C.f <- coords_C.f[,"lat"] 
+  x_G.f <- coords_G.f[,"lon"] ; y_G.f <- coords_G.f[,"lat"] 
+
+  plot_C.f <- function() {
+    plot  ( spdf_C, add=T )
+    points( x_C.f, y_C.f, pch=1, cex=0.5 )
+    # text  ( x_C.f, y_C.f, labels=code_C.f, pos=2, cex=0.5 )
+  }
+
+  plot_G.f <- function() {
+    plot  ( spdf_G, add=T )
+    points( x_G.f, y_G.f, pch=1, cex=0.5 )
+    # text  ( x_G.f, y_G.f, labels=code_G.f, pos=2, cex=0.5 )
+  }
+```
+
+## Climate data 1970-2000
+
+We import the very large WorldClim climate files into R-data structures called RasterStacks (see https://www.benjaminbell.co.uk/2018/02/rasterstacks-and-rasterplot.html ), which allow for easy parallel post-processing. An example of the data, for rainfall truncated to the extent of Costa Rica, is shown in Fig. \ref{fig:XX2}.
+
+```{r}
+  month <- c( "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" )
+```
+
+```{r, eval=F}
+  prec        <- stack( list.files( dir_WC_prec, ".tif", full.names=T ) )
+  srad        <- stack( list.files( dir_WC_srad, ".tif", full.names=T ) )
+  tmax        <- stack( list.files( dir_WC_tmax, ".tif", full.names=T ) )
+  tmin        <- stack( list.files( dir_WC_tmin, ".tif", full.names=T ) )
+  vapr        <- stack( list.files( dir_WC_vapr, ".tif", full.names=T ) )
+  wind        <- stack( list.files( dir_WC_wind, ".tif", full.names=T ) )
+  names(prec) <- names(srad) <- names(tmax) <-
+  names(tmin) <- names(vapr) <- names(wind) <- month
+  
+  prec_C <- crop(prec, ext_C) ; prec_G <- crop(prec, ext_G) ; rm(prec)
+  srad_C <- crop(srad, ext_C) ; srad_G <- crop(srad, ext_G) ; rm(srad)
+  tmax_C <- crop(tmax, ext_C) ; tmax_G <- crop(tmax, ext_G) ; rm(tmax)
+  tmin_C <- crop(tmin, ext_C) ; tmin_G <- crop(tmin, ext_G) ; rm(tmin)
+  vapr_C <- crop(vapr, ext_C) ; vapr_G <- crop(vapr, ext_G) ; rm(vapr)
+  wind_C <- crop(wind, ext_C) ; wind_G <- crop(wind, ext_G) ; rm(wind)
+
+  # writeRaster( prec_C, paste0(dir_WC,"WC_prec_C.grd") )
+  # writeRaster( srad_C, paste0(dir_WC,"WC_srad_C.grd") )
+  # writeRaster( tmax_C, paste0(dir_WC,"WC_tmax_C.grd") )
+  # writeRaster( tmin_C, paste0(dir_WC,"WC_tmin_C.grd") )
+  # writeRaster( vapr_C, paste0(dir_WC,"WC_vapr_C.grd") )
+  # writeRaster( wind_C, paste0(dir_WC,"WC_wind_C.grd") )
+  # 
+  # writeRaster( prec_G, paste0(dir_WC,"WC_prec_G.grd") )
+  # writeRaster( srad_G, paste0(dir_WC,"WC_srad_G.grd") )
+  # writeRaster( tmax_G, paste0(dir_WC,"WC_tmax_G.grd") )
+  # writeRaster( tmin_G, paste0(dir_WC,"WC_tmin_G.grd") )
+  # writeRaster( vapr_G, paste0(dir_WC,"WC_vapr_G.grd") )
+  # writeRaster( wind_G, paste0(dir_WC,"WC_wind_G.grd") )
+```
+
+```{r}
+  prec_C <- stack( paste0(dir_WC,"WC_prec_C.grd") )
+  srad_C <- stack( paste0(dir_WC,"WC_srad_C.grd") )
+  tmax_C <- stack( paste0(dir_WC,"WC_tmax_C.grd") )
+  tmin_C <- stack( paste0(dir_WC,"WC_tmin_C.grd") )
+  vapr_C <- stack( paste0(dir_WC,"WC_vapr_C.grd") )
+  wind_C <- stack( paste0(dir_WC,"WC_wind_C.grd") )
+
+  prec_G <- stack( paste0(dir_WC,"WC_prec_G.grd") )
+  srad_G <- stack( paste0(dir_WC,"WC_srad_G.grd") )
+  tmax_G <- stack( paste0(dir_WC,"WC_tmax_G.grd") )
+  tmin_G <- stack( paste0(dir_WC,"WC_tmin_G.grd") )
+  vapr_G <- stack( paste0(dir_WC,"WC_vapr_G.grd") )
+  wind_G <- stack( paste0(dir_WC,"WC_wind_G.grd") )
+```
+
+```{r XX2, fig.cap="\\label{fig:XX2}WorldClim clinatic data for Costa Rica: monthly rainfall (mm)."}
+  tempcol <- colorRampPalette( c("purple", "blue", "skyblue", "green" ,
+                   "lightgreen", "yellow", "orange", "red", "darkred") )
+  plot( prec_C, main=month, col=rainbow(100,end=0.7),
+        zlim=c(0,800), nc=3, nr=4 )
+```
+
+```{r}
+  monl    <- c( 31, 28.25, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 )
+
+  GR_C.f   <- round( raster::extract(srad_C, coords_C.f) / 1000, 1 )
+  TMIN_C.f <-        raster::extract(tmin_C, coords_C.f)
+  TMAX_C.f <-        raster::extract(tmax_C, coords_C.f)
+  VP_C.f   <-        raster::extract(vapr_C, coords_C.f)
+  WN_C.f   <-        raster::extract(wind_C, coords_C.f)
+  RAIN_C.f <-        raster::extract(prec_C, coords_C.f)
+    for(m in 1:12) RAIN_C.f[,m] <- RAIN_C.f[,m] / monl[m]
+  
+  GR_G.f   <- round( raster::extract(srad_G, coords_G.f) / 1000, 1 )
+  TMIN_G.f <-        raster::extract(tmin_G, coords_G.f)
+  TMAX_G.f <-        raster::extract(tmax_G, coords_G.f)
+  VP_G.f   <-        raster::extract(vapr_G, coords_G.f)
+  WN_G.f   <-        raster::extract(wind_G, coords_G.f)
+  RAIN_G.f <-        raster::extract(prec_G, coords_G.f)
+    for(m in 1:12) RAIN_G.f[,m] <- RAIN_G.f[,m] / monl[m]
+```
+
+For simulations with CAF2021 in project SEACAF, we need weather information for farms in Costa Rica and Guatemala. The locations of the farms are depicted in Fig. \ref{fig:Maps_CG}. We extracted WorldClim climatic data (all variables) for the 30-second boxes containing these farm locations and show the climatic averages for the months of January and July in Fig. \ref{fig:XX3}. The figure shows that temperature and vapour pressure decline markedly with altitude, while wind speed increases, and radiation and rainfall vary independently from altitude. These patterns are similar in the two countries.
+
+```{r}
+  par( mfrow=c(1,2), mar=c(3,3,3,5) )
+  plot( alt_C, main="Costa Rica", addfun=plot_C.f, zlim=c(0,4000) )
+  plot( alt_G, main="Guatemala", addfun=plot_G.f, zlim=c(0,4000) )
+
+  # Alternative way of producing a map with the farm locations
+  worldmap <- getMap(resolution = "high")
+  plot( worldmap,
+        col="lightgrey", border="darkgray",
+        xlim=c(-93,-83), ylim=c(8,18),
+        bg="aliceblue", asp=1 )
+  points( coords_C.f, col="red" , pch=1, cex=0.2 )
+  points( coords_G.f, col="blue", pch=1, cex=0.2 )
+```
+
+```{r XX3, fig.height=3, fig.cap="\\label{fig:XX3}WorldClim data for the locations of the coffee farms plotted against altitude (m). Top row: Costa Rica; bottom row: Guatemala. Monthly averages for January (red) and July (black). Six weather variables: global radiation (GR; MJ m-2 d-1), temperature (TMIN, TMAX; deg. C.), vapour pressure (VP; kPa), wind speed (WN; m s-1), precipitation (RAIN; mm d-1)."}
+  par( mfrow=c(2,6), mar=c(2,2,2,1) )
+  
+  ylim_GR.f   <- range( GR_C.f  , GR_G.f   )
+  ylim_TMIN.f <- range( TMIN_C.f, TMIN_G.f )
+  ylim_TMAX.f <- range( TMAX_C.f, TMAX_G.f )
+  ylim_VP.f   <- range( VP_C.f  , VP_G.f   )
+  ylim_WN.f   <- range( WN_C.f  , WN_G.f   )
+  ylim_RAIN.f <- range( RAIN_C.f, RAIN_G.f )
+
+  plot  ( alt_C.f, GR_C.f  [,7], ylim=ylim_GR.f  , main="GR" )
+  points( alt_C.f, GR_C.f  [,1], col="red" )
+  plot  ( alt_C.f, TMIN_C.f[,7], ylim=ylim_TMIN.f, main="TMIN" )
+  points( alt_C.f, TMIN_C.f[,1], col="red" )
+  plot  ( alt_C.f, TMAX_C.f[,7], ylim=ylim_TMAX.f, main="TMAX" )
+  points( alt_C.f, TMAX_C.f[,1], col="red" )
+  plot  ( alt_C.f, VP_C.f  [,7], ylim=ylim_VP.f  , main="VP" )
+  points( alt_C.f, VP_C.f  [,1], col="red" )
+  plot  ( alt_C.f, WN_C.f  [,7], ylim=ylim_WN.f  , main="WN" )
+  points( alt_C.f, WN_C.f  [,1], col="red" )
+  plot  ( alt_C.f, RAIN_C.f[,7], ylim=ylim_RAIN.f, main="RAIN" )
+  points( alt_C.f, RAIN_C.f[,1], col="red" )
+  
+  plot  ( alt_G.f, GR_G.f  [,7], ylim=ylim_GR.f  , main="GR" )
+  points( alt_G.f, GR_G.f  [,1], col="red" )
+  plot  ( alt_G.f, TMIN_G.f[,7], ylim=ylim_TMIN.f, main="TMIN" )
+  points( alt_G.f, TMIN_G.f[,1], col="red" )
+  plot  ( alt_G.f, TMAX_G.f[,7], ylim=ylim_TMAX.f, main="TMAX" )
+  points( alt_G.f, TMAX_G.f[,1], col="red" )
+  plot  ( alt_G.f, VP_G.f  [,7], ylim=ylim_VP.f  , main="VP" )
+  points( alt_G.f, VP_G.f  [,1], col="red" )
+  plot  ( alt_G.f, WN_G.f  [,7], ylim=ylim_WN.f  , main="WN" )
+  points( alt_G.f, WN_G.f  [,1], col="red" )
+  plot  ( alt_G.f, RAIN_G.f[,7], ylim=ylim_RAIN.f, main="RAIN" )
+  points( alt_G.f, RAIN_G.f[,1], col="red" )
+```
+
+## Weather 2000-2018
+
+```{r, eval=F}
+  prec.00_18 <- stack( c(
+    list.files( dir_WC_prec.2000_2009, ".tif", full.names=T ),
+    list.files( dir_WC_prec.2010_2018, ".tif", full.names=T ) ) )
+    prec.00_18 <- prec.00_18[[1:228]] # Only keep years 2000-2018
+  tmax.00_18 <- stack( c(
+    list.files( dir_WC_tmax.2000_2009, ".tif", full.names=T ),
+    list.files( dir_WC_tmax.2010_2018, ".tif", full.names=T ) ) )
+    tmax.00_18 <- tmax.00_18[[1:228]] # Only keep years 2000-2018
+  tmin.00_18 <- stack( c(
+    list.files( dir_WC_tmin.2000_2009, ".tif", full.names=T ),
+    list.files( dir_WC_tmin.2010_2018, ".tif", full.names=T ) ) )
+
+  names(prec.00_18) <- str_sub( names(prec.00_18), -7, -1 )
+  names(tmax.00_18) <- str_sub( names(tmax.00_18), -7, -1 )
+  names(tmin.00_18) <- str_sub( names(tmin.00_18), -7, -1 )
+
+  prec_C.00_18 <- crop(prec.00_18, ext_C)
+  prec_G.00_18 <- crop(prec.00_18, ext_G) ; rm(prec.00_18)
+  tmax_C.00_18 <- crop(tmax.00_18, ext_C)
+  tmax_G.00_18 <- crop(tmax.00_18, ext_G) ; rm(tmax.00_18)
+  tmin_C.00_18 <- crop(tmin.00_18, ext_C)
+  tmin_G.00_18 <- crop(tmin.00_18, ext_G) ; rm(tmin.00_18)
+
+  # writeRaster( prec_C.00_18, paste0(dir_WC,"WC_prec_C.00_18.grd") )
+  # writeRaster( prec_G.00_18, paste0(dir_WC,"WC_prec_G.00_18.grd") )
+  # writeRaster( tmax_C.00_18, paste0(dir_WC,"WC_tmax_C.00_18.grd") )
+  # writeRaster( tmax_G.00_18, paste0(dir_WC,"WC_tmax_G.00_18.grd") )
+  # writeRaster( tmin_C.00_18, paste0(dir_WC,"WC_tmin_C.00_18.grd") )
+  # writeRaster( tmin_G.00_18, paste0(dir_WC,"WC_tmin_G.00_18.grd") )
+```
+
+```{r}
+  prec_C.00_18 <- stack( paste0(dir_WC,"WC_prec_C.00_18.grd") )
+  prec_G.00_18 <- stack( paste0(dir_WC,"WC_prec_G.00_18.grd") )
+  tmax_C.00_18 <- stack( paste0(dir_WC,"WC_tmax_C.00_18.grd") )
+  tmax_G.00_18 <- stack( paste0(dir_WC,"WC_tmax_G.00_18.grd") )
+  tmin_C.00_18 <- stack( paste0(dir_WC,"WC_tmin_C.00_18.grd") )
+  tmin_G.00_18 <- stack( paste0(dir_WC,"WC_tmin_G.00_18.grd") )
+```
+
+In contrast to the WorldClim *climate* data for all variables, the WorldClim *weather* data for temperature and rainfall change from year to year over the represented period of 2000-2018. Fig. \ref{fig:precC.00.01} shows for Costa Rica how monthly total rainfall (mm) varies during the two years of 2000 and 2001.
+
+```{r precC.00.01, fig.height=8, fig.align="center", fig.cap="\\label{precC.00.01}Rainfall in Costa Rica in 2000 and 2001."}
+  plot( prec_C.00_18[[ 1:24]],
+        main=c( sapply(2000:2001, function(i){paste0(month," ",i)}) ),
+        col=rainbow(100,end=0.7), zlim=c(0,800), maxnl=24, nc=4 )
+```
+
+```{r}
+  i.00_18.month <- vector( "list", 12 )
+  m.end         <- c( paste0(".0",1:9), paste0(".",10:12) )
+  for(m in 1:12) {
+    i.00_18.month[[m]] <- which( endsWith( names(tmin_C.00_18), m.end[m] ) )
+  }
+
+  TMIN_C.00_18.f <- raster::extract(tmin_C.00_18, coords_C.f)
+  TMAX_C.00_18.f <- raster::extract(tmax_C.00_18, coords_C.f)
+  RAIN_C.00_18.f <- raster::extract(prec_C.00_18, coords_C.f)
+  for(m in 1:12) { RAIN_C.00_18.f[ , i.00_18.month[[m]] ] <-
+    RAIN_C.00_18.f[ , i.00_18.month[[m]] ] / monl[m] }
+  
+  TMIN_G.00_18.f <- raster::extract(tmin_G.00_18, coords_G.f)
+  TMAX_G.00_18.f <- raster::extract(tmax_G.00_18, coords_G.f)
+  RAIN_G.00_18.f <- raster::extract(prec_G.00_18, coords_G.f)
+  for(m in 1:12) { RAIN_G.00_18.f[ , i.00_18.month[[m]] ] <-
+    RAIN_G.00_18.f[ , i.00_18.month[[m]] ] / monl[m] }
+```
+
+```{r}
+  # Averages by calendar month for 2000-2018
+  TMIN_C.00_18.ma.f <- TMAX_C.00_18.ma.f <- RAIN_C.00_18.ma.f <-
+    matrix( NA, nrow=n_coords_C.f, ncol=12 )
+  TMIN_G.00_18.ma.f <- TMAX_G.00_18.ma.f <- RAIN_G.00_18.ma.f <-
+    matrix( NA, nrow=n_coords_G.f, ncol=12 )
+
+  for(m in 1:12) {
+    TMIN_C.00_18.ma.f[,m] <- rowMeans( TMIN_C.00_18.f[ , i.00_18.month[[m]] ] )
+    TMAX_C.00_18.ma.f[,m] <- rowMeans( TMAX_C.00_18.f[ , i.00_18.month[[m]] ] )
+    RAIN_C.00_18.ma.f[,m] <- rowMeans( RAIN_C.00_18.f[ , i.00_18.month[[m]] ] )
+    TMIN_G.00_18.ma.f[,m] <- rowMeans( TMIN_G.00_18.f[ , i.00_18.month[[m]] ] )
+    TMAX_G.00_18.ma.f[,m] <- rowMeans( TMAX_G.00_18.f[ , i.00_18.month[[m]] ] )
+    RAIN_G.00_18.ma.f[,m] <- rowMeans( RAIN_G.00_18.f[ , i.00_18.month[[m]] ] )
+  }
+  
+  # Anomalies by calendar month for 2000-2018
+  TMIN_C.00_18.anom.f <- TMAX_C.00_18.anom.f <- RAIN_C.00_18.anom.f <-
+    matrix( NA, nrow=n_coords_C.f, ncol=228 )
+  TMIN_G.00_18.anom.f <- TMAX_G.00_18.anom.f <- RAIN_G.00_18.anom.f <-
+    matrix( NA, nrow=n_coords_G.f, ncol=228 )
+  
+  for(m in 1:12) {
+    TMIN_C.00_18.anom.f[ , i.00_18.month[[m]] ] <-
+         TMIN_C.00_18.f[ , i.00_18.month[[m]] ] - TMIN_C.00_18.ma.f[,m]
+    TMAX_C.00_18.anom.f[ , i.00_18.month[[m]] ] <-
+         TMAX_C.00_18.f[ , i.00_18.month[[m]] ] - TMAX_C.00_18.ma.f[,m]
+    RAIN_C.00_18.anom.f[ , i.00_18.month[[m]] ] <-
+         RAIN_C.00_18.f[ , i.00_18.month[[m]] ] - RAIN_C.00_18.ma.f[,m]
+    
+    TMIN_G.00_18.anom.f[ , i.00_18.month[[m]] ] <-
+         TMIN_G.00_18.f[ , i.00_18.month[[m]] ] - TMIN_G.00_18.ma.f[,m]
+    TMAX_G.00_18.anom.f[ , i.00_18.month[[m]] ] <-
+         TMAX_G.00_18.f[ , i.00_18.month[[m]] ] - TMAX_G.00_18.ma.f[,m]
+    RAIN_G.00_18.anom.f[ , i.00_18.month[[m]] ] <-
+         RAIN_G.00_18.f[ , i.00_18.month[[m]] ] - RAIN_G.00_18.ma.f[,m]
+  }
+```
+
+For the locations of the SEACAF farms in Costa Rica and Guatemala, we calculated temperature and rainfall anomalies (deviations from long-term averages) for each month in 2000-2018 from the WorldClim weather data. Fig. \ref{fig:XX4} shows how these anomalies vary over time for two farms in Costa Rica. Because of the proximity of these farms to each other, the anomalies are closely correlated, as shown in the right-hand side panels of Fig. \ref{fig:XX4}. The correlations are much less strong when we compare a farm in Costa Rica with one in Guatemala (Fig. \ref{fig:XX5}).
+
+```{r XX4, fig.cap="\\label{fig:XX4}Temperature and rainfall anomalies (differences between WorldClim weather for 2000-2018 and long-term climatic averages) for two farms in Costa Rica. Left: anomalies against month (1=Jan 2000). Right: anomalies of one farm against those of the other."}
+  par( mfrow=c(3,2), mar=c(3,3,2,2), mgp=c(2,1,0) )
+
+  iSite1 <- 1 ; iSite2 <- 2
+  plot  ( 1:228, TMIN_C.00_18.anom.f[iSite1,], main="Anomalies TMIN (C)",
+          xlab="Month", ylab="" )
+  points( 1:228, TMIN_C.00_18.anom.f[iSite2,], col="red" )
+  plot( TMIN_C.00_18.anom.f[iSite1,], TMIN_C.00_18.anom.f[iSite2,],
+          xlab="C", ylab="C" )
+  
+  plot  ( 1:228, TMAX_C.00_18.anom.f[iSite1,], main="Anomalies TMAX (C)",
+          xlab="Month", ylab="" )
+  points( 1:228, TMAX_C.00_18.anom.f[iSite2,], col="red" )
+  plot( TMAX_C.00_18.anom.f[iSite1,], TMAX_C.00_18.anom.f[iSite2,],
+          xlab="C", ylab="C" )
+  
+  plot  ( 1:228, RAIN_C.00_18.anom.f[iSite1,], main="Anomalies RAIN (mm d-1)",
+          xlab="Month", ylab="" )
+  points( 1:228, RAIN_C.00_18.anom.f[iSite2,], col="red" )
+  plot( RAIN_C.00_18.anom.f[iSite1,], RAIN_C.00_18.anom.f[iSite2,],
+          xlab="mm d-1", ylab="mm d-1" )
+```
+
+```{r XX5, fig.cap="\\label{fig:XX5}Temperature and rainfall anomalies (differences between WorldClim weather for 2000-2018 and long-term climatic averages) for a farm in Costa Rica (black) and a farm in Guatemala (red). Left: anomalies against month (1=Jan 2000). Right: anomalies of one farm against those of the other."}
+  par( mfrow=c(3,2), mar=c(3,3,2,2), mgp=c(2,1,0) )
+
+  iSiteC <- 1 ; iSiteG <- 1
+  plot  ( 1:228, TMIN_C.00_18.anom.f[iSiteC,], main="Anomalies TMIN (C)",
+          xlab="Month", ylab="" )
+  points( 1:228, TMIN_G.00_18.anom.f[iSiteG,], col="red" )
+  plot(TMIN_C.00_18.anom.f[iSiteC,], TMIN_G.00_18.anom.f[iSiteG,],
+          xlab="C", ylab="C" )
+  
+  plot  ( 1:228, TMAX_C.00_18.anom.f[iSiteC,], main="Anomalies TMAX (C)",
+          xlab="Month", ylab="" )
+  points( 1:228, TMAX_G.00_18.anom.f[iSiteG,], col="red" )
+  plot(TMAX_C.00_18.anom.f[iSiteC,], TMAX_G.00_18.anom.f[iSiteG,],
+          xlab="C", ylab="C" )
+  
+  plot  ( 1:228, RAIN_C.00_18.anom.f[iSiteC,], main="Anomalies RAIN (mm d-1)",
+          xlab="Month", ylab="" )
+  points( 1:228, RAIN_G.00_18.anom.f[iSiteG,], col="red" )
+  plot(RAIN_C.00_18.anom.f[iSiteC,], RAIN_G.00_18.anom.f[iSiteG,],
+          xlab="mm d-1", ylab="mm d-1" )
+```
+
+## Creating CAF2021 daily weather files 2000-2018
+
+We used the monthly WorldClim data to create daily weather files (input files in the format required by CAF2021) for each of the 189 farms in SEACAF. For the climatic variables of global radiation (GR), vapour pressure (VP) and wind speed (WN) this was done by repeating the monthly average value for each day of the month. So the value of GR for any individual farm was the same on all days 1-31 January 2000, 1-31 January 2001, etc. In contrast, for temperature (TMIN, TMAX) and rainfall (RAIN) we created weather files that differed from year to year by adding the weather anomalies to the climatic averages. So the value of TMIN for any individual farm was the same on all days of January 2000 but different in January 2001 etc. We show daily weather files thus created for a farm in Costa Rica and a farm in Guatemala in Figs \ref{fig:XX6} and \ref{fig:XX7}. 
+
+```{r, eval=F}
+  matrix_C.00_18.f <- matrix( NA, nrow=n_coords_C.f, ncol=228 )
+    row.names(matrix_C.00_18.f) <- df_coords_C.f$code
+  matrix_G.00_18.f <- matrix( NA, nrow=n_coords_G.f, ncol=228 )
+    row.names(matrix_G.00_18.f) <- df_coords_G.f$code
+
+  # Expand climatic values to 2000-2018
+  matrix_GR_C.00_18.f <- matrix_TMIN_C.00_18.f <- matrix_TMAX_C.00_18.f <-
+  matrix_VP_C.00_18.f <- matrix_WN_C.00_18.f   <- matrix_RAIN_C.00_18.f <-
+    matrix_C.00_18.f
+  matrix_GR_G.00_18.f <- matrix_TMIN_G.00_18.f <- matrix_TMAX_G.00_18.f <-
+  matrix_VP_G.00_18.f <- matrix_WN_G.00_18.f   <- matrix_RAIN_G.00_18.f <-
+    matrix_G.00_18.f
+
+  for(y in 2000:2018) {
+    m <- (y-2000)*12 + (1:12)
+
+    matrix_GR_C.00_18.f  [ , m ] <- GR_C.f
+    matrix_TMIN_C.00_18.f[ , m ] <- TMIN_C.f
+    matrix_TMAX_C.00_18.f[ , m ] <- TMAX_C.f
+    matrix_VP_C.00_18.f  [ , m ] <- VP_C.f
+    matrix_WN_C.00_18.f  [ , m ] <- WN_C.f
+    matrix_RAIN_C.00_18.f[ , m ] <- RAIN_C.f
+
+    matrix_GR_G.00_18.f  [ , m ] <- GR_G.f
+    matrix_TMIN_G.00_18.f[ , m ] <- TMIN_G.f
+    matrix_TMAX_G.00_18.f[ , m ] <- TMAX_G.f
+    matrix_VP_G.00_18.f  [ , m ] <- VP_G.f
+    matrix_WN_G.00_18.f  [ , m ] <- WN_G.f
+    matrix_RAIN_G.00_18.f[ , m ] <- RAIN_G.f
+  }
+  matrix_TMIN_C.00_18.f  <- round( matrix_TMIN_C.00_18.f + TMIN_C.00_18.anom.f, 1 )
+  matrix_TMAX_C.00_18.f  <- round( matrix_TMAX_C.00_18.f + TMAX_C.00_18.anom.f, 1 )
+  matrix_RAIN_C.00_18.f0 <- round( matrix_RAIN_C.00_18.f + RAIN_C.00_18.anom.f, 2 )
+  matrix_RAIN_C.00_18.f  <- pmax(matrix_RAIN_C.00_18.f0, 0)
+
+  matrix_TMIN_G.00_18.f  <- round( matrix_TMIN_G.00_18.f + TMIN_G.00_18.anom.f, 1 )
+  matrix_TMAX_G.00_18.f  <- round( matrix_TMAX_G.00_18.f + TMAX_G.00_18.anom.f, 1 )
+  matrix_RAIN_G.00_18.f0 <- round( matrix_RAIN_G.00_18.f + RAIN_G.00_18.anom.f, 2 )
+  matrix_RAIN_G.00_18.f  <- pmax(matrix_RAIN_G.00_18.f0, 0)
+```
+
+```{r, eval=F}
+         weather_C.f   <- vector( "list", n_coords_C.f )
+         weather_G.f   <- vector( "list", n_coords_G.f )
+  names( weather_C.f ) <- df_coords_C.f$code
+  names( weather_G.f ) <- df_coords_G.f$code
+  
+  NYEAR        <- 19
+  NDAY         <- NYEAR * 365
+  wf           <- matrix( NA, nrow=NDAY, ncol=9 )
+  colnames(wf) <- c( "ST", "year", "doy",
+                     "GR", "TMIN", "TMAX", "VP", "WN", "RAIN" )
+  wf[,"year"]  <- rep( 2000:2018, each=365 )
+  wf[,"doy" ]  <- rep(    1: 365, NYEAR    )
+  
+  for( i in 1:n_coords_C.f ) { weather_C.f[[i]] <- wf }
+  for( i in 1:n_coords_G.f ) { weather_G.f[[i]] <- wf }
+```
+
+```{r, eval=F}
+  monl.00_18 <- rep( as.integer(monl), 19 )
+  NMON       <- length( monl.00_18 )
+
+  for( f in 1:n_coords_C.f)  {
+    weather_C.f[[f]][,"ST"] <- df_coords_C.f$code[f] - 1000
+    lastday <- 0
+    for( m in 1:NMON ) {
+      ml   <- monl.00_18[m]
+      iday <- lastday + (1:ml)
+      weather_C.f[[f]] [iday,"GR"  ] <- rep( matrix_GR_C.00_18.f  [f,m], ml )
+      weather_C.f[[f]] [iday,"TMIN"] <- rep( matrix_TMIN_C.00_18.f[f,m], ml )
+      weather_C.f[[f]] [iday,"TMAX"] <- rep( matrix_TMAX_C.00_18.f[f,m], ml )
+      weather_C.f[[f]] [iday,"VP"  ] <- rep( matrix_VP_C.00_18.f  [f,m], ml )
+      weather_C.f[[f]] [iday,"WN"  ] <- rep( matrix_WN_C.00_18.f  [f,m], ml )
+      weather_C.f[[f]] [iday,"RAIN"] <- rep( matrix_RAIN_C.00_18.f[f,m], ml )
+      lastday <- lastday + ml
+    }
+  }
+  names( weather_C.f ) <- df_coords_C.f$code
+  
+  for( f in 1:n_coords_G.f)  {
+    weather_G.f[[f]][,"ST"] <- df_coords_G.f$code[f] - 2000
+    lastday <- 0
+    for( m in 1:NMON ) {
+      ml   <- monl.00_18[m]
+      iday <- lastday + (1:ml)
+      weather_G.f[[f]] [iday,"GR"  ] <- rep( matrix_GR_G.00_18.f  [f,m], ml )
+      weather_G.f[[f]] [iday,"TMIN"] <- rep( matrix_TMIN_G.00_18.f[f,m], ml )
+      weather_G.f[[f]] [iday,"TMAX"] <- rep( matrix_TMAX_G.00_18.f[f,m], ml )
+      weather_G.f[[f]] [iday,"VP"  ] <- rep( matrix_VP_G.00_18.f  [f,m], ml )
+      weather_G.f[[f]] [iday,"WN"  ] <- rep( matrix_WN_G.00_18.f  [f,m], ml )
+      weather_G.f[[f]] [iday,"RAIN"] <- rep( matrix_RAIN_G.00_18.f[f,m], ml )
+      lastday <- lastday + ml
+    }
+  }
+  names( weather_G.f ) <- df_coords_G.f$code
+  
+  # save( weather_C.f, file=paste0( dir_WC, "WC_weather_C.f.RData" ) )
+  # save( weather_G.f, file=paste0( dir_WC, "WC_weather_G.f.RData" ) )
+```
+
+```{r}
+  load( paste0( dir_WC, "WC_weather_C.f.RData" ) )
+  load( paste0( dir_WC, "WC_weather_G.f.RData" ) )
+```
+
+```{r}
+  df_weather_C.f <- df_coords_C.f %>%
+    mutate( alt.WC     = alt_C.f     ) %>%
+    mutate( weather.WC = weather_C.f )
+  df_weather_G.f <- df_coords_G.f %>%
+    mutate( alt.WC     = alt_G.f     ) %>%
+    mutate( weather.WC = weather_G.f )
+```
+
+```{r XX6, fig.height=3, fig.cap="\\label{fig:XX6}Daily weather for a farm in Costa Rica. The time series were constructed by adding spatially coarse monthly weather anomalies to WorldClim climatic averages, followed by downscaling to days."}
+  par( mfrow=c(2,2), mar=c(2,2,2,2) )
+
+  f <- 1
+  plot  ( weather_C.f[[f]] [,"GR"  ], main="GR",
+          xlab="", ylab="", type="l" )
+  plot  ( weather_C.f[[f]] [,"TMAX"], main="TMAX, TMIN (red)",
+          xlab="", ylab="", type="l",
+          ylim=range(weather_C.f[[f]] [,c("TMAX", "TMIN")]) )
+  points( weather_C.f[[f]] [,"TMIN"], col="red", type="l" )
+  plot  ( weather_C.f[[f]] [,"VP"  ], main="VP, WN (blue)",
+          xlab="", ylab="", type="l",
+          ylim=range(weather_C.f[[f]] [,c("VP", "WN")]) )
+  points( weather_C.f[[f]] [,"WN"  ], col="blue", type="l" )
+  plot  ( weather_C.f[[f]] [,"RAIN"], main="RAIN",
+          xlab="", ylab="", type="l" )
+```
+
+```{r XX7, fig.height=3, fig.cap="\\label{fig:XX7}Daily weather for a farm in Guatemala - compare with previous figure."}
+  par( mfrow=c(2,2), mar=c(2,2,2,2) )
+
+  f <- 1
+  plot  ( weather_G.f[[f]] [,"GR"  ], main="GR",
+          xlab="", ylab="", type="l" )
+  plot  ( weather_G.f[[f]] [,"TMAX"], main="TMAX, TMIN (red)",
+          xlab="", ylab="", type="l",
+          ylim=range(weather_G.f[[f]] [,c("TMAX", "TMIN")]) )
+  points( weather_G.f[[f]] [,"TMIN"], col="red", type="l" )
+  plot  ( weather_G.f[[f]] [,"VP"  ], main="VP, WN (blue)",
+          xlab="", ylab="", type="l",
+          ylim=range(weather_G.f[[f]] [,c("VP", "WN")]) )
+  points( weather_G.f[[f]] [,"WN"  ], col="blue", type="l" )
+  plot  ( weather_G.f[[f]] [,"RAIN"], main="RAIN",
+          xlab="", ylab="", type="l" )
+```

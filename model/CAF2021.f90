@@ -494,6 +494,8 @@ do day = 1, NDAYS
   y(day,162    ) = f3up               ! -
   
   y(day,163:168) = DayHarv            ! -
+  
+  y(day,169:171) = fNgrowth_t         ! -
 
 ! CALIBRATION VARIABLES IN CAF2021's AND ORIANA's ORIGINAL BC DATA FILES.
 ! ------------------------------------------------------------------------

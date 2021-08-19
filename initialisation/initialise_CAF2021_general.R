@@ -153,6 +153,9 @@ yUnits[[21]] <- "(-)"
 yNames[[22]] <- paste0("DayHarv(",1:nc,")")
 yUnits[[22]] <- rep("(-)",nc)
 
+yNames[[23]] <- paste0("fNgrowth_t(",1:nt,")")
+yUnits[[23]] <- rep("(-)",nt)
+
 outputNames  <- unlist(yNames) ; outputUnits <- unlist(yUnits)
 NOUT         <- as.integer( length(outputNames) )
 
