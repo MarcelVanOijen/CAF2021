@@ -300,8 +300,8 @@ set_par_speciesT <- function( it, species="E. poeppigiana", p.old=params ) {
   return( p.new )
 }
 
-set_parT <- function( country="C", densE=0, densI=0, densB=0, densA=0,
-                                   densG=0, densC=0, p.old=params ) {
+set_parT <- function( densE=0, densI=0, densB=0, densA=0,
+                      densG=0, densC=0, p.old=params ) {
   p.new <- p.old
   d1    <- which( names_params=="TREEDENS0(1)" ) 
   d2    <- which( names_params=="TREEDENS0(2)" ) 
@@ -329,6 +329,44 @@ set_parT <- function( country="C", densE=0, densI=0, densB=0, densA=0,
   if(densC>0) { p.new[d3] <- densC/1e4
                 p.new     <- set_par_speciesT(3,"Cordia"   ,p.new) }
   
+  return( p.new )
+}
+
+set_par_CG <- function( df.f=df_C.f, fi=1, p.old=params, country="C" ) {
+  p.new <- p.old
+  
+  C     <- df.f$C.soil [ fi ]
+  CN    <- df.f$CN.soil[ fi ]
+  LAT   <- df.f$lat    [ fi ]
+  SLOPE <- df.f$slope  [ fi ]
+  shade <- df.f$shade  [ fi ]
+  
+  WCWP  <- df.f$WP     [ fi ]
+  WCFC  <- df.f$FC     [ fi ]
+  WCAD  <- 0.01
+  WCST  <- min( 1, WCFC+0.1 )
+  WCWET <- 0.5 * (WCFC + WCST)
+  
+  densE <- df.f$dens_Erythrina[ fi ]
+  densI <- df.f$dens_Inga     [ fi ]
+  densB <- df.f$dens_Banana   [ fi ]
+  densA <- df.f$dens_Avocado  [ fi ]
+  densG <- df.f$dens_Grevillea[ fi ]
+  densC <- df.f$dens_Cordia   [ fi ]
+  
+  p.new <- set_parT( densE, densI, densB, densA, densG, densC, p.old=p.new )
+  p.new <- set_par( c("CNLITT0","CNSOMF0","CNSOMS0"),
+                        c( CN    , CN    , CN    ), p.new )
+  p.new <- set_par( "CSOMS0"     , C         , p.new )
+  p.new <- set_par( "LAT"        , LAT       , p.new )
+  p.new <- set_par( "SLOPE"      , SLOPE     , p.new )
+  p.new <- set_par( "SHADETARGET", shade     , p.new )
+  p.new <- set_par( "FWCAD"      , WCAD /WCST, p.new )
+  p.new <- set_par( "FWCWP"      , WCWP /WCST, p.new )
+  p.new <- set_par( "FWCFC"      , WCFC /WCST, p.new )
+  p.new <- set_par( "FWCWET"     , WCWET/WCST, p.new )
+  p.new <- set_par( "WCST"       , WCST      , p.new )
+  
   if(country %in% c("C", "C.R.", "CRI", "Costa Rica")) {
     p.new <- set_par( c("FHARVBT(1)","FHARVBT(2)","FHARVBT(3)"), c(0,0,0), p.new )
     p.new <- set_par( c("FHARVLT(1)","FHARVLT(2)","FHARVLT(3)"), c(0,0,0), p.new )
@@ -341,27 +379,22 @@ set_parT <- function( country="C", densE=0, densI=0, densB=0, densA=0,
   return( p.new )
 }
 
-set_calendar_prunT <- function( it,
-  years=rep(-1,100), doys=rep(-1,100), fractions=-1, cp.old=calendar_prunT ) {
-  nprun <- length( years )
-  cp.new <- cp.old
-  cp.new[ it, 1:nprun, 1 ] <- years
-  cp.new[ it, 1:nprun, 2 ] <- doys
-  cp.new[ it, 1:nprun, 3 ] <- fractions
-  return( cp.new )
+set_fert_CG <- function( df.f=df_C.f, fi=1 ) {
+  Nfert <- df.f$Nfert[ fi ]
+  cf    <- matrix( -1, nrow=100, ncol=3 )
+  
+  cf [ 1:57, 1 ] <- rep( 2002:2020, each=3 )
+  cf [ 1:57, 2 ] <- c( 135, 289, 350 )
+  cf [ 1:57, 3 ] <- rep( Nfert/3, 3 )
+  return( cf )
 }
 
-set_calendar_thinT <- function( it,
-  years=rep(-1,100), doys=rep(-1,100), fractions=-1, ct.old=calendar_thinT ) {
-  nthin <- length( years )
-  ct.new <- ct.old
-  ct.new[ it, 1:nthin, 1 ] <- years
-  ct.new[ it, 1:nthin, 2 ] <- doys
-  ct.new[ it, 1:nthin, 3 ] <- fractions
-  return( ct.new )
-}
-
-set_prunT <- function( densE=0, densI=0, densB=0, densA=0, densG=0, densC=0 ) {
+set_prunT_CG <- function( df.f=df_C.f, fi=1 ) {
+  densE <- df.f$dens_Erythrina[ fi ]
+  densI <- df.f$dens_Inga     [ fi ]
+  densG <- df.f$dens_Grevillea[ fi ]
+  densC <- df.f$dens_Cordia   [ fi ]
+  
   cp <- array( -1, c(3,100,3) )
   yE <- rep( 2008:2020, each=2 ) ; nE <- length( yE )
   dE <- rep( c(140,350), nE/2 )
@@ -369,6 +402,7 @@ set_prunT <- function( densE=0, densI=0, densB=0, densA=0, densG=0, densC=0 ) {
   yI <- yG <- yC <- 2008:2020 ; nI <- nG <- nC <- length( yC )
   dI <- dG <- dC <- rep(140,nI) 
   fI <- fG <- fC <- rep( 0.1, nI )
+  
   if(densE>0) {
     cp[1,1:nE,1] <- yE ; cp[1,1:nE,2] <- dE ; cp[1,1:nE,3] <- fE }
   if(densI>0 & densE==0) {
@@ -377,15 +411,18 @@ set_prunT <- function( densE=0, densI=0, densB=0, densA=0, densG=0, densC=0 ) {
     cp[2,1:nI,1] <- yI ; cp[2,1:nI,2] <- dI ; cp[2,1:nI,3] <- fI }
   if(densG>0) {
     cp[3,1:nG,1] <- yG ; cp[3,1:nG,2] <- dG ; cp[3,1:nG,3] <- fG }
-  # REMOVE NEXT TWO LINES (timber like Cordia not pruned) ?
+  # REMOVE NEXT TWO LINES ? (Timber like Cordia not pruned)
   if(densC>0) {
     cp[3,1:nC,1] <- yC ; cp[3,1:nC,2] <- dC ; cp[3,1:nC,3] <- fC }
   return( cp )
 }
 
-set_thinT <- function( densE=0, densI=0, densB=0, densA=0, densG=0, densC=0 ) {
+set_thinT_CG <- function( df.f=df_C.f, fi=1 ) {
+  densC <- df.f$dens_Cordia[ fi ]
+    
   ct <- array( -1, c(3,100,3) )
   yC <- seq(2010,2020,by=5) ; dC <- 124 ; fC <- 0.3 ; nC <- length( yC )
+  
   if(densC>0) {
     ct[3,1:nC,1] <- yC ; ct[3,1:nC,2] <- dC ; ct[3,1:nC,3] <- fC }
   return( ct )

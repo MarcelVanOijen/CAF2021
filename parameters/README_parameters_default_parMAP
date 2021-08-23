@@ -1,0 +1,4 @@
+1. Origin of parMAP parameter settings
+
+The parameter settings in file 'parameters_default_parMAP.txt' are those found on 2021-06-26 by Bayesian calibration (BC) for the 32 treatments in the long-term experiments carried out at Turrialba (Costa Rica) and Masatepe (Nicaragua), and stored in 'CAF2021_parMAP_08_36.rds'
+

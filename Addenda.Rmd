@@ -27,7 +27,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   library( tidyverse )
 ```
 
-```{r}
+```{r, eval=F}
   filesTM <- file.info(list.files(pattern="^BC_Turrialba_Masatepe.*\\.RData$"))
   filesTM <- filesTM[ with(filesTM,order(as.POSIXct(mtime))), ]
   fileTM  <- tail( rownames(filesTM[1]), 1 )
@@ -50,6 +50,14 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
                                         rownames(parMAP.old)[p] ) )
     for(r in prow) { parMAP[r,] <- parMAP.old[p,] }
   }
+```
+
+```{r, eval=F}
+  dir.params   <- "parameters/"
+  file_par_def <- paste0( dir.params, "parameters_default_parMAP.txt" )
+  file.create( file_par_def )
+  
+  write.table( parMAP, file=file_par_def, sep="\t", col.names=NA )
 ```
 
 ```{r}
@@ -938,6 +946,16 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
 - My report of ~2007
 
 
+\clearpage
+
+# Saving the amended files df_C.f and df_G.f
+
+```{r}
+  save( df_C.f, file="df_C.f_final.rda" )
+  save( df_G.f, file="df_G.f_final.rda" )
+```
+
+
 
 \clearpage
 
@@ -1077,30 +1095,10 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
 ```
 
 
-## New code for running all farms, creating farm-specific initialisation files
+## Creating farm-specific initialisation files
 
 ```{r}
   dir.init <- "initialisation/CG/"
-```
-
-```{r}
-  sapply( paste0(dir.init,"inititialise_CAF2021_C_f",1:n_C.f,".R"), file.create)
-```
-
-```{r}
-  i <- 1
-
-  file.f <- paste0( dir.init, "inititialise_CAF2021_C_f", i, ".R" )
-  conn.f <- file( file.f )
-    
-  writeLines( c( "  set_params(QQQ)",
-                 "  set_weather(QQQ)"), conn.f )
-  writeLines( c( "  next command line 1)",
-                 "  line 2"), conn.f )
-  writeLines( c( "  following command line 3)",
-                 "  line 4"), conn.f )
-  
-  close( conn.f )
 ```
 
 ```{r}
@@ -1108,91 +1106,95 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
     cat( "\n", file=file.f, append=TRUE )
     cat( paste0("  ",text), file=file.f, append=TRUE )
   }
-  
-  i <- 1
-  file.f <- paste0( dir.init, "inititialise_CAF2021_C_f", i, ".R" )
-  cat( paste0("# ",file.f,"\n"), file=file.f )
-  cf("text1")
-  cf("text2")
-  cf("text3")
-  cf("text4")
-  cf("text5")
 ```
 
-## Original code for running all farms
+```{r, eval=F}
+  sapply( paste0(dir.init,"inititialise_CAF2021_C_f",1:n_C.f,".R"), file.create)
+
+  for(fi in 1:n_C.f) {
+    file.f <- paste0( dir.init, "inititialise_CAF2021_C_f", fi, ".R" )
+    cat( paste0("# ",file.f,"\n"), file=file.f )
+    cf(paste0("fi <- ",fi))
+    cf("source('initialisation/set_CAF2021_CG.R')")
+    cf("matrix_weather <- read_listweather_CAF( list_w=df_C.f$weather.WC,")
+    cf("  f=fi, y1=year_start, d1=doy_start, nd=NDAYS )")
+    cf("params         <- set_par_CG  ( df_C.f, fi, params, 'C' )")
+    cf("calendar_fert  <- set_fert_CG ( df_C.f, fi )")
+    cf("calendar_prunT <- set_prunT_CG( df_C.f, fi )")
+    cf("calendar_thinT <- set_thinT_CG( df_C.f, fi )")
+  }
+```
+
+```{r, eval=F}
+  sapply( paste0(dir.init,"inititialise_CAF2021_G_f",1:n_G.f,".R"), file.create)
+
+  for(fi in 1:n_G.f) {
+    file.f <- paste0( dir.init, "inititialise_CAF2021_G_f", fi, ".R" )
+    cat( paste0("# ",file.f,"\n"), file=file.f )
+    cf(paste0("fi <- ",fi))
+    cf("source('initialisation/set_CAF2021_CG.R')")
+    cf("matrix_weather <- read_listweather_CAF( list_w=df_G.f$weather.WC,")
+    cf("  f=fi, y1=year_start, d1=doy_start, nd=NDAYS )")
+    cf("params         <- set_par_CG  ( df_G.f, fi, params, 'G' )")
+    cf("calendar_fert  <- set_fert_CG ( df_G.f, fi )")
+    cf("calendar_prunT <- set_prunT_CG( df_G.f, fi )")
+    cf("calendar_thinT <- set_thinT_CG( df_G.f, fi )")
+  }
+```
+
+## Creating farm-specific data files for BC
 
 ```{r}
-  ip_CNLITT0     <- which( names_params=="CNLITT0"     )
-  ip_CNSOMF0     <- which( names_params=="CNSOMF0"     )
-  ip_CNSOMS0     <- which( names_params=="CNSOMS0"     )
-  ip_CSOM0       <- which( names_params=="CSOM0"       )
-  ip_FCSOMF0     <- which( names_params=="FCSOMF0"     )
-  ip_LAT         <- which( names_params=="LAT"         )
-  ip_SHADETARGET <- which( names_params=="SHADETARGET" )
-  ip_SLOPE       <- which( names_params=="SLOPE"       )
-  
-  ip_FWCAD  <- which( names_params=="FWCAD"  )
-  ip_FWCFC  <- which( names_params=="FWCFC"  )
-  ip_FWCWET <- which( names_params=="FWCWET" )
-  ip_FWCWP  <- which( names_params=="FWCWP"  )
-  ip_WCST   <- which( names_params== "WCST"  )
-  
-  ip_FHARVBT1 <- which( names_params== "FHARVBT(1)" )
-  ip_FHARVBT2 <- which( names_params== "FHARVBT(2)" )
-  ip_FHARVBT3 <- which( names_params== "FHARVBT(3)" )
-  ip_FHARVLT1 <- which( names_params== "FHARVLT(1)" )
-  ip_FHARVLT2 <- which( names_params== "FHARVLT(2)" )
-  ip_FHARVLT3 <- which( names_params== "FHARVLT(3)" )
-  
-  ip_PRUNTARGET1 <- which( names_params== "PRUNTARGET(1)" )
-  ip_PRUNTARGET2 <- which( names_params== "PRUNTARGET(2)" )
-  ip_PRUNTARGET3 <- which( names_params== "PRUNTARGET(3)" )
-  ip_THINTARGET1 <- which( names_params== "THINTARGET(1)" )
-  ip_THINTARGET2 <- which( names_params== "THINTARGET(2)" )
-  ip_THINTARGET3 <- which( names_params== "THINTARGET(3)" )
-  
-  ip_NFERTMULT   <- which( names_params== "NFERTMULT" )
-  ip_RAINMULT    <- which( names_params== "RAINMULT" )
+  dir.dataBC <- "data/CG/"
 ```
+
+```{r, eval=F}
+  sapply( paste0(dir.dataBC,"data_C_f",1:n_C.f,".txt"), file.create)
+
+  for(fi in 1:n_C.f) {
+    file.f <- paste0( dir.dataBC, "data_C_f", fi, ".txt" )
+    y1819 <- round(df_C.f$yield1819[fi]) ; y1920 <- round(df_C.f$yield1920[fi])
+    if((!is.na(y1819))) {
+      cat( paste0("harvDM_f_hay\t2019\t181\t",y1819,"\t",0.25,"\n"),
+           file=file.f ) }
+    if((!is.na(y1920))) {
+      cat( paste0("harvDM_f_hay\t2020\t181\t",y1920,"\t",0.25,"\n"),
+           file=file.f, append=TRUE ) }
+  }
+```
+
+```{r, eval=F}
+  sapply( paste0(dir.dataBC,"data_G_f",1:n_G.f,".txt"), file.create)
+
+  for(fi in 1:n_G.f) {
+    file.f <- paste0( dir.dataBC, "data_G_f", fi, ".txt" )
+    y1819 <- round(df_G.f$yield1819[fi]) ; y1920 <- round(df_G.f$yield1920[fi])
+    if((!is.na(y1819))) {
+      cat( paste0("harvDM_f_hay\t2019\t181\t",y1819,"\t",0.25,"\n"),
+           file=file.f ) }
+    if((!is.na(y1920))) {
+      cat( paste0("harvDM_f_hay\t2020\t181\t",y1920,"\t",0.25,"\n"),
+           file=file.f, append=TRUE ) }
+  }
+```
+
+
+## Running all farms
 
 ```{r list_outF_C}
   list_outF_C <- list_parF_C <- vector( "list", n_C.f )
+  # source('initialisation/set_CAF2021_CG.R')
+
   for(fi in 1:n_C.f) {
-    C_C     <- df_C.f$C.soil [ fi ]
-    CN_C    <- df_C.f$CN.soil[ fi ]
-    LAT_C   <- df_C.f$lat    [ fi ]
-    SLOPE_C <- df_C.f$slope  [ fi ]
-    Nfert_C <- df_C.f$Nfert  [ fi ]
-    shade_C <- df_C.f$shade  [ fi ]
+    # matrix_weather <- read_listweather_CAF( list_w=df_C.f$weather.WC,
+    #   f=fi, y1=year_start, d1=doy_start, nd=NDAYS )
+    # params         <- set_par_CG  ( df_C.f, fi, params, 'C' )
+    # calendar_fert  <- set_fert_CG ( df_C.f, fi )
+    # calendar_prunT <- set_prunT_CG( df_C.f, fi )
+    # calendar_thinT <- set_thinT_CG( df_C.f, fi )
+    file_init <- paste0( "initialisation/CG/inititialise_CAF2021_C_f", fi, ".R" )
+    source( file_init )
     
-    WCWP_C  <- df_C.f$WP[ fi ]
-    WCFC_C  <- df_C.f$FC[ fi ]
-    WCAD_C  <- 0.01
-    WCST_C  <- min( 1, WCFC_C+0.1 )
-    WCWET_C <- 0.5 * (WCFC_C + WCST_C)
-    
-    densE_C <- df_C.f$dens_Erythrina[ fi ]
-    densI_C <- df_C.f$dens_Inga     [ fi ]
-    densB_C <- df_C.f$dens_Banana   [ fi ]
-    densA_C <- df_C.f$dens_Avocado  [ fi ]
-    densG_C <- df_C.f$dens_Grevillea[ fi ]
-    densC_C <- df_C.f$dens_Cordia   [ fi ]
-    
-    source( sitesettings_filenames[1] )
-    NDAYS_fi          <- as.integer(15*365)
-    year_start_fi     <- as.integer(2005)
-    doy_start_fi      <- as.integer( 214)
-    matrix_weather_fi <- read_listweather_CAF( list_w = df_C.f$weather.WC,
-                                               f      = fi,
-                                               y1     = year_start_fi,
-                                               d1     = doy_start_fi,
-                                               nd     = NDAYS_fi )
-
-    calendar_fert_fi <- matrix( -1, nrow=100, ncol=3 )
-    calendar_fert_fi [ 1:57, 1 ] <- rep( 2002:2020, each=3 )
-    calendar_fert_fi [ 1:57, 2 ] <- c( 135, 289, 350 )
-    calendar_fert_fi [ 1:57, 3 ] <- rep( Nfert_C/3, 3 )
-
     nF_C                     <- 3
     mat_parF                 <- matrix( NA, nF_C, 1+length(names_params) )
     mat_outF                 <- matrix( NA, nF_C, 1+length(vars_Summary) )
@@ -1201,50 +1203,23 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
     mat_parF[,"FarmSetting"] <- 1:nF_C
     mat_outF[,"FarmSetting"] <- 1:nF_C
     
-    # source(sitesettings_filenames[31])
-    calendar_prunT_fi <- set_prunT( densE_C, densI_C, densB_C, densA_C,
-                                    densG_C, densC_C )
-    calendar_thinT_fi <- set_thinT( densE_C, densI_C, densB_C, densA_C,
-                                    densG_C, densC_C )
-    
     for(iF in 1:nF_C) {
-      params_fi <- parMAP[,31]
-      params_fi <- set_parT( "C", densE_C, densI_C, densB_C, densA_C,
-                                  densG_C, densC_C, p.old=params_fi )
-      params_fi[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0) ] <- CN_C
-      params_fi[ ip_CSOM0                            ] <- C_C
-      params_fi[ ip_LAT                              ] <- LAT_C
-      params_fi[ ip_SLOPE                            ] <- SLOPE_C
-      params_fi[ ip_SHADETARGET                      ] <- shade_C
-      params_fi[ ip_FWCAD  ] <- WCAD_C  / WCST_C
-      params_fi[ ip_FWCWP  ] <- WCWP_C  / WCST_C
-      params_fi[ ip_FWCFC  ] <- WCFC_C  / WCST_C
-      params_fi[ ip_FWCWET ] <- WCWET_C / WCST_C
-      params_fi[ ip_WCST   ] <- WCST_C
-      
-      params_fi[ ip_PRUNTARGET1 ] <- 1
-      params_fi[ ip_PRUNTARGET2 ] <- 1
-      params_fi[ ip_PRUNTARGET3 ] <- 1
-      params_fi[ ip_THINTARGET1 ] <- 0
-      params_fi[ ip_THINTARGET2 ] <- 0
-      params_fi[ ip_THINTARGET3 ] <- 0
-      
+      CSOM0 <- params[ which(names_params=="CSOM0") ]
       if( iF==2 ) {
-        params_fi[ ip_CSOM0 ] <- C_C * 0.5
-        # params_fi[ ip_FCSOMF0 ] <- 0.25
-        # params_fi[ ip_NFERTMULT ] <- 0.5
-        # params_fi[ ip_RAINMULT ] <- 0.5
+        params <- set_par( "CSOM0", CSOM0*0.5, params )
+        # params <- set_par( "FCSOMF0"  , 0.25, params )
+        # params <- set_par( "NFERTMULT", 0.5 , params )
+        # params <- set_par( "RAINMULT" , 0.5 , params )
       }
       if( iF==3 ) {
-        params_fi[ ip_CSOM0 ] <- C_C * 2
-        # params_fi[ ip_FCSOMF0 ] <- 0.75
-        # params_fi[ ip_NFERTMULT ] <- 2
-        # params_fi[ ip_RAINMULT ] <- 2
+        params <- set_par( "CSOM0", CSOM0*2  , params )
+        # params <- set_par( "FCSOMF0"  , 0.75, params )
+        # params <- set_par( "NFERTMULT", 2   , params )
+        # params <- set_par( "RAINMULT" , 2   , params )
       }
-      
-      outF <- run_model( params_fi, matrix_weather_fi, calendar_fert_fi,
-        calendar_prunC, calendar_prunT_fi, calendar_thinT_fi, NDAYS_fi )
-      mat_parF[iF,1+(1:length(names_params))] <- params_fi
+      outF <- run_model( params, matrix_weather, calendar_fert,
+        calendar_prunC, calendar_prunT, calendar_thinT, NDAYS )
+      mat_parF[iF,1+(1:length(names_params))] <- params
       mat_outF[iF,1+(1:length(vars_Summary))] <- outputSummary( outF )
     }
     list_parF_C[[fi]] <- mat_parF
@@ -1363,7 +1338,7 @@ Verifying the list of farm-specific summary outputs:
 ```
 
 ```{r, echo=T}
-  ptest <- params_fi[iptest] ; names(ptest) <- names_params[iptest]
+  ptest <- params[iptest] ; names(ptest) <- names_params[iptest]
   
   fi
   knitr::kable( t(df_C.f[fi,iscalars]) )
@@ -1391,42 +1366,16 @@ Farm 1073, with 80 avocado trees per hectare, has a simulated shade level of abo
 
 ```{r list_outF_G}
   list_outF_G <- list_parF_G <- vector( "list", n_G.f )
+  # source('initialisation/set_CAF2021_CG.R')
   for(fi in 1:n_G.f) {
-  # for(fi in 1:65) {
-    C_G     <- df_G.f$C.soil [ fi ]
-    CN_G    <- df_G.f$CN.soil[ fi ]
-    LAT_G   <- df_G.f$lat    [ fi ]
-    SLOPE_G <- df_G.f$slope  [ fi ]
-    Nfert_G <- df_G.f$Nfert  [ fi ]
-    shade_G <- df_G.f$shade  [ fi ]
-    
-    WCWP_G  <- df_G.f$WP[ fi ]
-    WCFC_G  <- df_G.f$FC[ fi ]
-    WCAD_G  <- 0.01
-    WCST_G  <- min( 1, WCFC_G+0.1 )
-    WCWET_G <- 0.5 * (WCFC_G + WCST_G)
-    
-    densE_G <- df_G.f$dens_Erythrina[ fi ]
-    densI_G <- df_G.f$dens_Inga     [ fi ]
-    densB_G <- df_G.f$dens_Banana   [ fi ]
-    densA_G <- df_G.f$dens_Avocado  [ fi ]
-    densG_G <- df_G.f$dens_Grevillea[ fi ]
-    densC_G <- df_G.f$dens_Cordia   [ fi ]
-    
-    source( sitesettings_filenames[1] )
-    NDAYS_fi          <- as.integer(15*365)
-    year_start_fi     <- as.integer(2005)
-    doy_start_fi      <- as.integer( 214)
-    matrix_weather_fi <- read_listweather_CAF( list_w = df_G.f$weather.WC,
-                                               f      = fi,
-                                               y1     = year_start_fi,
-                                               d1     = doy_start_fi,
-                                               nd     = NDAYS_fi )
-
-    calendar_fert_fi <- matrix( -1, nrow=100, ncol=3 )
-    calendar_fert_fi [ 1:57, 1 ] <- rep( 2002:2020, each=3 )
-    calendar_fert_fi [ 1:57, 2 ] <- c( 135, 289, 350 )
-    calendar_fert_fi [ 1:57, 3 ] <- rep( Nfert_G/3, 3 )
+    # matrix_weather <- read_listweather_CAF( list_w=df_G.f$weather.WC,
+    #   f=fi, y1=year_start, d1=doy_start, nd=NDAYS )
+    # params         <- set_par_CG  ( df_G.f, fi, params, 'G' )
+    # calendar_fert  <- set_fert_CG ( df_G.f, fi )
+    # calendar_prunT <- set_prunT_CG( df_G.f, fi )
+    # calendar_thinT <- set_thinT_CG( df_G.f, fi )
+    file_init <- paste0( "initialisation/CG/inititialise_CAF2021_G_f", fi, ".R" )
+    source( file_init )
 
     nF_G                     <- 3
     mat_parF                 <- matrix( NA, nF_G, 1+length(names_params) )
@@ -1436,49 +1385,23 @@ Farm 1073, with 80 avocado trees per hectare, has a simulated shade level of abo
     mat_parF[,"FarmSetting"] <- 1:nF_G
     mat_outF[,"FarmSetting"] <- 1:nF_G
     
-    # source(sitesettings_filenames[31])
-    calendar_prunT_fi <- set_prunT( densE_G, densI_G, densB_G, densA_G,
-                                    densG_G, densC_G )
-    calendar_thinT_fi <- set_thinT( densE_G, densI_G, densB_G, densA_G,
-                                    densG_G, densC_G )
-
     for(iF in 1:nF_G) {
-      params_fi <- parMAP[,31]
-      params_fi <- set_parT( "G", densE_G, densI_G, densB_G, densA_G,
-                                  densG_G, densC_G, p.old=params_fi )
-      params_fi[ c(ip_CNLITT0,ip_CNSOMF0,ip_CNSOMS0) ] <- CN_G
-      params_fi[ ip_CSOM0                            ] <- C_G
-      params_fi[ ip_LAT                              ] <- LAT_G
-      params_fi[ ip_SLOPE                            ] <- SLOPE_G
-      params_fi[ ip_SHADETARGET                      ] <- shade_G
-      params_fi[ ip_FWCAD  ] <- WCAD_G  / WCST_G
-      params_fi[ ip_FWCWP  ] <- WCWP_G  / WCST_G
-      params_fi[ ip_FWCFC  ] <- WCFC_G  / WCST_G
-      params_fi[ ip_FWCWET ] <- WCWET_G / WCST_G
-      params_fi[ ip_WCST   ] <- WCST_G
-      params_fi[ ip_PRUNTARGET1 ] <- 1
-      params_fi[ ip_PRUNTARGET2 ] <- 1
-      params_fi[ ip_PRUNTARGET3 ] <- 1
-      params_fi[ ip_THINTARGET1 ] <- 0
-      params_fi[ ip_THINTARGET2 ] <- 0
-      params_fi[ ip_THINTARGET3 ] <- 0
-      
+      CSOM0 <- params[ which(names_params=="CSOM0") ]
       if( iF==2 ) {
-        params_fi[ ip_CSOM0 ] <- C_G * 0.5
-        # params_fi[ ip_FCSOMF0 ] <- 0.25
-        # params_fi[ ip_NFERTMULT ] <- 0.5
-        # params_fi[ ip_RAINMULT ] <- 0.5
+        params <- set_par( "CSOM0", CSOM0*0.5, params )
+        # params <- set_par( "FCSOMF0"  , 0.25, params )
+        # params <- set_par( "NFERTMULT", 0.5 , params )
+        # params <- set_par( "RAINMULT" , 0.5 , params )
       }
       if( iF==3 ) {
-        params_fi[ ip_CSOM0 ] <- C_G * 2
-        # params_fi[ ip_FCSOMF0 ] <- 0.75
-        # params_fi[ ip_NFERTMULT ] <- 2
-        # params_fi[ ip_RAINMULT ] <- 2
+        params <- set_par( "CSOM0", CSOM0*2  , params )
+        # params <- set_par( "FCSOMF0"  , 0.75, params )
+        # params <- set_par( "NFERTMULT", 2   , params )
+        # params <- set_par( "RAINMULT" , 2   , params )
       }
-      
-      outF <- run_model( params_fi, matrix_weather_fi, calendar_fert_fi,
-        calendar_prunC, calendar_prunT_fi, calendar_thinT_fi, NDAYS_fi )
-      mat_parF[iF,1+(1:length(names_params))] <- params_fi
+      outF <- run_model( params, matrix_weather, calendar_fert,
+        calendar_prunC, calendar_prunT, calendar_thinT, NDAYS )
+      mat_parF[iF,1+(1:length(names_params))] <- params
       mat_outF[iF,1+(1:length(vars_Summary))] <- outputSummary( outF )
     }
     list_parF_G[[fi]] <- mat_parF
@@ -1734,7 +1657,7 @@ See Fig. \ref{fig:XX26}.
 ```
 
 ```{r, echo=T}
-  ptest <- params_fi[iptest] ; names(ptest) <- names_params[iptest]
+  ptest <- params[iptest] ; names(ptest) <- names_params[iptest]
   
   fi
   knitr::kable( t(df_G.f[fi,iscalars]) )
@@ -1761,7 +1684,7 @@ We examine a farm where measured shade is very high and simulated shade is very 
 ```{r}
   # ierr <- which( df_G.f$shade > 0.8 & oF1_G[,"Shade_f"] < 0.05 )
   # 
-  # params_fi[ip_WCST] * params_fi[ c(ip_FWCWP,ip_FWCFC) ] # Farm 79: 0.207,0.364
+  # params[ip_WCST] * params[ c(ip_FWCWP,ip_FWCFC) ] # Farm 79: 0.207,0.364
   # 
   # ierr
   # df_G.f[ierr,iscalars]
@@ -1784,7 +1707,7 @@ These settings make coffee and trees in Guatemala in the model - and likely in r
   knitr::kable( cbind( names_params,
                        round(parMAP[,11],4),
                        round(parMAP[,31],4),
-                       round(params_fi,4) ) )
+                       round(params,4) ) )
 
   knitr::kable( rbind( c("C",round(summary(df_C.f$C.soil),3)),
                        c("G",round(summary(df_G.f$C.soil),3)) ) )
