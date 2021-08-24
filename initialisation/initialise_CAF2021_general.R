@@ -308,28 +308,45 @@ set_parT <- function( densE=0, densI=0, densB=0, densA=0,
   d3    <- which( names_params=="TREEDENS0(3)" )
   p.new[ c(d1,d2,d3) ] <- 0
   
-  if(densE>0) { p.new[d1] <- densE/1e4
-                p.new     <- set_par_speciesT(1,"Erythrina",p.new) }
-  if(densE==0 & densI>0) {
-                p.new[d1] <- densI/1e4
-                p.new     <- set_par_speciesT(1,"Inga"     ,p.new) }
-  if(densE >0 & densI>0) {
-                p.new[d2] <- densI/1e4
-                p.new     <- set_par_speciesT(2,"Inga"     ,p.new) }
-  if(densE==0 & densI==0 & densB>0) {
-                p.new[d1] <- densB/1e4
-                p.new     <- set_par_speciesT(1,"Banana"   ,p.new) }
-  if((densE+densI) > 0   & densB>0) {
-                p.new[d2] <- densB/1e4
-                p.new     <- set_par_speciesT(2,"Banana"   ,p.new) }
-  if(densA>0) { p.new[d2] <- densA/1e4
-                p.new     <- set_par_speciesT(2,"Avocado"  ,p.new) }
-  if(densG>0) { p.new[d3] <- densG/1e4
-                p.new     <- set_par_speciesT(3,"Grevillea",p.new) }
-  if(densC>0) { p.new[d3] <- densC/1e4
-                p.new     <- set_par_speciesT(3,"Cordia"   ,p.new) }
-  
+  if(densE>0)     { p.new[d1] <- densE/1e4
+                    p.new     <- set_par_speciesT(1,"Erythrina",p.new) }
+  if(densI>densE) { p.new[d1] <- densI/1e4
+                    p.new     <- set_par_speciesT(1,"Inga"     ,p.new) }
+  if(densB>0)     { p.new[d2] <- densB/1e4
+                    p.new     <- set_par_speciesT(2,"Banana"   ,p.new) }
+  if(densA>densB) { p.new[d2] <- densA/1e4
+                    p.new     <- set_par_speciesT(2,"Avocado"  ,p.new) }
+  if(densG>0)     { p.new[d3] <- densG/1e4
+                    p.new     <- set_par_speciesT(3,"Grevillea",p.new) }
+  if(densC>densG) { p.new[d3] <- densC/1e4
+                    p.new     <- set_par_speciesT(3,"Cordia"   ,p.new) }
+  if(densB==0 & densA==0 & densE>0 & densI>0) {
+                    p.new[d1] <- densE/1e4 ; p.new[d2] <- densI/1e4
+                    p.new     <- set_par_speciesT(1,"Erythrina",p.new)
+                    p.new     <- set_par_speciesT(2,"Inga"     ,p.new) }
+  if(densE==0 & densI==0 & densB>0 & densA>0) {
+                    p.new[d1] <- densB/1e4 ; p.new[d2] <- densA/1e4
+                    p.new     <- set_par_speciesT(1,"Banana"   ,p.new)
+                    p.new     <- set_par_speciesT(2,"Avocado"  ,p.new) }
   return( p.new )
+}
+
+Tinventory_CG <- function( densE=0, densI=0, densB=0, densA=0,
+                           densG=0, densC=0 ) {
+  Tdens <- rep(0,3) ; Tnames <- rep("",3)
+  if(densE>0)     { Tnames[1] <- "E" ; Tdens[1] <- densE }
+  if(densI>densE) { Tnames[1] <- "I" ; Tdens[1] <- densI }
+  if(densB>0)     { Tnames[2] <- "B" ; Tdens[2] <- densB }
+  if(densA>densB) { Tnames[2] <- "A" ; Tdens[2] <- densA }
+  if(densG>0)     { Tnames[3] <- "G" ; Tdens[3] <- densG }
+  if(densC>densG) { Tnames[3] <- "C" ; Tdens[3] <- densC }
+  if(densB==0 & densA==0 & densE>0 & densI>0) {
+                    Tnames[1] <- "E" ; Tdens[1] <- densE
+                    Tnames[2] <- "I" ; Tdens[2] <- densI }
+  if(densE==0 & densI==0 & densB>0 & densA>0) {
+                    Tnames[1] <- "B" ; Tdens[1] <- densB
+                    Tnames[2] <- "A" ; Tdens[2] <- densA }
+  return( list( Tnames=Tnames, Tdens=Tdens ) )
 }
 
 set_par_CG <- function( df.f=df_C.f, fi=1, p.old=params, country="C" ) {
@@ -357,7 +374,7 @@ set_par_CG <- function( df.f=df_C.f, fi=1, p.old=params, country="C" ) {
   p.new <- set_parT( densE, densI, densB, densA, densG, densC, p.old=p.new )
   p.new <- set_par( c("CNLITT0","CNSOMF0","CNSOMS0"),
                         c( CN    , CN    , CN    ), p.new )
-  p.new <- set_par( "CSOMS0"     , C         , p.new )
+  p.new <- set_par( "CSOM0"      , C         , p.new )
   p.new <- set_par( "LAT"        , LAT       , p.new )
   p.new <- set_par( "SLOPE"      , SLOPE     , p.new )
   p.new <- set_par( "SHADETARGET", shade     , p.new )

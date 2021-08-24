@@ -33,10 +33,10 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   fileTM  <- tail( rownames(filesTM[1]), 1 )
   load( fileTM )
   
-  filesTM_MAP <- file.info(list.files(pattern="^CAF2021_parMAP.*\\.rds$"))
-  filesTM_MAP <- filesTM_MAP[ with(filesTM_MAP,order(as.POSIXct(mtime))), ]
-  fileTM_MAP  <- tail( rownames(filesTM_MAP[1]), 1 )
-  # parMAP      <- readRDS( fileTM_MAP )
+  # filesTM_MAP <- file.info(list.files(pattern="^CAF2021_parMAP.*\\.rds$"))
+  # filesTM_MAP <- filesTM_MAP[ with(filesTM_MAP,order(as.POSIXct(mtime))), ]
+  # fileTM_MAP  <- tail( rownames(filesTM_MAP[1]), 1 )
+  fileTM_MAP  <- "CAF2021_parMAP_08_36.rds"
   parMAP.old  <- readRDS( fileTM_MAP ) ; np.old <- dim(parMAP.old)[1]
   
   # Construct the parMAP (with more parameters than stored in fileTM_MAP)
@@ -80,7 +80,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   }
 ```
 
-```{r}
+```{r, eval=F}
   load( "df_C.f.rda" )
   load( "df_G.f.rda" )
 
@@ -95,7 +95,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
 
 ## Capping excessive fertilisation rates
 
-```{r}
+```{r, eval=F}
   iN500_C <- which(df_C.f$Nfert > 500 )
   iN500_G <- which(df_G.f$Nfert > 500 )
   
@@ -108,7 +108,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
 
 ## Correcting inconsistencies in reported tree and shade variables
 
-```{r}
+```{r, eval=F}
   if1104 <- which( df_C.f$code==1104 ) # nt=8 but tree densities all 0
   if1157 <- which( df_C.f$code==1157 ) # nt=0 but shade>0 (VisSky<1)
   
@@ -124,12 +124,12 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
 
 # New file for farm soils, application of pedotransfer functions and updating df_C|G.f
 
-```{r}
+```{r, eval=F}
   dir.f       <- "data/Farms SEACAF/"
   file_soil.f <- "Soil_general_final.xlsx"
 ```
 
-```{r}
+```{r, eval=F}
   df_soil1.f0 <- read_excel( paste0(dir.f,file_soil.f),
                              sheet="bulk_density", guess_max=3000, skip=1 )
 
@@ -147,7 +147,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
     select( code, DM.soil )
 ```
 
-```{r}
+```{r, eval=F}
   # Pedotransfer function derived by Tomasella et al. (2003)
   # as presented and evaluated by Tomasella et al. (2004)
   # We have no data for "Moisture equivalence (Me)" and set it at Me=0.4.
@@ -180,7 +180,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
 #   VanGenuchten(    0) # WCST 0.63
 ```
 
-```{r}
+```{r, eval=F}
   df_soil2.f0 <- read_excel( paste0(dir.f,file_soil.f),
                              sheet="physical_chemical" )
 
@@ -217,7 +217,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
     select( code, Cperc.soil.00_26, Nperc.soil.00_26, sand, silt, clay )
 ```
 
-```{r}
+```{r, eval=F}
   df_soil.f <- df_soil1.f %>%
     inner_join( df_soil2.f, by="code" ) %>%
     mutate( C.soil.00_26 = DM.soil * 260 * Cperc.soil.00_26 / 100 ) %>%
@@ -239,7 +239,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   df_soil_G.f <- df_soil.f %>% subset( df_soil.f$code >= 2000 )
 ```
 
-```{r}
+```{r, eval=F}
   df_C.f <- df_C.f %>%
     select ( ., -c(DM.soil,CN.soil,C.soil,N.soil) ) %>%
     inner_join( df_soil_C.f, by="code" )
@@ -251,7 +251,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   n_C.f  <- dim(df_C.f)[1] ; n_G.f <- dim(df_G.f)[1]
 ```
 
-```{r}
+```{r, eval=F}
   summary(df_C.f$C.soil)
   summary(df_G.f$C.soil)
   summary(df_C.f$N.soil)
@@ -271,7 +271,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
 
 # Weather data 2019-2020 and updating df_C|G.f
 
-```{r}
+```{r, eval=F}
   dir_weatherstations <- "weather/Climatic_Data/"
     dir_C_Icafe   <- "CostaRica/Icafe/"
     dir_C_IMN     <- "CostaRica/IMN/"
@@ -292,7 +292,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
     n_Anacafe   <- length( files_Anacafe )
 ```
 
-```{r}
+```{r, eval=F}
   df_Icafe       <- read_excel( paste0(dir_Icafe,file_Icafe) )
   stations_Icafe <- unique(df_Icafe$Estacion) ; n_Icafe <- length(stations_Icafe)
 
@@ -320,7 +320,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
     list_Anacafe[[s]] <- read_csv( paste0(dir_Anacafe,files_Anacafe[s]) ) }
 ```
 
-```{r}
+```{r, eval=F}
   for( s in 1:n_Icafe ) {
     list_Icafe.a[[s]] <- list_Icafe[[s]] %>%
       rename( ST = Estacion ) %>%
@@ -365,7 +365,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   # for( s in 1:n_Icafe ) { list_Icafe.a[[s]] %>% print(n = 1) }
 ```
 
-```{r}
+```{r, eval=F}
   for(s in 1:n_IMN.TMIN) {
     list_IMN.TMIN.a[[s]] <- list_IMN.TMIN[[s]] %>%
       rename( month = Mes ) %>%
@@ -440,7 +440,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   }
 ```
 
-```{r}
+```{r, eval=F}
   for( s in 1:n_Anacafe ) {
     list_Anacafe.a[[s]] <- list_Anacafe[[s]] %>%
       rename( ST    = ID_ESTACION ) %>%
@@ -463,7 +463,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   # for( s in 1:n_Anacafe ) { list_Anacafe.a[[s]] %>% print(n = 20, width=Inf) }
 ```
 
-```{r}
+```{r, eval=F}
   Icafe.a <- list_Icafe.a[[1]]
   for(s in 2:n_Icafe   ) { Icafe.a <- rbind(Icafe.a,list_Icafe.a[[s]]) }
   IMN.a   <- list_IMN.a  [[1]]
@@ -480,7 +480,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   # G.a %>% print(width=Inf,n=Inf)
 ```
 
-```{r}
+```{r, eval=F}
   df.ym <- function(df,y,m) {df %>% filter(year==y) %>% filter(month==m)}
 ```
 
@@ -562,7 +562,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   }
 ```
 
-```{r}
+```{r, eval=F}
   C.a.mean2019mon <- C.a %>%
     filter( year == 2019 ) %>%
     group_by( month ) %>%
@@ -574,7 +574,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   knitr::kable( C.a.mean2019mon )
 ```
 
-```{r}
+```{r, eval=F}
   G.a.mean2019mon <- G.a %>%
     filter( year == 2019 ) %>%
     group_by( month ) %>%
@@ -589,13 +589,13 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
 
 For 2019 we use the country-average monthly anomalies, for 2020 the climatic average.
 
-```{r}
+```{r, eval=F}
   monl   <- c( 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 )
   monend <- cumsum( monl ) ; monstart <- c( 1, head(monend+1,-1) )
   mon    <- function(doy) { which((doy>=monstart) & (doy<=monend)) }
 ```
 
-```{r}
+```{r, eval=F}
   nf <- length( df_C.f$code )
 
   for(f in 1:nf) {
@@ -624,7 +624,7 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
   }
 ```
 
-```{r}
+```{r, eval=F}
   nf <- length( df_G.f$code )
 
   par( mfrow=c(5,5), mar=c(2,1,1,1) )
@@ -661,12 +661,12 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
 
 # Yields from second harvest season (2019-2020) and updating df_C|G.f
 
-```{r}
+```{r, eval=F}
   dir.f            <- "data/Farms SEACAF/"
   file_yield1920.f <- "Database SEACAF - Net income.xlsx"
 ```
 
-```{r}
+```{r, eval=F}
   df_yield1920.f <- read_excel( paste0(dir.f,file_yield1920.f) )
 
   df_yield1920.f <- df_yield1920.f %>%
@@ -680,7 +680,7 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
     dplyr::select( code, yield1920 )
 ```
 
-```{r}
+```{r, eval=F}
   df_yield1920_C.f <- df_yield1920.f %>%
     subset ( df_yield1920.f$code < 2000 ) %>%
     arrange( code )
@@ -689,7 +689,7 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
     arrange( code )
 ```
 
-```{r}
+```{r, eval=F}
   lonlat_C.f  <- df_C.f[ c("lon","lat") ]
   lonlat_G.f  <- df_G.f[ c("lon","lat") ]
   coords.T    <- c( -83.68,  9.89  ) # Longitude, Latitude
@@ -698,7 +698,7 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
   dist_G.2170 <- as.vector( distm( coords.2170, lonlat_G.f ) ) / 1000
 ```
 
-```{r}
+```{r, eval=F}
   df_C.f <- df_C.f %>%
     rename( yield1819=yield ) %>%
     inner_join( df_yield1920_C.f, by=c("code") ) %>%
@@ -720,7 +720,7 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
   n_C.f <- dim(df_C.f)[1] ; n_G.f <- dim(df_G.f)[1]
 ```
 
-```{r}
+```{r, eval=F}
   par( mfrow=c(2,2), mar=c(2,2,3,2) )
 
   x = df_C.f$yield1819 ; y = df_C.f$yield1920
@@ -746,12 +746,12 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
 
 # Data on tree densities and updating df_C|G.f
 
-```{r}
+```{r, eval=F}
   dir.f        <- "data/Farms SEACAF/"
   file_trees.f <- "Copy of class_marcel JH.xlsx"
 ```
 
-```{r}
+```{r, eval=F}
   df_trees.f <- read_excel( paste0(dir.f,file_trees.f) )
 
   df_trees.f <- df_trees.f %>%
@@ -775,7 +775,7 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
   # df_trees.f %>% print( n=Inf, width=Inf)
 ```
 
-```{r}
+```{r, eval=F}
   df_trees_C.f <- df_trees.f %>%
     subset ( df_trees.f$code <  2000 ) %>%
     arrange( code )
@@ -784,7 +784,7 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
     arrange( code )
 ```
 
-```{r}
+```{r, eval=F}
   df_C.f <- df_C.f %>%
     inner_join( df_trees_C.f, by=c("code") ) %>%
     dplyr::select( code, lat, lon, dist, slope, altitude, alt.WC, weather.WC,
@@ -804,7 +804,7 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
   n_C.f <- dim(df_C.f)[1] ; n_G.f <- dim(df_G.f)[1]
 ```
 
-```{r}
+```{r, eval=F}
   par( mfrow=c(2,3), mar=c(4,2,3,2) )
 
   y1a_C = df_C.f$dens_Erythrina ; y1b_C = df_C.f$dens_Inga
@@ -864,29 +864,18 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
 
 ## Tree management
 
-```{r}
+```{r, eval=F}
   inamesdfscalars <- names(df_C.f)[ !(names(df_C.f) %in% "weather.WC") ]
   
-  df_C.f$dens_service <- df_C.f$dens_Erythrina  + df_C.f$dens_Inga
-  df_C.f$dens_fruit   <- df_C.f$dens_Banana     + df_C.f$dens_Avocado
-  df_C.f$dens_timber  <- df_C.f$dens_Grevillea  + df_C.f$dens_Cordia
-  i.s <- which( df_C.f$dens_service >
-               max( df_C.f$dens_Erythrina , df_C.f$dens_Inga ) )
-  i.f <- which( df_C.f$dens_fruit   >
-               max( df_C.f$dens_Banana    , df_C.f$dens_Avocado ) )
-  i.t <- which( df_C.f$dens_service >
-                max( df_C.f$dens_Grevillea, df_C.f$dens_Cordia ) )
-  df_C.f[i.s,inamesdfscalars]
-  
-  df_G.f$dens_service <- df_G.f$dens_Erythrina  + df_G.f$dens_Inga
-  df_G.f$dens_fruit   <- df_G.f$dens_Banana     + df_G.f$dens_Avocado
-  df_G.f$dens_timber  <- df_G.f$dens_Grevillea  + df_G.f$dens_Cordia
-  i.s <- which( df_G.f$dens_service >
-               max( df_G.f$dens_Erythrina , df_G.f$dens_Inga ) )
-  i.f <- which( df_G.f$dens_fruit   >
-               max( df_G.f$dens_Banana    , df_G.f$dens_Avocado ) )
-  i.t <- which( df_G.f$dens_service >
-                max( df_G.f$dens_Grevillea, df_G.f$dens_Cordia ) )
+  i.s <- which( df_C.f$dens_Erythrina > 0 & df_C.f$dens_Inga    > 0 )
+  i.f <- which( df_C.f$dens_Banana    > 0 & df_C.f$dens_Avocado > 0 )
+  i.t <- which( df_C.f$dens_Grevillea > 0 & df_C.f$dens_Cordia  > 0 )
+  df_C.f[c(i.s,i.f,i.t),inamesdfscalars]
+
+  i.s <- which( df_G.f$dens_Erythrina > 0 & df_G.f$dens_Inga    > 0 )
+  i.f <- which( df_G.f$dens_Banana    > 0 & df_G.f$dens_Avocado > 0 )
+  i.t <- which( df_G.f$dens_Grevillea > 0 & df_G.f$dens_Cordia  > 0 )
+  df_G.f[c(i.s,i.f,i.t),inamesdfscalars]
 ```
 
 ### Erythrina
@@ -950,9 +939,16 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
 
 # Saving the amended files df_C.f and df_G.f
 
-```{r}
+```{r, eval=F}
   save( df_C.f, file="df_C.f_final.rda" )
   save( df_G.f, file="df_G.f_final.rda" )
+```
+
+```{r}
+  load( "df_C.f_final.rda" )
+  load( "df_G.f_final.rda" )
+
+  n_C.f <- dim(df_C.f)[1] ; n_G.f <- dim(df_G.f)[1]
 ```
 
 
@@ -968,7 +964,8 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
     "harvDM_f_hay", "harvCPT_f", "harvCPT_2", "harvCST_f", "harvCST_3",
     "D_Nsoil"     , "D_Csoil"  , "D_C"      , "D_CT"     , "D_Csys"   ,
     "Shade_f"        , "Shade_fa"       , "Shade_fb"     ,
-    "NfixT_fb"       , "Nleaching_fb"   , "Crunoff_fb"   , "Csoil_fb"     ,
+    "NfixT_fb"       , "Nleaching_fb"   , "Crunoff_fb"   ,
+    "Csoil_fa"       , "Csoil_fb"       ,
     "harvDM_f_ha1819", "harvDM_f_ha1920",
     "fTranT_t_1a"    , "fTranT_t_1b"    , "fTranT_t_2a"  , "fTranT_t_2b"  ,
     "fTranT_t_3a"    , "fTranT_t_3b"    , "fNgrowth_t_1a", "fNgrowth_t_1b",
@@ -1054,6 +1051,7 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
     fOut[,"Nleaching_fb"] <- outputFinalYears[iNleaching] * 1e4 * 365
     fOut[,"Crunoff_fb"  ] <- outputFinalYears[iCrunoff  ] * 1e4 * 365
     
+    fOut[,"Csoil_fa"    ] <- outputFirstYears[iCsoil_f]
     fOut[,"Csoil_fb"    ] <- outputFinalYears[iCsoil_f]
 
     dHarv1819 <- which( (output[,iyear]==2019) & (output[,idoy]==181) )
@@ -1109,7 +1107,8 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
 ```
 
 ```{r, eval=F}
-  sapply( paste0(dir.init,"inititialise_CAF2021_C_f",1:n_C.f,".R"), file.create)
+  sapply( paste0(dir.init,"inititialise_CAF2021_C_f",1:n_C.f,".R"),
+          file.create)
 
   for(fi in 1:n_C.f) {
     file.f <- paste0( dir.init, "inititialise_CAF2021_C_f", fi, ".R" )
@@ -1126,7 +1125,8 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
 ```
 
 ```{r, eval=F}
-  sapply( paste0(dir.init,"inititialise_CAF2021_G_f",1:n_G.f,".R"), file.create)
+  sapply( paste0(dir.init,"inititialise_CAF2021_G_f",1:n_G.f,".R"),
+          file.create)
 
   for(fi in 1:n_G.f) {
     file.f <- paste0( dir.init, "inititialise_CAF2021_G_f", fi, ".R" )
@@ -1139,8 +1139,143 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
     cf("calendar_fert  <- set_fert_CG ( df_G.f, fi )")
     cf("calendar_prunT <- set_prunT_CG( df_G.f, fi )")
     cf("calendar_thinT <- set_thinT_CG( df_G.f, fi )")
+```
+
+```{r}
+  source('initialisation/initialise_CAF2021_general.R')
+
+  Tnames_C <- Tdens_C <- NULL
+  for(fi in 1:n_C.f) {
+    densE    <- df_C.f$dens_Erythrina[fi]
+    densI    <- df_C.f$dens_Inga     [fi]
+    densB    <- df_C.f$dens_Banana   [fi]
+    densA    <- df_C.f$dens_Avocado  [fi]
+    densG    <- df_C.f$dens_Grevillea[fi]
+    densC    <- df_C.f$dens_Cordia   [fi]
+    T_fi     <- Tinventory_CG( densE, densI, densB, densA, densG, densC )
+    Tnames_C <- rbind( Tnames_C, T_fi$Tnames )
+    Tdens_C  <- rbind( Tdens_C , T_fi$Tdens  )
+  }
+
+  Tnames_G <- Tdens_G <- NULL
+  for(fi in 1:n_G.f) {
+    densE    <- df_G.f$dens_Erythrina[fi]
+    densI    <- df_G.f$dens_Inga     [fi]
+    densB    <- df_G.f$dens_Banana   [fi]
+    densA    <- df_G.f$dens_Avocado  [fi]
+    densG    <- df_G.f$dens_Grevillea[fi]
+    densC    <- df_G.f$dens_Cordia   [fi]
+    T_fi     <- Tinventory_CG( densE, densI, densB, densA, densG, densC )
+    Tnames_G <- rbind( Tnames_G, T_fi$Tnames )
+    Tdens_G  <- rbind( Tdens_G , T_fi$Tdens  )
   }
 ```
+
+```{r}
+  knitr::kable( cbind( 1:n_C.f, Tnames_C ),
+                col.names=c("Costa Rica",paste0("T",1:3)) )
+  knitr::kable( cbind( 1:n_G.f, Tnames_G ),
+                col.names=c("Guatemala",paste0("T",1:3)) )
+```
+
+
+## Creating country-specific parameter-distribution files for BC
+
+```{r}
+  dir.par     <- "parameters/"
+  dir.init    <- "initialisation/CG/"
+  file.init_C <- paste0( dir.init, "inititialise_CAF2021_C_f", 1, ".R" )
+  source( file.init_C )
+
+  pAll     <- c("NFERTMULT","FCSOMF0","FWCWP")
+  npAll    <- length(pAll) ; ipAll <- rep(NA,npAll)
+  for(p in 1:npAll) { ipAll[p]     <- which( names_params==pAll[p] ) }
+
+  pT       <- c("KAC","KACEXP","KH","KHEXP")
+  npT      <- length(pT) ; list_ipT <- vector("list",npT)
+  for(p in 1:npT) { list_ipT[[p]] <- which( startsWith( names_params,
+                                                        paste0(pT[p],"(") ) ) }
+```
+
+```{r}
+  file.parBC_C <- paste0( dir.par, "parameters_BC_C.txt" ) 
+  file.create( file.parBC_C )
+  
+  if_C.E <- which(Tnames_C[,1]=="E") ; if_C.I <- which(Tnames_C[,1]=="I")
+  if_C.B <- which(Tnames_C[,2]=="B") ; if_C.A <- which(Tnames_C[,2]=="A")
+  if_C.G <- which(Tnames_C[,3]=="G") ; if_C.C <- which(Tnames_C[,3]=="C")
+
+  file.init_C.E <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.E[1], ".R")
+  file.init_C.I <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.I[1], ".R")
+  file.init_C.B <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.B[1], ".R")
+  file.init_C.A <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.A[1], ".R")
+  file.init_C.G <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.G[1], ".R")
+  file.init_C.C <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.C[1], ".R")
+
+  source( file.init_C )
+  pAll.def       <- round( params[ipAll], 3 )
+  pAll.min       <- round( pAll.def * 0.5, 3 )
+  ipfr           <- 2:3 # Fractions in [0,1]
+  pAll.max       <- pAll.def * 2
+  pAll.max[ipfr] <- round( pAll.def[ipfr] + 0.5*(1-pAll.def[ipfr]), 3 )
+
+  for(p in 1:npAll) {
+    cat( paste0( pAll[p]    ,"\t",
+                 pAll.min[p],"\t",
+                 pAll.def[p],"\t",
+                 pAll.max[p],"\t",
+                 "1:nSites\n"      ),
+    file=file.parBC_C, append=TRUE ) }
+  
+  # for(p in 1:npT) {
+  #   cat( paste0( ... ),
+  #   file=file.parBC_C, append=TRUE ) }
+```
+
+```{r}
+  file.parBC_G <- paste0( dir.par, "parameters_BC_G.txt" ) 
+  file.create( file.parBC_G )
+  
+  if_G.I <- which(Tnames_G[,1]=="I")
+  if_G.B <- which(Tnames_G[,2]=="B") ; if_G.A <- which(Tnames_G[,2]=="A")
+  if_G.G <- which(Tnames_G[,3]=="G") ; if_G.C <- which(Tnames_G[,3]=="C")
+
+  file.init_G   <- paste0(dir.init,"inititialise_CAF2021_G_f", 1        , ".R")
+  file.init_G.I <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G.I[1], ".R")
+  file.init_G.B <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G.B[1], ".R")
+  file.init_G.A <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G.A[1], ".R")
+  file.init_G.G <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G.G[1], ".R")
+  file.init_G.C <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G.C[1], ".R")
+
+  source( file.init_G )
+  pAll.def       <- round( params[ipAll], 3 )
+  pAll.min       <- round( pAll.def * 0.5, 3 )
+  ipfr           <- 2:3 # Fractions in [0,1]
+  pAll.max       <- pAll.def * 2
+  pAll.max[ipfr] <- round( pAll.def[ipfr] + 0.5*(1-pAll.def[ipfr]), 3 )
+
+  for(p in 1:npAll) {
+    cat( paste0( pAll[p]    ,"\t",
+                 pAll.min[p],"\t",
+                 pAll.def[p],"\t",
+                 pAll.max[p],"\t",
+                 "1:nSites\n"     ),
+    file=file.parBC_G, append=TRUE ) }
+  
+  # for(p in 1:npT) {
+  #   cat( paste0( ... ),
+  #   file=file.parBC_G, append=TRUE ) }
+```
+
+
+
+## BC
+
+```{r}
+  source('BC_CAF2021_C.R')
+  source('BC_CAF2021_G.R')
+```
+
 
 ## Creating farm-specific data files for BC
 
@@ -1153,12 +1288,17 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
 
   for(fi in 1:n_C.f) {
     file.f <- paste0( dir.dataBC, "data_C_f", fi, ".txt" )
-    y1819 <- round(df_C.f$yield1819[fi]) ; y1920 <- round(df_C.f$yield1920[fi])
+    y1819  <- round( df_C.f$yield1819[fi] )
+    y1920  <- round( df_C.f$yield1920[fi] )
+    shade  <-        df_G.f$shade    [fi]
     if((!is.na(y1819))) {
       cat( paste0("harvDM_f_hay\t2019\t181\t",y1819,"\t",0.25,"\n"),
            file=file.f ) }
     if((!is.na(y1920))) {
       cat( paste0("harvDM_f_hay\t2020\t181\t",y1920,"\t",0.25,"\n"),
+           file=file.f, append=TRUE ) }
+    if((!is.na(shade))) {
+      cat( paste0("Shade_f\t2019\t300\t"     ,shade,"\t",0.50,"\n"),
            file=file.f, append=TRUE ) }
   }
 ```
@@ -1168,14 +1308,27 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
 
   for(fi in 1:n_G.f) {
     file.f <- paste0( dir.dataBC, "data_G_f", fi, ".txt" )
-    y1819 <- round(df_G.f$yield1819[fi]) ; y1920 <- round(df_G.f$yield1920[fi])
+    y1819  <- round( df_G.f$yield1819[fi] )
+    y1920  <- round( df_G.f$yield1920[fi] )
+    shade  <-        df_G.f$shade    [fi]
     if((!is.na(y1819))) {
       cat( paste0("harvDM_f_hay\t2019\t181\t",y1819,"\t",0.25,"\n"),
            file=file.f ) }
     if((!is.na(y1920))) {
       cat( paste0("harvDM_f_hay\t2020\t181\t",y1920,"\t",0.25,"\n"),
            file=file.f, append=TRUE ) }
+    if((!is.na(shade))) {
+      cat( paste0("Shade_f\t2019\t300\t"     ,shade,"\t",0.50,"\n"),
+           file=file.f, append=TRUE ) }
   }
+```
+
+
+## After BC: MAP parameter vector
+
+```{r}
+  # matMAP_C <- readRDS( "CAF2021_parMAP_23_22.rds" )
+  # matMAP_G <- readRDS( "CAF2021_parMAP_06_00.rds" )
 ```
 
 
@@ -1195,6 +1348,10 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
     file_init <- paste0( "initialisation/CG/inititialise_CAF2021_C_f", fi, ".R" )
     source( file_init )
     
+    #######################
+    # params <- matMAP_C[,fi]
+    #######################
+    
     nF_C                     <- 3
     mat_parF                 <- matrix( NA, nF_C, 1+length(names_params) )
     mat_outF                 <- matrix( NA, nF_C, 1+length(vars_Summary) )
@@ -1203,15 +1360,18 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
     mat_parF[,"FarmSetting"] <- 1:nF_C
     mat_outF[,"FarmSetting"] <- 1:nF_C
     
+    CSOM0   <- params[ which(names_params=="CSOM0") ]
+    params1 <- params
     for(iF in 1:nF_C) {
-      CSOM0 <- params[ which(names_params=="CSOM0") ]
       if( iF==2 ) {
+        params <- params1
         params <- set_par( "CSOM0", CSOM0*0.5, params )
         # params <- set_par( "FCSOMF0"  , 0.25, params )
         # params <- set_par( "NFERTMULT", 0.5 , params )
         # params <- set_par( "RAINMULT" , 0.5 , params )
       }
       if( iF==3 ) {
+        params <- params1
         params <- set_par( "CSOM0", CSOM0*2  , params )
         # params <- set_par( "FCSOMF0"  , 0.75, params )
         # params <- set_par( "NFERTMULT", 2   , params )
@@ -1271,7 +1431,11 @@ Verifying the list of farm-specific summary outputs:
 ```
 
 ```{r}
-  par( mfrow=c(1,3), mar=c(4,4,1,1) )
+  par( mfrow=c(2,3), mar=c(4,4,1,1) )
+
+  plot( oF1_C[,"Csoil_fa"], df_C.f$C.soil ) ; abline(a=0,b=1,lty=2)
+  plot( oF2_C[,"Csoil_fa"], df_C.f$C.soil ) ; abline(a=0,b=1,lty=2)
+  plot( oF3_C[,"Csoil_fa"], df_C.f$C.soil ) ; abline(a=0,b=1,lty=2)
 
   plot( oF1_C[,"Csoil_fb"], df_C.f$C.soil ) ; abline(a=0,b=1,lty=2)
   plot( oF2_C[,"Csoil_fb"], df_C.f$C.soil ) ; abline(a=0,b=1,lty=2)
@@ -1318,40 +1482,19 @@ Verifying the list of farm-specific summary outputs:
     abline(h=mean(y,na.rm=T),lty=2,col="red") ; abline(v=mean(x),lty=2,col="red") 
 ```
 
-```{r}
+```{r, eval=F}
   iscalars <- which( names(df_C.f) != "weather.WC")
 
-  iptest   <- which( names_params %in% c(
-    "SHADETARGET",
-    "FWT(1)"      ,"FWT(2)"      ,"FWT(3)"      ,
-    "FST(1)"      ,"FST(2)"      ,"FST(3)"      ,
-    "FPT(1)"      ,"FPT(2)"      ,"FPT(3)"      ,
-    "KH(1)"       ,"KH(2)"       ,"KH(3)"       ,
-    "KAC(1)"      ,"KAC(2)"      ,"KAC(3)"      ,
-    "TCBT(1)"     ,"TCBT(2)"     ,"TCBT(3)"     ,
-    "TCRT(1)"     ,"TCRT(2)"     ,"TCRT(3)"     ,
-    "TCST(1)"     ,"TCST(2)"     ,"TCST(3)"     ,
-    "TOPTT(1)"    ,"TOPTT(2)"    ,"TOPTT(3)"    ,
-    "TTOLT(1)"    ,"TTOLT(2)"    ,"TTOLT(3)"    ,
-    "TREEDENS0(1)","TREEDENS0(2)","TREEDENS0(3)",
-    "HMAX(1)"     ,"HMAX(2)"     ,"HMAX(3)"     ) )
-```
-
-```{r, echo=T}
-  ptest <- params[iptest] ; names(ptest) <- names_params[iptest]
-  
-  fi
   knitr::kable( t(df_C.f[fi,iscalars]) )
-  knitr::kable( ptest )
 ```
 
-```{r}
-   # iEnv   <- c( 4:24, 55) ; iCoffee   <-  25: 38
-   # iTrees <- c(39:54,155) ; iCBT_t    <- 138:140
-   # plot_output( outF, vars=outputNames[ iEnv   ] )
-   # plot_output( outF, vars=outputNames[ iCoffee ] )
-   # plot_output( outF, vars=outputNames[ iTrees  ] )
-   # plot_output( outF, vars=outputNames[ iCBT_t  ] )
+```{r, eval=F}
+  iEnv   <- c( 4:24, 55) ; iCoffee   <-  25: 38
+  iTrees <- c(39:54,155) ; iCBT_t    <- 138:140
+  # plot_output( outF, vars=outputNames[ iEnv   ] )
+  # plot_output( outF, vars=outputNames[ iCoffee ] )
+  # plot_output( outF, vars=outputNames[ iTrees  ] )
+  # plot_output( outF, vars=outputNames[ iCBT_t  ] )
 ```
 
 Farm 1073, with 80 avocado trees per hectare, has a simulated shade level of about 0.05 despite a measured value of about 0.24. In the model, the short branch turnover time TCBT_t(2) of 1000 days keeps the crowns small. If this is a systematic error, we need to increase the longevity of avocado branches (and perhaps leaves).
@@ -1377,6 +1520,10 @@ Farm 1073, with 80 avocado trees per hectare, has a simulated shade level of abo
     file_init <- paste0( "initialisation/CG/inititialise_CAF2021_G_f", fi, ".R" )
     source( file_init )
 
+    #######################
+    # params <- matMAP_G[,fi]
+    #######################
+    
     nF_G                     <- 3
     mat_parF                 <- matrix( NA, nF_G, 1+length(names_params) )
     mat_outF                 <- matrix( NA, nF_G, 1+length(vars_Summary) )
@@ -1385,15 +1532,18 @@ Farm 1073, with 80 avocado trees per hectare, has a simulated shade level of abo
     mat_parF[,"FarmSetting"] <- 1:nF_G
     mat_outF[,"FarmSetting"] <- 1:nF_G
     
+    CSOM0   <- params[ which(names_params=="CSOM0") ]
+    params1 <- params
     for(iF in 1:nF_G) {
-      CSOM0 <- params[ which(names_params=="CSOM0") ]
       if( iF==2 ) {
+        params <- params1
         params <- set_par( "CSOM0", CSOM0*0.5, params )
         # params <- set_par( "FCSOMF0"  , 0.25, params )
         # params <- set_par( "NFERTMULT", 0.5 , params )
         # params <- set_par( "RAINMULT" , 0.5 , params )
       }
       if( iF==3 ) {
+        params <- params1
         params <- set_par( "CSOM0", CSOM0*2  , params )
         # params <- set_par( "FCSOMF0"  , 0.75, params )
         # params <- set_par( "NFERTMULT", 2   , params )
@@ -1425,7 +1575,11 @@ Farm 1073, with 80 avocado trees per hectare, has a simulated shade level of abo
 ```
 
 ```{r}
-  par( mfrow=c(1,3), mar=c(4,4,1,1) )
+  par( mfrow=c(2,3), mar=c(4,4,1,1) )
+
+  plot( oF1_G[,"Csoil_fa"], df_G.f$C.soil ) ; abline(a=0,b=1,lty=2)
+  plot( oF2_G[,"Csoil_fa"], df_G.f$C.soil ) ; abline(a=0,b=1,lty=2)
+  plot( oF3_G[,"Csoil_fa"], df_G.f$C.soil ) ; abline(a=0,b=1,lty=2)
 
   plot( oF1_G[,"Csoil_fb"], df_G.f$C.soil ) ; abline(a=0,b=1,lty=2)
   plot( oF2_G[,"Csoil_fb"], df_G.f$C.soil ) ; abline(a=0,b=1,lty=2)
@@ -1656,21 +1810,10 @@ See Fig. \ref{fig:XX26}.
        mean(oF3_G[,"harvDM_f_ha1920"]) )
 ```
 
-```{r, echo=T}
-  ptest <- params[iptest] ; names(ptest) <- names_params[iptest]
-  
-  fi
-  knitr::kable( t(df_G.f[fi,iscalars]) )
-  knitr::kable( ptest )
-```
+```{r, eval=F}
+  iscalars <- which( names(df_G.f) != "weather.WC")
 
-```{r}
-   # iEnv   <- c( 4:24, 55) ; iCoffee   <-  25: 38
-   # iTrees <- c(39:54,155) ; iCBT_t    <- 138:140
-   # plot_output( outF, vars=outputNames[ iEnv   ] )
-   # plot_output( outF, vars=outputNames[ iCoffee ] )
-   # plot_output( outF, vars=outputNames[ iTrees  ] )
-   # plot_output( outF, vars=outputNames[ iCBT_t  ] )
+  knitr::kable( t(df_G.f[fi,iscalars]) )
 ```
 
 The model underestimates shade in Guatemala for almost all farms. Possible explanations:
@@ -1681,7 +1824,7 @@ The model underestimates shade in Guatemala for almost all farms. Possible expla
 
 We examine a farm where measured shade is very high and simulated shade is very low.
 
-```{r}
+```{r, eval=F}
   # ierr <- which( df_G.f$shade > 0.8 & oF1_G[,"Shade_f"] < 0.05 )
   # 
   # params[ip_WCST] * params[ c(ip_FWCWP,ip_FWCFC) ] # Farm 79: 0.207,0.364
@@ -1703,7 +1846,7 @@ We also see that our initial parameterisation parMAP[,31] sets the SOM mineralis
 
 These settings make coffee and trees in Guatemala in the model - and likely in reality too if the data are reliable - often severely water- and N-limited. Still, observed yields in Guatemala are not strongly correlated with N-fertilisation rate, which is puzzling. 
 
-```{r}
+```{r, eval=F}
   knitr::kable( cbind( names_params,
                        round(parMAP[,11],4),
                        round(parMAP[,31],4),

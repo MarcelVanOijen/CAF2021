@@ -1,19 +1,19 @@
-## BC_CAF2021_MCMC_init_C.R
+## BC_CAF2021_MCMC_init_G.R
 ## MvO, 2021-08-24
 
-  load( "df_C.f_final.rda" ) ; n_C.f <- dim(df_C.f)[1]
+  load( "df_G.f_final.rda" ) ; n_G.f <- dim(df_G.f)[1]
 
 ## FILE FOR PRIOR PARAMETER DISTRIBUTION
-   file_prior <- "parameters/parameters_BC_C.txt"
+   file_prior <- "parameters/parameters_BC_G.txt"
 
 ## LIKELIHOOD FUNCTION ##
    source('BC/fLogL_Sivia.R')
 
 ## SETTINGS FOR THE DIFFERENT CALIBRATION SITES (at least one site)
    sitesettings_filenames <- paste0(
-      "initialisation/CG/inititialise_CAF2021_C_f", 1:n_C.f, ".R" )
+      "initialisation/CG/inititialise_CAF2021_G_f", 1:n_G.f, ".R" )
    sitedata_filenames     <- paste0(
-      "data/CG/data_C_f", 1:n_C.f, ".txt" )
+      "data/CG/data_G_f", 1:n_G.f, ".txt" )
    nSites                 <- length(sitedata_filenames)
    sitelist               <- list() ; length(sitelist) <- nSites
 
