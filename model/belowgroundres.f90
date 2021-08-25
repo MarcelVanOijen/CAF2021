@@ -54,10 +54,14 @@ Contains
   real :: Evap(nc), fTran(nc), RWA(nc), Tran(nc)
   real :: WAAD, WCAD, WCFC, WCWP, WCWET
   real :: fAvail(nc), FRR(nc), RWAevap(nc), WC(nc), WCCR(nc)
-  WCAD    = WCST * FWCAD                                           ! % (m3 m-3)
-  WCWP    = WCST * FWCWP                                           ! % (m3 m-3)
-  WCFC    = WCST * FWCFC                                           ! % (m3 m-3)
-  WCWET   = WCST * FWCWET                                          ! % (m3 m-3)
+  real :: WCSTM, FWCWPM
+   WCSTM  =  WCST *  WCSTMULT
+  FWCWPM  = FWCWP * FWCWPMULT
+  
+  WCAD    = WCSTM * FWCAD                                          ! % (m3 m-3)
+  WCWP    = WCSTM * FWCWPM                                         ! % (m3 m-3)
+  WCFC    = WCSTM * FWCFC                                          ! % (m3 m-3)
+  WCWET   = WCSTM * FWCWET                                         ! % (m3 m-3)
   WC      = 0.001 * WA   / ROOTD                                   ! % (m3 m-3)
   RWA     = max(0., min(1., (WC - WCWP) / (WCFC - WCWP) ) )        ! % (-)
   RWAevap = max(0., min(1., (WC - WCAD) / (WCFC - WCAD) ) )        ! % (-)
@@ -65,7 +69,7 @@ Contains
   Evap    = Pevap * RWAevap                                        ! % (mm d-1)
   WCCR    = WCWP + max( 0.01, Ptran/(Ptran+TRANCO) * (WCFC-WCWP) ) ! % (m3 m-3)
   where (WC>WCCR)
-    FRR = max(0., min(1., (WCST-WC)/(WCST-WCWET) ))
+    FRR = max(0., min(1., (WCSTM-WC)/(WCSTM-WCWET) ))
   elsewhere
     FRR = max(0., min(1., (WC-WCWP)/(WCCR-WCWP)  ))
   endwhere                                                         ! % (mm mm-1)

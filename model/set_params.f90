@@ -136,6 +136,13 @@ PRUNTARGET = pa(165:167) ! (-)
 THINTARGET = pa(168:170) ! (-)
 TREEDENS0  = pa(171:173) ! (m-2)
 
+!! EXTRA PARAMETERS
+CNSOM0MULT      = pa(174)
+CSOM0MULT       = pa(175)
+FWCWPMULT       = pa(176)
+WCSTMULT        = pa(177)
+SHADETARGETMULT = pa(178)
+
 ! FTCLMINT (1) Ep: medium (non-pollarded) - high (poll.)
 !          (3) {Ca,Gs,Ti}: low, Ed: medium
 ! KAC      (1) Ep   : 15.8

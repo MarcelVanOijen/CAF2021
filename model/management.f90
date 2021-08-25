@@ -15,6 +15,7 @@ Contains
     DAYS_PRUNT,FRPRUNT,DAYS_THINT,FRTHINT )
   integer                    :: year,doy,i,t
   real                       :: Shade_f
+  real                       :: SHADETARGETM
   integer,dimension(  100,2) :: DAYS_FERT , DAYS_PRUNC
   real   ,dimension(  100  ) ::             FRPRUNC
   integer,dimension(3,100,2) :: DAYS_PRUNT, DAYS_THINT
@@ -24,6 +25,7 @@ Contains
     prunFRC = 0
     prunFRT = 0
     thinFRT = 0
+    SHADETARGETM = SHADETARGET * SHADETARGETMULT
     do i=1,100    
       if ( (year==DAYS_FERT (i,1)) .and. (doy==DAYS_FERT (i,2)) ) then
         Nfert = NFERTMULT*NFERTV(i)/10000.
@@ -34,14 +36,14 @@ Contains
 	    do t=1,nt
         if ( (year==DAYS_PRUNT(t,i,1)) .and. (doy==DAYS_PRUNT(t,i,2)) ) then
           prunFRT(t) = FRPRUNT(t,i)
-          if ((SHADETARGET>0).and.(PRUNTARGET(t)==1).and.(Shade_f>0)) then
-            prunFRT(t) = max( 0., 1 - SHADETARGET / Shade_f )
+          if ((SHADETARGETM>0).and.(PRUNTARGET(t)==1).and.(Shade_f>0)) then
+            prunFRT(t) = max( 0., 1 - SHADETARGETM / Shade_f )
           endif
 	      endif
         if ( (year==DAYS_THINT(t,i,1)) .and. (doy==DAYS_THINT(t,i,2)) ) then
           thinFRT(t) = FRTHINT(t,i)
-          if ((SHADETARGET>0).and.(THINTARGET(t)==1).and.(Shade_f>0)) then
-            thinFRT(t) = max( 0., 1 - SHADETARGET / Shade_f )
+          if ((SHADETARGETM>0).and.(THINTARGET(t)==1).and.(Shade_f>0)) then
+            thinFRT(t) = max( 0., 1 - SHADETARGETM / Shade_f )
           endif
 	      endif
 	    enddo

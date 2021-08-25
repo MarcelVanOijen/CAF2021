@@ -4,7 +4,7 @@
    # rm(list = ls())
 
 ## 1. INITIALISE MCMC ##
-   nChain <- as.integer(1e4)
+   nChain <- as.integer(2e1)
    source('BC/BC_CAF2021_MCMC_init_C.R')
 
 ## 2. RUNNING THE MCMC ##

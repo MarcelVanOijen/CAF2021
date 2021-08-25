@@ -27,7 +27,10 @@ Contains
   real    :: Evap(:), LAI(:), Rainint(:), Tran(:), WA(:)
   real    :: RUNOFF(:), Drain(:)
   real    :: WAFC, WCFC
-  WCFC   = WCST * FWCFC                                     ! % (m3 m-3)
+  real    :: WCSTM
+  WCSTM  = WCST * WCSTMULT
+  
+  WCFC   = WCSTM * FWCFC                                    ! % (m3 m-3)
   WAFC   = 1000. * WCFC * ROOTD                             ! % (mm)
   RUNOFF = (RAIN-Rainint) * sin(atan(SLOPE/100)) * &
                                         exp(-KRUNOFF * LAI) ! % (mm d-1)

@@ -52,6 +52,23 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   }
 ```
 
+```{r}
+  update_matMAP <- function( matMAP.old=matMAP_C,
+                             init.new='initialisation/set_CAF2021_CG.R' ) {
+    source( init.new )
+    np.old <- dim(matMAP.old)[1] ; ns.old <- dim(matMAP.old)[2]
+    np.new <- length( params )   ; ns.new <- ns.old
+    matMAP.new           <- matrix( params, nrow=np.new, ncol=ns.new, byrow=F )
+    rownames(matMAP.new) <- names_params
+    colnames(matMAP.new) <- paste0( "s", 1:ns.new )
+    for(p.old in 1:np.old) {
+      p.new              <- which( rownames(matMAP.new) ==
+                                   rownames(matMAP.old)[p.old] )
+      matMAP.new[p.new,] <- matMAP.old[p.old,] }
+    return( matMAP.new )
+  }
+```
+
 ```{r, eval=F}
   dir.params   <- "parameters/"
   file_par_def <- paste0( dir.params, "parameters_default_parMAP.txt" )
@@ -144,7 +161,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
     group_by( code ) %>%
     summarise( DM.soil = mean(DM.soil,na.rm=T) ) %>%
     drop_na() %>%
-    select( code, DM.soil )
+    dplyr::select( code, DM.soil )
 ```
 
 ```{r, eval=F}
@@ -214,7 +231,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
     mutate( clay = rowMeans(select(., "clay.00_13", "clay.13_26" ),
                             na.rm=TRUE) ) %>%
     
-    select( code, Cperc.soil.00_26, Nperc.soil.00_26, sand, silt, clay )
+    dplyr::select( code, Cperc.soil.00_26, Nperc.soil.00_26, sand, silt, clay )
 ```
 
 ```{r, eval=F}
@@ -232,8 +249,8 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
     mutate ( WP = fTomasella2003(DM.soil,silt,clay)$WP ) %>%
     mutate ( FC = fTomasella2003(DM.soil,silt,clay)$FC ) %>%
   
-    select( code, DM.soil, CN.soil, C.soil, N.soil,
-            sand, silt, clay, WP, FC )
+    dplyr::select( code, DM.soil, CN.soil, C.soil, N.soil,
+                   sand, silt, clay, WP, FC )
 
   df_soil_C.f <- df_soil.f %>% subset( df_soil.f$code <  2000 )
   df_soil_G.f <- df_soil.f %>% subset( df_soil.f$code >= 2000 )
@@ -241,11 +258,11 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
 
 ```{r, eval=F}
   df_C.f <- df_C.f %>%
-    select ( ., -c(DM.soil,CN.soil,C.soil,N.soil) ) %>%
+    dplyr::select ( ., -c(DM.soil,CN.soil,C.soil,N.soil) ) %>%
     inner_join( df_soil_C.f, by="code" )
     
   df_G.f <- df_G.f %>%
-    select ( ., -c(DM.soil,CN.soil,C.soil,N.soil) ) %>%
+    dplyr::select ( ., -c(DM.soil,CN.soil,C.soil,N.soil) ) %>%
     inner_join( df_soil_G.f, by="code" )
   
   n_C.f  <- dim(df_C.f)[1] ; n_G.f <- dim(df_G.f)[1]
@@ -327,7 +344,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
       rename( TMAX    = "Temperatura máxima °C" ) %>%
       rename( TMIN    = "Temperatura mínima °C" ) %>%
       rename( RAIN    = "Lluvia mm" ) %>%
-      select( ST, year, month, TMIN, TMAX, RAIN ) %>%
+      dplyr::select( ST, year, month, TMIN, TMAX, RAIN ) %>%
       group_by( ST, year, month ) %>%
       summarize( TMIN = mean(TMIN,na.rm=T),
                  TMAX = mean(TMAX,na.rm=T),
@@ -1187,7 +1204,8 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
   file.init_C <- paste0( dir.init, "inititialise_CAF2021_C_f", 1, ".R" )
   source( file.init_C )
 
-  pAll     <- c("NFERTMULT","FCSOMF0","FWCWP")
+  pAll     <- c("CNSOM0MULT","CSOM0MULT","FWCWPMULT","WCSTMULT",
+                "SHADETARGETMULT","NFERTMULT")
   npAll    <- length(pAll) ; ipAll <- rep(NA,npAll)
   for(p in 1:npAll) { ipAll[p]     <- which( names_params==pAll[p] ) }
 
@@ -1205,19 +1223,18 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
   if_C2.B <- which(Tnames_C[,2]=="B") ; if_C2.A <- which(Tnames_C[,2]=="A")
   if_C3.G <- which(Tnames_C[,3]=="G") ; if_C3.C <- which(Tnames_C[,3]=="C")
 
-  file.init_C.E <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.1E[1], ".R")
-  file.init_C.I <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.1I[1], ".R")
-  file.init_C.B <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.2B[1], ".R")
-  file.init_C.A <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.2A[1], ".R")
-  file.init_C.G <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.3G[1], ".R")
-  file.init_C.C <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.3C[1], ".R")
+  file.init_C.E <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C1.E[1], ".R")
+  file.init_C.I <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C1.I[1], ".R")
+  file.init_C.B <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C2.B[1], ".R")
+  file.init_C.A <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C2.A[1], ".R")
+  file.init_C.G <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C3.G[1], ".R")
+  file.init_C.C <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C3.C[1], ".R")
 
   source( file.init_C )
-  pAll.def       <- round( params[ipAll], 3 )
-  pAll.min       <- round( pAll.def * 0.5, 3 )
-  ipfr           <- 2:3 # Fractions in [0,1]
-  pAll.max       <- pAll.def * 2
-  pAll.max[ipfr] <- round( pAll.def[ipfr] + 0.5*(1-pAll.def[ipfr]), 3 )
+  pAll.def         <- round( params[ipAll] , 3 )
+  pAll.min         <- round( pAll.def * 0.5, 3 )
+  pAll.max         <- round( pAll.def * 1.5, 3 )
+  pAll.max[c(3,5)] <- 1.1
 
   for(p in 1:npAll) {
     cat( paste0( pAll[p]    ,"\t",
@@ -1248,11 +1265,10 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
   file.init_G.C <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G3.C[1], ".R")
 
   source( file.init_G )
-  pAll.def       <- round( params[ipAll], 3 )
-  pAll.min       <- round( pAll.def * 0.5, 3 )
-  ipfr           <- 2:3 # Fractions in [0,1]
-  pAll.max       <- pAll.def * 2
-  pAll.max[ipfr] <- round( pAll.def[ipfr] + 0.5*(1-pAll.def[ipfr]), 3 )
+  pAll.def         <- round( params[ipAll] , 3 )
+  pAll.min         <- round( pAll.def * 0.5, 3 )
+  pAll.max         <- round( pAll.def * 1.5, 3 )
+  pAll.max[c(3,5)] <- 1.1
 
   for(p in 1:npAll) {
     cat( paste0( pAll[p]    ,"\t",
@@ -1318,14 +1334,17 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
 ## BC
 
 ```{r}
-  # source('BC_CAF2021_C.R')
-  # matMAP_C <- matMAP
-  matMAP_C <- readRDS( "CAF2021_parMAP_00_37.rds" )
+  source('BC_CAF2021_C.R')
+  matMAP_C <- matMAP
+  # matMAP_C.old <- readRDS( "CAF2021_parMAP_00_37.rds" )
+  # matMAP_C     <- update_matMAP( matMAP_C.old,
+  #                                'initialisation/set_CAF2021_CG.R' )
 
-  # source('BC_CAF2021_G.R')
-  # matMAP_G <- matMAP
-  matMAP_G <- readRDS( "CAF2021_parMAP_05_31.rds" )
-
+  source('BC_CAF2021_G.R')
+  matMAP_G <- matMAP
+  # matMAP_G.old <- readRDS( "CAF2021_parMAP_05_31.rds" )
+  # matMAP_G     <- update_matMAP( matMAP_G.old,
+  #                                'initialisation/set_CAF2021_CG.R' )
 ```
 
 
@@ -1406,11 +1425,13 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
       }
       if( iF==3 ) {
         params <- matMAP_C[,fi]
-        CSOM0  <- params[ which(names_params=="CSOM0") ]
-        params <- set_par( "CSOM0", CSOM0*2  , params )
-        # params <- set_par( "FCSOMF0"  , 0.75, params )
-        # params <- set_par( "NFERTMULT", 2   , params )
-        # params <- set_par( "RAINMULT" , 2   , params )
+        params <- set_par( "CNSOM0MULT"     , 0.5, params )
+        # params <- set_par( "CSOM0MULT"      , 0.5, params )
+        # params <- set_par( "FWCWPMULT"      , 0.5, params )
+        # params <- set_par( "WCSTMULT"       , 1.5, params )
+        # params <- set_par( "SHADETARGETMULT", 1.5, params )
+        # params <- set_par( "NFERTMULT"      , 0.5, params )
+        # params <- set_par( "RAINMULT"       , 0.5, params )
       }
       outF <- run_model( params, matrix_weather, calendar_fert,
         calendar_prunC, calendar_prunT, calendar_thinT, NDAYS )
@@ -1420,9 +1441,11 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
     list_parF_C[[fi]] <- mat_parF
     list_outF_C[[fi]] <- mat_outF
   }
+```
 
+```{r}
   df_C.f_sim <- df_C.f %>%
-    select ( code ) %>%
+    dplyr::select ( code ) %>%
     arrange( code ) %>%
     mutate ( parF = list_parF_C ) %>%
     mutate ( outF = list_outF_C )
@@ -1473,28 +1496,12 @@ Verifying the list of farm-specific summary outputs:
   summary( oF2_C[if_C3.G,"CAtree_t_3b"], digits=3 ) # Grevillea final two years
   summary( oF2_C[if_C3.C,"CAtree_t_3b"], digits=3 ) # Cordia final two years
 
-  summary( oF2_G[if_G1.I,"CAtree_t_1b"], digits=3 ) # Inga final two years
-  summary( oF2_G[if_G2.B,"CAtree_t_2b"], digits=3 ) # Banana final two years
-  summary( oF2_G[if_G2.A,"CAtree_t_2b"], digits=3 ) # Avocado final two years
-  summary( oF2_G[if_G3.G,"CAtree_t_3b"], digits=3 ) # Grevillea final two years
-  summary( oF2_G[if_G3.C,"CAtree_t_3b"], digits=3 ) # Cordia final two years
-```
-
-```{r, echo=T}
-# Costa Rica, MAP
   summary( oF2_C[if_C1.E,"H_t_1b"], digits=3 ) # Erythrina final two years
   summary( oF2_C[if_C1.I,"H_t_1b"], digits=3 ) # Inga final two years
   summary( oF2_C[if_C2.B,"H_t_2b"], digits=3 ) # Banana final two years
   summary( oF2_C[if_C2.A,"H_t_2b"], digits=3 ) # Avocado final two years
   summary( oF2_C[if_C3.G,"H_t_3b"], digits=3 ) # Grevillea final two years
   summary( oF2_C[if_C3.C,"H_t_3b"], digits=3 ) # Cordia final two years
-
-# Guatemala, MAP
-  summary( oF2_G[if_G1.I,"H_t_1b"], digits=3 ) # Inga final two years
-  summary( oF2_G[if_G2.B,"H_t_2b"], digits=3 ) # Banana final two years
-  summary( oF2_G[if_G2.A,"H_t_2b"], digits=3 ) # Avocado final two years
-  summary( oF2_G[if_G3.G,"H_t_3b"], digits=3 ) # Grevillea final two years
-  summary( oF2_G[if_G3.C,"H_t_3b"], digits=3 ) # Cordia final two years
 ```
 
 ```{r}
@@ -1600,12 +1607,14 @@ Farm 1073, with 80 avocado trees per hectare, has a simulated shade level of abo
         params <- params <- matMAP_G[,fi]
       }
       if( iF==3 ) {
-        params <- params <- matMAP_G[,fi]
-        CSOM0  <- params[ which(names_params=="CSOM0") ]
-        params <- set_par( "CSOM0", CSOM0*2  , params )
-        # params <- set_par( "FCSOMF0"  , 0.75, params )
-        # params <- set_par( "NFERTMULT", 2   , params )
-        # params <- set_par( "RAINMULT" , 2   , params )
+        params <- matMAP_G[,fi]
+        params <- set_par( "CNSOM0MULT"     , 0.5, params )
+        # params <- set_par( "CSOM0MULT"      , 0.5, params )
+        # params <- set_par( "FWCWPMULT"      , 0.5, params )
+        # params <- set_par( "WCSTMULT"       , 1.5, params )
+        # params <- set_par( "SHADETARGETMULT", 1.5, params )
+        # params <- set_par( "NFERTMULT"      , 0.5, params )
+        # params <- set_par( "RAINMULT"       , 0.5, params )
       }
       outF <- run_model( params, matrix_weather, calendar_fert,
         calendar_prunC, calendar_prunT, calendar_thinT, NDAYS )
@@ -1617,7 +1626,7 @@ Farm 1073, with 80 avocado trees per hectare, has a simulated shade level of abo
   }
 
   df_G.f_sim <- df_G.f %>%
-    select ( code ) %>%
+    dplyr::select ( code ) %>%
     arrange( code ) %>%
     mutate ( parF = list_parF_G ) %>%
     mutate ( outF = list_outF_G )
@@ -1630,6 +1639,20 @@ Farm 1073, with 80 avocado trees per hectare, has a simulated shade level of abo
   pF1_G <- dfparFSummary( df_G.f_sim, Fi=1 )
   pF2_G <- dfparFSummary( df_G.f_sim, Fi=2 )
   pF3_G <- dfparFSummary( df_G.f_sim, Fi=3 )
+```
+
+```{r, echo=T}
+  summary( oF2_G[if_G1.I,"CAtree_t_1b"], digits=3 ) # Inga final two years
+  summary( oF2_G[if_G2.B,"CAtree_t_2b"], digits=3 ) # Banana final two years
+  summary( oF2_G[if_G2.A,"CAtree_t_2b"], digits=3 ) # Avocado final two years
+  summary( oF2_G[if_G3.G,"CAtree_t_3b"], digits=3 ) # Grevillea final two years
+  summary( oF2_G[if_G3.C,"CAtree_t_3b"], digits=3 ) # Cordia final two years
+
+  summary( oF2_G[if_G1.I,"H_t_1b"], digits=3 ) # Inga final two years
+  summary( oF2_G[if_G2.B,"H_t_2b"], digits=3 ) # Banana final two years
+  summary( oF2_G[if_G2.A,"H_t_2b"], digits=3 ) # Avocado final two years
+  summary( oF2_G[if_G3.G,"H_t_3b"], digits=3 ) # Grevillea final two years
+  summary( oF2_G[if_G3.C,"H_t_3b"], digits=3 ) # Cordia final two years
 ```
 
 ```{r}
