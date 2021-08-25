@@ -1201,16 +1201,16 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
   file.parBC_C <- paste0( dir.par, "parameters_BC_C.txt" ) 
   file.create( file.parBC_C )
   
-  if_C.E <- which(Tnames_C[,1]=="E") ; if_C.I <- which(Tnames_C[,1]=="I")
-  if_C.B <- which(Tnames_C[,2]=="B") ; if_C.A <- which(Tnames_C[,2]=="A")
-  if_C.G <- which(Tnames_C[,3]=="G") ; if_C.C <- which(Tnames_C[,3]=="C")
+  if_C1.E <- which(Tnames_C[,1]=="E") ; if_C1.I <- which(Tnames_C[,1]=="I")
+  if_C2.B <- which(Tnames_C[,2]=="B") ; if_C2.A <- which(Tnames_C[,2]=="A")
+  if_C3.G <- which(Tnames_C[,3]=="G") ; if_C3.C <- which(Tnames_C[,3]=="C")
 
-  file.init_C.E <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.E[1], ".R")
-  file.init_C.I <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.I[1], ".R")
-  file.init_C.B <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.B[1], ".R")
-  file.init_C.A <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.A[1], ".R")
-  file.init_C.G <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.G[1], ".R")
-  file.init_C.C <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.C[1], ".R")
+  file.init_C.E <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.1E[1], ".R")
+  file.init_C.I <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.1I[1], ".R")
+  file.init_C.B <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.2B[1], ".R")
+  file.init_C.A <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.2A[1], ".R")
+  file.init_C.G <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.3G[1], ".R")
+  file.init_C.C <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.3C[1], ".R")
 
   source( file.init_C )
   pAll.def       <- round( params[ipAll], 3 )
@@ -1236,16 +1236,16 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
   file.parBC_G <- paste0( dir.par, "parameters_BC_G.txt" ) 
   file.create( file.parBC_G )
   
-  if_G.I <- which(Tnames_G[,1]=="I")
-  if_G.B <- which(Tnames_G[,2]=="B") ; if_G.A <- which(Tnames_G[,2]=="A")
-  if_G.G <- which(Tnames_G[,3]=="G") ; if_G.C <- which(Tnames_G[,3]=="C")
+  if_G1.I <- which(Tnames_G[,1]=="I")
+  if_G2.B <- which(Tnames_G[,2]=="B") ; if_G2.A <- which(Tnames_G[,2]=="A")
+  if_G3.G <- which(Tnames_G[,3]=="G") ; if_G3.C <- which(Tnames_G[,3]=="C")
 
   file.init_G   <- paste0(dir.init,"inititialise_CAF2021_G_f", 1        , ".R")
-  file.init_G.I <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G.I[1], ".R")
-  file.init_G.B <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G.B[1], ".R")
-  file.init_G.A <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G.A[1], ".R")
-  file.init_G.G <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G.G[1], ".R")
-  file.init_G.C <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G.C[1], ".R")
+  file.init_G.I <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G1.I[1], ".R")
+  file.init_G.B <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G2.B[1], ".R")
+  file.init_G.A <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G2.A[1], ".R")
+  file.init_G.G <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G3.G[1], ".R")
+  file.init_G.C <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G3.C[1], ".R")
 
   source( file.init_G )
   pAll.def       <- round( params[ipAll], 3 )
@@ -1265,15 +1265,6 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
   # for(p in 1:npT) {
   #   cat( paste0( ... ),
   #   file=file.parBC_G, append=TRUE ) }
-```
-
-
-
-## BC
-
-```{r}
-  source('BC_CAF2021_C.R')
-  source('BC_CAF2021_G.R')
 ```
 
 
@@ -1324,15 +1315,68 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
 ```
 
 
-## After BC: MAP parameter vector
+## BC
 
 ```{r}
-  # matMAP_C <- readRDS( "CAF2021_parMAP_23_22.rds" )
-  # matMAP_G <- readRDS( "CAF2021_parMAP_06_00.rds" )
+  # source('BC_CAF2021_C.R')
+  # matMAP_C <- matMAP
+  matMAP_C <- readRDS( "CAF2021_parMAP_00_37.rds" )
+
+  # source('BC_CAF2021_G.R')
+  # matMAP_G <- matMAP
+  matMAP_G <- readRDS( "CAF2021_parMAP_05_31.rds" )
+
 ```
 
 
-## Running all farms
+## Verifying posterior distributions for tree-specific parameters
+
+```{r}
+  # KAC
+  range( matMAP_C["KAC(1)",if_C1.E] )    ; range( matMAP_C["KAC(1)",if_C1.I] )
+  range( matMAP_C["KAC(2)",if_C2.B] )    ; range( matMAP_C["KAC(2)",if_C2.A] )
+  range( matMAP_C["KAC(3)",if_C3.G] )    ; range( matMAP_C["KAC(3)",if_C3.C] )
+  
+  # KACEXP
+  range( matMAP_C["KACEXP(1)",if_C1.E] ) ; range( matMAP_C["KACEXP(1)",if_C1.I] )
+  range( matMAP_C["KACEXP(2)",if_C2.B] ) ; range( matMAP_C["KACEXP(2)",if_C2.A] )
+  range( matMAP_C["KACEXP(3)",if_C3.G] ) ; range( matMAP_C["KACEXP(3)",if_C3.C] )
+
+  # KH
+  range( matMAP_C["KH(1)",if_C1.E] )     ; range( matMAP_C["KH(1)",if_C1.I] )
+  range( matMAP_C["KH(2)",if_C2.B] )     ; range( matMAP_C["KH(2)",if_C2.A] )
+  range( matMAP_C["KH(3)",if_C3.G] )     ; range( matMAP_C["KH(3)",if_C3.C] )
+
+  # KHEXP
+  range( matMAP_C["KHEXP(1)",if_C1.E] )  ; range( matMAP_C["KHEXP(1)",if_C1.I] )
+  range( matMAP_C["KHEXP(2)",if_C2.B] )  ; range( matMAP_C["KHEXP(2)",if_C2.A] )
+  range( matMAP_C["KHEXP(3)",if_C3.G] )  ; range( matMAP_C["KHEXP(3)",if_C3.C] )
+```
+
+```{r}
+  # KAC
+                                           range( matMAP_G["KAC(1)",if_G1.I] )
+  range( matMAP_G["KAC(2)",if_G2.B] )    ; range( matMAP_G["KAC(2)",if_G2.A] )
+  range( matMAP_G["KAC(3)",if_G3.G] )    ; range( matMAP_G["KAC(3)",if_G3.C] )
+  
+  # KACEXP
+                                           range( matMAP_G["KACEXP(1)",if_G1.I] )
+  range( matMAP_G["KACEXP(2)",if_G2.B] ) ; range( matMAP_G["KACEXP(2)",if_G2.A] )
+  range( matMAP_G["KACEXP(3)",if_G3.G] ) ; range( matMAP_G["KACEXP(3)",if_G3.C] )
+
+  # KH
+                                           range( matMAP_G["KH(1)",if_G1.I] )
+  range( matMAP_G["KH(2)",if_G2.B] )     ; range( matMAP_G["KH(2)",if_G2.A] )
+  range( matMAP_G["KH(3)",if_G3.G] )     ; range( matMAP_G["KH(3)",if_G3.C] )
+
+  # KHEXP
+                                           range( matMAP_G["KHEXP(1)",if_G1.I] )
+  range( matMAP_G["KHEXP(2)",if_G2.B] )  ; range( matMAP_G["KHEXP(2)",if_G2.A] )
+  range( matMAP_G["KHEXP(3)",if_G3.G] )  ; range( matMAP_G["KHEXP(3)",if_G3.C] )
+```
+
+
+## Running all farms with MAP parameter vector
 
 ```{r list_outF_C}
   list_outF_C <- list_parF_C <- vector( "list", n_C.f )
@@ -1348,10 +1392,6 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
     file_init <- paste0( "initialisation/CG/inititialise_CAF2021_C_f", fi, ".R" )
     source( file_init )
     
-    #######################
-    # params <- matMAP_C[,fi]
-    #######################
-    
     nF_C                     <- 3
     mat_parF                 <- matrix( NA, nF_C, 1+length(names_params) )
     mat_outF                 <- matrix( NA, nF_C, 1+length(vars_Summary) )
@@ -1360,18 +1400,13 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
     mat_parF[,"FarmSetting"] <- 1:nF_C
     mat_outF[,"FarmSetting"] <- 1:nF_C
     
-    CSOM0   <- params[ which(names_params=="CSOM0") ]
-    params1 <- params
     for(iF in 1:nF_C) {
       if( iF==2 ) {
-        params <- params1
-        params <- set_par( "CSOM0", CSOM0*0.5, params )
-        # params <- set_par( "FCSOMF0"  , 0.25, params )
-        # params <- set_par( "NFERTMULT", 0.5 , params )
-        # params <- set_par( "RAINMULT" , 0.5 , params )
+        params <- matMAP_C[,fi]
       }
       if( iF==3 ) {
-        params <- params1
+        params <- matMAP_C[,fi]
+        CSOM0  <- params[ which(names_params=="CSOM0") ]
         params <- set_par( "CSOM0", CSOM0*2  , params )
         # params <- set_par( "FCSOMF0"  , 0.75, params )
         # params <- set_par( "NFERTMULT", 2   , params )
@@ -1428,6 +1463,38 @@ Verifying the list of farm-specific summary outputs:
   pF1_C <- dfparFSummary( df_C.f_sim, Fi=1 )
   pF2_C <- dfparFSummary( df_C.f_sim, Fi=2 )
   pF3_C <- dfparFSummary( df_C.f_sim, Fi=3 )
+```
+
+```{r, echo=T}
+  summary( oF2_C[if_C1.E,"CAtree_t_1b"], digits=3 ) # Erythrina final two years
+  summary( oF2_C[if_C1.I,"CAtree_t_1b"], digits=3 ) # Inga final two years
+  summary( oF2_C[if_C2.B,"CAtree_t_2b"], digits=3 ) # Banana final two years
+  summary( oF2_C[if_C2.A,"CAtree_t_2b"], digits=3 ) # Avocado final two years
+  summary( oF2_C[if_C3.G,"CAtree_t_3b"], digits=3 ) # Grevillea final two years
+  summary( oF2_C[if_C3.C,"CAtree_t_3b"], digits=3 ) # Cordia final two years
+
+  summary( oF2_G[if_G1.I,"CAtree_t_1b"], digits=3 ) # Inga final two years
+  summary( oF2_G[if_G2.B,"CAtree_t_2b"], digits=3 ) # Banana final two years
+  summary( oF2_G[if_G2.A,"CAtree_t_2b"], digits=3 ) # Avocado final two years
+  summary( oF2_G[if_G3.G,"CAtree_t_3b"], digits=3 ) # Grevillea final two years
+  summary( oF2_G[if_G3.C,"CAtree_t_3b"], digits=3 ) # Cordia final two years
+```
+
+```{r, echo=T}
+# Costa Rica, MAP
+  summary( oF2_C[if_C1.E,"H_t_1b"], digits=3 ) # Erythrina final two years
+  summary( oF2_C[if_C1.I,"H_t_1b"], digits=3 ) # Inga final two years
+  summary( oF2_C[if_C2.B,"H_t_2b"], digits=3 ) # Banana final two years
+  summary( oF2_C[if_C2.A,"H_t_2b"], digits=3 ) # Avocado final two years
+  summary( oF2_C[if_C3.G,"H_t_3b"], digits=3 ) # Grevillea final two years
+  summary( oF2_C[if_C3.C,"H_t_3b"], digits=3 ) # Cordia final two years
+
+# Guatemala, MAP
+  summary( oF2_G[if_G1.I,"H_t_1b"], digits=3 ) # Inga final two years
+  summary( oF2_G[if_G2.B,"H_t_2b"], digits=3 ) # Banana final two years
+  summary( oF2_G[if_G2.A,"H_t_2b"], digits=3 ) # Avocado final two years
+  summary( oF2_G[if_G3.G,"H_t_3b"], digits=3 ) # Grevillea final two years
+  summary( oF2_G[if_G3.C,"H_t_3b"], digits=3 ) # Cordia final two years
 ```
 
 ```{r}
@@ -1520,10 +1587,6 @@ Farm 1073, with 80 avocado trees per hectare, has a simulated shade level of abo
     file_init <- paste0( "initialisation/CG/inititialise_CAF2021_G_f", fi, ".R" )
     source( file_init )
 
-    #######################
-    # params <- matMAP_G[,fi]
-    #######################
-    
     nF_G                     <- 3
     mat_parF                 <- matrix( NA, nF_G, 1+length(names_params) )
     mat_outF                 <- matrix( NA, nF_G, 1+length(vars_Summary) )
@@ -1532,18 +1595,13 @@ Farm 1073, with 80 avocado trees per hectare, has a simulated shade level of abo
     mat_parF[,"FarmSetting"] <- 1:nF_G
     mat_outF[,"FarmSetting"] <- 1:nF_G
     
-    CSOM0   <- params[ which(names_params=="CSOM0") ]
-    params1 <- params
     for(iF in 1:nF_G) {
       if( iF==2 ) {
-        params <- params1
-        params <- set_par( "CSOM0", CSOM0*0.5, params )
-        # params <- set_par( "FCSOMF0"  , 0.25, params )
-        # params <- set_par( "NFERTMULT", 0.5 , params )
-        # params <- set_par( "RAINMULT" , 0.5 , params )
+        params <- params <- matMAP_G[,fi]
       }
       if( iF==3 ) {
-        params <- params1
+        params <- params <- matMAP_G[,fi]
+        CSOM0  <- params[ which(names_params=="CSOM0") ]
         params <- set_par( "CSOM0", CSOM0*2  , params )
         # params <- set_par( "FCSOMF0"  , 0.75, params )
         # params <- set_par( "NFERTMULT", 2   , params )
@@ -1915,6 +1973,10 @@ Results of these simulations are shown in Figs \ref{fig:XX14C}, \ref{fig:XX14G},
 ```
 
 ```{r}
+  iF <- 2
+```
+
+```{r}
   listmat_nt_C[[1]] <- t( sapply( 1:nnt1_C, function(i){ cbind(
     df_C.f    [int1_C,]$code     [[i]],
     df_C.f    [int1_C,]$slope    [[i]],
@@ -1923,14 +1985,14 @@ Results of these simulations are shown in Figs \ref{fig:XX14C}, \ref{fig:XX14G},
     df_C.f    [int1_C,]$shade    [[i]],
     df_C.f    [int1_C,]$yield1819[[i]],
     df_C.f    [int1_C,]$yield1920[[i]],
-    df_C.f_sim[int1_C,]$outF     [[i]][,"harvDM_f_ha1819"][1],
-    df_C.f_sim[int1_C,]$outF     [[i]][,"harvDM_f_ha1920"][1],
-    df_C.f_sim[int1_C,]$outF     [[i]][,"harvDM_f_hay"   ][1],
-    df_C.f_sim[int1_C,]$outF     [[i]][,"D_Csoil"        ][1],
-    df_C.f_sim[int1_C,]$outF     [[i]][,"Shade_f"        ][1],
-    df_C.f_sim[int1_C,]$outF     [[i]][,"Nleaching_fb"   ][1],
-    df_C.f_sim[int1_C,]$outF     [[i]][,"Crunoff_fb"     ][1],
-    df_C.f_sim[int1_C,]$outF     [[i]][,"Csoil_fb"       ][1]
+    df_C.f_sim[int1_C,]$outF     [[i]][,"harvDM_f_ha1819"][iF],
+    df_C.f_sim[int1_C,]$outF     [[i]][,"harvDM_f_ha1920"][iF],
+    df_C.f_sim[int1_C,]$outF     [[i]][,"harvDM_f_hay"   ][iF],
+    df_C.f_sim[int1_C,]$outF     [[i]][,"D_Csoil"        ][iF],
+    df_C.f_sim[int1_C,]$outF     [[i]][,"Shade_f"        ][iF],
+    df_C.f_sim[int1_C,]$outF     [[i]][,"Nleaching_fb"   ][iF],
+    df_C.f_sim[int1_C,]$outF     [[i]][,"Crunoff_fb"     ][iF],
+    df_C.f_sim[int1_C,]$outF     [[i]][,"Csoil_fb"       ][iF]
   ) } ) )
   colnames(listmat_nt_C[[1]]) <- varnames.listmat
 
@@ -1942,14 +2004,14 @@ Results of these simulations are shown in Figs \ref{fig:XX14C}, \ref{fig:XX14G},
     df_C.f    [int2_C,]$shade    [[i]],
     df_C.f    [int2_C,]$yield1819[[i]],
     df_C.f    [int2_C,]$yield1920[[i]],
-    df_C.f_sim[int2_C,]$outF     [[i]][,"harvDM_f_ha1819"][1],
-    df_C.f_sim[int2_C,]$outF     [[i]][,"harvDM_f_ha1920"][1],
-    df_C.f_sim[int2_C,]$outF     [[i]][,"harvDM_f_hay"   ][1],
-    df_C.f_sim[int2_C,]$outF     [[i]][,"D_Csoil"        ][1],
-    df_C.f_sim[int2_C,]$outF     [[i]][,"Shade_f"        ][1],
-    df_C.f_sim[int2_C,]$outF     [[i]][,"Nleaching_fb"   ][1],
-    df_C.f_sim[int2_C,]$outF     [[i]][,"Crunoff_fb"     ][1],
-    df_C.f_sim[int2_C,]$outF     [[i]][,"Csoil_fb"       ][1]
+    df_C.f_sim[int2_C,]$outF     [[i]][,"harvDM_f_ha1819"][iF],
+    df_C.f_sim[int2_C,]$outF     [[i]][,"harvDM_f_ha1920"][iF],
+    df_C.f_sim[int2_C,]$outF     [[i]][,"harvDM_f_hay"   ][iF],
+    df_C.f_sim[int2_C,]$outF     [[i]][,"D_Csoil"        ][iF],
+    df_C.f_sim[int2_C,]$outF     [[i]][,"Shade_f"        ][iF],
+    df_C.f_sim[int2_C,]$outF     [[i]][,"Nleaching_fb"   ][iF],
+    df_C.f_sim[int2_C,]$outF     [[i]][,"Crunoff_fb"     ][iF],
+    df_C.f_sim[int2_C,]$outF     [[i]][,"Csoil_fb"       ][iF]
   ) } ) )
   colnames(listmat_nt_C[[2]]) <- varnames.listmat
 
@@ -1961,14 +2023,14 @@ Results of these simulations are shown in Figs \ref{fig:XX14C}, \ref{fig:XX14G},
     df_C.f    [int3_C,]$shade    [[i]],
     df_C.f    [int3_C,]$yield1819[[i]],
     df_C.f    [int3_C,]$yield1920[[i]],
-    df_C.f_sim[int3_C,]$outF     [[i]][,"harvDM_f_ha1819"][1],
-    df_C.f_sim[int3_C,]$outF     [[i]][,"harvDM_f_ha1920"][1],
-    df_C.f_sim[int3_C,]$outF     [[i]][,"harvDM_f_hay"   ][1],
-    df_C.f_sim[int3_C,]$outF     [[i]][,"D_Csoil"        ][1],
-    df_C.f_sim[int3_C,]$outF     [[i]][,"Shade_f"        ][1],
-    df_C.f_sim[int3_C,]$outF     [[i]][,"Nleaching_fb"   ][1],
-    df_C.f_sim[int3_C,]$outF     [[i]][,"Crunoff_fb"     ][1],
-    df_C.f_sim[int3_C,]$outF     [[i]][,"Csoil_fb"       ][1]
+    df_C.f_sim[int3_C,]$outF     [[i]][,"harvDM_f_ha1819"][iF],
+    df_C.f_sim[int3_C,]$outF     [[i]][,"harvDM_f_ha1920"][iF],
+    df_C.f_sim[int3_C,]$outF     [[i]][,"harvDM_f_hay"   ][iF],
+    df_C.f_sim[int3_C,]$outF     [[i]][,"D_Csoil"        ][iF],
+    df_C.f_sim[int3_C,]$outF     [[i]][,"Shade_f"        ][iF],
+    df_C.f_sim[int3_C,]$outF     [[i]][,"Nleaching_fb"   ][iF],
+    df_C.f_sim[int3_C,]$outF     [[i]][,"Crunoff_fb"     ][iF],
+    df_C.f_sim[int3_C,]$outF     [[i]][,"Csoil_fb"       ][iF]
   ) } ) )
   colnames(listmat_nt_C[[3]]) <- varnames.listmat
 ```
@@ -1982,14 +2044,14 @@ Results of these simulations are shown in Figs \ref{fig:XX14C}, \ref{fig:XX14G},
     df_G.f    [int1_G,]$shade    [[i]],
     df_G.f    [int1_G,]$yield1819[[i]],
     df_G.f    [int1_G,]$yield1920[[i]],
-    df_G.f_sim[int1_G,]$outF     [[i]][,"harvDM_f_ha1819"][1],
-    df_G.f_sim[int1_G,]$outF     [[i]][,"harvDM_f_ha1920"][1],
-    df_G.f_sim[int1_G,]$outF     [[i]][,"harvDM_f_hay"   ][1],
-    df_G.f_sim[int1_G,]$outF     [[i]][,"D_Csoil"        ][1],
-    df_G.f_sim[int1_G,]$outF     [[i]][,"Shade_f"        ][1],
-    df_G.f_sim[int1_G,]$outF     [[i]][,"Nleaching_fb"   ][1],
-    df_G.f_sim[int1_G,]$outF     [[i]][,"Crunoff_fb"     ][1],
-    df_G.f_sim[int1_G,]$outF     [[i]][,"Csoil_fb"       ][1]
+    df_G.f_sim[int1_G,]$outF     [[i]][,"harvDM_f_ha1819"][iF],
+    df_G.f_sim[int1_G,]$outF     [[i]][,"harvDM_f_ha1920"][iF],
+    df_G.f_sim[int1_G,]$outF     [[i]][,"harvDM_f_hay"   ][iF],
+    df_G.f_sim[int1_G,]$outF     [[i]][,"D_Csoil"        ][iF],
+    df_G.f_sim[int1_G,]$outF     [[i]][,"Shade_f"        ][iF],
+    df_G.f_sim[int1_G,]$outF     [[i]][,"Nleaching_fb"   ][iF],
+    df_G.f_sim[int1_G,]$outF     [[i]][,"Crunoff_fb"     ][iF],
+    df_G.f_sim[int1_G,]$outF     [[i]][,"Csoil_fb"       ][iF]
   ) } ) )
   colnames(listmat_nt_G[[1]]) <- varnames.listmat
 
@@ -2001,14 +2063,14 @@ Results of these simulations are shown in Figs \ref{fig:XX14C}, \ref{fig:XX14G},
     df_G.f    [int2_G,]$shade    [[i]],
     df_G.f    [int2_G,]$yield1819[[i]],
     df_G.f    [int2_G,]$yield1920[[i]],
-    df_G.f_sim[int2_G,]$outF     [[i]][,"harvDM_f_ha1819"][1],
-    df_G.f_sim[int2_G,]$outF     [[i]][,"harvDM_f_ha1920"][1],
-    df_G.f_sim[int2_G,]$outF     [[i]][,"harvDM_f_hay"   ][1],
-    df_G.f_sim[int2_G,]$outF     [[i]][,"D_Csoil"        ][1],
-    df_G.f_sim[int2_G,]$outF     [[i]][,"Shade_f"        ][1],
-    df_G.f_sim[int2_G,]$outF     [[i]][,"Nleaching_fb"   ][1],
-    df_G.f_sim[int2_G,]$outF     [[i]][,"Crunoff_fb"     ][1],
-    df_G.f_sim[int2_G,]$outF     [[i]][,"Csoil_fb"       ][1]
+    df_G.f_sim[int2_G,]$outF     [[i]][,"harvDM_f_ha1819"][iF],
+    df_G.f_sim[int2_G,]$outF     [[i]][,"harvDM_f_ha1920"][iF],
+    df_G.f_sim[int2_G,]$outF     [[i]][,"harvDM_f_hay"   ][iF],
+    df_G.f_sim[int2_G,]$outF     [[i]][,"D_Csoil"        ][iF],
+    df_G.f_sim[int2_G,]$outF     [[i]][,"Shade_f"        ][iF],
+    df_G.f_sim[int2_G,]$outF     [[i]][,"Nleaching_fb"   ][iF],
+    df_G.f_sim[int2_G,]$outF     [[i]][,"Crunoff_fb"     ][iF],
+    df_G.f_sim[int2_G,]$outF     [[i]][,"Csoil_fb"       ][iF]
   ) } ) )
   colnames(listmat_nt_G[[2]]) <- varnames.listmat
 
@@ -2020,14 +2082,14 @@ Results of these simulations are shown in Figs \ref{fig:XX14C}, \ref{fig:XX14G},
     df_G.f    [int3_G,]$shade    [[i]],
     df_G.f    [int3_G,]$yield1819[[i]],
     df_G.f    [int3_G,]$yield1920[[i]],
-    df_G.f_sim[int3_G,]$outF     [[i]][,"harvDM_f_ha1819"][1],
-    df_G.f_sim[int3_G,]$outF     [[i]][,"harvDM_f_ha1920"][1],
-    df_G.f_sim[int3_G,]$outF     [[i]][,"harvDM_f_hay"   ][1],
-    df_G.f_sim[int3_G,]$outF     [[i]][,"D_Csoil"        ][1],
-    df_G.f_sim[int3_G,]$outF     [[i]][,"Shade_f"        ][1],
-    df_G.f_sim[int3_G,]$outF     [[i]][,"Nleaching_fb"   ][1],
-    df_G.f_sim[int3_G,]$outF     [[i]][,"Crunoff_fb"     ][1],
-    df_G.f_sim[int3_G,]$outF     [[i]][,"Csoil_fb"       ][1]
+    df_G.f_sim[int3_G,]$outF     [[i]][,"harvDM_f_ha1819"][iF],
+    df_G.f_sim[int3_G,]$outF     [[i]][,"harvDM_f_ha1920"][iF],
+    df_G.f_sim[int3_G,]$outF     [[i]][,"harvDM_f_hay"   ][iF],
+    df_G.f_sim[int3_G,]$outF     [[i]][,"D_Csoil"        ][iF],
+    df_G.f_sim[int3_G,]$outF     [[i]][,"Shade_f"        ][iF],
+    df_G.f_sim[int3_G,]$outF     [[i]][,"Nleaching_fb"   ][iF],
+    df_G.f_sim[int3_G,]$outF     [[i]][,"Crunoff_fb"     ][iF],
+    df_G.f_sim[int3_G,]$outF     [[i]][,"Csoil_fb"       ][iF]
   ) } ) )
   colnames(listmat_nt_G[[3]]) <- varnames.listmat
 ```
