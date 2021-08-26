@@ -1195,41 +1195,170 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
                 col.names=c("Guatemala",paste0("T",1:3)) )
 ```
 
+```{r}
+  dir.init <- "initialisation/CG/"
+  dir.par  <- "parameters/"
+```
+
+```{r}
+  if_C.1E <- which(Tnames_C[,1]=="E") ; if_C.1I <- which(Tnames_C[,1]=="I")
+  if_C.2B <- which(Tnames_C[,2]=="B") ; if_C.2A <- which(Tnames_C[,2]=="A")
+  if_C.3G <- which(Tnames_C[,3]=="G") ; if_C.3C <- which(Tnames_C[,3]=="C")
+
+  if_G.1I <- which(Tnames_G[,1]=="I")
+  if_G.2B <- which(Tnames_G[,2]=="B") ; if_G.2A <- which(Tnames_G[,2]=="A")
+  if_G.3G <- which(Tnames_G[,3]=="G") ; if_G.3C <- which(Tnames_G[,3]=="C")
+  
+  file.init_C    <- paste0(dir.init,"inititialise_CAF2021_C_f", 1         , ".R")
+  file.init_C.1E <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.1E[1], ".R")
+  file.init_C.1I <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.1I[1], ".R")
+  file.init_C.2B <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.2B[1], ".R")
+  file.init_C.2A <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.2A[1], ".R")
+  file.init_C.3G <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.3G[1], ".R")
+  file.init_C.3C <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C.3C[1], ".R")
+
+  file.init_G    <- paste0(dir.init,"inititialise_CAF2021_G_f", 1         , ".R")
+  file.init_G.1I <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G.1I[1], ".R")
+  file.init_G.2B <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G.2B[1], ".R")
+  file.init_G.2A <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G.2A[1], ".R")
+  file.init_G.3G <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G.3G[1], ".R")
+  file.init_G.3C <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G.3C[1], ".R")
+```
+
 
 ## Creating country-specific parameter-distribution files for BC
 
 ```{r}
-  dir.par     <- "parameters/"
-  dir.init    <- "initialisation/CG/"
-  file.init_C <- paste0( dir.init, "inititialise_CAF2021_C_f", 1, ".R" )
+  source( file.init_C.1E ) ; par_C.1E <- params
+  source( file.init_C.1I ) ; par_C.1I <- params
+  source( file.init_C.2B ) ; par_C.2B <- params
+  source( file.init_C.2A ) ; par_C.2A <- params
+  source( file.init_C.3G ) ; par_C.3G <- params
+  source( file.init_C.3C ) ; par_C.3C <- params
+
+  source( file.init_G.1I ) ; par_G.1I <- params
+  source( file.init_G.2B ) ; par_G.2B <- params
+  source( file.init_G.2A ) ; par_G.2A <- params
+  source( file.init_G.3G ) ; par_G.3G <- params
+  source( file.init_G.3C ) ; par_G.3C <- params
+```
+
+
+```{r}
   source( file.init_C )
 
-  pAll     <- c("CNSOM0MULT","CSOM0MULT","FWCWPMULT","WCSTMULT",
-                "SHADETARGETMULT","NFERTMULT")
+  pAll     <- c("KEXT","RUBISC","TRANCO","YG","TCSOMF","TCSOMS","WCSTMULT")
   npAll    <- length(pAll) ; ipAll <- rep(NA,npAll)
   for(p in 1:npAll) { ipAll[p]     <- which( names_params==pAll[p] ) }
 
-  pT       <- c("KAC","KACEXP","KH","KHEXP")
+  pT       <- c("FLTMAX","FST","FWT","KAC","KACEXP","KH","KHEXP",
+                "LAIMAXT","LUEMAX","SLAT")
   npT      <- length(pT) ; list_ipT <- vector("list",npT)
   for(p in 1:npT) { list_ipT[[p]] <- which( startsWith( names_params,
                                                         paste0(pT[p],"(") ) ) }
+  
+  df_par_BC_C <- data.frame( ip = c( ipAll, unlist(list_ipT) ) )
+  vecstr <- function( vec ) { paste0("c(",paste(vec,collapse=","),")") }
+  df_par_BC_C <- df_par_BC_C %>%
+    mutate ( name   = names_params[ip] ) %>%
+    mutate ( val.1E = par_C.1E    [ip] ) %>%
+    mutate ( val.1I = par_C.1I    [ip] ) %>%
+    mutate ( val.2B = par_C.2B    [ip] ) %>%
+    mutate ( val.2A = par_C.2A    [ip] ) %>%
+    mutate ( val.3G = par_C.3G    [ip] ) %>%
+    mutate ( val.3C = par_C.3C    [ip] ) %>%
+    mutate ( rep    = ifelse( endsWith(name,")"), 2, 1 ) ) %>%
+    uncount( rep, .id="species" ) %>%
+    mutate ( val = ifelse( (species==1 & endsWith(name,"1)") ), val.1E,
+                   ifelse( (species==2 & endsWith(name,"1)") ), val.1I,
+                   ifelse( (species==1 & endsWith(name,"2)") ), val.2B,
+                   ifelse( (species==2 & endsWith(name,"2)") ), val.2A,
+                   ifelse( (species==1 & endsWith(name,"3)") ), val.3G,
+                   ifelse( (species==2 & endsWith(name,"3)") ), val.3C,
+                           val.1E )))))) ) %>%
+    mutate( val     = round( val       , 4 ) ) %>%
+    mutate( val.min = round( val * 0.8 , 4 ) ) %>%
+    mutate( val.max = round( val * 1.25, 4 ) ) %>%
+    dplyr::select( ip, name, species, val.min, val, val.max ) %>%
+    mutate ( farms = ifelse( (species==1 & endsWith(name,"1)") ), "if_C.1E",
+                     ifelse( (species==2 & endsWith(name,"1)") ), "if_C.1I",
+                     ifelse( (species==1 & endsWith(name,"2)") ), "if_C.2B",
+                     ifelse( (species==2 & endsWith(name,"2)") ), "if_C.2A",
+                     ifelse( (species==1 & endsWith(name,"3)") ), "if_C.3G",
+                     ifelse( (species==2 & endsWith(name,"3)") ), "if_C.3C",
+                              "1:nSites" )))))) )
+    # mutate ( farms = ifelse( (species==1 & endsWith(name,"1)") ), vecstr(if_C.1E),
+    #                  ifelse( (species==2 & endsWith(name,"1)") ), vecstr(if_C.1I),
+    #                  ifelse( (species==1 & endsWith(name,"2)") ), vecstr(if_C.2B),
+    #                  ifelse( (species==2 & endsWith(name,"2)") ), vecstr(if_C.2A),
+    #                  ifelse( (species==1 & endsWith(name,"3)") ), vecstr(if_C.3G),
+    #                  ifelse( (species==2 & endsWith(name,"3)") ), vecstr(if_C.3C),
+    #                           "1:nSites" )))))) )
+```
+
+```{r}
+  source( file.init_G )
+
+  pAll     <- c("KEXT","RUBISC","TRANCO","YG","TCSOMF","TCSOMS","WCSTMULT")
+  npAll    <- length(pAll) ; ipAll <- rep(NA,npAll)
+  for(p in 1:npAll) { ipAll[p]     <- which( names_params==pAll[p] ) }
+
+  pT       <- c("FLTMAX","FST","FWT","KAC","KACEXP","KH","KHEXP",
+                "LAIMAXT","LUEMAX","SLAT")
+  npT      <- length(pT) ; list_ipT <- vector("list",npT)
+  for(p in 1:npT) { list_ipT[[p]] <- which( startsWith( names_params,
+                                                        paste0(pT[p],"(") ) ) }
+  
+  df_par_BC_G <- data.frame( ip = c( ipAll, unlist(list_ipT) ) )
+  vecstr <- function( vec ) { paste0("c(",paste(vec,collapse=","),")") }
+  df_par_BC_G <- df_par_BC_G %>%
+    mutate ( name   = names_params[ip] ) %>%
+    mutate ( val.1I = par_G.1I    [ip] ) %>%
+    mutate ( val.2B = par_G.2B    [ip] ) %>%
+    mutate ( val.2A = par_G.2A    [ip] ) %>%
+    mutate ( val.3G = par_G.3G    [ip] ) %>%
+    mutate ( val.3C = par_G.3C    [ip] ) %>%
+    mutate ( rep    = ifelse( endsWith(name,"2)") | endsWith(name,"3)"), 2, 1 ) ) %>%
+    uncount( rep, .id="species" ) %>%
+    mutate ( val = ifelse( (species==1 & endsWith(name,"2)") ), val.2B,
+                   ifelse( (species==2 & endsWith(name,"2)") ), val.2A,
+                   ifelse( (species==1 & endsWith(name,"3)") ), val.3G,
+                   ifelse( (species==2 & endsWith(name,"3)") ), val.3C,
+                           val.1I )))) ) %>%
+    mutate( val     = round( val       , 4 ) ) %>%
+    mutate( val.min = round( val * 0.8 , 4 ) ) %>%
+    mutate( val.max = round( val * 1.25, 4 ) ) %>%
+    dplyr::select( ip, name, species, val.min, val, val.max ) %>%
+    mutate ( farms = ifelse( (             endsWith(name,"1)") ), "if_G.1I",
+                     ifelse( (species==1 & endsWith(name,"2)") ), "if_G.2B",
+                     ifelse( (species==2 & endsWith(name,"2)") ), "if_G.2A",
+                     ifelse( (species==1 & endsWith(name,"3)") ), "if_G.3G",
+                     ifelse( (species==2 & endsWith(name,"3)") ), "if_G.3C",
+                              "1:nSites" ))))) )
+    # mutate ( farms = ifelse( (             endsWith(name,"1)") ), vecstr(if_G.1I),
+    #                  ifelse( (species==1 & endsWith(name,"2)") ), vecstr(if_G.2B),
+    #                  ifelse( (species==2 & endsWith(name,"2)") ), vecstr(if_G.2A),
+    #                  ifelse( (species==1 & endsWith(name,"3)") ), vecstr(if_G.3G),
+    #                  ifelse( (species==2 & endsWith(name,"3)") ), vecstr(if_G.3C),
+    #                           "1:nSites" ))))) )
 ```
 
 ```{r}
   file.parBC_C <- paste0( dir.par, "parameters_BC_C.txt" ) 
+  df_par_BC_C %>%
+    dplyr::select( name, val.min, val, val.max, farms ) %>%
+    write.table( file.parBC_C, sep="\t", row.names=F, col.names=F )
+  
+  file.parBC_G <- paste0( dir.par, "parameters_BC_G.txt" ) 
+  df_par_BC_G %>%
+    dplyr::select( name, val.min, val, val.max, farms ) %>%
+    write.table( file.parBC_G, sep="\t", row.names=F, col.names=F )
+```
+
+```{r, eval=F}
+  file.parBC_C <- paste0( dir.par, "parameters_BC_C.txt" ) 
   file.create( file.parBC_C )
   
-  if_C1.E <- which(Tnames_C[,1]=="E") ; if_C1.I <- which(Tnames_C[,1]=="I")
-  if_C2.B <- which(Tnames_C[,2]=="B") ; if_C2.A <- which(Tnames_C[,2]=="A")
-  if_C3.G <- which(Tnames_C[,3]=="G") ; if_C3.C <- which(Tnames_C[,3]=="C")
-
-  file.init_C.E <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C1.E[1], ".R")
-  file.init_C.I <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C1.I[1], ".R")
-  file.init_C.B <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C2.B[1], ".R")
-  file.init_C.A <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C2.A[1], ".R")
-  file.init_C.G <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C3.G[1], ".R")
-  file.init_C.C <- paste0(dir.init,"inititialise_CAF2021_C_f", if_C3.C[1], ".R")
-
   source( file.init_C )
   pAll.def         <- round( params[ipAll] , 3 )
   pAll.min         <- round( pAll.def * 0.5, 3 )
@@ -1243,44 +1372,6 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
                  pAll.max[p],"\t",
                  "1:nSites\n"      ),
     file=file.parBC_C, append=TRUE ) }
-  
-  # for(p in 1:npT) {
-  #   cat( paste0( ... ),
-  #   file=file.parBC_C, append=TRUE ) }
-```
-
-```{r}
-  file.parBC_G <- paste0( dir.par, "parameters_BC_G.txt" ) 
-  file.create( file.parBC_G )
-  
-  if_G1.I <- which(Tnames_G[,1]=="I")
-  if_G2.B <- which(Tnames_G[,2]=="B") ; if_G2.A <- which(Tnames_G[,2]=="A")
-  if_G3.G <- which(Tnames_G[,3]=="G") ; if_G3.C <- which(Tnames_G[,3]=="C")
-
-  file.init_G   <- paste0(dir.init,"inititialise_CAF2021_G_f", 1        , ".R")
-  file.init_G.I <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G1.I[1], ".R")
-  file.init_G.B <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G2.B[1], ".R")
-  file.init_G.A <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G2.A[1], ".R")
-  file.init_G.G <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G3.G[1], ".R")
-  file.init_G.C <- paste0(dir.init,"inititialise_CAF2021_G_f", if_G3.C[1], ".R")
-
-  source( file.init_G )
-  pAll.def         <- round( params[ipAll] , 3 )
-  pAll.min         <- round( pAll.def * 0.5, 3 )
-  pAll.max         <- round( pAll.def * 1.5, 3 )
-  pAll.max[c(3,5)] <- 1.1
-
-  for(p in 1:npAll) {
-    cat( paste0( pAll[p]    ,"\t",
-                 pAll.min[p],"\t",
-                 pAll.def[p],"\t",
-                 pAll.max[p],"\t",
-                 "1:nSites\n"     ),
-    file=file.parBC_G, append=TRUE ) }
-  
-  # for(p in 1:npT) {
-  #   cat( paste0( ... ),
-  #   file=file.parBC_G, append=TRUE ) }
 ```
 
 
@@ -1352,46 +1443,46 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
 
 ```{r}
   # KAC
-  range( matMAP_C["KAC(1)",if_C1.E] )    ; range( matMAP_C["KAC(1)",if_C1.I] )
-  range( matMAP_C["KAC(2)",if_C2.B] )    ; range( matMAP_C["KAC(2)",if_C2.A] )
-  range( matMAP_C["KAC(3)",if_C3.G] )    ; range( matMAP_C["KAC(3)",if_C3.C] )
+  range( matMAP_C["KAC(1)",if_C.1E] )    ; range( matMAP_C["KAC(1)",if_C.1I] )
+  range( matMAP_C["KAC(2)",if_C.2B] )    ; range( matMAP_C["KAC(2)",if_C.2A] )
+  range( matMAP_C["KAC(3)",if_C.3G] )    ; range( matMAP_C["KAC(3)",if_C.3C] )
   
   # KACEXP
-  range( matMAP_C["KACEXP(1)",if_C1.E] ) ; range( matMAP_C["KACEXP(1)",if_C1.I] )
-  range( matMAP_C["KACEXP(2)",if_C2.B] ) ; range( matMAP_C["KACEXP(2)",if_C2.A] )
-  range( matMAP_C["KACEXP(3)",if_C3.G] ) ; range( matMAP_C["KACEXP(3)",if_C3.C] )
+  range( matMAP_C["KACEXP(1)",if_C.1E] ) ; range( matMAP_C["KACEXP(1)",if_C.1I] )
+  range( matMAP_C["KACEXP(2)",if_C.2B] ) ; range( matMAP_C["KACEXP(2)",if_C.2A] )
+  range( matMAP_C["KACEXP(3)",if_C.3G] ) ; range( matMAP_C["KACEXP(3)",if_C.3C] )
 
   # KH
-  range( matMAP_C["KH(1)",if_C1.E] )     ; range( matMAP_C["KH(1)",if_C1.I] )
-  range( matMAP_C["KH(2)",if_C2.B] )     ; range( matMAP_C["KH(2)",if_C2.A] )
-  range( matMAP_C["KH(3)",if_C3.G] )     ; range( matMAP_C["KH(3)",if_C3.C] )
+  range( matMAP_C["KH(1)",if_C.1E] )     ; range( matMAP_C["KH(1)",if_C.1I] )
+  range( matMAP_C["KH(2)",if_C.2B] )     ; range( matMAP_C["KH(2)",if_C.2A] )
+  range( matMAP_C["KH(3)",if_C.3G] )     ; range( matMAP_C["KH(3)",if_C.3C] )
 
   # KHEXP
-  range( matMAP_C["KHEXP(1)",if_C1.E] )  ; range( matMAP_C["KHEXP(1)",if_C1.I] )
-  range( matMAP_C["KHEXP(2)",if_C2.B] )  ; range( matMAP_C["KHEXP(2)",if_C2.A] )
-  range( matMAP_C["KHEXP(3)",if_C3.G] )  ; range( matMAP_C["KHEXP(3)",if_C3.C] )
+  range( matMAP_C["KHEXP(1)",if_C.1E] )  ; range( matMAP_C["KHEXP(1)",if_C.1I] )
+  range( matMAP_C["KHEXP(2)",if_C.2B] )  ; range( matMAP_C["KHEXP(2)",if_C.2A] )
+  range( matMAP_C["KHEXP(3)",if_C.3G] )  ; range( matMAP_C["KHEXP(3)",if_C.3C] )
 ```
 
 ```{r}
   # KAC
-                                           range( matMAP_G["KAC(1)",if_G1.I] )
-  range( matMAP_G["KAC(2)",if_G2.B] )    ; range( matMAP_G["KAC(2)",if_G2.A] )
-  range( matMAP_G["KAC(3)",if_G3.G] )    ; range( matMAP_G["KAC(3)",if_G3.C] )
+                                           range( matMAP_G["KAC(1)",if_G.1I] )
+  range( matMAP_G["KAC(2)",if_G.2B] )    ; range( matMAP_G["KAC(2)",if_G.2A] )
+  range( matMAP_G["KAC(3)",if_G.3G] )    ; range( matMAP_G["KAC(3)",if_G.3C] )
   
   # KACEXP
-                                           range( matMAP_G["KACEXP(1)",if_G1.I] )
-  range( matMAP_G["KACEXP(2)",if_G2.B] ) ; range( matMAP_G["KACEXP(2)",if_G2.A] )
-  range( matMAP_G["KACEXP(3)",if_G3.G] ) ; range( matMAP_G["KACEXP(3)",if_G3.C] )
+                                           range( matMAP_G["KACEXP(1)",if_G.1I] )
+  range( matMAP_G["KACEXP(2)",if_G.2B] ) ; range( matMAP_G["KACEXP(2)",if_G.2A] )
+  range( matMAP_G["KACEXP(3)",if_G.3G] ) ; range( matMAP_G["KACEXP(3)",if_G.3C] )
 
   # KH
-                                           range( matMAP_G["KH(1)",if_G1.I] )
-  range( matMAP_G["KH(2)",if_G2.B] )     ; range( matMAP_G["KH(2)",if_G2.A] )
-  range( matMAP_G["KH(3)",if_G3.G] )     ; range( matMAP_G["KH(3)",if_G3.C] )
+                                           range( matMAP_G["KH(1)",if_G.1I] )
+  range( matMAP_G["KH(2)",if_G.2B] )     ; range( matMAP_G["KH(2)",if_G.2A] )
+  range( matMAP_G["KH(3)",if_G.3G] )     ; range( matMAP_G["KH(3)",if_G.3C] )
 
   # KHEXP
-                                           range( matMAP_G["KHEXP(1)",if_G1.I] )
-  range( matMAP_G["KHEXP(2)",if_G2.B] )  ; range( matMAP_G["KHEXP(2)",if_G2.A] )
-  range( matMAP_G["KHEXP(3)",if_G3.G] )  ; range( matMAP_G["KHEXP(3)",if_G3.C] )
+                                           range( matMAP_G["KHEXP(1)",if_G.1I] )
+  range( matMAP_G["KHEXP(2)",if_G.2B] )  ; range( matMAP_G["KHEXP(2)",if_G.2A] )
+  range( matMAP_G["KHEXP(3)",if_G.3G] )  ; range( matMAP_G["KHEXP(3)",if_G.3C] )
 ```
 
 
@@ -1425,7 +1516,8 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
       }
       if( iF==3 ) {
         params <- matMAP_C[,fi]
-        params <- set_par( "CNSOM0MULT"     , 0.5, params )
+        calendar_prunC[ 1:12, 1 ] <- 2009:2020
+        # params <- set_par( "CNSOM0MULT"     , 0.5, params )
         # params <- set_par( "CSOM0MULT"      , 0.5, params )
         # params <- set_par( "FWCWPMULT"      , 0.5, params )
         # params <- set_par( "WCSTMULT"       , 1.5, params )
@@ -1489,19 +1581,19 @@ Verifying the list of farm-specific summary outputs:
 ```
 
 ```{r, echo=T}
-  summary( oF2_C[if_C1.E,"CAtree_t_1b"], digits=3 ) # Erythrina final two years
-  summary( oF2_C[if_C1.I,"CAtree_t_1b"], digits=3 ) # Inga final two years
-  summary( oF2_C[if_C2.B,"CAtree_t_2b"], digits=3 ) # Banana final two years
-  summary( oF2_C[if_C2.A,"CAtree_t_2b"], digits=3 ) # Avocado final two years
-  summary( oF2_C[if_C3.G,"CAtree_t_3b"], digits=3 ) # Grevillea final two years
-  summary( oF2_C[if_C3.C,"CAtree_t_3b"], digits=3 ) # Cordia final two years
+  summary( oF2_C[if_C.1E,"CAtree_t_1b"], digits=3 ) # Erythrina final two years
+  summary( oF2_C[if_C.1I,"CAtree_t_1b"], digits=3 ) # Inga final two years
+  summary( oF2_C[if_C.2B,"CAtree_t_2b"], digits=3 ) # Banana final two years
+  summary( oF2_C[if_C.2A,"CAtree_t_2b"], digits=3 ) # Avocado final two years
+  summary( oF2_C[if_C.3G,"CAtree_t_3b"], digits=3 ) # Grevillea final two years
+  summary( oF2_C[if_C.3C,"CAtree_t_3b"], digits=3 ) # Cordia final two years
 
-  summary( oF2_C[if_C1.E,"H_t_1b"], digits=3 ) # Erythrina final two years
-  summary( oF2_C[if_C1.I,"H_t_1b"], digits=3 ) # Inga final two years
-  summary( oF2_C[if_C2.B,"H_t_2b"], digits=3 ) # Banana final two years
-  summary( oF2_C[if_C2.A,"H_t_2b"], digits=3 ) # Avocado final two years
-  summary( oF2_C[if_C3.G,"H_t_3b"], digits=3 ) # Grevillea final two years
-  summary( oF2_C[if_C3.C,"H_t_3b"], digits=3 ) # Cordia final two years
+  summary( oF2_C[if_C.1E,"H_t_1b"], digits=3 ) # Erythrina final two years
+  summary( oF2_C[if_C.1I,"H_t_1b"], digits=3 ) # Inga final two years
+  summary( oF2_C[if_C.2B,"H_t_2b"], digits=3 ) # Banana final two years
+  summary( oF2_C[if_C.2A,"H_t_2b"], digits=3 ) # Avocado final two years
+  summary( oF2_C[if_C.3G,"H_t_3b"], digits=3 ) # Grevillea final two years
+  summary( oF2_C[if_C.3C,"H_t_3b"], digits=3 ) # Cordia final two years
 ```
 
 ```{r}
@@ -1608,7 +1700,8 @@ Farm 1073, with 80 avocado trees per hectare, has a simulated shade level of abo
       }
       if( iF==3 ) {
         params <- matMAP_G[,fi]
-        params <- set_par( "CNSOM0MULT"     , 0.5, params )
+        calendar_prunC[ 1:12, 1 ] <- 2009:2020
+        # params <- set_par( "CNSOM0MULT"     , 0.5, params )
         # params <- set_par( "CSOM0MULT"      , 0.5, params )
         # params <- set_par( "FWCWPMULT"      , 0.5, params )
         # params <- set_par( "WCSTMULT"       , 1.5, params )
@@ -1624,7 +1717,9 @@ Farm 1073, with 80 avocado trees per hectare, has a simulated shade level of abo
     list_parF_G[[fi]] <- mat_parF
     list_outF_G[[fi]] <- mat_outF
   }
+```
 
+```{r}
   df_G.f_sim <- df_G.f %>%
     dplyr::select ( code ) %>%
     arrange( code ) %>%
@@ -1642,17 +1737,17 @@ Farm 1073, with 80 avocado trees per hectare, has a simulated shade level of abo
 ```
 
 ```{r, echo=T}
-  summary( oF2_G[if_G1.I,"CAtree_t_1b"], digits=3 ) # Inga final two years
-  summary( oF2_G[if_G2.B,"CAtree_t_2b"], digits=3 ) # Banana final two years
-  summary( oF2_G[if_G2.A,"CAtree_t_2b"], digits=3 ) # Avocado final two years
-  summary( oF2_G[if_G3.G,"CAtree_t_3b"], digits=3 ) # Grevillea final two years
-  summary( oF2_G[if_G3.C,"CAtree_t_3b"], digits=3 ) # Cordia final two years
+  summary( oF2_G[if_G.1I,"CAtree_t_1b"], digits=3 ) # Inga final two years
+  summary( oF2_G[if_G.2B,"CAtree_t_2b"], digits=3 ) # Banana final two years
+  summary( oF2_G[if_G.2A,"CAtree_t_2b"], digits=3 ) # Avocado final two years
+  summary( oF2_G[if_G.3G,"CAtree_t_3b"], digits=3 ) # Grevillea final two years
+  summary( oF2_G[if_G.3C,"CAtree_t_3b"], digits=3 ) # Cordia final two years
 
-  summary( oF2_G[if_G1.I,"H_t_1b"], digits=3 ) # Inga final two years
-  summary( oF2_G[if_G2.B,"H_t_2b"], digits=3 ) # Banana final two years
-  summary( oF2_G[if_G2.A,"H_t_2b"], digits=3 ) # Avocado final two years
-  summary( oF2_G[if_G3.G,"H_t_3b"], digits=3 ) # Grevillea final two years
-  summary( oF2_G[if_G3.C,"H_t_3b"], digits=3 ) # Cordia final two years
+  summary( oF2_G[if_G.1I,"H_t_1b"], digits=3 ) # Inga final two years
+  summary( oF2_G[if_G.2B,"H_t_2b"], digits=3 ) # Banana final two years
+  summary( oF2_G[if_G.2A,"H_t_2b"], digits=3 ) # Avocado final two years
+  summary( oF2_G[if_G.3G,"H_t_3b"], digits=3 ) # Grevillea final two years
+  summary( oF2_G[if_G.3C,"H_t_3b"], digits=3 ) # Cordia final two years
 ```
 
 ```{r}

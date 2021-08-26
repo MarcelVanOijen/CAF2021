@@ -34,6 +34,9 @@
    
      # Check whether the candidate parameter vector is accepted, and extend the parameter chain.
        logalpha         <- logPrior1 + logL1 - (logPrior0 + logL0)
+       #################################
+       if(is.na(logL1)) logalpha <- -Inf
+       #################################
        if (log(runif(1,0,1)) < logalpha) {
          scpValues_BC   <- sccandidatepValues_BC
          logPrior0      <- logPrior1
