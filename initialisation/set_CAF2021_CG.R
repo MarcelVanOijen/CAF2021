@@ -22,9 +22,9 @@
   params <- set_par( c("THINTARGET(1)","THINTARGET(2)","THINTARGET(3)"),
                      c( 0             , 0             , 0             ), params )
   
-  calendar_prunC[ 1:10, 1 ] <- 2004:2013
-  calendar_prunC[ 1:10, 2 ] <- 59
-  calendar_prunC[ 1:10, 3 ] <-  0.28
-   
+  calendar_prunC[ 1:12, 1 ] <- 2009:2020
+  calendar_prunC[ 1:12, 2 ] <- 59
+  calendar_prunC[ 1:12, 3 ] <-  0.1
+
 # 3. CREATE EMPTY MATRIX y FOR MODEL OUTPUT ##
   y <- matrix(0,NDAYS,NOUT)

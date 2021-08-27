@@ -103,7 +103,11 @@ Contains
     enddo
   enddo
   
-  CAtree_t       = KAC * (CBpertree_t**KACEXP)
+  where (CBpertree_t<1.)
+    CAtree_t     = min( CAtreeMAX, KAC *  CBpertree_t           )
+  elsewhere
+    CAtree_t     = min( CAtreeMAX, KAC * (CBpertree_t**KACEXP ) )
+  endwhere
   SAT_t          = CAtree_t * treedens_t * SHADEPROJ
   
   f3lo = 1 - f3up
