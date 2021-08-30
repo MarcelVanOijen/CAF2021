@@ -1472,17 +1472,21 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
 ## BC
 
 ```{r}
-  source('BC_CAF2021_C.R')
-  matMAP_C <- matMAP
+
   # matMAP_C.old <- readRDS( "CAF2021_parMAP_23_39.rds" )
   # matMAP_C     <- update_matMAP( matMAP_C.old,
   #                                'initialisation/set_CAF2021_CG.R' )
-
-  source('BC_CAF2021_G.R')
-  matMAP_G <- matMAP
   # matMAP_G.old <- readRDS( "CAF2021_parMAP_04_23.rds" )
   # matMAP_G     <- update_matMAP( matMAP_G.old,
   #                                'initialisation/set_CAF2021_CG.R' )
+
+  # source('BC_CAF2021_C.R')
+  # matMAP_C <- matMAP
+  # source('BC_CAF2021_G.R')
+  # matMAP_G <- matMAP
+
+  matMAP_C <- readRDS( "CAF2021_parMAP_10_33.rds" )
+  matMAP_G <- readRDS( "CAF2021_parMAP_09_54.rds" )
 ```
 
 
@@ -1563,10 +1567,23 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
       }
       if( iF==3 ) {
         params <- matMAP_C[,fi]
-        ipAC         <- which( startsWith(names_params,"KAC") )
-        ipH          <- which( startsWith(names_params,"KH" ) )
-        params[ipAC] <- 1.2 * params[ipAC]
-        params[ipH ] <- 1.2 * params[ipH ]
+        params <- set_par( "RUBISC", 1, params )
+        if( fi %in% if_C.2B ) {
+          params <- set_par(
+            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),
+            c( 6      , 0.6       , 5     , 0.44     ),
+            params )
+          params <- set_par(
+            c("CBtree0(2)","CLtree0(2)","CRtree0(2)","CStree0(2)"),
+            c( 1          , 1          , 1          , 1          ),
+            params )
+        }
+        # calendar_fert[,3] <- 70 + calendar_fert[,3]
+        # calendar_fert[,3] <- pmax(70,calendar_fert[,3])
+        # ipAC         <- which( startsWith(names_params,"KAC") )
+        # ipH          <- which( startsWith(names_params,"KH" ) )
+        # params[ipAC] <- 1.2 * params[ipAC]
+        # params[ipH ] <- 1.2 * params[ipH ]
         # params <- set_par( "CNSOM0MULT"     , 0.5, params )
         # params <- set_par( "CSOM0MULT"      , 0.5, params )
         # params <- set_par( "FWCWPMULT"      , 0.5, params )
@@ -1642,20 +1659,64 @@ Verifying the list of farm-specific summary outputs:
   pF3_C <- dfparFSummary( df_C.f_sim, Fi=3 )
 ```
 
-```{r, echo=T}
-  summary( oF2_C[if_C.1E,"CAtree_t_1b"], digits=3 ) # Erythrina final two years
-  summary( oF2_C[if_C.1I,"CAtree_t_1b"], digits=3 ) # Inga final two years
-  summary( oF2_C[if_C.2B,"CAtree_t_2b"], digits=3 ) # Banana final two years
-  summary( oF2_C[if_C.2A,"CAtree_t_2b"], digits=3 ) # Avocado final two years
-  summary( oF2_C[if_C.3G,"CAtree_t_3b"], digits=3 ) # Grevillea final two years
-  summary( oF2_C[if_C.3C,"CAtree_t_3b"], digits=3 ) # Cordia final two years
+```{r}
+  tableY_C <- ( rbind(
+    c( "Obs." , "18/19", summary( df_C.f$yield1819         , digits=3 ) ),
+    c( ""     , "19/20", summary( df_C.f$yield1920         , digits=3 ) ),
+    rep( "", 8 ),
+    c( "Sim.2", "18/19", summary( oF2_C[,"harvDM_f_ha1819"], digits=3 ) ),
+    c( ""     , "19/20", summary( oF2_C[,"harvDM_f_ha1920"], digits=3 ) ),
+    rep( "", 8 ),
+    c( "Sim.1", "18/19", summary( oF1_C[,"harvDM_f_ha1819"], digits=3 ) ),
+    c( ""     , "19/20", summary( oF1_C[,"harvDM_f_ha1920"], digits=3 ) ),
+    c( "Sim.3", "18/19", summary( oF3_C[,"harvDM_f_ha1819"], digits=3 ) ),
+    c( ""     , "19/20", summary( oF3_C[,"harvDM_f_ha1920"], digits=3 ) ) ) )
+  colnames(tableY_C)[1] <- "C: Yield (kg ha-1)"
+  knitr::kable( tableY_C )
+```
 
-  summary( oF2_C[if_C.1E,"H_t_1b"], digits=3 ) # Erythrina final two years
-  summary( oF2_C[if_C.1I,"H_t_1b"], digits=3 ) # Inga final two years
-  summary( oF2_C[if_C.2B,"H_t_2b"], digits=3 ) # Banana final two years
-  summary( oF2_C[if_C.2A,"H_t_2b"], digits=3 ) # Avocado final two years
-  summary( oF2_C[if_C.3G,"H_t_3b"], digits=3 ) # Grevillea final two years
-  summary( oF2_C[if_C.3C,"H_t_3b"], digits=3 ) # Cordia final two years
+```{r}
+  tableCA_C2 <- ( rbind(
+    c( "Erythina" , summary( oF2_C[if_C.1E,"CAtree_t_1b"], digits=3 ) ),
+    c( "Inga"     , summary( oF2_C[if_C.1I,"CAtree_t_1b"], digits=3 ) ),
+    c( "Banana"   , summary( oF2_C[if_C.2B,"CAtree_t_2b"], digits=3 ) ),
+    c( "Avocado"  , summary( oF2_C[if_C.2A,"CAtree_t_2b"], digits=3 ) ),
+    c( "Grevillea", summary( oF2_C[if_C.3G,"CAtree_t_3b"], digits=3 ) ),
+    c( "Cordia"   , summary( oF2_C[if_C.3C,"CAtree_t_3b"], digits=3 ) ) ) )
+  colnames(tableCA_C2)[1] <- "C2: CAtree (m2)"
+  knitr::kable( tableCA_C2 )
+
+  tableH_C2 <- ( rbind(
+    c( "Erythina" , summary( oF2_C[if_C.1E,"H_t_1b"], digits=3 ) ),
+    c( "Inga"     , summary( oF2_C[if_C.1I,"H_t_1b"], digits=3 ) ),
+    c( "Banana"   , summary( oF2_C[if_C.2B,"H_t_2b"], digits=3 ) ),
+    c( "Avocado"  , summary( oF2_C[if_C.2A,"H_t_2b"], digits=3 ) ),
+    c( "Grevillea", summary( oF2_C[if_C.3G,"H_t_3b"], digits=3 ) ),
+    c( "Cordia"   , summary( oF2_C[if_C.3C,"H_t_3b"], digits=3 ) ) ) )
+  colnames(tableH_C2)[1] <- "C2: H (m)"
+  knitr::kable( tableH_C2 )
+```
+
+```{r}
+  tableCA_C3 <- ( rbind(
+    c( "Erythina" , summary( oF3_C[if_C.1E,"CAtree_t_1b"], digits=3 ) ),
+    c( "Inga"     , summary( oF3_C[if_C.1I,"CAtree_t_1b"], digits=3 ) ),
+    c( "Banana"   , summary( oF3_C[if_C.2B,"CAtree_t_2b"], digits=3 ) ),
+    c( "Avocado"  , summary( oF3_C[if_C.2A,"CAtree_t_2b"], digits=3 ) ),
+    c( "Grevillea", summary( oF3_C[if_C.3G,"CAtree_t_3b"], digits=3 ) ),
+    c( "Cordia"   , summary( oF3_C[if_C.3C,"CAtree_t_3b"], digits=3 ) ) ) )
+  colnames(tableCA_C3)[1] <- "C3: CAtree (m2)"
+  knitr::kable( tableCA_C3 )
+
+  tableH_C3 <- ( rbind(
+    c( "Erythina" , summary( oF3_C[if_C.1E,"H_t_1b"], digits=3 ) ),
+    c( "Inga"     , summary( oF3_C[if_C.1I,"H_t_1b"], digits=3 ) ),
+    c( "Banana"   , summary( oF3_C[if_C.2B,"H_t_2b"], digits=3 ) ),
+    c( "Avocado"  , summary( oF3_C[if_C.2A,"H_t_2b"], digits=3 ) ),
+    c( "Grevillea", summary( oF3_C[if_C.3G,"H_t_3b"], digits=3 ) ),
+    c( "Cordia"   , summary( oF3_C[if_C.3C,"H_t_3b"], digits=3 ) ) ) )
+  colnames(tableH_C3)[1] <- "C3: H (m)"
+  knitr::kable( tableH_C3 )
 ```
 
 ```{r}
@@ -1748,6 +1809,14 @@ Farm 1073, with 80 avocado trees per hectare, has a simulated shade level of abo
   # oF1_C  [ierr,        ]
 ```
 
+```{r, eval=F}
+  unique( matMAP_G["KAC(2)"   ,if_G.2B] )
+  unique( matMAP_G["KACEXP(2)",if_G.2B] )
+  unique( matMAP_G["KH(2)"    ,if_G.2B] )
+  unique( matMAP_G["KHEXP(2)" ,if_G.2B] )
+```
+
+
 ```{r list_outF_G}
   list_outF_G <- list_parF_G <- vector( "list", n_G.f )
   # source('initialisation/set_CAF2021_CG.R')
@@ -1775,10 +1844,23 @@ Farm 1073, with 80 avocado trees per hectare, has a simulated shade level of abo
       }
       if( iF==3 ) {
         params <- matMAP_G[,fi]
-        ipAC         <- which( startsWith(names_params,"KAC") )
-        ipH          <- which( startsWith(names_params,"KH" ) )
-        params[ipAC] <- 1.2 * params[ipAC]
-        params[ipH ] <- 1.2 * params[ipH ]
+        params <- set_par( "RUBISC", 1, params )
+        if( fi %in% if_G.2B ) {
+          params <- set_par(
+            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),
+            c( 6      , 0.6       , 5     , 0.44     ),
+            params )
+          params <- set_par(
+            c("CBtree0(2)","CLtree0(2)","CRtree0(2)","CStree0(2)"),
+            c( 1          , 1          , 1          , 1          ),
+            params )
+        }
+        # calendar_fert[,3] <- 70 + calendar_fert[,3]
+        # calendar_fert[,3] <- pmax(70,calendar_fert[,3])
+        # ipAC       <- which( startsWith(names_params,"KAC") )
+        # ipH          <- which( startsWith(names_params,"KH" ) )
+        # params[ipAC] <- 1.2 * params[ipAC]
+        # params[ipH ] <- 1.2 * params[ipH ]
         # params <- set_par( "CNSOM0MULT"     , 0.5, params )
         # params <- set_par( "CSOM0MULT"      , 0.5, params )
         # params <- set_par( "FWCWPMULT"      , 0.5, params )
@@ -1826,18 +1908,60 @@ Farm 1073, with 80 avocado trees per hectare, has a simulated shade level of abo
   pF3_G <- dfparFSummary( df_G.f_sim, Fi=3 )
 ```
 
-```{r, echo=T}
-  summary( oF2_G[if_G.1I,"CAtree_t_1b"], digits=3 ) # Inga final two years
-  summary( oF2_G[if_G.2B,"CAtree_t_2b"], digits=3 ) # Banana final two years
-  summary( oF2_G[if_G.2A,"CAtree_t_2b"], digits=3 ) # Avocado final two years
-  summary( oF2_G[if_G.3G,"CAtree_t_3b"], digits=3 ) # Grevillea final two years
-  summary( oF2_G[if_G.3C,"CAtree_t_3b"], digits=3 ) # Cordia final two years
+```{r}
+  tableY_G <- ( rbind(
+    c( "Obs." , "18/19", summary( df_G.f$yield1819         , digits=3 ) ),
+    c( ""     , "19/20", summary( df_G.f$yield1920         , digits=3 ) ),
+    rep( "", 8 ),
+    c( "Sim.2", "18/19", summary( oF2_G[,"harvDM_f_ha1819"], digits=3 ) ),
+    c( ""     , "19/20", summary( oF2_G[,"harvDM_f_ha1920"], digits=3 ) ),
+    rep( "", 8 ),
+    c( "Sim.1", "18/19", summary( oF1_G[,"harvDM_f_ha1819"], digits=3 ) ),
+    c( ""     , "19/20", summary( oF1_G[,"harvDM_f_ha1920"], digits=3 ) ),
+    c( "Sim.3", "18/19", summary( oF3_G[,"harvDM_f_ha1819"], digits=3 ) ),
+    c( ""     , "19/20", summary( oF3_G[,"harvDM_f_ha1920"], digits=3 ) ) ) )
+  colnames(tableY_G)[1] <- "G: Yield (kg ha-1)"
+  knitr::kable( tableY_G )
+```
 
-  summary( oF2_G[if_G.1I,"H_t_1b"], digits=3 ) # Inga final two years
-  summary( oF2_G[if_G.2B,"H_t_2b"], digits=3 ) # Banana final two years
-  summary( oF2_G[if_G.2A,"H_t_2b"], digits=3 ) # Avocado final two years
-  summary( oF2_G[if_G.3G,"H_t_3b"], digits=3 ) # Grevillea final two years
-  summary( oF2_G[if_G.3C,"H_t_3b"], digits=3 ) # Cordia final two years
+```{r}
+  tableCA_G2 <- ( rbind(
+    c( "Inga"     , summary( oF2_G[if_G.1I,"CAtree_t_1b"], digits=3 ) ),
+    c( "Banana"   , summary( oF2_G[if_G.2B,"CAtree_t_2b"], digits=3 ) ),
+    c( "Avocado"  , summary( oF2_G[if_G.2A,"CAtree_t_2b"], digits=3 ) ),
+    c( "Grevillea", summary( oF2_G[if_G.3G,"CAtree_t_3b"], digits=3 ) ),
+    c( "Cordia"   , summary( oF2_G[if_G.3C,"CAtree_t_3b"], digits=3 ) ) ) )
+  colnames(tableCA_G2)[1] <- "G2: CAtree (m2)"
+  knitr::kable( tableCA_G2 )
+
+  tableH_G2 <- ( rbind(
+    c( "Inga"     , summary( oF2_G[if_G.1I,"H_t_1b"], digits=3 ) ),
+    c( "Banana"   , summary( oF2_G[if_G.2B,"H_t_2b"], digits=3 ) ),
+    c( "Avocado"  , summary( oF2_G[if_G.2A,"H_t_2b"], digits=3 ) ),
+    c( "Grevillea", summary( oF2_G[if_G.3G,"H_t_3b"], digits=3 ) ),
+    c( "Cordia"   , summary( oF2_G[if_G.3C,"H_t_3b"], digits=3 ) ) ) )
+  colnames(tableH_G2)[1] <- "G2: H (m)"
+  knitr::kable( tableH_G2 )
+```
+
+```{r}
+  tableCA_G3 <- ( rbind(
+    c( "Inga"     , summary( oF3_G[if_G.1I,"CAtree_t_1b"], digits=3 ) ),
+    c( "Banana"   , summary( oF3_G[if_G.2B,"CAtree_t_2b"], digits=3 ) ),
+    c( "Avocado"  , summary( oF3_G[if_G.2A,"CAtree_t_2b"], digits=3 ) ),
+    c( "Grevillea", summary( oF3_G[if_G.3G,"CAtree_t_3b"], digits=3 ) ),
+    c( "Cordia"   , summary( oF3_G[if_G.3C,"CAtree_t_3b"], digits=3 ) ) ) )
+  colnames(tableCA_G3)[1] <- "G3: CAtree (m2)"
+  knitr::kable( tableCA_G3 )
+
+  tableH_G3 <- ( rbind(
+    c( "Inga"     , summary( oF3_G[if_G.1I,"H_t_1b"], digits=3 ) ),
+    c( "Banana"   , summary( oF3_G[if_G.2B,"H_t_2b"], digits=3 ) ),
+    c( "Avocado"  , summary( oF3_G[if_G.2A,"H_t_2b"], digits=3 ) ),
+    c( "Grevillea", summary( oF3_G[if_G.3G,"H_t_3b"], digits=3 ) ),
+    c( "Cordia"   , summary( oF3_G[if_G.3C,"H_t_3b"], digits=3 ) ) ) )
+  colnames(tableH_G3)[1] <- "G3: H (m)"
+  knitr::kable( tableH_G3 )
 ```
 
 ```{r}
@@ -1906,10 +2030,11 @@ Farm 1073, with 80 avocado trees per hectare, has a simulated shade level of abo
 ```
 
 ```{r}
-  plotimpacts_CG.Nfert <- function( FC=oF1_C, FG=oF1_G, yvar="y.sim" ){
-    xC=df_C.f$Nfert ; xG=df_G.f$Nfert ; yC=FC[,yvar] ; yG=FG[,yvar]
+  plotimpacts_CG <- function( FC=oF1_C, FG=oF1_G, xvar="Nfert", yvar="y.sim" ){
+    xC=df_C.f[,xvar] ; xG=df_G.f[,xvar]
+    yC=FC    [,yvar] ; yG=FG    [,yvar]
     plot  ( xC, yC,
-      xlab="Nfert", ylab="",
+      xlab=xvar, ylab="",
       main=paste0(substr(deparse(substitute(FC)),1,2),": ",yvar),
       pch=1,
       # xlim=c( 0, max(xC,xG) ),
@@ -1935,158 +2060,131 @@ See Fig. \ref{fig:XX31}.
 ```{r XX31, fig.height=7.5, fig.cap="\\label{fig:XX31}XX31."}
   par( mfrow=c(3,4), mar=c(4,2,1,2), mgp=c(2,1,0) )
 
-  yp <- "KH(1)"     ; plotimpacts_CG.Nfert( FC=pF2_C, FG=pF2_G, yvar=yp )
-  yp <- "KHEXP(1)"  ; plotimpacts_CG.Nfert( FC=pF2_C, FG=pF2_G, yvar=yp )
-  yp <- "KAC(1)"    ; plotimpacts_CG.Nfert( FC=pF2_C, FG=pF2_G, yvar=yp )
-  yp <- "KACEXP(1)" ; plotimpacts_CG.Nfert( FC=pF2_C, FG=pF2_G, yvar=yp )
+  yp <- "KH(1)"     ; plotimpacts_CG( FC=pF2_C, FG=pF2_G, yvar=yp )
+  yp <- "KHEXP(1)"  ; plotimpacts_CG( FC=pF2_C, FG=pF2_G, yvar=yp )
+  yp <- "KAC(1)"    ; plotimpacts_CG( FC=pF2_C, FG=pF2_G, yvar=yp )
+  yp <- "KACEXP(1)" ; plotimpacts_CG( FC=pF2_C, FG=pF2_G, yvar=yp )
   
-  yp <- "KH(2)"     ; plotimpacts_CG.Nfert( FC=pF2_C, FG=pF2_G, yvar=yp )
-  yp <- "KHEXP(2)"  ; plotimpacts_CG.Nfert( FC=pF2_C, FG=pF2_G, yvar=yp )
-  yp <- "KAC(2)"    ; plotimpacts_CG.Nfert( FC=pF2_C, FG=pF2_G, yvar=yp )
-  yp <- "KACEXP(2)" ; plotimpacts_CG.Nfert( FC=pF2_C, FG=pF2_G, yvar=yp )
+  yp <- "KH(2)"     ; plotimpacts_CG( FC=pF2_C, FG=pF2_G, yvar=yp )
+  yp <- "KHEXP(2)"  ; plotimpacts_CG( FC=pF2_C, FG=pF2_G, yvar=yp )
+  yp <- "KAC(2)"    ; plotimpacts_CG( FC=pF2_C, FG=pF2_G, yvar=yp )
+  yp <- "KACEXP(2)" ; plotimpacts_CG( FC=pF2_C, FG=pF2_G, yvar=yp )
 
-  yp <- "KH(3)"     ; plotimpacts_CG.Nfert( FC=pF2_C, FG=pF2_G, yvar=yp )
-  yp <- "KHEXP(3)"  ; plotimpacts_CG.Nfert( FC=pF2_C, FG=pF2_G, yvar=yp )
-  yp <- "KAC(3)"    ; plotimpacts_CG.Nfert( FC=pF2_C, FG=pF2_G, yvar=yp )
-  yp <- "KACEXP(3)" ; plotimpacts_CG.Nfert( FC=pF2_C, FG=pF2_G, yvar=yp )
+  yp <- "KH(3)"     ; plotimpacts_CG( FC=pF2_C, FG=pF2_G, yvar=yp )
+  yp <- "KHEXP(3)"  ; plotimpacts_CG( FC=pF2_C, FG=pF2_G, yvar=yp )
+  yp <- "KAC(3)"    ; plotimpacts_CG( FC=pF2_C, FG=pF2_G, yvar=yp )
+  yp <- "KACEXP(3)" ; plotimpacts_CG( FC=pF2_C, FG=pF2_G, yvar=yp )
 ```
 
 See Fig. \ref{fig:XX21}.
 
 ```{r XX21, fig.height=7.5, fig.cap="\\label{fig:XX21}XX21."}
-  par( mfrow=c(4,3), mar=c(4,2,2,2), mgp=c(2,1,0) )
+  par( mfrow=c(3,3), mar=c(4,2,2,2), mgp=c(2,1,0) )
 
-  yv <- "fTranT_t_1a"   ; plotimpacts_CG.Nfert( FC=oF1_C, FG=oF1_G, yvar=yv )
-                          plotimpacts_CG.Nfert( FC=oF2_C, FG=oF2_G, yvar=yv )
-                          plotimpacts_CG.Nfert( FC=oF3_C, FG=oF3_G, yvar=yv )
-  yv <- "fTranT_t_1b"   ; plotimpacts_CG.Nfert( FC=oF1_C, FG=oF1_G, yvar=yv )
-                          plotimpacts_CG.Nfert( FC=oF2_C, FG=oF2_G, yvar=yv )
-                          plotimpacts_CG.Nfert( FC=oF3_C, FG=oF3_G, yvar=yv )
+  yv <- "fTranT_t_1b"   ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
+                          plotimpacts_CG( FC=oF2_C, FG=oF2_G, yvar=yv )
+                          plotimpacts_CG( FC=oF3_C, FG=oF3_G, yvar=yv )
+  yv <- "fTranT_t_2b"   ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
+                          plotimpacts_CG( FC=oF2_C, FG=oF2_G, yvar=yv )
+                          plotimpacts_CG( FC=oF3_C, FG=oF3_G, yvar=yv )
+  yv <- "fTranT_t_3b"   ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
+                          plotimpacts_CG( FC=oF2_C, FG=oF2_G, yvar=yv )
+                          plotimpacts_CG( FC=oF3_C, FG=oF3_G, yvar=yv )
+```
 
-  yv <- "fNgrowth_t_1a" ; plotimpacts_CG.Nfert( FC=oF1_C, FG=oF1_G, yvar=yv )
-                          plotimpacts_CG.Nfert( FC=oF2_C, FG=oF2_G, yvar=yv )
-                          plotimpacts_CG.Nfert( FC=oF3_C, FG=oF3_G, yvar=yv )
-  yv <- "fNgrowth_t_1b" ; plotimpacts_CG.Nfert( FC=oF1_C, FG=oF1_G, yvar=yv )
-                          plotimpacts_CG.Nfert( FC=oF2_C, FG=oF2_G, yvar=yv )
-                          plotimpacts_CG.Nfert( FC=oF3_C, FG=oF3_G, yvar=yv )
+```{r XX21b, fig.height=7.5, fig.cap="\\label{fig:XX21b}XX21b."}
+  par( mfrow=c(3,3), mar=c(4,2,2,2), mgp=c(2,1,0) )
+
+  yv <- "fTranT_t_1b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="dist", yvar=yv )
+                        plotimpacts_CG( FC=oF2_C, FG=oF2_G, xvar="dist", yvar=yv )
+                        plotimpacts_CG( FC=oF3_C, FG=oF3_G, xvar="dist", yvar=yv )
+  yv <- "fTranT_t_2b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="dist", yvar=yv )
+                        plotimpacts_CG( FC=oF2_C, FG=oF2_G, xvar="dist", yvar=yv )
+                        plotimpacts_CG( FC=oF3_C, FG=oF3_G, xvar="dist", yvar=yv )
+  yv <- "fTranT_t_3b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="dist", yvar=yv )
+                        plotimpacts_CG( FC=oF2_C, FG=oF2_G, xvar="dist", yvar=yv )
+                        plotimpacts_CG( FC=oF3_C, FG=oF3_G, xvar="dist", yvar=yv )
 ```
 
 See Fig. \ref{fig:XX22}.
 
 ```{r XX22, fig.height=7.5, fig.cap="\\label{fig:XX22}XX22."}
-  par( mfrow=c(4,3), mar=c(4,2,2,2), mgp=c(2,1,0) )
+  par( mfrow=c(3,3), mar=c(4,2,2,2), mgp=c(2,1,0) )
 
-  yv <- "fTranT_t_2a"   ; plotimpacts_CG.Nfert( FC=oF1_C, FG=oF1_G, yvar=yv )
-                          plotimpacts_CG.Nfert( FC=oF2_C, FG=oF2_G, yvar=yv )
-                          plotimpacts_CG.Nfert( FC=oF3_C, FG=oF3_G, yvar=yv )
-  yv <- "fTranT_t_2b"   ; plotimpacts_CG.Nfert( FC=oF1_C, FG=oF1_G, yvar=yv )
-                          plotimpacts_CG.Nfert( FC=oF2_C, FG=oF2_G, yvar=yv )
-                          plotimpacts_CG.Nfert( FC=oF3_C, FG=oF3_G, yvar=yv )
-
-  yv <- "fNgrowth_t_2a" ; plotimpacts_CG.Nfert( FC=oF1_C, FG=oF1_G, yvar=yv )
-                          plotimpacts_CG.Nfert( FC=oF2_C, FG=oF2_G, yvar=yv )
-                          plotimpacts_CG.Nfert( FC=oF3_C, FG=oF3_G, yvar=yv )
-  yv <- "fNgrowth_t_2b" ; plotimpacts_CG.Nfert( FC=oF1_C, FG=oF1_G, yvar=yv )
-                          plotimpacts_CG.Nfert( FC=oF2_C, FG=oF2_G, yvar=yv )
-                          plotimpacts_CG.Nfert( FC=oF3_C, FG=oF3_G, yvar=yv )
+  yv <- "fNgrowth_t_1b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
+                          plotimpacts_CG( FC=oF2_C, FG=oF2_G, yvar=yv )
+                          plotimpacts_CG( FC=oF3_C, FG=oF3_G, yvar=yv )
+  yv <- "fNgrowth_t_2b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
+                          plotimpacts_CG( FC=oF2_C, FG=oF2_G, yvar=yv )
+                          plotimpacts_CG( FC=oF3_C, FG=oF3_G, yvar=yv )
+  yv <- "fNgrowth_t_3b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
+                          plotimpacts_CG( FC=oF2_C, FG=oF2_G, yvar=yv )
+                          plotimpacts_CG( FC=oF3_C, FG=oF3_G, yvar=yv )
 ```
 
-See Fig. \ref{fig:XX23}.
+```{r XX22b, fig.height=7.5, fig.cap="\\label{fig:XX22b}XX22b."}
+  par( mfrow=c(3,3), mar=c(4,2,2,2), mgp=c(2,1,0) )
 
-```{r XX23, fig.height=7.5, fig.cap="\\label{fig:XX23}XX23."}
-  par( mfrow=c(4,3), mar=c(4,2,2,2), mgp=c(2,1,0) )
-
-  yv <- "fTranT_t_3a"   ; plotimpacts_CG.Nfert( FC=oF1_C, FG=oF1_G, yvar=yv )
-                          plotimpacts_CG.Nfert( FC=oF2_C, FG=oF2_G, yvar=yv )
-                          plotimpacts_CG.Nfert( FC=oF3_C, FG=oF3_G, yvar=yv )
-  yv <- "fTranT_t_3b"   ; plotimpacts_CG.Nfert( FC=oF1_C, FG=oF1_G, yvar=yv )
-                          plotimpacts_CG.Nfert( FC=oF2_C, FG=oF2_G, yvar=yv )
-                          plotimpacts_CG.Nfert( FC=oF3_C, FG=oF3_G, yvar=yv )
-
-  yv <- "fNgrowth_t_3a" ; plotimpacts_CG.Nfert( FC=oF1_C, FG=oF1_G, yvar=yv )
-                          plotimpacts_CG.Nfert( FC=oF2_C, FG=oF2_G, yvar=yv )
-                          plotimpacts_CG.Nfert( FC=oF3_C, FG=oF3_G, yvar=yv )
-  yv <- "fNgrowth_t_3b" ; plotimpacts_CG.Nfert( FC=oF1_C, FG=oF1_G, yvar=yv )
-                          plotimpacts_CG.Nfert( FC=oF2_C, FG=oF2_G, yvar=yv )
-                          plotimpacts_CG.Nfert( FC=oF3_C, FG=oF3_G, yvar=yv )
+  yv <- "fNgrowth_t_1b"
+  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="dist", yvar=yv )
+  plotimpacts_CG( FC=oF2_C, FG=oF2_G, xvar="dist", yvar=yv )
+  plotimpacts_CG( FC=oF3_C, FG=oF3_G, xvar="dist", yvar=yv )
+  yv <- "fNgrowth_t_2b"
+  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="dist", yvar=yv )
+  plotimpacts_CG( FC=oF2_C, FG=oF2_G, xvar="dist", yvar=yv )
+  plotimpacts_CG( FC=oF3_C, FG=oF3_G, xvar="dist", yvar=yv )
+  yv <- "fNgrowth_t_3b"
+  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="dist", yvar=yv )
+  plotimpacts_CG( FC=oF2_C, FG=oF2_G, xvar="dist", yvar=yv )
+  plotimpacts_CG( FC=oF3_C, FG=oF3_G, xvar="dist", yvar=yv )
 ```
 
 See Fig. \ref{fig:XX24}.
 
 ```{r XX24, fig.height=7.5, fig.cap="\\label{fig:XX24}XX24."}
-  par( mfrow=c(4,3), mar=c(4,2,2,2), mgp=c(2,1,0) )
+  par( mfrow=c(3,3), mar=c(4,2,2,2), mgp=c(2,1,0) )
 
-  yv <- "H_t_1a"      ; plotimpacts_CG.Nfert( FC=oF1_C, FG=oF1_G, yvar=yv )
-                        plotimpacts_CG.Nfert( FC=oF2_C, FG=oF2_G, yvar=yv )
-                        plotimpacts_CG.Nfert( FC=oF3_C, FG=oF3_G, yvar=yv )
-  yv <- "H_t_1b"      ; plotimpacts_CG.Nfert( FC=oF1_C, FG=oF1_G, yvar=yv )
-                        plotimpacts_CG.Nfert( FC=oF2_C, FG=oF2_G, yvar=yv )
-                        plotimpacts_CG.Nfert( FC=oF3_C, FG=oF3_G, yvar=yv )
+  yv <- "H_t_1b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
+                   plotimpacts_CG( FC=oF2_C, FG=oF2_G, yvar=yv )
+                   plotimpacts_CG( FC=oF3_C, FG=oF3_G, yvar=yv )
+  yv <- "H_t_2b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
+                   plotimpacts_CG( FC=oF2_C, FG=oF2_G, yvar=yv )
+                   plotimpacts_CG( FC=oF3_C, FG=oF3_G, yvar=yv )
+  yv <- "H_t_3b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
+                   plotimpacts_CG( FC=oF2_C, FG=oF2_G, yvar=yv )
+                   plotimpacts_CG( FC=oF3_C, FG=oF3_G, yvar=yv )
+```
 
-  yv <- "CAtree_t_1a" ; plotimpacts_CG.Nfert( FC=oF1_C, FG=oF1_G, yvar=yv )
-                        plotimpacts_CG.Nfert( FC=oF2_C, FG=oF2_G, yvar=yv )
-                        plotimpacts_CG.Nfert( FC=oF3_C, FG=oF3_G, yvar=yv )
-  yv <- "CAtree_t_1b" ; plotimpacts_CG.Nfert( FC=oF1_C, FG=oF1_G, yvar=yv )
-                        plotimpacts_CG.Nfert( FC=oF2_C, FG=oF2_G, yvar=yv )
-                        plotimpacts_CG.Nfert( FC=oF3_C, FG=oF3_G, yvar=yv )
+See Fig. \ref{fig:XX24b}.
+
+```{r XX24b, fig.height=7.5, fig.cap="\\label{fig:XX24b}XX24b."}
+  par( mfrow=c(3,3), mar=c(4,2,2,2), mgp=c(2,1,0) )
+
+  yv <- "H_t_1b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="dist", yvar=yv )
+                   plotimpacts_CG( FC=oF2_C, FG=oF2_G, xvar="dist", yvar=yv )
+                   plotimpacts_CG( FC=oF3_C, FG=oF3_G, xvar="dist", yvar=yv )
+  yv <- "H_t_2b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="dist", yvar=yv )
+                   plotimpacts_CG( FC=oF2_C, FG=oF2_G, xvar="dist", yvar=yv )
+                   plotimpacts_CG( FC=oF3_C, FG=oF3_G, xvar="dist", yvar=yv )
+  yv <- "H_t_3b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="dist", yvar=yv )
+                   plotimpacts_CG( FC=oF2_C, FG=oF2_G, xvar="dist", yvar=yv )
+                   plotimpacts_CG( FC=oF3_C, FG=oF3_G, xvar="dist", yvar=yv )
 ```
 
 See Fig. \ref{fig:XX25}.
 
 ```{r XX25, fig.height=7.5, fig.cap="\\label{fig:XX25}XX25."}
-  par( mfrow=c(4,3), mar=c(4,2,2,2), mgp=c(2,1,0) )
+  par( mfrow=c(3,3), mar=c(4,2,2,2), mgp=c(2,1,0) )
 
-  yv <- "H_t_2a"      ; plotimpacts_CG.Nfert( FC=oF1_C, FG=oF1_G, yvar=yv )
-                        plotimpacts_CG.Nfert( FC=oF2_C, FG=oF2_G, yvar=yv )
-                        plotimpacts_CG.Nfert( FC=oF3_C, FG=oF3_G, yvar=yv )
-  yv <- "H_t_2b"      ; plotimpacts_CG.Nfert( FC=oF1_C, FG=oF1_G, yvar=yv )
-                        plotimpacts_CG.Nfert( FC=oF2_C, FG=oF2_G, yvar=yv )
-                        plotimpacts_CG.Nfert( FC=oF3_C, FG=oF3_G, yvar=yv )
-
-  yv <- "CAtree_t_2a" ; plotimpacts_CG.Nfert( FC=oF1_C, FG=oF1_G, yvar=yv )
-                        plotimpacts_CG.Nfert( FC=oF2_C, FG=oF2_G, yvar=yv )
-                        plotimpacts_CG.Nfert( FC=oF3_C, FG=oF3_G, yvar=yv )
-  yv <- "CAtree_t_2b" ; plotimpacts_CG.Nfert( FC=oF1_C, FG=oF1_G, yvar=yv )
-                        plotimpacts_CG.Nfert( FC=oF2_C, FG=oF2_G, yvar=yv )
-                        plotimpacts_CG.Nfert( FC=oF3_C, FG=oF3_G, yvar=yv )
-```
-
-See Fig. \ref{fig:XX26}.
-
-```{r XX26, fig.height=7.5, fig.cap="\\label{fig:XX26}XX26."}
-  par( mfrow=c(4,3), mar=c(4,2,2,2), mgp=c(2,1,0) )
-
-  yv <- "H_t_3a"      ; plotimpacts_CG.Nfert( FC=oF1_C, FG=oF1_G, yvar=yv )
-                        plotimpacts_CG.Nfert( FC=oF2_C, FG=oF2_G, yvar=yv )
-                        plotimpacts_CG.Nfert( FC=oF3_C, FG=oF3_G, yvar=yv )
-  yv <- "H_t_3b"      ; plotimpacts_CG.Nfert( FC=oF1_C, FG=oF1_G, yvar=yv )
-                        plotimpacts_CG.Nfert( FC=oF2_C, FG=oF2_G, yvar=yv )
-                        plotimpacts_CG.Nfert( FC=oF3_C, FG=oF3_G, yvar=yv )
-
-  yv <- "CAtree_t_3a" ; plotimpacts_CG.Nfert( FC=oF1_C, FG=oF1_G, yvar=yv )
-                        plotimpacts_CG.Nfert( FC=oF2_C, FG=oF2_G, yvar=yv )
-                        plotimpacts_CG.Nfert( FC=oF3_C, FG=oF3_G, yvar=yv )
-  yv <- "CAtree_t_3b" ; plotimpacts_CG.Nfert( FC=oF1_C, FG=oF1_G, yvar=yv )
-                        plotimpacts_CG.Nfert( FC=oF2_C, FG=oF2_G, yvar=yv )
-                        plotimpacts_CG.Nfert( FC=oF3_C, FG=oF3_G, yvar=yv )
-```
-
-```{r, echo=T}
-  print(mean(df_C.f$yield1819))
-  cat( mean(oF1_C[,"harvDM_f_ha1819"]), mean(oF2_C[,"harvDM_f_ha1819"]),
-       mean(oF3_C[,"harvDM_f_ha1819"]) )
-       
-  mean(df_C.f$yield1920,na.rm=T)
-  cat( mean(oF1_C[,"harvDM_f_ha1920"]), mean(oF2_C[,"harvDM_f_ha1920"]),
-       mean(oF3_C[,"harvDM_f_ha1920"]) )
-                                   
-  print(mean(df_G.f$yield1819))
-  cat( mean(oF1_G[,"harvDM_f_ha1819"]), mean(oF2_G[,"harvDM_f_ha1819"]),
-       mean(oF3_G[,"harvDM_f_ha1819"]) )
-
-  print( mean(df_G.f$yield1920,na.rm=T))
-  cat( mean(oF1_G[,"harvDM_f_ha1920"]), mean(oF2_G[,"harvDM_f_ha1920"]),
-       mean(oF3_G[,"harvDM_f_ha1920"]) )
+  yv <- "CAtree_t_1b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
+                        plotimpacts_CG( FC=oF2_C, FG=oF2_G, yvar=yv )
+                        plotimpacts_CG( FC=oF3_C, FG=oF3_G, yvar=yv )
+  yv <- "CAtree_t_2b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
+                        plotimpacts_CG( FC=oF2_C, FG=oF2_G, yvar=yv )
+                        plotimpacts_CG( FC=oF3_C, FG=oF3_G, yvar=yv )
+  yv <- "CAtree_t_3b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
+                        plotimpacts_CG( FC=oF2_C, FG=oF2_G, yvar=yv )
+                        plotimpacts_CG( FC=oF3_C, FG=oF3_G, yvar=yv )
 ```
 
 ```{r, eval=F}
@@ -2152,26 +2250,36 @@ These settings make coffee and trees in Guatemala in the model - and likely in r
 
 Fig. \ref{fig:XX13} shows that, in the simulations, the annual yields in 2018-19 and 2019-20 varied more between farms than the long-term average yields did.
 
-```{r XX13, fig.height=4, fig.cap="\\label{fig:XX13}Simulated yields in 2018-19 and 2019-20 vs. long-term average yields in the same simulations."}
-  par( mfrow=c(1,2), mar=c(3,3,2,2) )
+```{r XX13, fig.height=3, fig.cap="\\label{fig:XX13}Yields in 2019-20 vs. yield in 2018-19."}
+  par( mfrow=c(1,2), mar=c(3,3,3,2) )
 
-  plot  ( oF2_C[,"harvDM_f_hay"], oF2_C[,"harvDM_f_ha1819"],
-          main="Costa Rica (sim.)",
-          xlab="mean yield", ylab="kg DM ha-1 y-1")
-  points( oF2_C[,"harvDM_f_hay"], oF2_C[,"harvDM_f_ha1920"], col="red" )
+  x_C <- df_C.f$yield1819 ; y_C <- df_C.f$yield1920
+  x_G <- df_G.f$yield1819 ; y_G <- df_G.f$yield1920
+  plot  ( x_C, y_C, main="Observed yields\n(kg DM ha-1 y-1)",
+          xlab="2018-19", ylab="2019-20")
+  points( x_G, y_G, col="red" )
+  y.lm_C <- lm( y_C ~ x_C ) ; r2_C <- round( summary(y.lm_C)$r.squared, 2 )
+  y.lm_G <- lm( y_G ~ x_G ) ; r2_G <- round( summary(y.lm_G)$r.squared, 2 )
+  abline( y.lm_C$coefficients[1], y.lm_C$coefficients[2], col="black" )
+  abline( y.lm_G$coefficients[1], y.lm_G$coefficients[2], col="red" )
   abline( 1, 1, lty=2 )
-  legend( "bottomright",legend=c("y=x","18/19","19/20"),
-          lty=c(2,NA,NA), pch=c(NA,1,1), col=c("black","black","red"),
-          bg="transparent" )
+  legend( "bottomright",
+          legend=c(paste0("C (r2=",r2_C,")"),paste0("G (r2=",r2_G,")")),
+          lty=c(1,1), col=c("black","red"), bg="transparent", cex=0.5 )
   
-  plot  ( oF2_G[,"harvDM_f_hay"], oF2_G[,"harvDM_f_ha1819"],
-          main="Guatemala (sim.)",
-          xlab="mean yield", ylab="yield 2018/19")
-  points( oF2_G[,"harvDM_f_hay"], oF2_G[,"harvDM_f_ha1920"], col="red" )
+  x_C <- oF2_C[,"harvDM_f_ha1819"] ; y_C <- oF2_C[,"harvDM_f_ha1920"]
+  x_G <- oF2_G[,"harvDM_f_ha1819"] ; y_G <- oF2_G[,"harvDM_f_ha1920"]
+  plot  ( x_C, y_C, main="Simulated yields\n(kg DM ha-1 y-1)",
+          xlab="2018-19", ylab="2019-20")
+  points( x_G, y_G, col="red" )
+  y.lm_C <- lm( y_C ~ x_C ) ; r2_C <- round( summary(y.lm_C)$r.squared, 2 )
+  y.lm_G <- lm( y_G ~ x_G ) ; r2_G <- round( summary(y.lm_G)$r.squared, 2 )
+  abline( y.lm_C$coefficients[1], y.lm_C$coefficients[2], col="black" )
+  abline( y.lm_G$coefficients[1], y.lm_G$coefficients[2], col="red" )
   abline( 1, 1, lty=2 )
-  legend( "bottomright",legend=c("y=x","18/19","19/20"),
-          lty=c(2,NA,NA), pch=c(NA,1,1), col=c("black","black","red"),
-          bg="transparent" )
+  legend( "bottomright",
+          legend=c(paste0("C (r2=",r2_C,")"),paste0("G (r2=",r2_G,")")),
+          lty=c(1,1), col=c("black","red"), bg="transparent", cex=0.5 )
 ```
 
 We now come to the simulations for all farms that used farm-specific information on weather, soil, nitrogen fertilisation rate, tree species and shade-level.
