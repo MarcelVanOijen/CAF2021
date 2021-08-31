@@ -1256,13 +1256,14 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
 ```{r}
   source( file.init_C )
 
-  # pAll     <- c("KEXT","RUBISC","TRANCO","YG","TCSOMF","TCSOMS","WCSTMULT")
-  pAll     <- c("KEXT","RUBISC","TRANCO","YG")
+  pAll     <- c("TCSOMF","TCSOMS","CSOM0MULT")
+  # pAll     <- c("KEXT","RUBISC","TRANCO","YG")
   npAll    <- length(pAll) ; ipAll <- rep(NA,npAll)
   for(p in 1:npAll) { ipAll[p]     <- which( names_params==pAll[p] ) }
 
-  pT       <- c("FLTMAX","FST","FWT","KAC","KACEXP","KH","KHEXP",
-                "LAIMAXT","LUEMAX","SLAT")
+  # pT       <- c("FLTMAX","FST","FWT","KAC","KACEXP","KH","KHEXP",
+  #               "LAIMAXT","LUEMAX","SLAT")
+  pT       <- c("FLTMAX","FST","FWT", "LAIMAXT","LUEMAX","SLAT")
   npT      <- length(pT) ; list_ipT <- vector("list",npT)
   for(p in 1:npT) { list_ipT[[p]] <- which( startsWith( names_params,
                                                         paste0(pT[p],"(") ) ) }
@@ -1297,25 +1298,19 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
                      ifelse( (species==1 & endsWith(name,"3)") ), "if_C.3G",
                      ifelse( (species==2 & endsWith(name,"3)") ), "if_C.3C",
                               "1:nSites" )))))) )
-    # mutate ( farms = ifelse( (species==1 & endsWith(name,"1)") ), vecstr(if_C.1E),
-    #                  ifelse( (species==2 & endsWith(name,"1)") ), vecstr(if_C.1I),
-    #                  ifelse( (species==1 & endsWith(name,"2)") ), vecstr(if_C.2B),
-    #                  ifelse( (species==2 & endsWith(name,"2)") ), vecstr(if_C.2A),
-    #                  ifelse( (species==1 & endsWith(name,"3)") ), vecstr(if_C.3G),
-    #                  ifelse( (species==2 & endsWith(name,"3)") ), vecstr(if_C.3C),
-    #                           "1:nSites" )))))) )
 ```
 
 ```{r}
   source( file.init_G )
 
-  # pAll     <- c("KEXT","RUBISC","TRANCO","YG","TCSOMF","TCSOMS","WCSTMULT")
-  pAll     <- c("KEXT","RUBISC","TRANCO","YG")
+  pAll     <- c("TCSOMF","TCSOMS","CSOM0MULT")
+  # pAll     <- c("KEXT","RUBISC","TRANCO","YG")
   npAll    <- length(pAll) ; ipAll <- rep(NA,npAll)
   for(p in 1:npAll) { ipAll[p]     <- which( names_params==pAll[p] ) }
 
-  pT       <- c("FLTMAX","FST","FWT","KAC","KACEXP","KH","KHEXP",
-                "LAIMAXT","LUEMAX","SLAT")
+  # pT       <- c("FLTMAX","FST","FWT","KAC","KACEXP","KH","KHEXP",
+  #               "LAIMAXT","LUEMAX","SLAT")
+  pT       <- c("FLTMAX","FST","FWT", "LAIMAXT","LUEMAX","SLAT")
   npT      <- length(pT) ; list_ipT <- vector("list",npT)
   for(p in 1:npT) { list_ipT[[p]] <- which( startsWith( names_params,
                                                         paste0(pT[p],"(") ) ) }
@@ -1346,12 +1341,6 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
                      ifelse( (species==1 & endsWith(name,"3)") ), "if_G.3G",
                      ifelse( (species==2 & endsWith(name,"3)") ), "if_G.3C",
                               "1:nSites" ))))) )
-    # mutate ( farms = ifelse( (             endsWith(name,"1)") ), vecstr(if_G.1I),
-    #                  ifelse( (species==1 & endsWith(name,"2)") ), vecstr(if_G.2B),
-    #                  ifelse( (species==2 & endsWith(name,"2)") ), vecstr(if_G.2A),
-    #                  ifelse( (species==1 & endsWith(name,"3)") ), vecstr(if_G.3G),
-    #                  ifelse( (species==2 & endsWith(name,"3)") ), vecstr(if_G.3C),
-    #                           "1:nSites" ))))) )
 ```
 
 ```{r}
@@ -1373,8 +1362,12 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
   dir.dataBC <- "data/CG/"
 ```
 
-```{r, eval=F}
+```{r, eval=T}
   sapply( paste0(dir.dataBC,"data_C_f",1:n_C.f,".txt"), file.create)
+
+  cv.yield <- 0.2
+  cv.shade <- 0.4
+  cv.trees <- 0.8
 
   for(fi in 1:n_C.f) {
     file.f <- paste0( dir.dataBC, "data_C_f", fi, ".txt" )
@@ -1382,49 +1375,53 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
     y1920  <- round( df_C.f$yield1920[fi] )
     shade  <-        df_G.f$shade    [fi]
     if((!is.na(y1819))) {
-      cat( paste0("harvDM_f_hay\t2019\t181\t",y1819,"\t",0.25,"\n"),
+      cat( paste0("harvDM_f_hay\t2019\t181\t",y1819,"\t",cv.yield,"\n"),
            file=file.f ) }
     if((!is.na(y1920))) {
-      cat( paste0("harvDM_f_hay\t2020\t181\t",y1920,"\t",0.25,"\n"),
+      cat( paste0("harvDM_f_hay\t2020\t181\t",y1920,"\t",cv.yield,"\n"),
            file=file.f, append=TRUE ) }
     if((!is.na(shade))) {
-      cat( paste0("Shade_f\t2019\t300\t"     ,shade,"\t",0.50,"\n"),
+      cat( paste0("Shade_f\t2019\t300\t"     ,shade,"\t",cv.shade,"\n"),
            file=file.f, append=TRUE ) }
     if(fi %in% if_C.1E) {
-      cat( paste0("h_t(1)\t2020\t139\t"      ,  8  ,"\t",1.00,"\n"),
+      cat( paste0("h_t(1)\t2020\t139\t"      ,  8  ,"\t",cv.trees,"\n"),
            file=file.f, append=TRUE )
-      cat( paste0("CAtree_t(1)\t2020\t139\t" , 25  ,"\t",1.00,"\n"),
+      cat( paste0("CAtree_t(1)\t2020\t139\t" , 25  ,"\t",cv.trees,"\n"),
            file=file.f, append=TRUE ) }
     if(fi %in% if_C.1I) {
-      cat( paste0("h_t(1)\t2020\t139\t"      ,  8  ,"\t",1.00,"\n"),
+      cat( paste0("h_t(1)\t2020\t139\t"      ,  8  ,"\t",cv.trees,"\n"),
            file=file.f, append=TRUE )
-      cat( paste0("CAtree_t(1)\t2020\t139\t" , 50  ,"\t",1.00,"\n"),
+      cat( paste0("CAtree_t(1)\t2020\t139\t" , 50  ,"\t",cv.trees,"\n"),
            file=file.f, append=TRUE ) }
     if(fi %in% if_C.2B) {
-      cat( paste0("h_t(2)\t2020\t139\t"      ,  8  ,"\t",1.00,"\n"),
+      cat( paste0("h_t(2)\t2020\t139\t"      ,  8  ,"\t",cv.trees,"\n"),
            file=file.f, append=TRUE )
-      cat( paste0("CAtree_t(2)\t2020\t139\t" , 25  ,"\t",1.00,"\n"),
+      cat( paste0("CAtree_t(2)\t2020\t139\t" , 25  ,"\t",cv.trees,"\n"),
            file=file.f, append=TRUE ) }
     if(fi %in% if_C.2A) {
-      cat( paste0("h_t(2)\t2020\t139\t"      ,  8  ,"\t",1.00,"\n"),
+      cat( paste0("h_t(2)\t2020\t139\t"      ,  8  ,"\t",cv.trees,"\n"),
            file=file.f, append=TRUE )
-      cat( paste0("CAtree_t(2)\t2020\t139\t" , 25  ,"\t",1.00,"\n"),
+      cat( paste0("CAtree_t(2)\t2020\t139\t" , 25  ,"\t",cv.trees,"\n"),
            file=file.f, append=TRUE ) }
     if(fi %in% if_C.3G) {
-      cat( paste0("h_t(3)\t2020\t139\t"      , 15  ,"\t",1.00,"\n"),
+      cat( paste0("h_t(3)\t2020\t139\t"      , 15  ,"\t",cv.trees,"\n"),
            file=file.f, append=TRUE )
-      cat( paste0("CAtree_t(3)\t2020\t139\t" ,100  ,"\t",1.00,"\n"),
+      cat( paste0("CAtree_t(3)\t2020\t139\t" ,100  ,"\t",cv.trees,"\n"),
            file=file.f, append=TRUE ) }
     if(fi %in% if_C.3C) {
-      cat( paste0("h_t(3)\t2020\t139\t"      , 30  ,"\t",1.00,"\n"),
+      cat( paste0("h_t(3)\t2020\t139\t"      , 30  ,"\t",cv.trees,"\n"),
            file=file.f, append=TRUE )
-      cat( paste0("CAtree_t(3)\t2020\t139\t" ,200  ,"\t",1.00,"\n"),
+      cat( paste0("CAtree_t(3)\t2020\t139\t" ,200  ,"\t",cv.trees,"\n"),
            file=file.f, append=TRUE ) }
   }
 ```
 
-```{r, eval=F}
+```{r, eval=T}
   sapply( paste0(dir.dataBC,"data_G_f",1:n_G.f,".txt"), file.create)
+
+  cv.yield <- 0.2
+  cv.shade <- 0.4
+  cv.trees <- 0.8
 
   for(fi in 1:n_G.f) {
     file.f <- paste0( dir.dataBC, "data_G_f", fi, ".txt" )
@@ -1432,38 +1429,38 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
     y1920  <- round( df_G.f$yield1920[fi] )
     shade  <-        df_G.f$shade    [fi]
     if((!is.na(y1819))) {
-      cat( paste0("harvDM_f_hay\t2019\t181\t",y1819,"\t",0.25,"\n"),
+      cat( paste0("harvDM_f_hay\t2019\t181\t",y1819,"\t",cv.yield,"\n"),
            file=file.f ) }
     if((!is.na(y1920))) {
-      cat( paste0("harvDM_f_hay\t2020\t181\t",y1920,"\t",0.25,"\n"),
+      cat( paste0("harvDM_f_hay\t2020\t181\t",y1920,"\t",cv.yield,"\n"),
            file=file.f, append=TRUE ) }
     if((!is.na(shade))) {
-      cat( paste0("Shade_f\t2019\t300\t"     ,shade,"\t",0.50,"\n"),
+      cat( paste0("Shade_f\t2019\t300\t"     ,shade,"\t",cv.shade,"\n"),
            file=file.f, append=TRUE ) }
     if(fi %in% if_G.1I) {
-      cat( paste0("h_t(1)\t2020\t139\t"      ,  8  ,"\t",1.00,"\n"),
+      cat( paste0("h_t(1)\t2020\t139\t"      ,  8  ,"\t",cv.trees,"\n"),
            file=file.f, append=TRUE )
-      cat( paste0("CAtree_t(1)\t2020\t139\t" , 50  ,"\t",1.00,"\n"),
+      cat( paste0("CAtree_t(1)\t2020\t139\t" , 50  ,"\t",cv.trees,"\n"),
            file=file.f, append=TRUE ) }
     if(fi %in% if_G.2B) {
-      cat( paste0("h_t(2)\t2020\t139\t"      ,  8  ,"\t",1.00,"\n"),
+      cat( paste0("h_t(2)\t2020\t139\t"      ,  8  ,"\t",cv.trees,"\n"),
            file=file.f, append=TRUE )
-      cat( paste0("CAtree_t(2)\t2020\t139\t" , 25  ,"\t",1.00,"\n"),
+      cat( paste0("CAtree_t(2)\t2020\t139\t" , 25  ,"\t",cv.trees,"\n"),
            file=file.f, append=TRUE ) }
     if(fi %in% if_G.2A) {
-      cat( paste0("h_t(2)\t2020\t139\t"      ,  8  ,"\t",1.00,"\n"),
+      cat( paste0("h_t(2)\t2020\t139\t"      ,  8  ,"\t",cv.trees,"\n"),
            file=file.f, append=TRUE )
-      cat( paste0("CAtree_t(2)\t2020\t139\t" , 25  ,"\t",1.00,"\n"),
+      cat( paste0("CAtree_t(2)\t2020\t139\t" , 25  ,"\t",cv.trees,"\n"),
            file=file.f, append=TRUE ) }
     if(fi %in% if_G.3G) {
-      cat( paste0("h_t(3)\t2020\t139\t"      , 15  ,"\t",1.00,"\n"),
+      cat( paste0("h_t(3)\t2020\t139\t"      , 15  ,"\t",cv.trees,"\n"),
            file=file.f, append=TRUE )
-      cat( paste0("CAtree_t(3)\t2020\t139\t" ,100  ,"\t",1.00,"\n"),
+      cat( paste0("CAtree_t(3)\t2020\t139\t" ,100  ,"\t",cv.trees,"\n"),
            file=file.f, append=TRUE ) }
     if(fi %in% if_G.3C) {
-      cat( paste0("h_t(3)\t2020\t139\t"      , 30  ,"\t",1.00,"\n"),
+      cat( paste0("h_t(3)\t2020\t139\t"      , 30  ,"\t",cv.trees,"\n"),
            file=file.f, append=TRUE )
-      cat( paste0("CAtree_t(3)\t2020\t139\t" ,200  ,"\t",1.00,"\n"),
+      cat( paste0("CAtree_t(3)\t2020\t139\t" ,200  ,"\t",cv.trees,"\n"),
            file=file.f, append=TRUE ) }
   }
 ```
@@ -1485,8 +1482,11 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
   # source('BC_CAF2021_G.R')
   # matMAP_G <- matMAP
 
-  matMAP_C <- readRDS( "CAF2021_parMAP_10_33.rds" )
-  matMAP_G <- readRDS( "CAF2021_parMAP_09_54.rds" )
+  # matMAP_C <- readRDS( "CAF2021_parMAP_10_33.rds" )
+  # matMAP_G <- readRDS( "CAF2021_parMAP_09_54.rds" )
+
+  source('BC_CAF2021_C.R') ; matMAP_C <- matMAP
+  source('BC_CAF2021_G.R') ; matMAP_G <- matMAP
 ```
 
 
@@ -1567,17 +1567,49 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
       }
       if( iF==3 ) {
         params <- matMAP_C[,fi]
-        params <- set_par( "RUBISC", 1, params )
-        if( fi %in% if_C.2B ) {
+        params <- set_par( c("KEXT","RUBISC","TRANCO","YG" ),
+                           c( 0.48 , 0.92   , 6.3    , 0.7) )
+        # params <- set_par( c("KEXT","RUBISC","TRANCO","YG" ),
+        #                    c( 0.53 , 1      , 5.7    , 0.56) )
+        if( fi %in% if_C.1E ) { params <- set_par(
+            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(9.1,0.6,3.7,0.25)) }
+        if( fi %in% if_G.1I ) { params <- set_par(
+            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6,0.5,6.5,0.25)) }
+        if( fi %in% if_G.2B ) { params <- set_par(
+            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(5,0.6,4,0.4))
           params <- set_par(
-            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),
-            c( 6      , 0.6       , 5     , 0.44     ),
-            params )
-          params <- set_par(
-            c("CBtree0(2)","CLtree0(2)","CRtree0(2)","CStree0(2)"),
-            c( 1          , 1          , 1          , 1          ),
-            params )
-        }
+            c("CBtree0(2)","CLtree0(2)","CRtree0(2)","CStree0(2)"),c(1,1,1,1)) }
+        if( fi %in% if_G.2A ) { params <- set_par(
+            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(4,0.6,3,0.4)) }
+        if( fi %in% if_G.3G ) { params <- set_par(
+            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6.7,0.63,5,0.25)) }
+        if( fi %in% if_G.3C ) { params <- set_par(
+            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6.7,0.7,5.6,0.33)) }
+        # if( fi %in% if_C.1E ) { params <- set_par(
+        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(8.0,0.45,3.6,0.21)) }
+        # if( fi %in% if_C.1I ) { params <- set_par(
+        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6.2,0.58,4.9,0.24)) }
+        # if( fi %in% if_C.2B ) { params <- set_par(
+        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(4.9,0.62,3.9,0.44))
+        #   params <- set_par(
+        #     c("CBtree0(2)","CLtree0(2)","CRtree0(2)","CStree0(2)"),c(1,1,1,1)) }
+        # if( fi %in% if_C.2A ) { params <- set_par(
+        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(4.4,0.60,3.0,0.36)) }
+        # if( fi %in% if_C.3G ) { params <- set_par(
+        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6.2,0.53,5.0,0.27)) }
+        # if( fi %in% if_C.3C ) { params <- set_par(
+        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6.6,0.66,6.1,0.34)) }
+        # params <- set_par( "RUBISC", 1, params )
+        # if( fi %in% if_C.2B ) {
+        #   params <- set_par(
+        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),
+        #     c( 6      , 0.6       , 5     , 0.44     ),
+        #     params )
+        #   params <- set_par(
+        #     c("CBtree0(2)","CLtree0(2)","CRtree0(2)","CStree0(2)"),
+        #     c( 1          , 1          , 1          , 1          ),
+        #     params )
+        # }
         # calendar_fert[,3] <- 70 + calendar_fert[,3]
         # calendar_fert[,3] <- pmax(70,calendar_fert[,3])
         # ipAC         <- which( startsWith(names_params,"KAC") )
@@ -1810,10 +1842,36 @@ Farm 1073, with 80 avocado trees per hectare, has a simulated shade level of abo
 ```
 
 ```{r, eval=F}
-  unique( matMAP_G["KAC(2)"   ,if_G.2B] )
-  unique( matMAP_G["KACEXP(2)",if_G.2B] )
-  unique( matMAP_G["KH(2)"    ,if_G.2B] )
-  unique( matMAP_G["KHEXP(2)" ,if_G.2B] )
+matMAP_CG <- matMAP_C
+  unique( matMAP_CG["KEXT"     ,       ] )
+  unique( matMAP_CG["RUBISC"   ,       ] )
+  unique( matMAP_CG["TRANCO"   ,       ] )
+  unique( matMAP_CG["YG"       ,       ] )
+
+  unique( matMAP_CG["KAC(1)"   ,if_G.1E] )
+  unique( matMAP_CG["KACEXP(1)",if_G.1E] )
+  unique( matMAP_CG["KH(1)"    ,if_G.1E] )
+  unique( matMAP_CG["KHEXP(1)" ,if_G.1E] )
+  unique( matMAP_CG["KAC(1)"   ,if_G.1I] )
+  unique( matMAP_CG["KACEXP(1)",if_G.1I] )
+  unique( matMAP_CG["KH(1)"    ,if_G.1I] )
+  unique( matMAP_CG["KHEXP(1)" ,if_G.1I] )
+  unique( matMAP_CG["KAC(2)"   ,if_G.2B] )
+  unique( matMAP_CG["KACEXP(2)",if_G.2B] )
+  unique( matMAP_CG["KH(2)"    ,if_G.2B] )
+  unique( matMAP_CG["KHEXP(2)" ,if_G.2B] )
+  unique( matMAP_CG["KAC(2)"   ,if_G.2A] )
+  unique( matMAP_CG["KACEXP(2)",if_G.2A] )
+  unique( matMAP_CG["KH(2)"    ,if_G.2A] )
+  unique( matMAP_CG["KHEXP(2)" ,if_G.2A] )
+  unique( matMAP_CG["KAC(3)"   ,if_G.3G] )
+  unique( matMAP_CG["KACEXP(3)",if_G.3G] )
+  unique( matMAP_CG["KH(3)"    ,if_G.3G] )
+  unique( matMAP_CG["KHEXP(3)" ,if_G.3G] )
+  unique( matMAP_CG["KAC(3)"   ,if_G.3C] )
+  unique( matMAP_CG["KACEXP(3)",if_G.3C] )
+  unique( matMAP_CG["KH(3)"    ,if_G.3C] )
+  unique( matMAP_CG["KHEXP(3)" ,if_G.3C] )
 ```
 
 
@@ -1844,17 +1902,45 @@ Farm 1073, with 80 avocado trees per hectare, has a simulated shade level of abo
       }
       if( iF==3 ) {
         params <- matMAP_G[,fi]
-        params <- set_par( "RUBISC", 1, params )
-        if( fi %in% if_G.2B ) {
+        params <- set_par( c("KEXT","RUBISC","TRANCO","YG" ),
+                           c( 0.48 , 0.92   , 6.3    , 0.7) )
+        # params <- set_par( c("KEXT","RUBISC","TRANCO","YG" ),
+        #                    c( 0.53 , 1      , 5.7    , 0.56) )
+        if( fi %in% if_G.1I ) { params <- set_par(
+            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6,0.5,6.5,0.25)) }
+        if( fi %in% if_G.2B ) { params <- set_par(
+            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(5,0.6,4,0.4))
           params <- set_par(
-            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),
-            c( 6      , 0.6       , 5     , 0.44     ),
-            params )
-          params <- set_par(
-            c("CBtree0(2)","CLtree0(2)","CRtree0(2)","CStree0(2)"),
-            c( 1          , 1          , 1          , 1          ),
-            params )
-        }
+            c("CBtree0(2)","CLtree0(2)","CRtree0(2)","CStree0(2)"),c(1,1,1,1)) }
+        if( fi %in% if_G.2A ) { params <- set_par(
+            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(4,0.6,3,0.4)) }
+        if( fi %in% if_G.3G ) { params <- set_par(
+            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6.7,0.63,5,0.25)) }
+        if( fi %in% if_G.3C ) { params <- set_par(
+            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6.7,0.7,5.6,0.33)) }
+        # if( fi %in% if_G.1I ) { params <- set_par(
+        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6.2,0.58,4.9,0.24)) }
+        # if( fi %in% if_G.2B ) { params <- set_par(
+        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(4.9,0.62,3.9,0.44))
+        #   params <- set_par(
+        #     c("CBtree0(2)","CLtree0(2)","CRtree0(2)","CStree0(2)"),c(1,1,1,1)) }
+        # if( fi %in% if_G.2A ) { params <- set_par(
+        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(4.4,0.60,3.0,0.36)) }
+        # if( fi %in% if_G.3G ) { params <- set_par(
+        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6.2,0.53,5.0,0.27)) }
+        # if( fi %in% if_G.3C ) { params <- set_par(
+        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6.6,0.66,6.1,0.34)) }
+        # params <- set_par( "RUBISC", 1, params )
+        # if( fi %in% if_G.2B ) {
+        #   params <- set_par(
+        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),
+        #     c( 6      , 0.6       , 5     , 0.44     ),
+        #     params )
+        #   params <- set_par(
+        #     c("CBtree0(2)","CLtree0(2)","CRtree0(2)","CStree0(2)"),
+        #     c( 1          , 1          , 1          , 1          ),
+        #     params )
+        # }
         # calendar_fert[,3] <- 70 + calendar_fert[,3]
         # calendar_fert[,3] <- pmax(70,calendar_fert[,3])
         # ipAC       <- which( startsWith(names_params,"KAC") )

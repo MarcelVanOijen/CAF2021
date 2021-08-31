@@ -45,7 +45,8 @@
      for (i in 1:ndata[s]) {
        if( data_name[[s]][i] == "harvDM_f_hay") {
          # data_sd[[s]][i] <- 0.5 * max( 1, sqrt(data_value[[s]][i]) )
-         data_sd[[s]][i] <- 500 * max( 1, sqrt(data_value[[s]][i]/1000) )
+         # data_sd[[s]][i] <- 500 * max( 1, sqrt(data_value[[s]][i]/1000) )
+         data_sd[[s]][i] <- 300 * max( 1, sqrt(data_value[[s]][i]/1000) )
        }
      }
      ###########################################################################
