@@ -1362,7 +1362,7 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
   dir.dataBC <- "data/CG/"
 ```
 
-```{r, eval=T}
+```{r, eval=F}
   sapply( paste0(dir.dataBC,"data_C_f",1:n_C.f,".txt"), file.create)
 
   cv.yield <- 0.2
@@ -1416,7 +1416,7 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
   }
 ```
 
-```{r, eval=T}
+```{r, eval=F}
   sapply( paste0(dir.dataBC,"data_G_f",1:n_G.f,".txt"), file.create)
 
   cv.yield <- 0.2
@@ -1570,10 +1570,10 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
       }
       if( iF==3 ) {
         params <- matMAP_C[,fi]
+        params <- set_par( c("TCSOMF","TCSOMS","CSOM0MULT" ),
+                           c( 10000  , 100000 , 1          ) )
         if( fi %in% if_C.2B ) { params <- set_par(
             c("CBtree0(2)","CLtree0(2)","CRtree0(2)","CStree0(2)"),c(1,1,1,1)) }
-        # params <- set_par( c("TCSOMF","TCSOMS","CSOM0MULT" ),
-        #                    c( 10000  , 100000 , 1          ) )
         # params <- set_par( c("KEXT","RUBISC","TRANCO","YG" ),
         #                    c( 0.48 , 0.92   , 6.3    , 0.7) )
         # if( fi %in% if_C.1E ) { params <- set_par(
@@ -1890,14 +1890,14 @@ matMAP_CG <- matMAP_C
       }
       if( iF==3 ) {
         params <- matMAP_G[,fi]
-        # params <- set_par( c("KEXT","RUBISC","TRANCO","YG" ),
-        #                    c( 0.5  , 1      , 6.5    , 0.7 ) )
-        # params <- set_par( c("KEXT","RUBISC","TRANCO","YG" ),
-        #                    c( 0.5  , 1      , 6.5    , 0.7 ) )
-        # params <- set_par( c("TCSOMF","TCSOMS","CSOM0MULT" ),
-        #                    c( 10000  , 100000 , 1          ) )
+        params <- set_par( c("TCSOMF","TCSOMS","CSOM0MULT" ),
+                           c( 10000  , 100000 , 1          ) )
         if( fi %in% if_G.2B ) { params <- set_par(
             c("CBtree0(2)","CLtree0(2)","CRtree0(2)","CStree0(2)"),c(1,1,1,1)) }
+        # params <- set_par( c("KEXT","RUBISC","TRANCO","YG" ),
+        #                    c( 0.5  , 1      , 6.5    , 0.7 ) )
+        # params <- set_par( c("KEXT","RUBISC","TRANCO","YG" ),
+        #                    c( 0.5  , 1      , 6.5    , 0.7 ) )
         # params <- set_par( c("KEXT","RUBISC","TRANCO","YG" ),
         #                    c( 0.48 , 0.92   , 6.3    , 0.7) )
         # if( fi %in% if_G.1I ) { params <- set_par(
