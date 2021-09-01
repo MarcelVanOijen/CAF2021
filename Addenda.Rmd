@@ -1485,8 +1485,11 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
   # matMAP_C <- readRDS( "CAF2021_parMAP_10_33.rds" )
   # matMAP_G <- readRDS( "CAF2021_parMAP_09_54.rds" )
 
-  source('BC_CAF2021_C.R') ; matMAP_C <- matMAP
-  source('BC_CAF2021_G.R') ; matMAP_G <- matMAP
+  # source('BC_CAF2021_C.R') ; matMAP_C <- matMAP
+  # source('BC_CAF2021_G.R') ; matMAP_G <- matMAP
+
+  matMAP_C <- readRDS( "CAF2021_parMAP_23_51.rds" )
+  matMAP_G <- readRDS( "CAF2021_parMAP_04_31.rds" )
 ```
 
 
@@ -1567,49 +1570,26 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
       }
       if( iF==3 ) {
         params <- matMAP_C[,fi]
-        params <- set_par( c("KEXT","RUBISC","TRANCO","YG" ),
-                           c( 0.48 , 0.92   , 6.3    , 0.7) )
-        # params <- set_par( c("KEXT","RUBISC","TRANCO","YG" ),
-        #                    c( 0.53 , 1      , 5.7    , 0.56) )
-        if( fi %in% if_C.1E ) { params <- set_par(
-            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(9.1,0.6,3.7,0.25)) }
-        if( fi %in% if_G.1I ) { params <- set_par(
-            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6,0.5,6.5,0.25)) }
-        if( fi %in% if_G.2B ) { params <- set_par(
-            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(5,0.6,4,0.4))
-          params <- set_par(
+        if( fi %in% if_C.2B ) { params <- set_par(
             c("CBtree0(2)","CLtree0(2)","CRtree0(2)","CStree0(2)"),c(1,1,1,1)) }
-        if( fi %in% if_G.2A ) { params <- set_par(
-            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(4,0.6,3,0.4)) }
-        if( fi %in% if_G.3G ) { params <- set_par(
-            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6.7,0.63,5,0.25)) }
-        if( fi %in% if_G.3C ) { params <- set_par(
-            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6.7,0.7,5.6,0.33)) }
+        # params <- set_par( c("TCSOMF","TCSOMS","CSOM0MULT" ),
+        #                    c( 10000  , 100000 , 1          ) )
+        # params <- set_par( c("KEXT","RUBISC","TRANCO","YG" ),
+        #                    c( 0.48 , 0.92   , 6.3    , 0.7) )
         # if( fi %in% if_C.1E ) { params <- set_par(
-        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(8.0,0.45,3.6,0.21)) }
+        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(9.1,0.6,3.7,0.25)) }
         # if( fi %in% if_C.1I ) { params <- set_par(
-        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6.2,0.58,4.9,0.24)) }
+        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6,0.5,6.5,0.25)) }
         # if( fi %in% if_C.2B ) { params <- set_par(
-        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(4.9,0.62,3.9,0.44))
+        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(5,0.6,4,0.4))
         #   params <- set_par(
         #     c("CBtree0(2)","CLtree0(2)","CRtree0(2)","CStree0(2)"),c(1,1,1,1)) }
         # if( fi %in% if_C.2A ) { params <- set_par(
-        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(4.4,0.60,3.0,0.36)) }
+        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(4,0.6,3,0.4)) }
         # if( fi %in% if_C.3G ) { params <- set_par(
-        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6.2,0.53,5.0,0.27)) }
+        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6.7,0.63,5,0.25)) }
         # if( fi %in% if_C.3C ) { params <- set_par(
-        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6.6,0.66,6.1,0.34)) }
-        # params <- set_par( "RUBISC", 1, params )
-        # if( fi %in% if_C.2B ) {
-        #   params <- set_par(
-        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),
-        #     c( 6      , 0.6       , 5     , 0.44     ),
-        #     params )
-        #   params <- set_par(
-        #     c("CBtree0(2)","CLtree0(2)","CRtree0(2)","CStree0(2)"),
-        #     c( 1          , 1          , 1          , 1          ),
-        #     params )
-        # }
+        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6.7,0.7,5.6,0.33)) }
         # calendar_fert[,3] <- 70 + calendar_fert[,3]
         # calendar_fert[,3] <- pmax(70,calendar_fert[,3])
         # ipAC         <- which( startsWith(names_params,"KAC") )
@@ -1644,6 +1624,14 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
     list_parF_C[[fi]] <- mat_parF
     list_outF_C[[fi]] <- mat_outF
   }
+```
+
+```{r}
+  plot_output( outF, vars= c( paste0("At(",1:3,")"),
+                              "harvDM_f_hay",
+                              paste0("h_t(",1:3,")"),
+                              "Shade_f",
+                              paste0("CAtree_t(",1:3,")")) )
 ```
 
 ```{r}
@@ -1902,45 +1890,28 @@ matMAP_CG <- matMAP_C
       }
       if( iF==3 ) {
         params <- matMAP_G[,fi]
-        params <- set_par( c("KEXT","RUBISC","TRANCO","YG" ),
-                           c( 0.48 , 0.92   , 6.3    , 0.7) )
         # params <- set_par( c("KEXT","RUBISC","TRANCO","YG" ),
-        #                    c( 0.53 , 1      , 5.7    , 0.56) )
-        if( fi %in% if_G.1I ) { params <- set_par(
-            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6,0.5,6.5,0.25)) }
+        #                    c( 0.5  , 1      , 6.5    , 0.7 ) )
+        # params <- set_par( c("KEXT","RUBISC","TRANCO","YG" ),
+        #                    c( 0.5  , 1      , 6.5    , 0.7 ) )
+        # params <- set_par( c("TCSOMF","TCSOMS","CSOM0MULT" ),
+        #                    c( 10000  , 100000 , 1          ) )
         if( fi %in% if_G.2B ) { params <- set_par(
-            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(5,0.6,4,0.4))
-          params <- set_par(
             c("CBtree0(2)","CLtree0(2)","CRtree0(2)","CStree0(2)"),c(1,1,1,1)) }
-        if( fi %in% if_G.2A ) { params <- set_par(
-            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(4,0.6,3,0.4)) }
-        if( fi %in% if_G.3G ) { params <- set_par(
-            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6.7,0.63,5,0.25)) }
-        if( fi %in% if_G.3C ) { params <- set_par(
-            c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6.7,0.7,5.6,0.33)) }
+        # params <- set_par( c("KEXT","RUBISC","TRANCO","YG" ),
+        #                    c( 0.48 , 0.92   , 6.3    , 0.7) )
         # if( fi %in% if_G.1I ) { params <- set_par(
-        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6.2,0.58,4.9,0.24)) }
+        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6,0.5,6.5,0.25)) }
         # if( fi %in% if_G.2B ) { params <- set_par(
-        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(4.9,0.62,3.9,0.44))
+        #   c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(5,0.6,4,0.4))
         #   params <- set_par(
-        #     c("CBtree0(2)","CLtree0(2)","CRtree0(2)","CStree0(2)"),c(1,1,1,1)) }
+        #   c("CBtree0(2)","CLtree0(2)","CRtree0(2)","CStree0(2)"),c(1,1,1,1)) }
         # if( fi %in% if_G.2A ) { params <- set_par(
-        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(4.4,0.60,3.0,0.36)) }
+        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(4,0.6,3,0.4)) }
         # if( fi %in% if_G.3G ) { params <- set_par(
-        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6.2,0.53,5.0,0.27)) }
+        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6.7,0.63,5,0.25)) }
         # if( fi %in% if_G.3C ) { params <- set_par(
-        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6.6,0.66,6.1,0.34)) }
-        # params <- set_par( "RUBISC", 1, params )
-        # if( fi %in% if_G.2B ) {
-        #   params <- set_par(
-        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),
-        #     c( 6      , 0.6       , 5     , 0.44     ),
-        #     params )
-        #   params <- set_par(
-        #     c("CBtree0(2)","CLtree0(2)","CRtree0(2)","CStree0(2)"),
-        #     c( 1          , 1          , 1          , 1          ),
-        #     params )
-        # }
+        #     c("KAC(2)","KACEXP(2)","KH(2)","KHEXP(2)"),c(6.7,0.7,5.6,0.33)) }
         # calendar_fert[,3] <- 70 + calendar_fert[,3]
         # calendar_fert[,3] <- pmax(70,calendar_fert[,3])
         # ipAC       <- which( startsWith(names_params,"KAC") )
@@ -1975,6 +1946,14 @@ matMAP_CG <- matMAP_C
     list_parF_G[[fi]] <- mat_parF
     list_outF_G[[fi]] <- mat_outF
   }
+```
+
+```{r}
+  plot_output( outF, vars= c( paste0("At(",1:3,")"),
+                              "harvDM_f_hay",
+                              paste0("h_t(",1:3,")"),
+                              "Shade_f",
+                              paste0("CAtree_t(",1:3,")")) )
 ```
 
 ```{r}
@@ -2382,7 +2361,7 @@ Results of these simulations are shown in Figs \ref{fig:XX14C}, \ref{fig:XX14G},
   nnt3_C <- length(int3_C)      ; nnt3_G <- length(int3_G)
   
   listmat_nt_C <- listmat_nt_G <- vector( "list", 3 )
-  varnames.listmat <- c( "code","slope","Nfert","nt","shade",
+  varnames.listmat <- c( "code","dist","slope","Nfert","nt","shade",
     "y1819","y1920",  "y1819.sim","y1920.sim","y.sim",
     "D_Csoil.sim","shade.sim","Nleach.sim","Crunoff.sim","Csoil.sim" )
 ```
@@ -2394,6 +2373,7 @@ Results of these simulations are shown in Figs \ref{fig:XX14C}, \ref{fig:XX14G},
 ```{r}
   listmat_nt_C[[1]] <- t( sapply( 1:nnt1_C, function(i){ cbind(
     df_C.f    [int1_C,]$code     [[i]],
+    df_C.f    [int1_C,]$dist     [[i]],
     df_C.f    [int1_C,]$slope    [[i]],
     df_C.f    [int1_C,]$Nfert    [[i]],
     df_C.f    [int1_C,]$nt       [[i]],
@@ -2413,6 +2393,7 @@ Results of these simulations are shown in Figs \ref{fig:XX14C}, \ref{fig:XX14G},
 
   listmat_nt_C[[2]] <- t( sapply( 1:nnt2_C, function(i){ cbind(
     df_C.f    [int2_C,]$code     [[i]],
+    df_C.f    [int2_C,]$dist     [[i]],
     df_C.f    [int2_C,]$slope    [[i]],
     df_C.f    [int2_C,]$Nfert    [[i]],
     df_C.f    [int2_C,]$nt       [[i]],
@@ -2432,6 +2413,7 @@ Results of these simulations are shown in Figs \ref{fig:XX14C}, \ref{fig:XX14G},
 
   listmat_nt_C[[3]] <- t( sapply( 1:nnt3_C, function(i){ cbind(
     df_C.f    [int3_C,]$code     [[i]],
+    df_C.f    [int3_C,]$dist     [[i]],
     df_C.f    [int3_C,]$slope    [[i]],
     df_C.f    [int3_C,]$Nfert    [[i]],
     df_C.f    [int3_C,]$nt       [[i]],
@@ -2453,6 +2435,7 @@ Results of these simulations are shown in Figs \ref{fig:XX14C}, \ref{fig:XX14G},
 ```{r}
   listmat_nt_G[[1]] <- t( sapply( 1:nnt1_G, function(i){ cbind(
     df_G.f    [int1_G,]$code     [[i]],
+    df_G.f    [int1_G,]$dist     [[i]],
     df_G.f    [int1_G,]$slope    [[i]],
     df_G.f    [int1_G,]$Nfert    [[i]],
     df_G.f    [int1_G,]$nt       [[i]],
@@ -2472,6 +2455,7 @@ Results of these simulations are shown in Figs \ref{fig:XX14C}, \ref{fig:XX14G},
 
   listmat_nt_G[[2]] <- t( sapply( 1:nnt2_G, function(i){ cbind(
     df_G.f    [int2_G,]$code     [[i]],
+    df_G.f    [int2_G,]$dist     [[i]],
     df_G.f    [int2_G,]$slope    [[i]],
     df_G.f    [int2_G,]$Nfert    [[i]],
     df_G.f    [int2_G,]$nt       [[i]],
@@ -2491,6 +2475,7 @@ Results of these simulations are shown in Figs \ref{fig:XX14C}, \ref{fig:XX14G},
 
   listmat_nt_G[[3]] <- t( sapply( 1:nnt3_G, function(i){ cbind(
     df_G.f    [int3_G,]$code     [[i]],
+    df_G.f    [int3_G,]$dist     [[i]],
     df_G.f    [int3_G,]$slope    [[i]],
     df_G.f    [int3_G,]$Nfert    [[i]],
     df_G.f    [int3_G,]$nt       [[i]],
@@ -2510,21 +2495,21 @@ Results of these simulations are shown in Figs \ref{fig:XX14C}, \ref{fig:XX14G},
 ```
 
 ```{r}
-  plotimpacts_nt.Nfert <- function( listmat=listmat_nt_C, var="y.sim" ){
-    plot  ( listmat[[1]][,"Nfert"], listmat[[1]][,var],
-      xlab="Nfert", ylab="",main=var, pch=1,
-      xlim=c(0,max(listmat[[1]][,"Nfert"],listmat[[2]][,"Nfert"],
-                   listmat[[3]][,"Nfert"])),
-      ylim=c(min(0,listmat[[1]][,var],listmat[[2]][,var],listmat[[3]][,var],
+  plotimpacts_nt <- function( listmat=listmat_nt_C, xvar="Nfert", yvar="y.sim" ){
+    plot  ( listmat[[1]][,xvar], listmat[[1]][,yvar],
+      xlab=xvar, ylab="",main=yvar, pch=1,
+      xlim=c(0,max(listmat[[1]][,xvar],listmat[[2]][,xvar],
+                   listmat[[3]][,xvar])),
+      ylim=c(min(0,listmat[[1]][,yvar],listmat[[2]][,yvar],listmat[[3]][,yvar],
                  na.rm=T),
-             max(  listmat[[1]][,var],listmat[[2]][,var],listmat[[3]][,var],
+             max(  listmat[[1]][,yvar],listmat[[2]][,yvar],listmat[[3]][,yvar],
                  na.rm=T)) )
-    points( listmat[[2]][,"Nfert"], listmat[[2]][,var], pch=20, col="red"  )
-    points( listmat[[3]][,"Nfert"], listmat[[3]][,var], pch=6, col="blue" )
+    points( listmat[[2]][,xvar], listmat[[2]][,yvar], pch=20, col="red"  )
+    points( listmat[[3]][,xvar], listmat[[3]][,yvar], pch=6, col="blue" )
     
-    y.lm.nt1 <- lm( listmat[[1]][,var] ~ listmat[[1]][,"Nfert"] )
-    y.lm.nt2 <- lm( listmat[[2]][,var] ~ listmat[[2]][,"Nfert"] )
-    y.lm.nt3 <- lm( listmat[[3]][,var] ~ listmat[[3]][,"Nfert"] )
+    y.lm.nt1 <- lm( listmat[[1]][,yvar] ~ listmat[[1]][,xvar] )
+    y.lm.nt2 <- lm( listmat[[2]][,yvar] ~ listmat[[2]][,xvar] )
+    y.lm.nt3 <- lm( listmat[[3]][,yvar] ~ listmat[[3]][,xvar] )
     r2.nt1   <- round( summary(y.lm.nt1)$r.squared, 2 )
     r2.nt2   <- round( summary(y.lm.nt2)$r.squared, 2 )
     r2.nt3   <- round( summary(y.lm.nt3)$r.squared, 2 )
@@ -2542,29 +2527,57 @@ Results of these simulations are shown in Figs \ref{fig:XX14C}, \ref{fig:XX14G},
 ```{r XX15, fig.height=7.5, fig.cap="\\label{fig:XX15}Observations of shade and yield for farms in Costa Rica plus simulations of seven variables: Long-term average coffee yield, Yield in 2018-19, Change in soil carbon, Average shade level, Final year nitrogen leaching, Final year carbon loss in run-off, Soil carbon."}
   par(mfrow=c(3,3),mar=c(4,2,2,2), mgp=c(2,1,0))
 
-  plotimpacts_nt.Nfert( listmat_nt_C, "shade"       )
-  plotimpacts_nt.Nfert( listmat_nt_C, "y1819"       )
-  plotimpacts_nt.Nfert( listmat_nt_C, "y1920"       )
-  plotimpacts_nt.Nfert( listmat_nt_C, "shade.sim"   )
-  plotimpacts_nt.Nfert( listmat_nt_C, "y1819.sim"   )
-  plotimpacts_nt.Nfert( listmat_nt_C, "y1920.sim"   )
-  plotimpacts_nt.Nfert( listmat_nt_C, "D_Csoil.sim" )
-  plotimpacts_nt.Nfert( listmat_nt_C, "Nleach.sim"  )
-  plotimpacts_nt.Nfert( listmat_nt_C, "Crunoff.sim" )
+  plotimpacts_nt( listmat_nt_C, "Nfert", "shade"        )
+  plotimpacts_nt( listmat_nt_C, "Nfert",  "y1819"       )
+  plotimpacts_nt( listmat_nt_C, "Nfert",  "y1920"       )
+  plotimpacts_nt( listmat_nt_C, "Nfert",  "shade.sim"   )
+  plotimpacts_nt( listmat_nt_C, "Nfert",  "y1819.sim"   )
+  plotimpacts_nt( listmat_nt_C, "Nfert",  "y1920.sim"   )
+  plotimpacts_nt( listmat_nt_C, "Nfert",  "D_Csoil.sim" )
+  plotimpacts_nt( listmat_nt_C, "Nfert",  "Nleach.sim"  )
+  plotimpacts_nt( listmat_nt_C, "Nfert",  "Crunoff.sim" )
 ```
 
 ```{r XX16, fig.height=7.5, fig.cap="\\label{fig:XX16}Shade- and yield-observations for farms in Guatemala plus simulations of seven variables: see previous figure for explanation of variables."}
   par(mfrow=c(3,3),mar=c(4,2,2,2), mgp=c(2,1,0))
 
-  plotimpacts_nt.Nfert( listmat_nt_G, "shade"       )
-  plotimpacts_nt.Nfert( listmat_nt_G, "y1819"       )
-  plotimpacts_nt.Nfert( listmat_nt_G, "y1920"       )
-  plotimpacts_nt.Nfert( listmat_nt_G, "shade.sim"   )
-  plotimpacts_nt.Nfert( listmat_nt_G, "y1819.sim"   )
-  plotimpacts_nt.Nfert( listmat_nt_G, "y1920.sim"   )
-  plotimpacts_nt.Nfert( listmat_nt_G, "D_Csoil.sim" )
-  plotimpacts_nt.Nfert( listmat_nt_G, "Nleach.sim"  )
-  plotimpacts_nt.Nfert( listmat_nt_G, "Crunoff.sim" )
+  plotimpacts_nt( listmat_nt_G, "Nfert", "shade"       )
+  plotimpacts_nt( listmat_nt_G, "Nfert", "y1819"       )
+  plotimpacts_nt( listmat_nt_G, "Nfert", "y1920"       )
+  plotimpacts_nt( listmat_nt_G, "Nfert", "shade.sim"   )
+  plotimpacts_nt( listmat_nt_G, "Nfert", "y1819.sim"   )
+  plotimpacts_nt( listmat_nt_G, "Nfert", "y1920.sim"   )
+  plotimpacts_nt( listmat_nt_G, "Nfert", "D_Csoil.sim" )
+  plotimpacts_nt( listmat_nt_G, "Nfert", "Nleach.sim"  )
+  plotimpacts_nt( listmat_nt_G, "Nfert", "Crunoff.sim" )
+```
+
+```{r, fig.height=7.5}
+  par(mfrow=c(3,3),mar=c(4,2,2,2), mgp=c(2,1,0))
+
+  plotimpacts_nt( listmat_nt_C, "dist", "shade"        )
+  plotimpacts_nt( listmat_nt_C, "dist",  "y1819"       )
+  plotimpacts_nt( listmat_nt_C, "dist",  "y1920"       )
+  plotimpacts_nt( listmat_nt_C, "dist",  "shade.sim"   )
+  plotimpacts_nt( listmat_nt_C, "dist",  "y1819.sim"   )
+  plotimpacts_nt( listmat_nt_C, "dist",  "y1920.sim"   )
+  plotimpacts_nt( listmat_nt_C, "dist",  "D_Csoil.sim" )
+  plotimpacts_nt( listmat_nt_C, "dist",  "Nleach.sim"  )
+  plotimpacts_nt( listmat_nt_C, "dist",  "Crunoff.sim" )
+```
+
+```{r, fig.height=7.5}
+  par(mfrow=c(3,3),mar=c(4,2,2,2), mgp=c(2,1,0))
+
+  plotimpacts_nt( listmat_nt_G, "dist", "shade"       )
+  plotimpacts_nt( listmat_nt_G, "dist", "y1819"       )
+  plotimpacts_nt( listmat_nt_G, "dist", "y1920"       )
+  plotimpacts_nt( listmat_nt_G, "dist", "shade.sim"   )
+  plotimpacts_nt( listmat_nt_G, "dist", "y1819.sim"   )
+  plotimpacts_nt( listmat_nt_G, "dist", "y1920.sim"   )
+  plotimpacts_nt( listmat_nt_G, "dist", "D_Csoil.sim" )
+  plotimpacts_nt( listmat_nt_G, "dist", "Nleach.sim"  )
+  plotimpacts_nt( listmat_nt_G, "dist", "Crunoff.sim" )
 ```
 
 # Analysis of model-data mismatch
@@ -2601,7 +2614,7 @@ Results of these simulations are shown in Figs \ref{fig:XX14C}, \ref{fig:XX14G},
     plotxylm("G: e1920 ~ e1819", orig=F) ; abline(a=0,b=1,lty=2)
 ```
 
-```{r}
+```{r, eval=F}
   par(mfrow=c(4,5), mar=c(2,2,2,1))
 
   y=y1819.err_C
@@ -2627,7 +2640,7 @@ Results of these simulations are shown in Figs \ref{fig:XX14C}, \ref{fig:XX14G},
   x=df_C.f$dens_Cordia    ; plotxylm("C: e1819 ~ Cordia"   )
 ```
 
-```{r}
+```{r, eval=F}
   par(mfrow=c(4,5), mar=c(2,2,2,1))
 
   y=y1920.err_C
@@ -2653,7 +2666,7 @@ Results of these simulations are shown in Figs \ref{fig:XX14C}, \ref{fig:XX14G},
   x=df_C.f$dens_Cordia    ; plotxylm("C: e1920 ~ Cordia"   )
 ```
 
-```{r}
+```{r, eval=F}
   par(mfrow=c(4,5), mar=c(2,2,2,1))
 
   y=y1819.err_G
@@ -2679,7 +2692,7 @@ Results of these simulations are shown in Figs \ref{fig:XX14C}, \ref{fig:XX14G},
   x=df_G.f$dens_Cordia    ; plotxylm("G: e1819 ~ Cordia"   )
 ```
 
-```{r}
+```{r, eval=F}
   par(mfrow=c(4,5), mar=c(2,2,2,1))
 
   y=y1920.err_G
@@ -2705,7 +2718,7 @@ Results of these simulations are shown in Figs \ref{fig:XX14C}, \ref{fig:XX14G},
   x=df_G.f$dens_Cordia    ; plotxylm("G: e1920 ~ Cordia"   )
 ```
 
-```{r}
+```{r, eval=F}
   par(mfrow=c(2,2), mar=c(2,2,2,1))
 
   y=y1819.err_C
@@ -2723,7 +2736,7 @@ Results of these simulations are shown in Figs \ref{fig:XX14C}, \ref{fig:XX14G},
   x=oF2_G[,"Shade_fb"     ] ; plotxylm("G: e1920 ~ Shade_fb"     )
 ```
 
-```{r}
+```{r, eval=F}
   par(mfrow=c(4,3), mar=c(2,2,2,1))
 
   y=y1819.err_C
@@ -2743,7 +2756,7 @@ Results of these simulations are shown in Figs \ref{fig:XX14C}, \ref{fig:XX14G},
   x=oF2_C[,"fNgrowth_t_3b"] ; plotxylm("C: e1920 ~ fNgrowth_t_3b" )
 ```
 
-```{r}
+```{r, eval=F}
   par(mfrow=c(4,3), mar=c(2,2,2,1))
 
   y=y1819.err_G
