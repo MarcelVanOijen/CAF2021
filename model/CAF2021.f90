@@ -156,6 +156,14 @@ where (Ac>0.)
   CW            = CW0
   NL            = CL * NCLMAX
   LAI           = CL * SLAMAX
+elsewhere
+  DVS           = 0.
+  CL            = 0.
+  CP            = 0.
+  CR            = 0.
+  CW            = 0.
+  NL            = 0.
+  LAI           = 0.
 endwhere
 SENSIT       = 0
 SINKP        = 0

@@ -216,16 +216,23 @@ set_par_speciesT <- function( it, species="E. poeppigiana", p.old=params ) {
     p.new <- set_par( names, vals, p.old=p.old )    
   } else if (species %in% c("Banana", "banana",
                             "Musa sp.","Musa")) {
-    names[ 1] <- paste0("CBtree0("  ,it,")") ; vals[ 1] <-    0.1
-    names[ 2] <- paste0("CLtree0("  ,it,")") ; vals[ 2] <-    0.1
-    names[ 3] <- paste0("CRtree0("  ,it,")") ; vals[ 3] <-    0.1
-    names[ 4] <- paste0("CStree0("  ,it,")") ; vals[ 4] <-    0.1
+    # names[ 1] <- paste0("CBtree0("  ,it,")") ; vals[ 1] <-    0.1
+    # names[ 2] <- paste0("CLtree0("  ,it,")") ; vals[ 2] <-    0.1
+    # names[ 3] <- paste0("CRtree0("  ,it,")") ; vals[ 3] <-    0.1
+    # names[ 4] <- paste0("CStree0("  ,it,")") ; vals[ 4] <-    0.1
+    names[ 1] <- paste0("CBtree0("  ,it,")") ; vals[ 1] <-    1
+    names[ 2] <- paste0("CLtree0("  ,it,")") ; vals[ 2] <-    1
+    names[ 3] <- paste0("CRtree0("  ,it,")") ; vals[ 3] <-    1
+    names[ 4] <- paste0("CStree0("  ,it,")") ; vals[ 4] <-    1
     names[ 5] <- paste0("FWT("      ,it,")") ; vals[ 5] <-    0.5
     names[ 6] <- paste0("FST("      ,it,")") ; vals[ 6] <-    0.5
     names[ 7] <- paste0("FPT("      ,it,")") ; vals[ 7] <-    0.5
-    names[ 8] <- paste0("KH("       ,it,")") ; vals[ 8] <-    4
-    names[ 9] <- paste0("KHEXP("    ,it,")") ; vals[ 9] <-    0.4
-    names[10] <- paste0("KAC("      ,it,")") ; vals[10] <-    5
+    # names[ 8] <- paste0("KH("       ,it,")") ; vals[ 8] <-    4
+    # names[ 9] <- paste0("KHEXP("    ,it,")") ; vals[ 9] <-    0.4
+    # names[10] <- paste0("KAC("      ,it,")") ; vals[10] <-    5
+    names[ 8] <- paste0("KH("       ,it,")") ; vals[ 8] <-    4.5
+    names[ 9] <- paste0("KHEXP("    ,it,")") ; vals[ 9] <-    0.42
+    names[10] <- paste0("KAC("      ,it,")") ; vals[10] <-    7
     names[11] <- paste0("KACEXP("   ,it,")") ; vals[11] <-    0.6
     names[12] <- paste0("TBEFOREPT(",it,")") ; vals[12] <-  100
     names[13] <- paste0("TCBT("     ,it,")") ; vals[13] <-  365
@@ -261,8 +268,10 @@ set_par_speciesT <- function( it, species="E. poeppigiana", p.old=params ) {
     names[ 2] <- paste0("CLtree0("  ,it,")") ; vals[ 2] <-     0.1
     names[ 3] <- paste0("CRtree0("  ,it,")") ; vals[ 3] <-     0.1
     names[ 4] <- paste0("CStree0("  ,it,")") ; vals[ 4] <-     0.1
-    names[ 5] <- paste0("FWT("      ,it,")") ; vals[ 5] <-     0.54
-    names[ 6] <- paste0("FST("      ,it,")") ; vals[ 6] <-     0.28
+    # names[ 5] <- paste0("FWT("      ,it,")") ; vals[ 5] <-     0.54
+    # names[ 6] <- paste0("FST("      ,it,")") ; vals[ 6] <-     0.28
+    names[ 5] <- paste0("FWT("      ,it,")") ; vals[ 5] <-     0.43
+    names[ 6] <- paste0("FST("      ,it,")") ; vals[ 6] <-     0.25
     names[ 7] <- paste0("FPT("      ,it,")") ; vals[ 7] <-     0
     names[ 8] <- paste0("KH("       ,it,")") ; vals[ 8] <-     5
     names[ 9] <- paste0("KHEXP("    ,it,")") ; vals[ 9] <-     0.25
@@ -275,14 +284,21 @@ set_par_speciesT <- function( it, species="E. poeppigiana", p.old=params ) {
     names[16] <- paste0("TOPTT("    ,it,")") ; vals[16] <-    25.0
     names[17] <- paste0("TTOLT("    ,it,")") ; vals[17] <-     8
     names[18] <- paste0("HMAX("     ,it,")") ; vals[18] <-    99
+    
+    names[19] <- paste0("FLTMAX("   ,it,")") ; vals[19] <-     0.27
+    names[20] <- paste0("LAIMAXT("  ,it,")") ; vals[20] <-     5
+    names[21] <- paste0("SLAT("     ,it,")") ; vals[21] <-    25
+    
     p.new <- set_par( names, vals, p.old=p.old )    
   } else if (species %in% c("Cordia", "C. alliodora")) {
     names[ 1] <- paste0("CBtree0("  ,it,")") ; vals[ 1] <-     0.1
     names[ 2] <- paste0("CLtree0("  ,it,")") ; vals[ 2] <-     0.1
     names[ 3] <- paste0("CRtree0("  ,it,")") ; vals[ 3] <-     0.1
     names[ 4] <- paste0("CStree0("  ,it,")") ; vals[ 4] <-     0.1
-    names[ 5] <- paste0("FWT("      ,it,")") ; vals[ 5] <-     0.54
-    names[ 6] <- paste0("FST("      ,it,")") ; vals[ 6] <-     0.28
+    # names[ 5] <- paste0("FWT("      ,it,")") ; vals[ 5] <-     0.54
+    # names[ 6] <- paste0("FST("      ,it,")") ; vals[ 6] <-     0.28
+    names[ 5] <- paste0("FWT("      ,it,")") ; vals[ 5] <-     0.55
+    names[ 6] <- paste0("FST("      ,it,")") ; vals[ 6] <-     0.3
     names[ 7] <- paste0("FPT("      ,it,")") ; vals[ 7] <-     0
     names[ 8] <- paste0("KH("       ,it,")") ; vals[ 8] <-     5.6
     names[ 9] <- paste0("KHEXP("    ,it,")") ; vals[ 9] <-     0.33
@@ -295,6 +311,11 @@ set_par_speciesT <- function( it, species="E. poeppigiana", p.old=params ) {
     names[16] <- paste0("TOPTT("    ,it,")") ; vals[16] <-    25.0
     names[17] <- paste0("TTOLT("    ,it,")") ; vals[17] <-     8
     names[18] <- paste0("HMAX("     ,it,")") ; vals[18] <-    99
+    
+    names[19] <- paste0("FLTMAX("   ,it,")") ; vals[19] <-     0.24
+    names[20] <- paste0("LAIMAXT("  ,it,")") ; vals[20] <-     5
+    names[21] <- paste0("SLAT("     ,it,")") ; vals[21] <-    25
+    
     p.new <- set_par( names, vals, p.old=p.old )    
   } else { stop( paste("Parameterisation for", species, "is not provided.") ) }
   return( p.new )
@@ -371,9 +392,12 @@ set_par_CG <- function( df.f=df_C.f, fi=1, p.old=params, country="C" ) {
   densG <- df.f$dens_Grevillea[ fi ]
   densC <- df.f$dens_Cordia   [ fi ]
   
+  p.new <- set_par( c("TCSOMF","TCSOMS","CSOM0MULT" ),
+                    c( 7300   , 73000  , 1          ), p.new )
+  
   p.new <- set_parT( densE, densI, densB, densA, densG, densC, p.old=p.new )
   p.new <- set_par( c("CNLITT0","CNSOMF0","CNSOMS0"),
-                        c( CN    , CN    , CN    ), p.new )
+                    c( CN      , CN      , CN      ), p.new )
   p.new <- set_par( "CSOM0"      , C         , p.new )
   p.new <- set_par( "LAT"        , LAT       , p.new )
   p.new <- set_par( "SLOPE"      , SLOPE     , p.new )

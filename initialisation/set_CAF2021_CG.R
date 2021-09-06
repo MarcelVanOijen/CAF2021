@@ -17,8 +17,6 @@
   names_params   <- row.names(df_params)
   params         <- df_params[,parcol]
 
-  # params <- set_par( "RUBISC", 1, params )
-  
   params <- set_par( c("PRUNTARGET(1)","PRUNTARGET(2)","PRUNTARGET(3)"),
                      c( 1             , 1             , 1             ), params )
   params <- set_par( c("THINTARGET(1)","THINTARGET(2)","THINTARGET(3)"),
