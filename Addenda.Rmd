@@ -289,7 +289,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
 
 # Weather data 2019-2020 and updating df_C|G.f
 
-```{r, eval=F}
+```{r, eval=T}
   dir_weatherstations <- "weather/Climatic_Data/"
     dir_C_Icafe   <- "CostaRica/Icafe/"
     dir_C_IMN     <- "CostaRica/IMN/"
@@ -310,7 +310,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
     n_Anacafe   <- length( files_Anacafe )
 ```
 
-```{r, eval=F}
+```{r, eval=T}
   df_Icafe       <- read_excel( paste0(dir_Icafe,file_Icafe) )
   stations_Icafe <- unique(df_Icafe$Estacion) ; n_Icafe <- length(stations_Icafe)
 
@@ -338,7 +338,22 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
     list_Anacafe[[s]] <- read_csv( paste0(dir_Anacafe,files_Anacafe[s]) ) }
 ```
 
-```{r, eval=F}
+```{r}
+  ny_Icafe <- rep( NA, n_Icafe )
+  for( s in 1:n_Icafe)    { r <- range( list_Icafe[[s]]$year )
+    ny_Icafe[s]   <- 1 + r[2] - r[1] }
+
+  ny_IMN <- rep( NA, n_IMN.RAIN )
+  for( s in 1:n_IMN.RAIN) { r <- range( list_IMN.RAIN[[s]]$Año )
+    ny_IMN[s]     <- 1 + r[2] - r[1] }
+  
+  ny_Anacafe <- rep( NA, n_Anacafe )
+  for( s in 1:n_Anacafe)  { r <- range( list_Anacafe[[s]][,"year"] )
+    ny_Anacafe[s] <- 1 + r[2] - r[1] }
+```
+
+
+```{r, eval=T}
   for( s in 1:n_Icafe ) {
     list_Icafe.a[[s]] <- list_Icafe[[s]] %>%
       rename( ST = Estacion ) %>%
@@ -383,7 +398,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   # for( s in 1:n_Icafe ) { list_Icafe.a[[s]] %>% print(n = 1) }
 ```
 
-```{r, eval=F}
+```{r, eval=T}
   for(s in 1:n_IMN.TMIN) {
     list_IMN.TMIN.a[[s]] <- list_IMN.TMIN[[s]] %>%
       rename( month = Mes ) %>%
@@ -458,7 +473,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   }
 ```
 
-```{r, eval=F}
+```{r, eval=T}
   for( s in 1:n_Anacafe ) {
     list_Anacafe.a[[s]] <- list_Anacafe[[s]] %>%
       rename( ST    = ID_ESTACION ) %>%
@@ -481,7 +496,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   # for( s in 1:n_Anacafe ) { list_Anacafe.a[[s]] %>% print(n = 20, width=Inf) }
 ```
 
-```{r, eval=F}
+```{r, eval=T}
   Icafe.a <- list_Icafe.a[[1]]
   for(s in 2:n_Icafe   ) { Icafe.a <- rbind(Icafe.a,list_Icafe.a[[s]]) }
   IMN.a   <- list_IMN.a  [[1]]
@@ -498,11 +513,11 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   # G.a %>% print(width=Inf,n=Inf)
 ```
 
-```{r, eval=F}
+```{r, eval=T}
   df.ym <- function(df,y,m) {df %>% filter(year==y) %>% filter(month==m)}
 ```
 
-```{r, eval=F}
+```{r, eval=T}
   # Weather stations Costa Rica and their distance from Turrialba
   df=C.a
 
@@ -511,7 +526,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   dist.T      <- as.vector( distm( coordsT, lonlat_C.ST ) ) / 1000
   df          <- df %>% add_column( dist=dist.T )
 
-  par( mfrow=c(3,4), mar=c(2,2,1,1) )
+  par( mfrow=c(3,4), mar=c(3,3,3,1), mgp=c(2,1,0) )
 
   country="C" ; xvar="dist"
   
@@ -546,7 +561,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   }
 ```
 
-```{r, eval=F}
+```{r, eval=T}
   # Weather stations Guatemala and their distance from farm 170
   df=G.a
 
@@ -555,7 +570,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   dist.170    <- as.vector( distm( coordsG170, lonlat_G.ST ) ) / 1000
   df          <- df %>% add_column( dist=dist.170 )
 
-  par( mfrow=c(3,4), mar=c(2,2,1,1) )
+  par( mfrow=c(3,4), mar=c(3,3,3,1), mgp=c(2,1,0) )
 
   country="G" ; xvar="dist"
   
@@ -580,7 +595,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   }
 ```
 
-```{r, eval=F}
+```{r, eval=T}
   C.a.mean2019mon <- C.a %>%
     filter( year == 2019 ) %>%
     group_by( month ) %>%
@@ -592,7 +607,7 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
   knitr::kable( C.a.mean2019mon )
 ```
 
-```{r, eval=F}
+```{r, eval=T}
   G.a.mean2019mon <- G.a %>%
     filter( year == 2019 ) %>%
     group_by( month ) %>%
@@ -607,13 +622,13 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
 
 For 2019 we use the country-average monthly anomalies, for 2020 the climatic average.
 
-```{r, eval=F}
+```{r, eval=T}
   monl   <- c( 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 )
   monend <- cumsum( monl ) ; monstart <- c( 1, head(monend+1,-1) )
   mon    <- function(doy) { which((doy>=monstart) & (doy<=monend)) }
 ```
 
-```{r, eval=F}
+```{r, eval=T}
   nf <- length( df_C.f$code )
 
   for(f in 1:nf) {
@@ -642,7 +657,7 @@ For 2019 we use the country-average monthly anomalies, for 2020 the climatic ave
   }
 ```
 
-```{r, eval=F}
+```{r, eval=T}
   nf <- length( df_G.f$code )
 
   par( mfrow=c(5,5), mar=c(2,1,1,1) )
