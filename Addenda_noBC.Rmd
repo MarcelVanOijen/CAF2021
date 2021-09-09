@@ -945,9 +945,9 @@ Fig. \ref{fig:XX15} shows observations and simulations of multiple variables, al
   if_C.type32 <- which(df_C.f$type=="P3_S2")
   if_C.type43 <- which(df_C.f$type=="P4_S3")
   
-  if_G.type12 <- which(df_G.f$type=="P1_S3")
+  if_G.type13 <- which(df_G.f$type=="P1_S3")
   if_G.type24 <- which(df_G.f$type=="P2_S4")
-  if_G.type32 <- which(df_G.f$type=="P3_S3")
+  if_G.type33 <- which(df_G.f$type=="P3_S3")
   if_G.type43 <- which(df_G.f$type=="P4_S3")
 ```
 
@@ -1023,67 +1023,67 @@ Fig. \ref{fig:XX15} shows observations and simulations of multiple variables, al
   par( mfrow=c(3,3), mar=c(4,4,3,1) )
 
   yobs    <- "Nfert"
-  yobs.12 <- df_G.f[ if_G.type12, yobs ] ; yobs.24 <- df_G.f[ if_G.type24, yobs ]
-  yobs.32 <- df_G.f[ if_G.type32, yobs ] ; yobs.43 <- df_G.f[ if_G.type43, yobs ]
-  yobs.   <- list( yobs.12, yobs.24, yobs.32, yobs.43 )
-  boxplot( yobs., names=c(1.2, 2.4, 3.2, 4.3), main="N-fert. (kg ha-1 y-1)",
+  yobs.13 <- df_G.f[ if_G.type13, yobs ] ; yobs.24 <- df_G.f[ if_G.type24, yobs ]
+  yobs.33 <- df_G.f[ if_G.type33, yobs ] ; yobs.43 <- df_G.f[ if_G.type43, yobs ]
+  yobs.   <- list( yobs.13, yobs.24, yobs.33, yobs.43 )
+  boxplot( yobs., names=c(1.3, 2.4, 3.3, 4.3), main="N-fert. (kg ha-1 y-1)",
            col="green")
   
   yobs    <- "shade"
-  yobs.12 <- df_G.f[ if_G.type12, yobs ] ; yobs.24 <- df_G.f[ if_G.type24, yobs ]
-  yobs.32 <- df_G.f[ if_G.type32, yobs ] ; yobs.43 <- df_G.f[ if_G.type43, yobs ]
-  yobs.   <- list( yobs.12, yobs.24, yobs.32, yobs.43 )
-  boxplot( yobs., names=c(1.2, 2.4, 3.2, 4.3), main="Shade (-)\nobserved",
+  yobs.13 <- df_G.f[ if_G.type13, yobs ] ; yobs.24 <- df_G.f[ if_G.type24, yobs ]
+  yobs.33 <- df_G.f[ if_G.type33, yobs ] ; yobs.43 <- df_G.f[ if_G.type43, yobs ]
+  yobs.   <- list( yobs.13, yobs.24, yobs.33, yobs.43 )
+  boxplot( yobs., names=c(1.3, 2.4, 3.3, 4.3), main="Shade (-)\nobserved",
            col="green")
   
   yobs    <- c( "yield1819", "yield1920" ) 
-  yobs.12 <- df_G.f[ if_G.type12, yobs ] ; yobs.24 <- df_G.f[ if_G.type24, yobs ]
-  yobs.32 <- df_G.f[ if_G.type32, yobs ] ; yobs.43 <- df_G.f[ if_G.type43, yobs ]
-  yobs.   <- list( as.matrix(yobs.12), as.matrix(yobs.24),
-                   as.matrix(yobs.32), as.matrix(yobs.43) )
-  boxplot( yobs., names=c(1.2, 2.4, 3.2, 4.3), main="Yield (kg ha-1 y-1)\nobserved",
+  yobs.13 <- df_G.f[ if_G.type13, yobs ] ; yobs.24 <- df_G.f[ if_G.type24, yobs ]
+  yobs.33 <- df_G.f[ if_G.type33, yobs ] ; yobs.43 <- df_G.f[ if_G.type43, yobs ]
+  yobs.   <- list( as.matrix(yobs.13), as.matrix(yobs.24),
+                   as.matrix(yobs.33), as.matrix(yobs.43) )
+  boxplot( yobs., names=c(1.3, 2.4, 3.3, 4.3), main="Yield (kg ha-1 y-1)\nobserved",
            col="green")
   
   yobs    <- "altitude"
-  yobs.12 <- df_G.f[ if_G.type12, yobs ] ; yobs.24 <- df_G.f[ if_G.type24, yobs ]
-  yobs.32 <- df_G.f[ if_G.type32, yobs ] ; yobs.43 <- df_G.f[ if_G.type43, yobs ]
-  yobs.   <- list( yobs.12, yobs.24, yobs.32, yobs.43 )
-  boxplot( yobs., names=c(1.2, 2.4, 3.2, 4.3), main="Altitude (m)",
+  yobs.13 <- df_G.f[ if_G.type13, yobs ] ; yobs.24 <- df_G.f[ if_G.type24, yobs ]
+  yobs.33 <- df_G.f[ if_G.type33, yobs ] ; yobs.43 <- df_G.f[ if_G.type43, yobs ]
+  yobs.   <- list( yobs.13, yobs.24, yobs.33, yobs.43 )
+  boxplot( yobs., names=c(1.3, 2.4, 3.3, 4.3), main="Altitude (m)",
            col="green")
   
   ysim    <- "Shade_fb"
-  ysim.12 <- oF1_G[ if_G.type12, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
-  ysim.32 <- oF1_G[ if_G.type32, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
-  ysim.   <- list( ysim.12, ysim.24, ysim.32, ysim.43 )
-  boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="Shade (-)\nsimulated",
+  ysim.13 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
+  ysim.33 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
+  ysim.   <- list( ysim.13, ysim.24, ysim.33, ysim.43 )
+  boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="Shade (-)\nsimulated",
            col="cyan")
   
   ysim    <- c( "harvDM_f_ha1819", "harvDM_f_ha1920" )
-  ysim.12 <- oF1_G[ if_G.type12, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
-  ysim.32 <- oF1_G[ if_G.type32, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
-  ysim.   <- list( ysim.12, ysim.24, ysim.32, ysim.43 )
-  boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="Yield (kg ha-1 y-1)\nsimulated",
+  ysim.13 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
+  ysim.33 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
+  ysim.   <- list( ysim.13, ysim.24, ysim.33, ysim.43 )
+  boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="Yield (kg ha-1 y-1)\nsimulated",
            col="cyan")
   
   ysim    <- "D_Csoil"
-  ysim.12 <- oF1_G[ if_G.type12, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
-  ysim.32 <- oF1_G[ if_G.type32, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
-  ysim.   <- list( ysim.12, ysim.24, ysim.32, ysim.43 )
-  boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="D_Csoil (kg ha-1 y-1)\nsimulated",
+  ysim.13 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
+  ysim.33 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
+  ysim.   <- list( ysim.13, ysim.24, ysim.33, ysim.43 )
+  boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="D_Csoil (kg ha-1 y-1)\nsimulated",
            col="cyan", ylim=c(-3000,3000))
   
   ysim    <- "Nleaching_fb"
-  ysim.12 <- oF1_G[ if_G.type12, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
-  ysim.32 <- oF1_G[ if_G.type32, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
-  ysim.   <- list( ysim.12, ysim.24, ysim.32, ysim.43 )
-  boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="N-leaching (kg ha-1 y-1)\nsimulated",
+  ysim.13 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
+  ysim.33 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
+  ysim.   <- list( ysim.13, ysim.24, ysim.33, ysim.43 )
+  boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="N-leaching (kg ha-1 y-1)\nsimulated",
            col="cyan", ylim=c(0,100))
   
   ysim    <- "Crunoff_fb"
-  ysim.12 <- oF1_G[ if_G.type12, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
-  ysim.32 <- oF1_G[ if_G.type32, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
-  ysim.   <- list( ysim.12, ysim.24, ysim.32, ysim.43 )
-  boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="C-runoff (kg ha-1 y-1)\nsimulated",
+  ysim.13 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
+  ysim.33 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
+  ysim.   <- list( ysim.13, ysim.24, ysim.33, ysim.43 )
+  boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="C-runoff (kg ha-1 y-1)\nsimulated",
            col="cyan", ylim=c(0,1000))
 ```
 
