@@ -216,10 +216,6 @@ set_par_speciesT <- function( it, species="E. poeppigiana", p.old=params ) {
     p.new <- set_par( names, vals, p.old=p.old )    
   } else if (species %in% c("Banana", "banana",
                             "Musa sp.","Musa")) {
-    # names[ 1] <- paste0("CBtree0("  ,it,")") ; vals[ 1] <-    0.1
-    # names[ 2] <- paste0("CLtree0("  ,it,")") ; vals[ 2] <-    0.1
-    # names[ 3] <- paste0("CRtree0("  ,it,")") ; vals[ 3] <-    0.1
-    # names[ 4] <- paste0("CStree0("  ,it,")") ; vals[ 4] <-    0.1
     names[ 1] <- paste0("CBtree0("  ,it,")") ; vals[ 1] <-    1
     names[ 2] <- paste0("CLtree0("  ,it,")") ; vals[ 2] <-    1
     names[ 3] <- paste0("CRtree0("  ,it,")") ; vals[ 3] <-    1
@@ -448,7 +444,7 @@ set_prunT_CG <- function( df.f=df_C.f, fi=1 ) {
     cp[2,1:nI,1] <- yI ; cp[2,1:nI,2] <- dI ; cp[2,1:nI,3] <- fI }
   if(densG>0) {
     cp[3,1:nG,1] <- yG ; cp[3,1:nG,2] <- dG ; cp[3,1:nG,3] <- fG }
-  # REMOVE NEXT TWO LINES ? (Timber like Cordia not pruned)
+  # Comment out next two lines if timber-trees like Cordia are not pruned
   if(densC>0) {
     cp[3,1:nC,1] <- yC ; cp[3,1:nC,2] <- dC ; cp[3,1:nC,3] <- fC }
   return( cp )

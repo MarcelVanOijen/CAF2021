@@ -250,10 +250,10 @@ This means that all parameter values for coffee and tree morphology and physiolo
 ```
 
 ```{r}
-  knitr::kable( cbind( 1:n_C.f, Tnames_C ),
-                col.names=c("Costa Rica",paste0("T",1:3)) )
-  knitr::kable( cbind( 1:n_G.f, Tnames_G ),
-                col.names=c("Guatemala",paste0("T",1:3)) )
+  knitr::kable( cbind( 1:n_C.f, Tnames_C, Tdens_C),
+                col.names=c("Costa Rica",paste0("T",1:3),paste0("T",1:3)) )
+  knitr::kable( cbind( 1:n_G.f, Tnames_G, Tdens_G),
+                col.names=c("Guatemala" ,paste0("T",1:3),paste0("T",1:3)) )
 ```
 
 ```{r}
