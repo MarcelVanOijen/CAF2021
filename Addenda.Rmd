@@ -1478,22 +1478,12 @@ We run the model for each of the farm locations in Costa Rica and Guatemala, usi
 ## BC
 
 ```{r}
-
   # matMAP_C.old <- readRDS( "CAF2021_parMAP_23_39.rds" )
   # matMAP_C     <- update_matMAP( matMAP_C.old,
   #                                'initialisation/set_CAF2021_CG.R' )
   # matMAP_G.old <- readRDS( "CAF2021_parMAP_04_23.rds" )
   # matMAP_G     <- update_matMAP( matMAP_G.old,
   #                                'initialisation/set_CAF2021_CG.R' )
-
-  # matMAP_C <- readRDS( "CAF2021_parMAP_10_33.rds" )
-  # matMAP_G <- readRDS( "CAF2021_parMAP_09_54.rds" )
-
-  # matMAP_C <- readRDS( "CAF2021_parMAP_23_51.rds" )
-  # matMAP_G <- readRDS( "CAF2021_parMAP_04_31.rds" )
-
-  # matMAP_C <- readRDS( "CAF2021_parMAP_03_28.rds" )
-  # matMAP_G <- readRDS( "CAF2021_parMAP_12_57.rds" )
 
   # source('BC_CAF2021_C.R') ; matMAP_C <- matMAP
   # source('BC_CAF2021_G.R') ; matMAP_G <- matMAP
