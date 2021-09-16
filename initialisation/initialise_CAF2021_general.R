@@ -381,9 +381,8 @@ set_par_CG <- function( df.f=df_C.f, fi=1, p.old=params, country="C" ) {
   densG <- df.f$dens_Grevillea[ fi ]
   densC <- df.f$dens_Cordia   [ fi ]
   
-  p.new <- set_par( c("TCSOMF","TCSOMS","CSOM0MULT" ),
-                    c( 7300   , 73000  , 1          ), p.new )
-  
+  p.new <- set_par( c("TCSOMF","TCSOMS"), c(7300,73000), p.new )
+
   p.new <- set_parT( densE, densI, densB, densA, densG, densC, p.old=p.new )
   p.new <- set_par( c("CNLITT0","CNSOMF0","CNSOMS0"),
                     c( CN      , CN      , CN      ), p.new )

@@ -16,16 +16,6 @@
   df_params      <- read.table( file_params, header=T, sep="\t", row.names=1 )
   names_params   <- row.names(df_params)
   params         <- df_params[,parcol]
-  
-  ######################################################
-  # fileTM_MAP <- "CAF2021_parMAP_10_46.rds"
-  # matMAP     <- readRDS( fileTM_MAP )
-  # 
-  # paramsNEW  <- set_par( names_params, matMAP[,32] )
-  # # paramsNEW  <- set_par( c("FCSOMF0","RNLEACH","TCLITT"),
-  # #                        c( 0.29    , 0.31    , 950    ), paramsNEW )
-  # params     <- paramsNEW
-  ######################################################
 
   params <- set_par( c("PRUNTARGET(1)","PRUNTARGET(2)","PRUNTARGET(3)"),
                      c( 1             , 1             , 1             ), params )

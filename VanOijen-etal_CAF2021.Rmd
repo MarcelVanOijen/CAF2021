@@ -1,0 +1,211 @@
+---
+title: 'Ecosystem services at coffee agroforestry farms in Costa Rica and Guatemala: Estimation using CAF2021'
+author:
+- Marcel van Oijen$^{1*}$
+- Jeremy Haggar$^{2}$
+- Mirna Barrios$^{3}$
+- Lucie Büchi$^{2}$
+- Rolando Cerda$^{4}$
+- Stefania Cerretelli$^{2}$
+- Erick López$^{5}$
+- Elias de Melo Virginio Filho$^{4}$
+- Alejandra Ospina$^{4}$
+date: '`r Sys.Date()`'
+output:
+  pdf_document:
+    fig_crop: false
+    fig_caption: yes
+    keep_tex: no
+    number_sections: yes
+    toc: no
+  word_document:
+    reference_docx: word-styles-reference-01.docx
+  html_document: default
+fontsize: 11pt
+geometry: margin=1in
+csl: agroforestry-systems.csl
+bibliography: SEACAF.bib
+---
+
+```{r, include=FALSE}
+  knitr::opts_chunk$set(echo=F,results="asis",warning=FALSE,message=FALSE)
+```
+
+$^1$ Independent researcher, Edinburgh, United Kingdom 
+$^2$ Natural Resources Institute, University of Greenwich, Chatham Maritime, Medway, United Kingdom  
+$^3$ CATIE, Centro Agronómico Tropical de Investigación y Enseñanza, Managua, Nicaragua  
+$^4$ CATIE, Centro Agronómico Tropical de Investigación y Enseñanza, Turrialba 30501, Costa Rica  
+$^5$ Centro Estudios Ambientales y Biodiversidad, Universidad del Valle de Guatemala, Cuidad de Guatemala, Guatemala
+\
+
+**Abstract:** Coffee ...
+\
+
+**Key words:** Agroforestry systems, *Coffee arabica*, Process-based modelling
+\
+
+$^*$ Corresponding author: ORCID 0000-0003-4028-3626, VanOijenMarcel@gmail.com
+
+
+
+\clearpage
+
+# Declarations {-}
+
+**Acknowledgments:** We acknowledge support by the Institute for Coffee in Costa Rica (ICAFE) and the National Coffee Association of Guatemala (ANACAFE), as well as the coffee farmers in both countries who enabled this research.
+\
+
+**Funding:** This research was funded by UK Research and Innovation Biotechnology and Biological Sciences Research Council (UKRI/BBSRC), from the Global Challenges Research Fund (GCRF) under the Agri-systems Research to Enhance Rural Livelihoods in Developing Countries programme, Grant No. BB/S01490X/1.
+\
+
+**Conflicts of interest/Competing interests:** None.
+\
+
+**Ethics approval:** Not applicable.
+\
+
+**Consent to participate:** Not applicable.
+\
+
+**Consent for publication:** Not applicable.
+\
+
+**Availability of data and material:** Requests for data should be addressed to JH.
+\
+
+**Code availability:** The coffee agroforestry model CAF2021 can be downloaded from https://doi.org/10.5281/zenodo. ...
+
+
+
+\clearpage
+
+# Introduction
+
+- The goal of sustainable agriculture puts multiple demands on coffee agroforestry systems.
+- Many ecosystem services are difficult to quantify.
+- Central American conditions: mountainous topography with young volcanic soils leading to strong spatial variation in weather patterns and fertility. Together with wide variation in management choices, this leads to stronmg variability in CAF systems behaviour.
+- Here, we used a combination of data analysis and process-based modelling to quantify ecosystem services at 168 farms coffee agroforestry farms in Costa Rica and Guatemala.
+- The same farms were studies previously by Haggar et al. (2021), who showed ...
+- Goal 1: Attempt to identify the drivers of the observed differences in productivity and shade.
+- Goal 2: Show the implications of aiming for a particular farm type regarding ecosystem services and sustainability.
+
+\clearpage
+
+# Materials and methods
+
+
+## Data experiments T+M
+
+
+## Data farms C+G
+- Farm inventory:
+  - Shade tree composition
+  - Soil data: C, N, water-holding capacity (using pedotransfer function)
+- Weather data (5 variables): WorldClim plus country-wide 2019 anomalies for rain and temperature.
+
+
+## CAF2021 structure
+
+Short description. Full details on zenodo ...
+
+### Similarity with earlier models
+- CAF2007 [@] and CAF2014 [@]
+- Biogeochemical processes within soil, coffee plants, shade trees.
+- Inputs: Weather, latitude (to calculate day length), management (calendars for fertilisation, pruning and thinning calendars), parameter values for properties of soil, coffee and trees.
+- State variables: for C, N and water plus DVS.
+- Outputs: state variables and process rates including ecosystem (dis)services such as productivity of coffee and trees, N-leaching, N-emission, erosion in the form of soil organic matter loss (C & N) in run-off, C-sequestration in the soil.
+- Daily time step, FORTRAN but called from R.
+
+### New model structure
+  - 3 tree species. 2 of the 3 spp. have non-overlapping crown areas. Shaded area calculation using arrays.
+  - Fruit production.
+  - Tree height + crown area determines degree of overshadowing.
+  - HMAX.
+  - Options for shade-goal directed pruning and/or thinning.
+- Typical use-case: service tree + fruit tree + timber tree.
+
+
+## CAF2021 BC on data experiments T+M
+- 32 (18T+14M) treatments (in contrast to Ovalle with CAF2014 which was limited to treatments with no more than one tree species et al. 2020: 6+4)
+- New model, new treatments, therefore new BC.
+
+
+## CAF2021 application to farms C+G
+- Input data as mentioned above
+- Parameters for 6 representative tree species
+- Erythrina + Inga: MAP paranmeter settings
+- Banana + avocado: literature
+- Cordia: literature (including vO et al. 2010a and Edwin 2021)
+- Grevillea: literature (including Edwin 2021)
+- Planting year but stands were mostly mature. We simulated 2005-2020 and mainly focused on results from the last two years.
+- Only differences C-G: (1) pruned branches removed in G but left on the field in C, (2) HMAX of some tree species differently managed.
+
+### Additional sensitvity analysis
+- Simulate climatic extremes / IAV / El Niño years.
+  - Vary farm typology? We can only do that if we find the causes underlying the groups first.
+  
+  
+  
+\clearpage
+
+# Results
+
+
+## BC on data from Turrialba and Masatepe
+
+- Results for coffee yields: calibrated model
+- Results for multiple
+  - UQ
+
+
+## Examples of CAF2021 outputs for different farm types
+
+
+
+\clearpage
+
+# Discussion
+
+
+## BC
+
+- One (not two) calibrations for C and G simultaneously. Good posterior simulations despite having no treatment- or country-specific parameters. Coffee parameters universal, tree species assumed the same in both experiments Only experiment-specific parameters: very small number of soil parameters. Any spatial variation within the experiments also ignored.
+- UQ
+
+## Farm simulations
+- Quality MAP (from T+M!) simulations to farms C+G, i.e. out-of-sample simulations.
+  - Parameter uncertainty not changed, but many additional sources of uncertainty, i.e. so parameter uncertainty only provides lower bound. The additional uncertainties are mainly farm input data uncertainties:
+    - Upscaling from top 26 to full soil column. Ignoring variation between farms.
+    - Start year 2005.
+    - Representativeness of the six tree species. Compare with number of tree species reported for each farm.
+    - Ignoring within-month weather variability. Note that WorldClim Turrialba weather data gave similarly good simulations as on-site weather station.
+    - ...
+
+
+## Farms ES-analysis: Differences between Costa Rica and Guatemala
+  
+  
+## Typology
+
+
+
+\clearpage
+
+# Conclusions
+
+- The model seems to be able to simulate a wide range of CAF systems. Despite much information being unavailable, and no farm-level model calibration, still reasonably good simulation of coffee yields in Costa Rica.
+- However, ES-estimation only preliminary.
+- Poorer results for Guatemala remain to be explained. Three sources of error:
+  - Model structure
+  - Model input data
+  - Model parameterisation
+- Need for multivariate BC data, not just yield.
+- Model points to inevitable trade-offs between coffee yield and environmental ecosystem services. The data suggest that some Guatemala farms manage to keep yields high despite low fertilisation. The modelling suggests that this can only be the case if either soils in Guatemala (which are not high in N) release their N more readily - which woould lead to fast loss of soil fertility - than Costa Rican soils or if local coffee and shade tree genotypes have higher NUE.
+- Key question: Does shade lead to buffering against extreme climatic conditions?
+  - Answer can only be preliminary: no long-term reliable annual ecosystem services data, apart from the time series of coffee yield in the Turrialba and Masatepe experiments.  
+
+
+
+\clearpage
+
+# References {-}
