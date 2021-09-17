@@ -75,10 +75,25 @@ This means that all parameter values for coffee and tree morphology and physiolo
   }
 ```
 
-```{r}
+```{r, eval=F}
+  # load( "df_C.f_final_exceptYieldConv3.rda" )
+  # load( "df_G.f_final_exceptYieldConv3.rda" )
+  # 
+  # df_C.f <- df_C.f %>% 
+  #   mutate( yield1819 = yield1819 * 3.87/3) %>%
+  #   mutate( yield1920 = yield1920 * 3.87/3)
+  # 
+  # df_G.f <- df_G.f %>% 
+  #   mutate( yield1819 = yield1819 * 3.87/3) %>%
+  #   mutate( yield1920 = yield1920 * 3.87/3)
+  # 
+  # save( df_C.f, file="df_C.f_final.rda" )
+  # save( df_G.f, file="df_G.f_final.rda" )
+```
+  
+```{r}  
   load( "df_C.f_final.rda" )
   load( "df_G.f_final.rda" )
-
   n_C.f <- dim(df_C.f)[1] ; n_G.f <- dim(df_G.f)[1]
 ```
 
