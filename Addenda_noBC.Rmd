@@ -435,8 +435,7 @@ This means that all parameter values for coffee and tree morphology and physiolo
 
   Ssummary_C.vpmax <- sapply( 1:length(vars_Summary), function(vi){
     names( which.max( abs( mat_outF_C_SA[,vi] ) ) ) } )
-  colnames( Ssummary_C.vpmax ) <- vars_Summary
-  
+
   knitr::kable( cbind( t(Ssummary_C.v), Ssummary_C.vpmax ) )
 ```
 
@@ -629,8 +628,7 @@ This means that all parameter values for coffee and tree morphology and physiolo
 
   Ssummary_G.vpmax <- sapply( 1:length(vars_Summary), function(vi){
     names( which.max( abs( mat_outF_G_SA[,vi] ) ) ) } )
-  colnames( Ssummary_G.vpmax ) <- vars_Summary
-  
+
   knitr::kable( cbind( t(Ssummary_G.v), Ssummary_G.vpmax ) )
 ```
 
