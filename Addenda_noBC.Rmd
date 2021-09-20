@@ -53,6 +53,74 @@ This means that all parameter values for coffee and tree morphology and physiolo
 
 \clearpage
 
+# UQ
+
+```{r}
+  load("BC_Turrialba_Masatepe_06_45.RData")
+  source( sitesettings_filenames[1] )
+
+  aa <- 1 + 4 * (2-1)/(4-1) # Typical prior: if mode=2, min=1, max=4
+  bb <- 6 - aa
+  pp <- 1 + rbeta(1e5,aa,bb)*(4-1)
+  mean(pp) ## should be 1 + (4-1) * (aa/(aa+bb)) = 13/6
+  # mode(pp) should be 1 + (4-1) * (aa-1)/(aa+bb-2) = 2
+  sd(pp) / mean(pp)
+  sqrt(aa*bb) / (aa+bb) / sqrt(aa+bb+1) * (4-1) / (13/6) # prior cv = 25.51 %
+  
+  file_parModes <- "CAF2021_parModes_06_45.txt"
+  df_parModes   <- read.table( file_parModes, sep="\t", header=T, row.names=1 )
+  cbind( names_params, df_parModes[,"CVPost_1"] )
+  iCV           <- which( startsWith( colnames(df_parModes), "CVPost_" ) )
+  summary(         df_parModes[,iCV]   )
+  summary( unlist( df_parModes[,iCV] ) )
+  
+
+# Calculate model output for a sample from the posterior
+# Take a sample (of size nSample) from the chain generated using MCMC
+  mean_s <- cv_s <- matrix(NA,nrow=nSites,ncol=NOUT)
+  for (s in 1:nSites) {
+    params          <- list_params        [[s]]
+    matrix_weather  <- list_matrix_weather[[s]]
+    calendar_fert   <- list_calendar_fert [[s]]
+    calendar_prunC  <- list_calendar_prunC[[s]] 
+    calendar_prunT  <- list_calendar_prunT[[s]]
+    calendar_thinT  <- list_calendar_thinT[[s]]  
+    NDAYS           <- list_NDAYS         [[s]]       
+    ip_BC_s         <- ip_BC_site         [[s]]
+    icol_pChain_s   <- icol_pChain_site   [[s]]
+    nSample         <- 100
+    nStep           <- (nChain-nBurnin) / nSample
+    outputSample    <- array( 0, c(nSample,NDAYS,NOUT) )
+    ii              <- 0
+    for (j in seq(nBurnin+nStep, nChain, nStep)) {
+      ii <- ii+1
+      params_j           <- pChain[j,] * sc
+      params[ip_BC_s]    <- params_j[icol_pChain_s]
+      outputSample[ii,,] <- run_model( params, matrix_weather,
+                                       calendar_fert, calendar_prunC,
+	              	                     calendar_prunT, calendar_thinT, NDAYS )
+    } # end of sample loop
+  mean_s[s,] <- sapply( 1:NOUT, function(i) {
+      mean(outputSample[,NDAYS,i],na.rm=T)
+    } )
+  cv_s[s,] <- sapply( 1:NOUT, function(i) {
+      sd  (outputSample[,NDAYS,i],na.rm=T) /
+      mean(outputSample[,NDAYS,i],na.rm=T)
+    } )
+
+  colnames(mean_s) <- colnames(cv_s) <- outputNames
+  }
+  
+  cbind (summary(mean_s[,c("Shade_f","harvDM_f_hay",
+                           "D_Csoil_f_hay","Nleaching_f_hay")]) )
+  cbind (summary(cv_s  [,c("Shade_f","harvDM_f_hay",
+                           "D_Csoil_f_hay","Nleaching_f_hay")]) )
+```
+
+
+
+\clearpage
+
 # Simulating results for farms in Costa Rica and Guatemala
 
 ```{r}
@@ -293,6 +361,8 @@ This means that all parameter values for coffee and tree morphology and physiolo
     file_init <- paste0( "initialisation/CG/inititialise_CAF2021_C_f", fi, ".R" )
     source( file_init )
     
+    params <- set_par( "SHADETARGETMULT", 0.6 )
+    
     nF_C                     <- 1
     mat_parF                 <- matrix( NA, nF_C, 1+length(names_params) )
     mat_outF                 <- matrix( NA, nF_C, 1+length(vars_Summary) )
@@ -322,6 +392,52 @@ This means that all parameter values for coffee and tree morphology and physiolo
     list_parF_C[[fi]] <- mat_parF
     list_outF_C[[fi]] <- mat_outF
   }
+```
+
+```{r list_outF_C_SA}
+  list_outF_C_SA <- vector( "list", n_C.f )
+
+  for(fi in 1:n_C.f) {
+    file_init <- paste0( "initialisation/CG/inititialise_CAF2021_C_f", fi, ".R" )
+    source( file_init )
+    
+    params <- set_par( "SHADETARGETMULT", 0.6 )
+    npar                  <- length(params)
+    mat_outF              <- matrix( NA, npar, length(vars_Summary) )
+    colnames( mat_outF )  <- vars_Summary
+    for(pi in 1:npar) {
+      paramsS     <- params
+      paramsS[pi] <- params[pi] * 0.9
+      outF <- run_model( paramsS, matrix_weather, calendar_fert,
+        calendar_prunC, calendar_prunT, calendar_thinT, NDAYS )
+      mat_outF[pi,] <- outputSummary( outF )
+    }
+    list_outF_C_SA[[fi]] <- mat_outF
+  }
+
+  mat_outF_C_SA <- matrix( NA, nrow=npar, ncol=length(vars_Summary) )
+  rownames(mat_outF_C_SA) <- names_params
+  colnames(mat_outF_C_SA) <- vars_Summary
+  for(pi in 1:npar) {
+    for(vi in 1:length(vars_Summary)) {
+      S_pivi.f <- rep( NA, n_C.f )
+      for(fi in 1:n_C.f) {
+        S_pivi.f[fi] <- -10 *
+          ( list_outF_C_SA[[fi]][pi,vi]/list_outF_C[[fi]][1,vi+1] - 1 )
+      }
+      mat_outF_C_SA[pi,vi] <- round( mean( S_pivi.f, na.rm=T ), 3 )
+    }
+  }
+  
+  Ssummary_C.v <- sapply( 1:length(vars_Summary), function(vi){
+    range( mat_outF_C_SA[,vi], na.rm=T ) } )
+  colnames( Ssummary_C.v ) <- vars_Summary
+
+  Ssummary_C.vpmax <- sapply( 1:length(vars_Summary), function(vi){
+    names( which.max( abs( mat_outF_C_SA[,vi] ) ) ) } )
+  colnames( Ssummary_C.vpmax ) <- vars_Summary
+  
+  knitr::kable( cbind( t(Ssummary_C.v), Ssummary_C.vpmax ) )
 ```
 
 ```{r exC, fig.height=3, fig.cap="\\label{fig:exC}Example simulation: Costa Rica farm 89."}
@@ -434,9 +550,12 @@ This means that all parameter values for coffee and tree morphology and physiolo
 
 ```{r list_outF_G}
   list_outF_G <- list_parF_G <- vector( "list", n_G.f )
+
   for(fi in 1:n_G.f) {
     file_init <- paste0( "initialisation/CG/inititialise_CAF2021_G_f", fi, ".R" )
     source( file_init )
+    
+    params <- set_par( "SHADETARGETMULT", 0.6 )
 
     nF_G                     <- 1
     mat_parF                 <- matrix( NA, nF_G, 1+length(names_params) )
@@ -467,6 +586,52 @@ This means that all parameter values for coffee and tree morphology and physiolo
     list_parF_G[[fi]] <- mat_parF
     list_outF_G[[fi]] <- mat_outF
   }
+```
+
+```{r list_outF_G_SA}
+  list_outF_G_SA <- vector( "list", n_G.f )
+
+  for(fi in 1:n_G.f) {
+    file_init <- paste0( "initialisation/CG/inititialise_CAF2021_G_f", fi, ".R" )
+    source( file_init )
+    
+    params <- set_par( "SHADETARGETMULT", 0.6 )
+    npar                  <- length(params)
+    mat_outF              <- matrix( NA, npar, length(vars_Summary) )
+    colnames( mat_outF )  <- vars_Summary
+    for(pi in 1:npar) {
+      paramsS     <- params
+      paramsS[pi] <- params[pi] * 0.9
+      outF <- run_model( paramsS, matrix_weather, calendar_fert,
+        calendar_prunC, calendar_prunT, calendar_thinT, NDAYS )
+      mat_outF[pi,] <- outputSummary( outF )
+    }
+    list_outF_G_SA[[fi]] <- mat_outF
+  }
+
+  mat_outF_G_SA <- matrix( NA, nrow=npar, ncol=length(vars_Summary) )
+  rownames(mat_outF_G_SA) <- names_params
+  colnames(mat_outF_G_SA) <- vars_Summary
+  for(pi in 1:npar) {
+    for(vi in 1:length(vars_Summary)) {
+      S_pivi.f <- rep( NA, n_G.f )
+      for(fi in 1:n_G.f) {
+        S_pivi.f[fi] <- -10 *
+          ( list_outF_G_SA[[fi]][pi,vi]/list_outF_G[[fi]][1,vi+1] - 1 )
+      }
+      mat_outF_G_SA[pi,vi] <- round( mean( S_pivi.f, na.rm=T ), 3 )
+    }
+  }
+  
+  Ssummary_G.v <- sapply( 1:length(vars_Summary), function(vi){
+    range( mat_outF_G_SA[,vi], na.rm=T ) } )
+  colnames( Ssummary_G.v ) <- vars_Summary
+
+  Ssummary_G.vpmax <- sapply( 1:length(vars_Summary), function(vi){
+    names( which.max( abs( mat_outF_G_SA[,vi] ) ) ) } )
+  colnames( Ssummary_G.vpmax ) <- vars_Summary
+  
+  knitr::kable( cbind( t(Ssummary_G.v), Ssummary_G.vpmax ) )
 ```
 
 ```{r exG, fig.height=3, fig.cap="\\label{fig:exG}Example simulation: Guatemala farm 79."}
@@ -1092,7 +1257,7 @@ Fig. \ref{fig:XX15} shows observations and simulations of multiple variables, al
   ysim.33 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
   ysim.   <- list( ysim.13, ysim.24, ysim.33, ysim.43 )
   boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="N-leaching (kg ha-1 y-1)\nsimulated",
-           col="cyan", ylim=c(0,100))
+           col="cyan", ylim=c(0,200))
   
   ysim    <- "Crunoff_fb"
   ysim.13 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
@@ -1182,6 +1347,9 @@ Fig. \ref{fig:XX15} shows observations and simulations of multiple variables, al
 
 
 ## UQ
+
+
+## SA
 
 
 ## Results

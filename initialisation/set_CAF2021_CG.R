@@ -12,21 +12,22 @@
   NDAYS      <- as.integer(15*365)
    
   file_params    <- 'parameters/parameters_default.txt'
-    parcol       <- 31
+    parcol       <- 1
   df_params      <- read.table( file_params, header=T, sep="\t", row.names=1 )
   names_params   <- row.names(df_params)
   params         <- df_params[,parcol]
   
   ######################################################
-  # fileTM_MAP <- "CAF2021_parMAP_10_46.rds"
-  # matMAP     <- readRDS( fileTM_MAP )
-  # 
-  # paramsNEW  <- set_par( names_params, matMAP[,32] )
-  # # paramsNEW  <- set_par( c("FCSOMF0","RNLEACH","TCLITT"),
-  # #                        c( 0.29    , 0.31    , 950    ), paramsNEW )
-  # params     <- paramsNEW
+  fileTM_MAP <- "CAF2021_parMAP_06_45.rds"
+  # fileTM_MAP <- "CAF2021_parMAP_03_50.rds"
+  matMAP     <- readRDS( fileTM_MAP )
+  params     <- set_par( names_params, matMAP[,32] )
+  params     <- set_par( c("FCSOMF0","RNLEACH","TCLITT"),
+                         c( 0.5    , 0.5    ,   730    ) )
   ######################################################
 
+  # params[which(names_params %in% c("FCSOMF0","RNLEACH","TCLITT","TCSOMF","TCSOMS"))]
+  
   params <- set_par( c("PRUNTARGET(1)","PRUNTARGET(2)","PRUNTARGET(3)"),
                      c( 1             , 1             , 1             ), params )
   params <- set_par( c("THINTARGET(1)","THINTARGET(2)","THINTARGET(3)"),
