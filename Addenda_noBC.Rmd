@@ -376,7 +376,7 @@ This means that all parameter values for coffee and tree morphology and physiolo
       params.X         <- set_par("SHADETARGETMULT",0.1)
       year             <- matrix_weather[,1]
       doy              <- matrix_weather[,2]
-      iday.X           <- which( year==2019 & doy > 150 & doy < 270 )
+      iday.X           <- which( year==2019 & doy > 180 )
       ivar.X           <- 8 # RAIN
       matrix_weather.X <- matrix_weather
       matrix_weather.X[ iday.X, ivar.X ] <-
@@ -610,7 +610,7 @@ This means that all parameter values for coffee and tree morphology and physiolo
       params.X         <- set_par("SHADETARGETMULT",0.1)
       year             <- matrix_weather[,1]
       doy              <- matrix_weather[,2]
-      iday.X           <- which( year==2019 & doy > 150 & doy < 270 )
+      iday.X           <- which( year==2019 & doy > 180 )
       ivar.X           <- 8 # RAIN
       matrix_weather.X <- matrix_weather
       matrix_weather.X[ iday.X, ivar.X ] <-
