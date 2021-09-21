@@ -66,15 +66,16 @@ This means that all parameter values for coffee and tree morphology and physiolo
   # mode(pp) should be 1 + (4-1) * (aa-1)/(aa+bb-2) = 2
   sd(pp) / mean(pp)
   sqrt(aa*bb) / (aa+bb) / sqrt(aa+bb+1) * (4-1) / (13/6) # prior cv = 25.51 %
-  
+```
+
+```{r}
   file_parModes <- "CAF2021_parModes_06_45.txt"
   df_parModes   <- read.table( file_parModes, sep="\t", header=T, row.names=1 )
-  cbind( names_params, df_parModes[,"CVPost_1"] )
+  # knitr::kable( cbind( names_params, df_parModes[,"CVPost_1"] ) )
   iCV           <- which( startsWith( colnames(df_parModes), "CVPost_" ) )
-  summary(         df_parModes[,iCV]   )
-  summary( unlist( df_parModes[,iCV] ) )
+  # summary(         df_parModes[,iCV]   )
+  # summary( unlist( df_parModes[,iCV] ) )
   
-
 # Calculate model output for a sample from the posterior
 # Take a sample (of size nSample) from the chain generated using MCMC
   mean_s <- cv_s <- matrix(NA,nrow=nSites,ncol=NOUT)
@@ -411,11 +412,14 @@ This means that all parameter values for coffee and tree morphology and physiolo
       outF <- run_model( paramsS, matrix_weather, calendar_fert,
         calendar_prunC, calendar_prunT, calendar_thinT, NDAYS )
       mat_outF[pi,] <- outputSummary( outF )
+      if(startsWith(names_params[pi],"PRUNTARGET(")) mat_outF[pi,] <- NA
+      if(startsWith(names_params[pi],"THINTARGET(")) mat_outF[pi,] <- NA
     }
     list_outF_C_SA[[fi]] <- mat_outF
   }
 
-  mat_outF_C_SA <- matrix( NA, nrow=npar, ncol=length(vars_Summary) )
+  mat_outF_C_SA <- mat_outF_C_SA.minf <- mat_outF_C_SA.maxf <-
+    matrix( NA, nrow=npar, ncol=length(vars_Summary) )
   rownames(mat_outF_C_SA) <- names_params
   colnames(mat_outF_C_SA) <- vars_Summary
   for(pi in 1:npar) {
@@ -425,7 +429,9 @@ This means that all parameter values for coffee and tree morphology and physiolo
         S_pivi.f[fi] <- -10 *
           ( list_outF_C_SA[[fi]][pi,vi]/list_outF_C[[fi]][1,vi+1] - 1 )
       }
-      mat_outF_C_SA[pi,vi] <- round( mean( S_pivi.f, na.rm=T ), 3 )
+      mat_outF_C_SA     [pi,vi] <- round( mean( S_pivi.f, na.rm=T ), 2 )
+      mat_outF_C_SA.minf[pi,vi] <- round( min ( S_pivi.f, na.rm=T ), 2 )
+      mat_outF_C_SA.maxf[pi,vi] <- round( max ( S_pivi.f, na.rm=T ), 2 )
     }
   }
   
@@ -434,9 +440,16 @@ This means that all parameter values for coffee and tree morphology and physiolo
   colnames( Ssummary_C.v ) <- vars_Summary
 
   Ssummary_C.vpmax <- sapply( 1:length(vars_Summary), function(vi){
-    names( which.max( abs( mat_outF_C_SA[,vi] ) ) ) } )
+    ipmax <- which.max( abs( mat_outF_C_SA[,vi] ) )
+    return( c( names(ipmax), mat_outF_C_SA.minf[ipmax,vi],
+               mat_outF_C_SA[ipmax,vi], mat_outF_C_SA.maxf[ipmax,vi] ) ) } )
 
-  knitr::kable( cbind( t(Ssummary_C.v), Ssummary_C.vpmax ) )
+  table_Ssummary_C <- cbind( t(Ssummary_C.v), t(Ssummary_C.vpmax) )
+  colnames( table_Ssummary_C ) <- c( "min_Smeanf(p)", "max_Smeanf(p)",
+                                     "P(maxabs_S)",
+                                     "min_SP(f)","mean_SP(f)","max_SP(f)" )
+  
+  knitr::kable( table_Ssummary_C )
 ```
 
 ```{r exC, fig.height=3, fig.cap="\\label{fig:exC}Example simulation: Costa Rica farm 89."}
@@ -604,11 +617,14 @@ This means that all parameter values for coffee and tree morphology and physiolo
       outF <- run_model( paramsS, matrix_weather, calendar_fert,
         calendar_prunC, calendar_prunT, calendar_thinT, NDAYS )
       mat_outF[pi,] <- outputSummary( outF )
+      if(startsWith(names_params[pi],"PRUNTARGET(")) mat_outF[pi,] <- NA
+      if(startsWith(names_params[pi],"THINTARGET(")) mat_outF[pi,] <- NA
     }
     list_outF_G_SA[[fi]] <- mat_outF
   }
 
-  mat_outF_G_SA <- matrix( NA, nrow=npar, ncol=length(vars_Summary) )
+  mat_outF_G_SA <- mat_outF_G_SA.minf <- mat_outF_G_SA.maxf <-
+    matrix( NA, nrow=npar, ncol=length(vars_Summary) )
   rownames(mat_outF_G_SA) <- names_params
   colnames(mat_outF_G_SA) <- vars_Summary
   for(pi in 1:npar) {
@@ -618,7 +634,9 @@ This means that all parameter values for coffee and tree morphology and physiolo
         S_pivi.f[fi] <- -10 *
           ( list_outF_G_SA[[fi]][pi,vi]/list_outF_G[[fi]][1,vi+1] - 1 )
       }
-      mat_outF_G_SA[pi,vi] <- round( mean( S_pivi.f, na.rm=T ), 3 )
+      mat_outF_G_SA     [pi,vi] <- round( mean( S_pivi.f, na.rm=T ), 2 )
+      mat_outF_G_SA.minf[pi,vi] <- round( min ( S_pivi.f, na.rm=T ), 2 )
+      mat_outF_G_SA.maxf[pi,vi] <- round( max ( S_pivi.f, na.rm=T ), 2 )
     }
   }
   
@@ -627,9 +645,16 @@ This means that all parameter values for coffee and tree morphology and physiolo
   colnames( Ssummary_G.v ) <- vars_Summary
 
   Ssummary_G.vpmax <- sapply( 1:length(vars_Summary), function(vi){
-    names( which.max( abs( mat_outF_G_SA[,vi] ) ) ) } )
+    ipmax <- which.max( abs( mat_outF_G_SA[,vi] ) )
+    return( c( names(ipmax), mat_outF_G_SA.minf[ipmax,vi],
+               mat_outF_G_SA[ipmax,vi], mat_outF_G_SA.maxf[ipmax,vi] ) ) } )
 
-  knitr::kable( cbind( t(Ssummary_G.v), Ssummary_G.vpmax ) )
+  table_Ssummary_G <- cbind( t(Ssummary_G.v), t(Ssummary_G.vpmax) )
+  colnames( table_Ssummary_G ) <- c( "min_Smeanf(p)", "max_Smeanf(p)",
+                                     "P(maxabs_S)",
+                                     "min_SP(f)","mean_SP(f)","max_SP(f)" )
+  
+  knitr::kable( table_Ssummary_G )
 ```
 
 ```{r exG, fig.height=3, fig.cap="\\label{fig:exG}Example simulation: Guatemala farm 79."}
