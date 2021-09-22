@@ -411,7 +411,7 @@ This means that all parameter values for coffee and tree morphology and physiolo
   }
 ```
 
-```{r list_outF_C_SA, eval=F}
+```{r list_outF_C_SA, eval=T}
   list_outF_C_SA <- vector( "list", n_C.f )
 
   for(fi in 1:n_C.f) {
@@ -645,7 +645,7 @@ This means that all parameter values for coffee and tree morphology and physiolo
   }
 ```
 
-```{r list_outF_G_SA, eval=F}
+```{r list_outF_G_SA, eval=T}
   list_outF_G_SA <- vector( "list", n_G.f )
 
   for(fi in 1:n_G.f) {
