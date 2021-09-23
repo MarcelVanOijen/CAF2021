@@ -31,7 +31,7 @@ bibliography: SEACAF.bib
   knitr::opts_chunk$set(echo=F,results="asis",warning=FALSE,message=FALSE)
 ```
 
-$^1$ Independent researcher, Edinburgh, United Kingdom 
+$^1$ Independent researcher, Edinburgh, United Kingdom  
 $^2$ Natural Resources Institute, University of Greenwich, Chatham Maritime, Medway, United Kingdom  
 $^3$ CATIE, Centro Agronómico Tropical de Investigación y Enseñanza, Managua, Nicaragua  
 $^4$ CATIE, Centro Agronómico Tropical de Investigación y Enseñanza, Turrialba 30501, Costa Rica  
@@ -41,7 +41,7 @@ $^5$ Centro Estudios Ambientales y Biodiversidad, Universidad del Valle de Guate
 **Abstract:** Coffee ...
 \
 
-**Key words:** Agroforestry systems, *Coffee arabica*, Process-based modelling
+**Key words:** Agroforestry systems, *Coffea arabica*, Process-based modelling
 \
 
 $^*$ Corresponding author: ORCID 0000-0003-4028-3626, VanOijenMarcel@gmail.com
@@ -83,11 +83,18 @@ $^*$ Corresponding author: ORCID 0000-0003-4028-3626, VanOijenMarcel@gmail.com
 
 - The goal of sustainable agriculture puts multiple demands on coffee agroforestry systems.
 - Many ecosystem services are difficult to quantify.
-- Central American conditions: mountainous topography with young volcanic soils leading to strong spatial variation in weather patterns and fertility. Together with wide variation in management choices, this leads to stronmg variability in CAF systems behaviour.
-- Here, we used a combination of data analysis and process-based modelling to quantify ecosystem services at 168 farms coffee agroforestry farms in Costa Rica and Guatemala.
-- The same farms were studies previously by Haggar et al. (2021), who showed ...
-- Goal 1: Attempt to identify the drivers of the observed differences in productivity and shade.
-- Goal 2: Show the implications of aiming for a particular farm type regarding ecosystem services and sustainability.
+- Central American conditions: mountainous topography with young volcanic soils leading to strong spatial variation in weather patterns and fertility. Together with wide variation in management choices, this leads to strong variability in CAF systems behaviour.
+- Here, we used a combination of data analysis and process-based modelling to quantify ecosystem services at coffee agroforestry farms: 89 farms in Costa Rica and 79 in Guatemala.
+- The same farms were studied previously by Haggar et al. (2021), who showed ...
+- Measurements at these farms did not include ES related to carbon and nitrogen biogeochemistry. So we estimated these ES using the new coffee agroforestry model CAF2021, which we introduce in this paper. The model differs from its predecessors CAF2007 and CAF2014 mainly in that it allows for more complex agroforestry systems with up to three different shade tree species.
+- Other models for coffee: ...
+- Details of model structure are provided below (Materials and Methods) and online.
+- To calibrate the model, we used multivariate data from 32 different treatments applied in long-term field experiments in Costa Rica and Nicaragua. A subset of these data (10 treatments) was used earlier in the Bayesian calibration of CAF2014, a model that could not simulate experimental treatments with multiple shade tree species. Bayesian calibration has become a common method for model calibration and uncertainty quantification of process-based models (vO 2020). Here we use the same method of Bayesian model calibration by means of Markov chain Monte Carlo sampling that was used by Ovalle et al.
+- Goal 1: Identify the drivers of observed differences in productivity between farms and farm types.
+- Goal 2: Assess the implications of aiming for any particular farm type for biogeochemistry-related ecosystem services and sustainability.
+- Goal 3: Assess CAF2021 as a tool for studying coffee agroforestry systems.
+
+
 
 \clearpage
 
@@ -96,17 +103,20 @@ $^*$ Corresponding author: ORCID 0000-0003-4028-3626, VanOijenMarcel@gmail.com
 
 ## Data experiments T+M
 
+- Locations, years, treatments, measurements.
+- See also Supplementary Information
+
 
 ## Data farms C+G
 - Farm inventory:
   - Shade tree composition
-  - Soil data: C, N, water-holding capacity (using pedotransfer function)
+  - Soil data: C, N, texture information from which we infer water-holding capacity using a pedotransfer function.
 - Weather data (5 variables): WorldClim plus country-wide 2019 anomalies for rain and temperature.
 
 
 ## CAF2021 structure
 
-Short description. Full details on zenodo ...
+CAF2021 is a process-based model for the biogeochemistry of coffee agrofrestry systems. We give a short description here. Full details on zenodo ...
 
 ### Similarity with earlier models
 - CAF2007 [@] and CAF2014 [@]
@@ -122,7 +132,7 @@ Short description. Full details on zenodo ...
   - Tree height + crown area determines degree of overshadowing.
   - HMAX.
   - Options for shade-goal directed pruning and/or thinning.
-- Typical use-case: service tree + fruit tree + timber tree.
+- Typical use-case: service tree + fruit tree + timber tree. See Supplementary information.
 
 
 ## CAF2021 BC on data experiments T+M
@@ -133,17 +143,18 @@ Short description. Full details on zenodo ...
 ## CAF2021 application to farms C+G
 - Input data as mentioned above
 - Parameters for 6 representative tree species
-- Erythrina + Inga: MAP paranmeter settings
+- Erythrina + Inga: MAP parameter settings
 - Banana + avocado: literature
 - Cordia: literature (including vO et al. 2010a and Edwin 2021)
 - Grevillea: literature (including Edwin 2021)
 - Planting year but stands were mostly mature. We simulated 2005-2020 and mainly focused on results from the last two years.
+- Farm-specific weather, soils and management but no farm-specific parameter values.
 - Only differences C-G: (1) pruned branches removed in G but left on the field in C, (2) HMAX of some tree species differently managed.
 
-### Additional sensitvity analysis
-- Simulate climatic extremes / IAV / El Niño years.
-  - Vary farm typology? We can only do that if we find the causes underlying the groups first.
-  
+### Additional sensitivity analysis
+- Parameter SA.
+- Assessment of yield and ES stability after a severe drought.
+
   
   
 \clearpage
@@ -154,9 +165,8 @@ Short description. Full details on zenodo ...
 ## BC on data from Turrialba and Masatepe
 
 - Results for coffee yields: calibrated model
-- Results for multiple
+- Results for multiple variables
   - UQ
-
 
 ## Examples of CAF2021 outputs for different farm types
 
@@ -169,8 +179,10 @@ Short description. Full details on zenodo ...
 
 ## BC
 
-- One (not two) calibrations for C and G simultaneously. Good posterior simulations despite having no treatment- or country-specific parameters. Coffee parameters universal, tree species assumed the same in both experiments Only experiment-specific parameters: very small number of soil parameters. Any spatial variation within the experiments also ignored.
-- UQ
+- One (not two) calibrations for C and G simultaneously. Good posterior simulations despite having no treatment- or country-specific parameters. Coffee parameters universal, tree species assumed the same in both experiments. Only experiment-specific parameters: very small number of soil parameters. Any spatial variation within the experiments also ignored.
+- Turrialba experimental cross-validation: How well do yields in Block 1 predict those in Blocks 2 and 3?
+- UQ: only for parameters, not for model structure.
+
 
 ## Farm simulations
 - Quality MAP (from T+M!) simulations to farms C+G, i.e. out-of-sample simulations.
@@ -179,13 +191,26 @@ Short description. Full details on zenodo ...
     - Start year 2005.
     - Representativeness of the six tree species. Compare with number of tree species reported for each farm.
     - Ignoring within-month weather variability. Note that WorldClim Turrialba weather data gave similarly good simulations as on-site weather station.
-    - ...
+- The model seems to be able to simulate a wide range of CAF systems. Despite much information being unavailable, and no farm-level model calibration, still good simulation of coffee yields in Costa Rica.
+- However, ES-estimation only preliminary.
+- Need for multivariate BC data, not just yield.
 
 
 ## Farms ES-analysis: Differences between Costa Rica and Guatemala
-  
-  
-## Typology
+- Lower Nfert in C leading to lower N-leaching. However, it also led to lower plant gorwth and thus lower carbon-addition to the system.
+- Simulated yield differences correlated with Nfert in both countries. This was consistent with observations in Costa Rica. However in Guatemala there were observations of high yield on farms with minimal Nfert, and the model cannot explain that. These poorer results for Guatemala remain to be explained. Three sources of error:
+  - Model structure
+  - Model input data
+  - Model parameterisation
+
+
+## Farms ES-analysis: Differences between farm types
+- Model points to inevitable trade-offs between coffee yield and environmental ecosystem services. The data suggest that some Guatemala farms manage to keep yields high despite low fertilisation. The modelling suggests that this can only be the case if either soils in Guatemala (which are not high in N) release their N more readily - which woould lead to fast loss of soil fertility - than Costa Rican soils or if local coffee and shade tree genotypes have higher NUE.
+
+
+## Sensitivity analysis
+- Key question: Does shade lead to buffering against extreme climatic conditions?
+  - Answer can only be preliminary: no long-term reliable annual ecosystem services data, apart from the time series of coffee yield in the Turrialba and Masatepe experiments.  
 
 
 
@@ -193,16 +218,32 @@ Short description. Full details on zenodo ...
 
 # Conclusions
 
-- The model seems to be able to simulate a wide range of CAF systems. Despite much information being unavailable, and no farm-level model calibration, still reasonably good simulation of coffee yields in Costa Rica.
-- However, ES-estimation only preliminary.
-- Poorer results for Guatemala remain to be explained. Three sources of error:
-  - Model structure
-  - Model input data
-  - Model parameterisation
-- Need for multivariate BC data, not just yield.
-- Model points to inevitable trade-offs between coffee yield and environmental ecosystem services. The data suggest that some Guatemala farms manage to keep yields high despite low fertilisation. The modelling suggests that this can only be the case if either soils in Guatemala (which are not high in N) release their N more readily - which woould lead to fast loss of soil fertility - than Costa Rican soils or if local coffee and shade tree genotypes have higher NUE.
-- Key question: Does shade lead to buffering against extreme climatic conditions?
-  - Answer can only be preliminary: no long-term reliable annual ecosystem services data, apart from the time series of coffee yield in the Turrialba and Masatepe experiments.  
+- Goal 1: Identify the drivers of observed differences in productivity between farms and farm types.
+- Goal 2: Assess the implications of aiming for any particular farm type for biogeochemistry-related ecosystem services and sustainability.
+- Goal 3: Assess CAF2021 as a tool for studying coffee agroforestry systems.
+
+
+
+\clearpage
+
+# Supplementary information {-}
+
+## Data from long-term experiments used in Bayesian calibration
+- In one table:
+  - For all different measured variables: n, mean, standard deviation
+  - Calibrated simulations using the MAP parameter value: mean, RMSE 
+
+## Examples of output from CAF2021
+- Take a three-three system from C or G: Service-fruit-timber
+- Figure with multiple time series
+  - At(1:3)
+  - Ac(1:6)
+  - H(1:3)
+  - Coffee yield
+  - Fruit production
+  - Timber production
+  - C-sequestration
+  - N-leaching
 
 
 
