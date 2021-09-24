@@ -274,7 +274,7 @@ set_par_speciesT <- function( it, species="E. poeppigiana", p.old=params ) {
     names[15] <- paste0("TCST("     ,it,")") ; vals[15] <- 99999
     names[16] <- paste0("TOPTT("    ,it,")") ; vals[16] <-    25.0
     names[17] <- paste0("TTOLT("    ,it,")") ; vals[17] <-     8
-    names[18] <- paste0("HMAX("     ,it,")") ; vals[18] <-    99
+    names[18] <- paste0("HMAX("     ,it,")") ; vals[18] <-    50
     
     names[19] <- paste0("FLTMAX("   ,it,")") ; vals[19] <-     0.27
     names[20] <- paste0("LAIMAXT("  ,it,")") ; vals[20] <-     5
@@ -299,7 +299,7 @@ set_par_speciesT <- function( it, species="E. poeppigiana", p.old=params ) {
     names[15] <- paste0("TCST("     ,it,")") ; vals[15] <- 99999
     names[16] <- paste0("TOPTT("    ,it,")") ; vals[16] <-    25.0
     names[17] <- paste0("TTOLT("    ,it,")") ; vals[17] <-     8
-    names[18] <- paste0("HMAX("     ,it,")") ; vals[18] <-    99
+    names[18] <- paste0("HMAX("     ,it,")") ; vals[18] <-    50
     
     names[19] <- paste0("FLTMAX("   ,it,")") ; vals[19] <-     0.24
     names[20] <- paste0("LAIMAXT("  ,it,")") ; vals[20] <-     5
