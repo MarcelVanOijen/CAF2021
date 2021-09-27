@@ -110,7 +110,7 @@ $^*$ Corresponding author: ORCID 0000-0003-4028-3626, VanOijenMarcel@gmail.com
 ## Data farms C+G
 - Farm inventory:
   - Shade tree composition
-  - Soil data: C, N, texture information from which we infer water-holding capacity using a pedotransfer function.
+  - Soil data: C, N, texture information from which we infer water-holding capacity using a pedotransfer function. Assuming that bottom soil layers contain SOM equivalent to 20% of top-soil SOM.
 - Weather data (5 variables): WorldClim plus country-wide 2019 anomalies for rain and temperature.
 
 
