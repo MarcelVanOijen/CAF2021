@@ -81,14 +81,13 @@ $^*$ Corresponding author: ORCID 0000-0003-4028-3626, VanOijenMarcel@gmail.com
 
 # Introduction
 
-- The goal of sustainable agriculture puts multiple demands on coffee agroforestry systems.
-- Many ecosystem services are difficult to quantify.
-- Central American conditions: mountainous topography with young volcanic soils leading to strong spatial variation in weather patterns and fertility. Together with wide variation in management choices, this leads to strong variability in CAF systems behaviour.
-- Here, we used a combination of data analysis and process-based modelling to quantify ecosystem services at coffee agroforestry farms: 89 farms in Costa Rica and 79 in Guatemala.
+- The goal of sustainable agriculture puts multiple demands on coffee agroforestry systems (CAF). The productivity of coffee plants and shade trees must be high while negative impacts on the environment are minimised. In this paper, we refer to each form of productivity or environmental impact as an *ecosystem service* (ES). An important issue in the evaluation of CAF is that many ES are difficult to quantify, which hampers the choice of shade tree species and farm management.
+- This is a particular problem in Central America, where mountainous topography with young volcanic soils leads to strong spatial variation in weather patterns and soil fertility. Together with a wide variation in management choices, this has led to strong variability in productivity. It likely also caused strong variation in environmental ES, but these have not been measured as much.
+- Here, we used a combination of data analysis and process-based modelling to quantify ecosystem services at coffee agroforestry farms: 89 farms in Costa Rica and 79 in Guatemala. 
 - The same farms were studied previously by Haggar et al. (2021), who showed ...
 - Measurements at these farms did not include ES related to carbon and nitrogen biogeochemistry. So we estimated these ES using the new coffee agroforestry model CAF2021, which we introduce in this paper. The model differs from its predecessors CAF2007 and CAF2014 mainly in that it allows for more complex agroforestry systems with up to three different shade tree species.
 - Other models for coffee: ...
-- Details of model structure are provided below (Materials and Methods) and online.
+- Details of the structure of CAF2021 are provided in the Materials and Methods section and online.
 - To calibrate the model, we used multivariate data from 32 different treatments applied in long-term field experiments in Costa Rica and Nicaragua. A subset of these data (10 treatments) was used earlier in the Bayesian calibration of CAF2014, a model that could not simulate experimental treatments with multiple shade tree species. Bayesian calibration has become a common method for model calibration and uncertainty quantification of process-based models (vO 2020). Here we use the same method of Bayesian model calibration by means of Markov chain Monte Carlo sampling that was used by Ovalle et al.
 - Goal 1: Identify the drivers of observed differences in productivity between farms and farm types.
 - Goal 2: Assess the implications of aiming for any particular farm type for biogeochemistry-related ecosystem services and sustainability.
@@ -179,7 +178,7 @@ CAF2021 is a process-based model for the biogeochemistry of coffee agrofrestry s
 
 ## BC
 
-- One (not two) calibrations for C and G simultaneously. Good posterior simulations despite having no treatment- or country-specific parameters. Coffee parameters universal, tree species assumed the same in both experiments. Only experiment-specific parameters: very small number of soil parameters. Any spatial variation within the experiments also ignored.
+- One (not 2 or 32) calibration for all treatments in Turrialba and  Masatepe simultaneously. Good posterior simulations despite having no treatment- or country-specific parameters. Coffee parameters universal, tree species assumed to have the same properties in both experiments. Only experiment-specific parameters: very small number of soil parameters. Any spatial variation within the experiments also ignored.
 - Turrialba experimental cross-validation: How well do yields in Block 1 predict those in Blocks 2 and 3?
 - UQ: only for parameters, not for model structure.
 
@@ -197,7 +196,7 @@ CAF2021 is a process-based model for the biogeochemistry of coffee agrofrestry s
 
 
 ## Farms ES-analysis: Differences between Costa Rica and Guatemala
-- Lower Nfert in C leading to lower N-leaching. However, it also led to lower plant gorwth and thus lower carbon-addition to the system.
+- Lower Nfert in C leading to lower N-leaching. However, it also led to lower plant growth and thus lower carbon-addition to the system.
 - Simulated yield differences correlated with Nfert in both countries. This was consistent with observations in Costa Rica. However in Guatemala there were observations of high yield on farms with minimal Nfert, and the model cannot explain that. These poorer results for Guatemala remain to be explained. Three sources of error:
   - Model structure
   - Model input data
@@ -206,9 +205,11 @@ CAF2021 is a process-based model for the biogeochemistry of coffee agrofrestry s
 
 ## Farms ES-analysis: Differences between farm types
 - Model points to inevitable trade-offs between coffee yield and environmental ecosystem services. The data suggest that some Guatemala farms manage to keep yields high despite low fertilisation. The modelling suggests that this can only be the case if either soils in Guatemala (which are not high in N) release their N more readily - which woould lead to fast loss of soil fertility - than Costa Rican soils or if local coffee and shade tree genotypes have higher NUE.
+- The farms differed in the amount of shade that was realised. Shade has multiple impacts on soil and  microclimate, and therefore affects not only coffee productivity but all ES. We studied the impacts of shade on the performance of the different systems in a separate model sensitivity analysis, to be discussed next.
 
 
 ## Sensitivity analysis
+- Shade trees may produce useful products and lead to increased carbon-sequestration, but they also have an impact on coffee growth. The presence of shade trees lowers temperature as well as the availability to coffee plants of light, water, and nitrogen. This competition for resources reduces coffee yields but bean quality may be enhanced. Shade may also have beneficial effects by supporting biodiversity and constraining some pests and diseases, but these regulating ES were not studied here and are not simulated by CAF2021.
 - Key question: Does shade lead to buffering against extreme climatic conditions?
   - Answer can only be preliminary: no long-term reliable annual ecosystem services data, apart from the time series of coffee yield in the Turrialba and Masatepe experiments.  
 

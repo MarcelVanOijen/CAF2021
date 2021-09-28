@@ -411,7 +411,7 @@ This means that all parameter values for coffee and tree morphology and physiolo
   if_G.3G <- which(Tnames_G[,3]=="G") ; if_G.3C <- which(Tnames_G[,3]=="C")
 ```
 
-```{r list_outF_C, cache=T}
+```{r list_outF_C, cache=F}
   list_outF_C <- list_parF_C <- vector( "list", n_C.f )
 
   for(fi in 1:n_C.f) {
@@ -465,7 +465,7 @@ This means that all parameter values for coffee and tree morphology and physiolo
   }
 ```
 
-```{r list_outF_C_SA, eval=T, cache=T}
+```{r list_outF_C_SA, eval=T, cache=F}
   list_outF_C_SA <- vector( "list", n_C.f )
 
   for(fi in 1:n_C.f) {
@@ -666,7 +666,7 @@ This means that all parameter values for coffee and tree morphology and physiolo
     plotxylm("Yields Costa Rica 2 yrs", orig=F)
 ```
 
-```{r list_outF_G, cache=T}
+```{r list_outF_G, cache=F}
   list_outF_G <- list_parF_G <- vector( "list", n_G.f )
 
   for(fi in 1:n_G.f) {
@@ -720,7 +720,7 @@ This means that all parameter values for coffee and tree morphology and physiolo
   }
 ```
 
-```{r list_outF_G_SA, eval=T, cache=T}
+```{r list_outF_G_SA, eval=T, cache=F}
   list_outF_G_SA <- vector( "list", n_G.f )
 
   for(fi in 1:n_G.f) {
@@ -1320,8 +1320,8 @@ Fig. \ref{fig:XX15} shows observations and simulations of multiple variables, al
   if_G.type43 <- which(df_G.f$type=="P4_S3")
 ```
 
-```{r XX31, fig.height=7.5, fig.cap="\\label{fig:XX31}Observations (green) and simulations (blue) for 4 farm types in Costa Rica. Farm type codes ranging from 1 = very low to 4 = high: first digit is productivity, second is shade."}
-  par( mfrow=c(3,3), mar=c(4,4,3,1) )
+```{r XX31obs, fig.height=5.5, fig.cap="\\label{fig:XX31obs}Observations for 4 farm types in Costa Rica. Farm type codes ranging from 1 = very low to 4 = high: first digit is productivity, second is shade."}
+  par( mfrow=c(2,3), mar=c(4,4,3,1) )
 
   yobs    <- "Nfert"
   yobs.12 <- df_C.f[ if_C.type12, yobs ] ; yobs.24 <- df_C.f[ if_C.type24, yobs ]
@@ -1351,7 +1351,11 @@ Fig. \ref{fig:XX15} shows observations and simulations of multiple variables, al
   yobs.   <- list( yobs.12, yobs.24, yobs.32, yobs.43 )
   boxplot( yobs., names=c(1.2, 2.4, 3.2, 4.3), main="Altitude (m)",
            col="green")
-  
+```
+
+```{r XX31sim, fig.height=5.5, fig.cap="\\label{fig:XX31sim}Simulations for 4 farm types in Costa Rica. Farm type codes ranging from 1 = very low to 4 = high: first digit is productivity, second is shade."}
+  par( mfrow=c(2,3), mar=c(4,4,3,1) )
+
   ysim    <- "Shade_fb"
   ysim.12 <- oF1_C[ if_C.type12, ysim ] ; ysim.24 <- oF1_C[ if_C.type24, ysim ]
   ysim.32 <- oF1_C[ if_C.type32, ysim ] ; ysim.43 <- oF1_C[ if_C.type43, ysim ]
@@ -1373,6 +1377,13 @@ Fig. \ref{fig:XX15} shows observations and simulations of multiple variables, al
   boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="D_Csoil (kg ha-1 y-1)\nsimulated",
            col="cyan")
   
+  ysim    <- "NfixT_fb"
+  ysim.12 <- oF1_C[ if_C.type12, ysim ] ; ysim.24 <- oF1_C[ if_C.type24, ysim ]
+  ysim.32 <- oF1_C[ if_C.type32, ysim ] ; ysim.43 <- oF1_C[ if_C.type43, ysim ]
+  ysim.   <- list( ysim.12, ysim.24, ysim.32, ysim.43 )
+  boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="N-fix. (kg ha-1 y-1)\nsimulated",
+           col="cyan")
+
   ysim    <- "Nleaching_fb"
   ysim.12 <- oF1_C[ if_C.type12, ysim ] ; ysim.24 <- oF1_C[ if_C.type24, ysim ]
   ysim.32 <- oF1_C[ if_C.type32, ysim ] ; ysim.43 <- oF1_C[ if_C.type43, ysim ]
@@ -1504,8 +1515,8 @@ Fig. \ref{fig:XX15} shows observations and simulations of multiple variables, al
            cex.main=0.7, cex.axis=0.7, ylim=c(0,600))
 ```
 
-```{r XX32, fig.height=7.5, fig.cap="\\label{fig:XX32}Observations (green) and simulations (blue) for 4 farm types in Guatemala. Farm type codes ranging from 1 = very low to 4 = high: first digit is productivity, second is shade."}
-  par( mfrow=c(3,3), mar=c(4,4,3,1) )
+```{r XX32obs, fig.height=5.5, fig.cap="\\label{fig:XX32obs}Observations for 4 farm types in Guatemala. Farm type codes ranging from 1 = very low to 4 = high: first digit is productivity, second is shade."}
+  par( mfrow=c(2,3), mar=c(4,4,3,1) )
 
   yobs    <- "Nfert"
   yobs.13 <- df_G.f[ if_G.type13, yobs ] ; yobs.24 <- df_G.f[ if_G.type24, yobs ]
@@ -1535,7 +1546,11 @@ Fig. \ref{fig:XX15} shows observations and simulations of multiple variables, al
   yobs.   <- list( yobs.13, yobs.24, yobs.33, yobs.43 )
   boxplot( yobs., names=c(1.3, 2.4, 3.3, 4.3), main="Altitude (m)",
            col="green")
-  
+```
+
+```{r XX32sim, fig.height=5.5, fig.cap="\\label{fig:XX32sim}Simulations for 4 farm types in Guatemala. Farm type codes ranging from 1 = very low to 4 = high: first digit is productivity, second is shade."}
+  par( mfrow=c(2,3), mar=c(4,4,3,1) )
+
   ysim    <- "Shade_fb"
   ysim.13 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
   ysim.33 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
@@ -1557,6 +1572,13 @@ Fig. \ref{fig:XX15} shows observations and simulations of multiple variables, al
   boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="D_Csoil (kg ha-1 y-1)\nsimulated",
            col="cyan", ylim=c(-3000,3000))
   
+  ysim    <- "NfixT_fb"
+  ysim.12 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
+  ysim.32 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
+  ysim.   <- list( ysim.12, ysim.24, ysim.32, ysim.43 )
+  boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="N-fix. (kg ha-1 y-1)\nsimulated",
+           col="cyan")
+
   ysim    <- "Nleaching_fb"
   ysim.13 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
   ysim.33 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
