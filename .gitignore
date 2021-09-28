@@ -21,6 +21,6 @@ data/Farms SEACAF/
 wc0.5/
 gadm36_CRI_0_sp.rds
 gadm36_GTM_0_sp.rds
-*.rda
 initialisation/CG/
 data/CG/
+*_cache/

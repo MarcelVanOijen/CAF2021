@@ -162,7 +162,7 @@ NOUT         <- as.integer( length(outputNames) )
 # cbind( outputNames, outputUnits )
 
 ################################################################################
-### 4. FUNCTION FOR CHANGING PARAMETER VALUES
+### 4. FUNCTIONS FOR SETTING PARAMETER VALUES
 ################################################################################
 set_par <- function( names=names_params[1], vals=params[1], p.old=params ) {
   ipar  <- match(names,names_params) ; npar <- length(ipar)

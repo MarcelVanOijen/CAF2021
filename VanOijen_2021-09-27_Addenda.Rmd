@@ -418,11 +418,6 @@ This means that all parameter values for coffee and tree morphology and physiolo
     file_init <- paste0( "initialisation/CG/inititialise_CAF2021_C_f", fi, ".R" )
     source( file_init )
     
-    # params <- set_par( "SHADETARGETMULT", 0.5 )
-    # params <- set_par( "CSOM0MULT"      , 4/5 )
-    # params <- set_par( "HMAX(3)"        , 50  )
-    # ip     <- which( names_params=="KACEXP(3)" ) ; params[ip] <- params[ip] * 1.2
-
     nF_C                     <- 4
     mat_parF                 <- matrix( NA, nF_C, 1+length(names_params) )
     mat_outF                 <- matrix( NA, nF_C, 1+length(vars_Summary) )
@@ -476,11 +471,6 @@ This means that all parameter values for coffee and tree morphology and physiolo
   for(fi in 1:n_C.f) {
     file_init <- paste0( "initialisation/CG/inititialise_CAF2021_C_f", fi, ".R" )
     source( file_init )
-    
-    # params <- set_par( "SHADETARGETMULT", 0.5 )
-    # params <- set_par( "CSOM0MULT"      , 4/5 )
-    # params <- set_par( "HMAX(3)"        , 50  )
-    # ip     <- which( names_params=="KACEXP(3)" ) ; params[ip] <- params[ip] * 1.2
     
     npar                  <- length(params)
     mat_outF              <- matrix( NA, npar, length(vars_Summary) )
@@ -683,11 +673,6 @@ This means that all parameter values for coffee and tree morphology and physiolo
     file_init <- paste0( "initialisation/CG/inititialise_CAF2021_G_f", fi, ".R" )
     source( file_init )
     
-    # params <- set_par( "SHADETARGETMULT", 0.5 )
-    # params <- set_par( "CSOM0MULT"      , 4/5 )
-    # params <- set_par( "HMAX(3)"        , 50  )
-    # ip     <- which( names_params=="KACEXP(3)" ) ; params[ip] <- params[ip] * 1.2
-    
     nF_G                     <- 4
     mat_parF                 <- matrix( NA, nF_G, 1+length(names_params) )
     mat_outF                 <- matrix( NA, nF_G, 1+length(vars_Summary) )
@@ -741,11 +726,6 @@ This means that all parameter values for coffee and tree morphology and physiolo
   for(fi in 1:n_G.f) {
     file_init <- paste0( "initialisation/CG/inititialise_CAF2021_G_f", fi, ".R" )
     source( file_init )
-    
-    # params <- set_par( "SHADETARGETMULT", 0.5 )
-    # params <- set_par( "CSOM0MULT"      , 4/5 )
-    # params <- set_par( "HMAX(3)"        , 50  )
-    # ip     <- which( names_params=="KACEXP(3)" ) ; params[ip] <- params[ip] * 1.2
     
     npar                  <- length(params)
     mat_outF              <- matrix( NA, npar, length(vars_Summary) )
