@@ -54,8 +54,8 @@ This means that all parameter values for coffee and tree morphology and physiolo
 ## Updating df_C.f and df_G.f
 
 ```{r, eval=F}
-  # load( "df_C.f_final.rda" )
-  # load( "df_G.f_final.rda" )
+  # load( "df_C.f.rda" )
+  # load( "df_G.f.rda" )
 ```
 
 ```{r, eval=F}
