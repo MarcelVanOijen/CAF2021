@@ -81,11 +81,11 @@ $^*$ Corresponding author: ORCID 0000-0003-4028-3626, VanOijenMarcel@gmail.com
 
 # Introduction
 
-- The goal of sustainable agriculture puts multiple demands on coffee agroforestry systems (CAF). The productivity of coffee plants and shade trees must be high while negative impacts on the environment are minimised. In this paper, we refer to each form of productivity or environmental impact as an *ecosystem service* (ES). An important issue in the evaluation of CAF is that many ES are difficult to quantify, which hampers the choice of shade tree species and farm management.
-- This is a particular problem in Central America, where mountainous topography with young volcanic soils leads to strong spatial variation in weather patterns and soil fertility. Together with a wide variation in management choices, this has led to strong variability in productivity. It likely also caused strong variation in environmental ES, but these have not been measured as much.
-- Here, we used a combination of data analysis and process-based modelling to quantify ecosystem services at coffee agroforestry farms: 89 farms in Costa Rica and 79 in Guatemala. 
+- The goal of sustainable agriculture puts multiple demands on coffee agroforestry systems (CAF). The productivity of coffee plants and shade trees must be high while minimising negative impacts on the environment. In this paper, we refer to each form of productivity or environmental impact as an *ecosystem service* (ES). An important issue in the evaluation of CAF is that many ES are difficult to quantify, which hampers the choice of shade tree species and farm management.
+- This is a particular problem in Central America, where mountainous topography with young volcanic soils leads to strong spatial variation in weather patterns and soil fertility. Together with a wide variation in management choices, this has led to strong variability in productivity. It likely also caused strong variation in environmental ES, but not many data are available for these.
+- Here, we used a combination of data analysis and process-based modelling to quantify ES at coffee agroforestry farms: 89 farms in Costa Rica and 79 in Guatemala. 
 - The same farms were studied previously by Haggar et al. (2021), who showed ...
-- Measurements at these farms did not include ES related to carbon and nitrogen biogeochemistry. So we estimated these ES using the new coffee agroforestry model CAF2021, which we introduce in this paper. The model differs from its predecessors CAF2007 and CAF2014 mainly in that it allows for more complex agroforestry systems with up to three different shade tree species.
+- Measurements at these farms did not include ES related to carbon and nitrogen biogeochemistry. Here we estimated these ES using the new coffee agroforestry model CAF2021, which we introduce in this paper. The model differs from its predecessors CAF2007 and CAF2014 mainly in that it allows for more complex agroforestry systems with up to three different shade tree species.
 - Other models for coffee: ...
 - Details of the structure of CAF2021 are provided in the Materials and Methods section and online.
 - To calibrate the model, we used multivariate data from 32 different treatments applied in long-term field experiments in Costa Rica and Nicaragua. A subset of these data (10 treatments) was used earlier in the Bayesian calibration of CAF2014, a model that could not simulate experimental treatments with multiple shade tree species. Bayesian calibration has become a common method for model calibration and uncertainty quantification of process-based models (vO 2020). Here we use the same method of Bayesian model calibration by means of Markov chain Monte Carlo sampling that was used by Ovalle et al.
@@ -107,10 +107,11 @@ $^*$ Corresponding author: ORCID 0000-0003-4028-3626, VanOijenMarcel@gmail.com
 
 
 ## Data farms C+G
-- Farm inventory:
-  - Shade tree composition
-  - Soil data: C, N, texture information from which we infer water-holding capacity using a pedotransfer function. Assuming that bottom soil layers contain SOM equivalent to 20% of top-soil SOM.
-- Weather data (5 variables): WorldClim plus country-wide 2019 anomalies for rain and temperature.
+- 89 farms in Costa Rica, 79 farms in Guatemala with sufficient information to run CAF20212.
+- We summarise farm properties using the typology of Haggar et al. (2021).
+- ENVIRONMENTAL TABLE: per country four farm types, so a table with 8 rows and as columns: n, averages of altitude, slope, temperature, rain, soil C, soil N, water-holding capacity
+  - State that water-holding capcity was derived from soil texture information using the pedotransfer function tested by Tomasella et al. (). We further assume that bottom soil layers contain SOM equivalent to 20% of top-soil SOM. Weather data (5 variables, only two summarised in the table): WorldClim plus country-wide 2019 anomalies for rain and temperature.
+- MANAGEMENT TABLE: as previous table but N-fertilisation and densities of 6 representative tree species.
 
 
 ## CAF2021 structure
@@ -201,17 +202,23 @@ CAF2021 is a process-based model for the biogeochemistry of coffee agrofrestry s
   - Model structure
   - Model input data
   - Model parameterisation
+- Banana productivity persisted better in Costa Rica than in Guatemala.
+  - Banana is used more in Costa Rica than in Guatemala.
+  - Service trees in Costa Rica are mainly Erythrina which is pollarded frequently and intensively, thus allowing light to reach any fruit trees. The Inga in Guatemala are allowed to intercept more light.
+  - Banana is mainly used in young coffee agroforestry stands
 
 
 ## Farms ES-analysis: Differences between farm types
-- Model points to inevitable trade-offs between coffee yield and environmental ecosystem services. The data suggest that some Guatemala farms manage to keep yields high despite low fertilisation. The modelling suggests that this can only be the case if either soils in Guatemala (which are not high in N) release their N more readily - which woould lead to fast loss of soil fertility - than Costa Rican soils or if local coffee and shade tree genotypes have higher NUE.
+- The model points to inevitable trade-offs between productivity of coffee, productivity of trees and environmental ecosystem services.
+- The data suggest that some Guatemala farms manage to keep yields high despite low fertilisation. The modelling suggests that this can only be the case if either soils in Guatemala (which are not high in N) release their N more readily - which woould lead to fast loss of soil fertility - than Costa Rican soils or if local coffee and shade tree genotypes have higher NUE. Contribution from N-fixation seems small.
 - The farms differed in the amount of shade that was realised. Shade has multiple impacts on soil and  microclimate, and therefore affects not only coffee productivity but all ES. We studied the impacts of shade on the performance of the different systems in a separate model sensitivity analysis, to be discussed next.
+- Shade can be managed in different ways. Farms can have low shade by (1) low planting density of trees, (2) high frequency and intensity of thinning, (3) high frequency and intensity of pruning. Compare these.
 
 
 ## Sensitivity analysis
 - Shade trees may produce useful products and lead to increased carbon-sequestration, but they also have an impact on coffee growth. The presence of shade trees lowers temperature as well as the availability to coffee plants of light, water, and nitrogen. This competition for resources reduces coffee yields but bean quality may be enhanced. Shade may also have beneficial effects by supporting biodiversity and constraining some pests and diseases, but these regulating ES were not studied here and are not simulated by CAF2021.
-- Key question: Does shade lead to buffering against extreme climatic conditions?
-  - Answer can only be preliminary: no long-term reliable annual ecosystem services data, apart from the time series of coffee yield in the Turrialba and Masatepe experiments.  
+- Key question: Does shade lead to buffering against extreme climatic conditions? Is there a trade-off between average yield level and stability of yield? 
+  - Answers can only be preliminary: no long-term reliable annual ecosystem services data, apart from the time series of coffee yield in the Turrialba and Masatepe experiments.
 
 
 

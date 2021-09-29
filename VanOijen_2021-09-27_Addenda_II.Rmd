@@ -224,18 +224,22 @@ This means that all parameter values for coffee and tree morphology and physiolo
 
 ```{r}
   vars_Summary <- c(
-    "harvDM_f_hay", "harvCPT_f", "harvCPT_2", "harvCST_f", "harvCST_3",
-    "D_Nsoil"     , "D_Csoil"  , "D_C"      , "D_CT"     , "D_Csys"   ,
-    "Shade_f"        , "Shade_fa"       , "Shade_fb"     ,
-    "NfixT_fb"       , "Nleaching_fb"   , "Crunoff_fb"   ,
+    "harvDM_f_hay"   , "sd.harvDM_f_hay", 
+    "harvDMST_3_hay" , "harvCPT_f_hay"  , "harvCST_f"   , "harvCST_3",
+    "D_Nsoil"        ,
+    "D_Csoil"        , "D_C"            , "D_CT"        , "D_Csys"     ,
+    "Shade_f"        , "Shade_fa"       , "Shade_fb"    ,
+    "Nemission_fb"   , "NfixT_fb"       , "Nleaching_fb", "Crunoff_fb" ,
     "Csoil_fa"       , "Csoil_fb"       ,
     "harvDM_f_ha1819", "harvDM_f_ha1920",
-    "fTranT_t_1a"    , "fTranT_t_1b"    , "fTranT_t_2a"  , "fTranT_t_2b"  ,
-    "fTranT_t_3a"    , "fTranT_t_3b"    , "fNgrowth_t_1a", "fNgrowth_t_1b",
-    "fNgrowth_t_2a"  , "fNgrowth_t_2b"  , "fNgrowth_t_3a", "fNgrowth_t_3b",
-    "H_t_1a"         , "H_t_1b"         , "H_t_2a"       , "H_t_2b"       ,
-    "H_t_3a"         , "H_t_3b"         , "CAtree_t_1a"  , "CAtree_t_1b"  ,
-    "CAtree_t_2a"    , "CAtree_t_2b"    , "CAtree_t_3a"  , "CAtree_t_3b"
+    "fTranT_1a"      , "fTranT_1b"      , "fTranT_2a"   , "fTranT_2b"  ,
+    "fTranT_3a"      , "fTranT_3b"      , "fNgrowth_1a" , "fNgrowth_1b",
+    "fNgrowth_2a"    , "fNgrowth_2b"    , "fNgrowth_3a" , "fNgrowth_3b",
+    "H_1a"           , "H_1b"           , "H_2a"        , "H_2b"       ,
+    "H_3a"           , "H_3b"           , "CAtree_1a"   , "CAtree_1b"  ,
+    "CAtree_2a"      , "CAtree_2b"      , "CAtree_3a"   , "CAtree_3b"  ,
+    "treedens_1"     , "treedens_2"     , "treedens_3"  ,
+    "CST_3"
   )
 ```
 
@@ -246,56 +250,68 @@ This means that all parameter values for coffee and tree morphology and physiolo
     fOut           <- matrix( NA, nrow=1, ncol=length(vars_Summary) )
     colnames(fOut) <- vars_Summary
 
-    iyear      <- which( outputNames=="year" )
-    idoy       <- which( outputNames=="doy" )
+    iyear       <- which( outputNames=="year" )
+    idoy        <- which( outputNames=="doy" )
     
-    ih_f_hay   <- which( outputNames=="harvDM_f_hay" ) # kg C ha-1 y-1
-    ihCPT_f    <- which( outputNames=="harvCPT_f"    ) # kg C m-2 d-1
-    ihCPT_2    <- which( outputNames=="harvCPT_t(2)" ) # kg C m-2 d-1
-    ihCST_f    <- which( outputNames=="harvCST_f"    ) # kg C m-2 d-1
-    ihCST_3    <- which( outputNames=="harvCST_t(3)" ) # kg C m-2 d-1
-    iNsoil_f   <- which( outputNames=="Nsoil_f"      ) # kg N m-2
-    iCsoil_f   <- which( outputNames=="Csoil_f"      ) # kg C m-2 
-    iC_f       <- which( outputNames=="C_f"          ) # kg C m-2
-    iCT_f      <- which( outputNames=="CT_f"         ) # kg C m-2
-    
-    iShade_f   <- which( outputNames=="Shade_f"      ) # m2 m-2
-    
-    iNfixT     <- which( outputNames=="NfixT_f"      ) # kg N m-2 d-1
-    iNleaching <- which( outputNames=="Nleaching_f"  ) # kg N m-2 d-1
-    iCrunoff   <- which( outputNames=="Crunoff_f"    ) # kg C m-2 d-1
-    
-    idayH1     <- which( outputNames=="DayHarv(1)" )
-    idayH2     <- which( outputNames=="DayHarv(2)" )
-    
-    ifTranT1   <- which( outputNames=="fTranT_t(1)")
-    ifTranT2   <- which( outputNames=="fTranT_t(2)")
-    ifTranT3   <- which( outputNames=="fTranT_t(3)")
-    ifNgrwT1   <- which( outputNames=="fNgrowth_t(1)")
-    ifNgrwT2   <- which( outputNames=="fNgrowth_t(2)")
-    ifNgrwT3   <- which( outputNames=="fNgrowth_t(3)")
-    ihT1       <- which( outputNames=="h_t(1)")
-    ihT2       <- which( outputNames=="h_t(2)")
-    ihT3       <- which( outputNames=="h_t(3)")
-    iCAtreeT1  <- which( outputNames=="CAtree_t(1)")
-    iCAtreeT2  <- which( outputNames=="CAtree_t(2)")
-    iCAtreeT3  <- which( outputNames=="CAtree_t(3)")
+    ih_f_hay    <- which( outputNames=="harvDM_f_hay" ) # kg C ha-1 y-1
+    ihCPT_f     <- which( outputNames=="harvCPT_f"    ) # kg C m-2 d-1
+    ihCPT_2     <- which( outputNames=="harvCPT_t(2)" ) # kg C m-2 d-1
+    ihCST_f     <- which( outputNames=="harvCST_f"    ) # kg C m-2 d-1
+    ihCST_3     <- which( outputNames=="harvCST_t(3)" ) # kg C m-2 d-1
+    iNsoil_f    <- which( outputNames=="Nsoil_f"      ) # kg N m-2
+    iCsoil_f    <- which( outputNames=="Csoil_f"      ) # kg C m-2 
+    iC_f        <- which( outputNames=="C_f"          ) # kg C m-2
+    iCT_f       <- which( outputNames=="CT_f"         ) # kg C m-2
 
-    c.DM  <- 1 / 0.47          # 'kg C' -> 'kg DM'
+    iShade_f    <- which( outputNames=="Shade_f"      ) # m2 m-2
+    
+    iNemission  <- which( outputNames=="Nemission_f"  ) # kg N m-2 d-1
+    iNfixT      <- which( outputNames=="NfixT_f"      ) # kg N m-2 d-1
+    iNleaching  <- which( outputNames=="Nleaching_f"  ) # kg N m-2 d-1
+    iCrunoff    <- which( outputNames=="Crunoff_f"    ) # kg C m-2 d-1
+    
+    idayH1      <- which( outputNames=="DayHarv(1)" )
+    idayH2      <- which( outputNames=="DayHarv(2)" )
+    ifTranT_1   <- which( outputNames=="fTranT_t(1)")
+    ifTranT_2   <- which( outputNames=="fTranT_t(2)")
+    ifTranT_3   <- which( outputNames=="fTranT_t(3)")
+    ifNgrwT_1   <- which( outputNames=="fNgrowth_t(1)")
+    ifNgrwT_2   <- which( outputNames=="fNgrowth_t(2)")
+    ifNgrwT_3   <- which( outputNames=="fNgrowth_t(3)")
+    ihT_1       <- which( outputNames=="h_t(1)")
+    ihT_2       <- which( outputNames=="h_t(2)")
+    ihT_3       <- which( outputNames=="h_t(3)")
+    iCAtreeT_1  <- which( outputNames=="CAtree_t(1)")
+    iCAtreeT_2  <- which( outputNames=="CAtree_t(2)")
+    iCAtreeT_3  <- which( outputNames=="CAtree_t(3)")
+    itreedens_1 <- which( outputNames=="treedens_t(1)")
+    itreedens_2 <- which( outputNames=="treedens_t(2)")
+    itreedens_3 <- which( outputNames=="treedens_t(3)")
+    iCST_3      <- which( outputNames=="CST_t(3)" )
+
+    c.DM  <- 1 / 0.47          # 'kg C'               -> 'kg DM'
     NDAYS <- dim(output)[1]
+    c.ha  <- 1e4               # 'm-2'                -> 'ha-1'
     c.hay <- 1e4 * 365 / NDAYS # 'm-2 in sim. period' -> 'ha-1 y-1'
     d181  <- which( output[,idoy]==181 )
     
-    T1 <- 0 ; if(output[1,which(outputNames=="treedens_t(1)")]>0) T1 <- 1
-    T2 <- 0 ; if(output[1,which(outputNames=="treedens_t(2)")]>0) T2 <- 1
-    T3 <- 0 ; if(output[1,which(outputNames=="treedens_t(3)")]>0) T3 <- 1
+    T1 <- 0 ; if(output[1,itreedens_1]>0) T1 <- 1
+    T2 <- 0 ; if(output[1,itreedens_2]>0) T2 <- 1
+    T3 <- 0 ; if(output[1,itreedens_3]>0) T3 <- 1
     
-           fOut[,"harvDM_f_hay"] <- mean( output[d181,ih_f_hay] )
-           fOut[,"harvCPT_f"]    <- sum ( output[    ,ihCPT_f ] ) * c.DM * c.hay
-    if(T2) fOut[,"harvCPT_2"]    <- sum ( output[    ,ihCPT_2 ] ) * c.DM * c.hay
-           fOut[,"harvCST_f"]    <- sum ( output[    ,ihCST_f ] ) * c.DM * c.hay
-    if(T3) fOut[,"harvCST_3"]    <- sum ( output[    ,ihCST_3 ] ) * c.DM * c.hay
-    
+           fOut[,"sd.harvDM_f_hay"] <- sd(output[d181 ,ih_f_hay] )
+           fOut[,"harvDM_f_hay"] <- mean( output[d181 ,ih_f_hay] )
+           fOut[,"harvCPT_f_hay"]<- sum ( output[     ,ihCPT_f ] ) * c.DM * c.hay
+           fOut[,"harvCST_f"]    <- sum ( output[     ,ihCST_f ] ) * c.DM * c.hay
+    if(T3) fOut[,"harvCST_3"]    <- sum ( output[     ,ihCST_3 ] ) * c.DM * c.hay
+    if(T3) fOut[,"CST_3"]        <-       output[NDAYS,iCST_3  ]   * c.DM * c.hay
+           
+           fOut[,"harvDMST_3_hay"] <- sum( fOut[,c("harvCST_3","CST_3")],na.rm=T )
+           
+           fOut[,"treedens_1"]   <-       output[NDAYS,itreedens_1]       * c.ha
+           fOut[,"treedens_2"]   <-       output[NDAYS,itreedens_2]       * c.ha
+           fOut[,"treedens_3"]   <-       output[NDAYS,itreedens_3]       * c.ha
+           
     D_output         <- output[NDAYS,] - output[1,]
     fOut[,"D_Nsoil"] <- D_output[iNsoil_f] * c.hay
     fOut[,"D_Csoil"] <- D_output[iCsoil_f] * c.hay
@@ -310,12 +326,13 @@ This means that all parameter values for coffee and tree morphology and physiolo
     fOut[,"Shade_fa"    ] <- mean( outputFirstYears[ iShade_f] )
     fOut[,"Shade_fb"    ] <- mean( outputFinalYears[ iShade_f] )
     
+    fOut[,"Nemission_fb"] <- outputFinalYears[iNemission] * 1e4 * 365
     fOut[,"NfixT_fb"    ] <- outputFinalYears[iNfixT    ] * 1e4 * 365
     fOut[,"Nleaching_fb"] <- outputFinalYears[iNleaching] * 1e4 * 365
-    fOut[,"Crunoff_fb"  ] <- outputFinalYears[iCrunoff  ] * 1e4 * 365
     
-    fOut[,"Csoil_fa"    ] <- outputFirstYears[iCsoil_f]
-    fOut[,"Csoil_fb"    ] <- outputFinalYears[iCsoil_f]
+    fOut[,"Crunoff_fb"  ] <- outputFinalYears[iCrunoff  ] * 1e4 * 365
+    fOut[,"Csoil_fa"    ] <- outputFirstYears[iCsoil_f  ]
+    fOut[,"Csoil_fb"    ] <- outputFinalYears[iCsoil_f  ]
 
     dHarv1819 <- which( (output[,iyear]==2019) & (output[,idoy]==181) )
     dHarv1920 <- which( (output[,iyear]==2020) & (output[,idoy]==181) )
@@ -323,32 +340,32 @@ This means that all parameter values for coffee and tree morphology and physiolo
     fOut[,"harvDM_f_ha1819"] <- output[dHarv1819,ih_f_hay]
     fOut[,"harvDM_f_ha1920"] <- output[dHarv1920,ih_f_hay]
 
-    if(T1) { fOut[,"fTranT_t_1a"  ] <- mean( outputFirstYears[ifTranT1] )
-             fOut[,"fTranT_t_1b"  ] <- mean( outputFinalYears[ifTranT1] )
-             fOut[,"fNgrowth_t_1a"] <- mean( outputFirstYears[ifNgrwT1] )
-             fOut[,"fNgrowth_t_1b"] <- mean( outputFinalYears[ifNgrwT1] )
-             fOut[,"H_t_1a"       ] <- mean( outputFirstYears[ihT1] )
-             fOut[,"H_t_1b"       ] <- mean( outputFinalYears[ihT1] )
-             fOut[,"CAtree_t_1a"  ] <- mean( outputFirstYears[iCAtreeT1] )
-             fOut[,"CAtree_t_1b"  ] <- mean( outputFinalYears[iCAtreeT1] )
+    if(T1) { fOut[,"fTranT_1a"  ] <- mean( outputFirstYears[ifTranT_1] )
+             fOut[,"fTranT_1b"  ] <- mean( outputFinalYears[ifTranT_1] )
+             fOut[,"fNgrowth_1a"] <- mean( outputFirstYears[ifNgrwT_1] )
+             fOut[,"fNgrowth_1b"] <- mean( outputFinalYears[ifNgrwT_1] )
+             fOut[,"H_1a"       ] <- mean( outputFirstYears[ihT_1] )
+             fOut[,"H_1b"       ] <- mean( outputFinalYears[ihT_1] )
+             fOut[,"CAtree_1a"  ] <- mean( outputFirstYears[iCAtreeT_1] )
+             fOut[,"CAtree_1b"  ] <- mean( outputFinalYears[iCAtreeT_1] )
            }
-    if(T2) { fOut[,"fTranT_t_2a"  ] <- mean( outputFirstYears[ifTranT2] )
-             fOut[,"fTranT_t_2b"  ] <- mean( outputFinalYears[ifTranT2] )
-             fOut[,"fNgrowth_t_2a"] <- mean( outputFirstYears[ifNgrwT2] )
-             fOut[,"fNgrowth_t_2b"] <- mean( outputFinalYears[ifNgrwT2] )
-             fOut[,"H_t_2a"       ] <- mean( outputFirstYears[ihT2] )
-             fOut[,"H_t_2b"       ] <- mean( outputFinalYears[ihT2] )
-             fOut[,"CAtree_t_2a"  ] <- mean( outputFirstYears[iCAtreeT2] )
-             fOut[,"CAtree_t_2b"  ] <- mean( outputFinalYears[iCAtreeT2] )
+    if(T2) { fOut[,"fTranT_2a"  ] <- mean( outputFirstYears[ifTranT_2] )
+             fOut[,"fTranT_2b"  ] <- mean( outputFinalYears[ifTranT_2] )
+             fOut[,"fNgrowth_2a"] <- mean( outputFirstYears[ifNgrwT_2] )
+             fOut[,"fNgrowth_2b"] <- mean( outputFinalYears[ifNgrwT_2] )
+             fOut[,"H_2a"       ] <- mean( outputFirstYears[ihT_2] )
+             fOut[,"H_2b"       ] <- mean( outputFinalYears[ihT_2] )
+             fOut[,"CAtree_2a"  ] <- mean( outputFirstYears[iCAtreeT_2] )
+             fOut[,"CAtree_2b"  ] <- mean( outputFinalYears[iCAtreeT_2] )
            }
-    if(T3) { fOut[,"fTranT_t_3a"  ] <- mean( outputFirstYears[ifTranT3] )
-             fOut[,"fTranT_t_3b"  ] <- mean( outputFinalYears[ifTranT3] )
-             fOut[,"fNgrowth_t_3a"] <- mean( outputFirstYears[ifNgrwT3] )
-             fOut[,"fNgrowth_t_3b"] <- mean( outputFinalYears[ifNgrwT3] )
-             fOut[,"H_t_3a"       ] <- mean( outputFirstYears[ihT3] )
-             fOut[,"H_t_3b"       ] <- mean( outputFinalYears[ihT3] )
-             fOut[,"CAtree_t_3a"  ] <- mean( outputFirstYears[iCAtreeT3] )
-             fOut[,"CAtree_t_3b"  ] <- mean( outputFinalYears[iCAtreeT3] )
+    if(T3) { fOut[,"fTranT_3a"  ] <- mean( outputFirstYears[ifTranT_3] )
+             fOut[,"fTranT_3b"  ] <- mean( outputFinalYears[ifTranT_3] )
+             fOut[,"fNgrowth_3a"] <- mean( outputFirstYears[ifNgrwT_3] )
+             fOut[,"fNgrowth_3b"] <- mean( outputFinalYears[ifNgrwT_3] )
+             fOut[,"H_3a"       ] <- mean( outputFirstYears[ihT_3] )
+             fOut[,"H_3b"       ] <- mean( outputFinalYears[ihT_3] )
+             fOut[,"CAtree_3a"  ] <- mean( outputFirstYears[iCAtreeT_3] )
+             fOut[,"CAtree_3b"  ] <- mean( outputFinalYears[iCAtreeT_3] )
            }
 
     return( fOut )
@@ -594,22 +611,22 @@ This means that all parameter values for coffee and tree morphology and physiolo
 
 ```{r}
   tableCA_C1 <- ( rbind(
-    c( "Erythina" , summary( oF1_C[if_C.1E,"CAtree_t_1b"], digits=3 ) ),
-    c( "Inga"     , summary( oF1_C[if_C.1I,"CAtree_t_1b"], digits=3 ) ),
-    c( "Banana"   , summary( oF1_C[if_C.2B,"CAtree_t_2b"], digits=3 ) ),
-    c( "Avocado"  , summary( oF1_C[if_C.2A,"CAtree_t_2b"], digits=3 ) ),
-    c( "Grevillea", summary( oF1_C[if_C.3G,"CAtree_t_3b"], digits=3 ) ),
-    c( "Cordia"   , summary( oF1_C[if_C.3C,"CAtree_t_3b"], digits=3 ) ) ) )
+    c( "Erythina" , summary( oF1_C[if_C.1E,"CAtree_1b"], digits=3 ) ),
+    c( "Inga"     , summary( oF1_C[if_C.1I,"CAtree_1b"], digits=3 ) ),
+    c( "Banana"   , summary( oF1_C[if_C.2B,"CAtree_2b"], digits=3 ) ),
+    c( "Avocado"  , summary( oF1_C[if_C.2A,"CAtree_2b"], digits=3 ) ),
+    c( "Grevillea", summary( oF1_C[if_C.3G,"CAtree_3b"], digits=3 ) ),
+    c( "Cordia"   , summary( oF1_C[if_C.3C,"CAtree_3b"], digits=3 ) ) ) )
   colnames(tableCA_C1)[1] <- "C1: CAtree (m2)"
   knitr::kable( tableCA_C1 )
 
   tableH_C1 <- ( rbind(
-    c( "Erythina" , summary( oF1_C[if_C.1E,"H_t_1b"], digits=3 ) ),
-    c( "Inga"     , summary( oF1_C[if_C.1I,"H_t_1b"], digits=3 ) ),
-    c( "Banana"   , summary( oF1_C[if_C.2B,"H_t_2b"], digits=3 ) ),
-    c( "Avocado"  , summary( oF1_C[if_C.2A,"H_t_2b"], digits=3 ) ),
-    c( "Grevillea", summary( oF1_C[if_C.3G,"H_t_3b"], digits=3 ) ),
-    c( "Cordia"   , summary( oF1_C[if_C.3C,"H_t_3b"], digits=3 ) ) ) )
+    c( "Erythina" , summary( oF1_C[if_C.1E,"H_1b"], digits=3 ) ),
+    c( "Inga"     , summary( oF1_C[if_C.1I,"H_1b"], digits=3 ) ),
+    c( "Banana"   , summary( oF1_C[if_C.2B,"H_2b"], digits=3 ) ),
+    c( "Avocado"  , summary( oF1_C[if_C.2A,"H_2b"], digits=3 ) ),
+    c( "Grevillea", summary( oF1_C[if_C.3G,"H_3b"], digits=3 ) ),
+    c( "Cordia"   , summary( oF1_C[if_C.3C,"H_3b"], digits=3 ) ) ) )
   colnames(tableH_C1)[1] <- "C1: H (m)"
   knitr::kable( tableH_C1 )
 ```
@@ -823,20 +840,20 @@ This means that all parameter values for coffee and tree morphology and physiolo
 
 ```{r}
   tableCA_G1 <- ( rbind(
-    c( "Inga"     , summary( oF1_G[if_G.1I,"CAtree_t_1b"], digits=3 ) ),
-    c( "Banana"   , summary( oF1_G[if_G.2B,"CAtree_t_2b"], digits=3 ) ),
-    c( "Avocado"  , summary( oF1_G[if_G.2A,"CAtree_t_2b"], digits=3 ) ),
-    c( "Grevillea", summary( oF1_G[if_G.3G,"CAtree_t_3b"], digits=3 ) ),
-    c( "Cordia"   , summary( oF1_G[if_G.3C,"CAtree_t_3b"], digits=3 ) ) ) )
+    c( "Inga"     , summary( oF1_G[if_G.1I,"CAtree_1b"], digits=3 ) ),
+    c( "Banana"   , summary( oF1_G[if_G.2B,"CAtree_2b"], digits=3 ) ),
+    c( "Avocado"  , summary( oF1_G[if_G.2A,"CAtree_2b"], digits=3 ) ),
+    c( "Grevillea", summary( oF1_G[if_G.3G,"CAtree_3b"], digits=3 ) ),
+    c( "Cordia"   , summary( oF1_G[if_G.3C,"CAtree_3b"], digits=3 ) ) ) )
   colnames(tableCA_G1)[1] <- "G1: CAtree (m2)"
   knitr::kable( tableCA_G1 )
 
   tableH_G1 <- ( rbind(
-    c( "Inga"     , summary( oF1_G[if_G.1I,"H_t_1b"], digits=3 ) ),
-    c( "Banana"   , summary( oF1_G[if_G.2B,"H_t_2b"], digits=3 ) ),
-    c( "Avocado"  , summary( oF1_G[if_G.2A,"H_t_2b"], digits=3 ) ),
-    c( "Grevillea", summary( oF1_G[if_G.3G,"H_t_3b"], digits=3 ) ),
-    c( "Cordia"   , summary( oF1_G[if_G.3C,"H_t_3b"], digits=3 ) ) ) )
+    c( "Inga"     , summary( oF1_G[if_G.1I,"H_1b"], digits=3 ) ),
+    c( "Banana"   , summary( oF1_G[if_G.2B,"H_2b"], digits=3 ) ),
+    c( "Avocado"  , summary( oF1_G[if_G.2A,"H_2b"], digits=3 ) ),
+    c( "Grevillea", summary( oF1_G[if_G.3G,"H_3b"], digits=3 ) ),
+    c( "Cordia"   , summary( oF1_G[if_G.3C,"H_3b"], digits=3 ) ) ) )
   colnames(tableH_G1)[1] <- "G1: H (m)"
   knitr::kable( tableH_G1 )
 ```
@@ -922,40 +939,40 @@ This means that all parameter values for coffee and tree morphology and physiolo
 ```{r XX21, fig.height=5, fig.cap="\\label{fig:XX21}Final water limitation of the three tree classes vs. N-fertilisation (top row) and vs. distance from the easternmost farm (bottom row). Black: Costa Rica. Red: Guatemala."}
   par( mfrow=c(2,3), mar=c(4,2,2,2), mgp=c(2,1,0) )
 
-  yv <- "fTranT_t_1b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
-  yv <- "fTranT_t_2b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
-  yv <- "fTranT_t_3b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
+  yv <- "fTranT_1b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
+  yv <- "fTranT_2b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
+  yv <- "fTranT_3b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
 
-  yv <- "fTranT_t_1b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="dist", yvar=yv )
-  yv <- "fTranT_t_2b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="dist", yvar=yv )
-  yv <- "fTranT_t_3b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="dist", yvar=yv )
+  yv <- "fTranT_1b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="dist", yvar=yv )
+  yv <- "fTranT_2b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="dist", yvar=yv )
+  yv <- "fTranT_3b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="dist", yvar=yv )
 ```
 
 ```{r XX22, fig.height=5, fig.cap="\\label{fig:XX22}Final N-limitation of the three tree classes vs. N-fertilisation (top row) and vs. distance from the easternmost farm (bottom row). Black: Costa Rica. Red: Guatemala."}
   par( mfrow=c(2,3), mar=c(4,2,2,2), mgp=c(2,1,0) )
 
-  yv <- "fNgrowth_t_1b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
-  yv <- "fNgrowth_t_2b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
-  yv <- "fNgrowth_t_3b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
+  yv <- "fNgrowth_1b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
+  yv <- "fNgrowth_2b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
+  yv <- "fNgrowth_3b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
 
-  yv <- "fNgrowth_t_1b"
+  yv <- "fNgrowth_1b"
   plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="dist", yvar=yv )
-  yv <- "fNgrowth_t_2b"
+  yv <- "fNgrowth_2b"
   plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="dist", yvar=yv )
-  yv <- "fNgrowth_t_3b"
+  yv <- "fNgrowth_3b"
   plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="dist", yvar=yv )
 ```
 
 ```{r XX24, fig.height=5, fig.cap="\\label{fig:XX24}Costa Rica: Tree height vs. N-fertilisation (top row) and distance from easternmost farm (bottom row). Black: Costa Rica. Red: Guatemala."}
   par( mfrow=c(2,3), mar=c(4,2,2,2), mgp=c(2,1,0) )
 
-  yv <- "H_t_1b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
-  yv <- "H_t_2b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
-  yv <- "H_t_3b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
+  yv <- "H_1b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
+  yv <- "H_2b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
+  yv <- "H_3b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, yvar=yv )
 
-  yv <- "H_t_1b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="dist", yvar=yv )
-  yv <- "H_t_2b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="dist", yvar=yv )
-  yv <- "H_t_3b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="dist", yvar=yv )
+  yv <- "H_1b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="dist", yvar=yv )
+  yv <- "H_2b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="dist", yvar=yv )
+  yv <- "H_3b" ; plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="dist", yvar=yv )
 ```
 
 When we run the following code, we see that Guatemala has:
@@ -1318,10 +1335,18 @@ Fig. \ref{fig:XX15} shows observations and simulations of multiple variables, al
   if_G.type24 <- which(df_G.f$type=="P2_S4")
   if_G.type33 <- which(df_G.f$type=="P3_S3")
   if_G.type43 <- which(df_G.f$type=="P4_S3")
+  
+  sim <- sapply( 1:length(if_G.type13), function(s) {
+    list_outF_G[if_G.type13[s]][[1]][,"Shade_f"][1] } )
+  obs <- df_G.f$shade[if_G.type13]
+
+  sim <- sapply( 1:length(if_G.type13), function(s) {
+    list_outF_G[if_G.type13[s]][[1]][,"harvDM_f_hay"][1] } )
+  obs <- df_G.f$yield1920[if_G.type13]
 ```
 
 ```{r XX31obs, fig.height=5.5, fig.cap="\\label{fig:XX31obs}Observations for 4 farm types in Costa Rica. Farm type codes ranging from 1 = very low to 4 = high: first digit is productivity, second is shade."}
-  par( mfrow=c(2,3), mar=c(4,4,3,1) )
+  par( mfrow=c(3,3), mar=c(4,4,3,1) )
 
   yobs    <- "Nfert"
   yobs.12 <- df_C.f[ if_C.type12, yobs ] ; yobs.24 <- df_C.f[ if_C.type24, yobs ]
@@ -1351,10 +1376,53 @@ Fig. \ref{fig:XX15} shows observations and simulations of multiple variables, al
   yobs.   <- list( yobs.12, yobs.24, yobs.32, yobs.43 )
   boxplot( yobs., names=c(1.2, 2.4, 3.2, 4.3), main="Altitude (m)",
            col="green")
+  
+  yobs    <- "slope"
+  yobs.12 <- df_C.f[ if_C.type12, yobs ] ; yobs.24 <- df_C.f[ if_C.type24, yobs ]
+  yobs.32 <- df_C.f[ if_C.type32, yobs ] ; yobs.43 <- df_C.f[ if_C.type43, yobs ]
+  yobs.   <- list( yobs.12, yobs.24, yobs.32, yobs.43 )
+  boxplot( yobs., names=c(1.2, 2.4, 3.2, 4.3), main="Slope (deg)",
+           col="green", ylim=c(0,30) )
+  
+  yobs.a  <- "WP" ; yobs.b  <- "FC"
+  yobs.12 <- df_C.f[ if_C.type12, yobs.b ] - df_C.f[ if_C.type12, yobs.a ]
+  yobs.24 <- df_C.f[ if_C.type24, yobs.b ] - df_C.f[ if_C.type24, yobs.a ]
+  yobs.32 <- df_C.f[ if_C.type32, yobs.b ] - df_C.f[ if_C.type32, yobs.a ]
+  yobs.43 <- df_C.f[ if_C.type43, yobs.b ] - df_C.f[ if_C.type43, yobs.a ]
+  yobs.   <- list( yobs.12, yobs.24, yobs.32, yobs.43 )
+  boxplot( yobs., names=c(1.2, 2.4, 3.2, 4.3), main="Water holding cap. (-)",
+           col="green")
+
+  yobs    <- c( "dens_Erythrina", "dens_Inga" )
+  yobs.12 <- rowSums( df_C.f[ if_C.type12, yobs ] )
+  yobs.24 <- rowSums( df_C.f[ if_C.type24, yobs ] )
+  yobs.32 <- rowSums( df_C.f[ if_C.type32, yobs ] )
+  yobs.43 <- rowSums( df_C.f[ if_C.type43, yobs ] )
+  yobs.   <- list( yobs.12, yobs.24, yobs.32, yobs.43 )
+  boxplot( yobs., names=c(1.2, 2.4, 3.2, 4.3), main="Service trees (ha-1)",
+           col="green", ylim=c(0,500) )
+  
+  yobs    <- c( "dens_Banana", "dens_Avocado" )
+  yobs.12 <- rowSums( df_C.f[ if_C.type12, yobs ] )
+  yobs.24 <- rowSums( df_C.f[ if_C.type24, yobs ] )
+  yobs.32 <- rowSums( df_C.f[ if_C.type32, yobs ] )
+  yobs.43 <- rowSums( df_C.f[ if_C.type43, yobs ] )
+  yobs.   <- list( yobs.12, yobs.24, yobs.32, yobs.43 )
+  boxplot( yobs., names=c(1.2, 2.4, 3.2, 4.3), main="Fruit trees (ha-1)",
+           col="green", ylim=c(0,500) )
+  
+  yobs    <- c( "dens_Grevillea", "dens_Cordia" )
+  yobs.12 <- rowSums( df_C.f[ if_C.type12, yobs ] )
+  yobs.24 <- rowSums( df_C.f[ if_C.type24, yobs ] )
+  yobs.32 <- rowSums( df_C.f[ if_C.type32, yobs ] )
+  yobs.43 <- rowSums( df_C.f[ if_C.type43, yobs ] )
+  yobs.   <- list( yobs.12, yobs.24, yobs.32, yobs.43 )
+  boxplot( yobs., names=c(1.2, 2.4, 3.2, 4.3), main="Timber trees (ha-1)",
+           col="green", ylim=c(0,500) )
 ```
 
-```{r XX31sim, fig.height=5.5, fig.cap="\\label{fig:XX31sim}Simulations for 4 farm types in Costa Rica. Farm type codes ranging from 1 = very low to 4 = high: first digit is productivity, second is shade."}
-  par( mfrow=c(2,3), mar=c(4,4,3,1) )
+```{r XX31sim, fig.height=7.5, fig.cap="\\label{fig:XX31sim}Simulations for 4 farm types in Costa Rica. Farm type codes ranging from 1 = very low to 4 = high: first digit is productivity, second is shade."}
+  par( mfrow=c(3,3), mar=c(4,4,3,1) )
 
   ysim    <- "Shade_fb"
   ysim.12 <- oF1_C[ if_C.type12, ysim ] ; ysim.24 <- oF1_C[ if_C.type24, ysim ]
@@ -1370,6 +1438,27 @@ Fig. \ref{fig:XX15} shows observations and simulations of multiple variables, al
   boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="Yield (kg ha-1 y-1)\nsimulated",
            col="cyan")
   
+  ysim    <- "sd.harvDM_f_hay"
+  ysim.12 <- oF1_C[ if_C.type12, ysim ] ; ysim.24 <- oF1_C[ if_C.type24, ysim ]
+  ysim.32 <- oF1_C[ if_C.type32, ysim ] ; ysim.43 <- oF1_C[ if_C.type43, ysim ]
+  ysim.   <- list( ysim.12, ysim.24, ysim.32, ysim.43 )
+  boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="sd(yield) (kg ha-1 y-1)\nsimulated",
+           col="cyan")
+  
+  ysim    <- "harvDMST_3_hay"
+  ysim.12 <- oF1_C[ if_C.type12, ysim ] ; ysim.24 <- oF1_C[ if_C.type24, ysim ]
+  ysim.32 <- oF1_C[ if_C.type32, ysim ] ; ysim.43 <- oF1_C[ if_C.type43, ysim ]
+  ysim.   <- list( ysim.12, ysim.24, ysim.32, ysim.43 )
+  boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="Timber (kg ha-1 y-1)\nsimulated",
+           col="cyan")
+
+  ysim    <- "harvCPT_f_hay"
+  ysim.12 <- oF1_C[ if_C.type12, ysim ] ; ysim.24 <- oF1_C[ if_C.type24, ysim ]
+  ysim.32 <- oF1_C[ if_C.type32, ysim ] ; ysim.43 <- oF1_C[ if_C.type43, ysim ]
+  ysim.   <- list( ysim.12, ysim.24, ysim.32, ysim.43 )
+  boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="Fruit (kg ha-1 y-1)\nsimulated",
+           col="cyan")
+
   ysim    <- "D_Csoil"
   ysim.12 <- oF1_C[ if_C.type12, ysim ] ; ysim.24 <- oF1_C[ if_C.type24, ysim ]
   ysim.32 <- oF1_C[ if_C.type32, ysim ] ; ysim.43 <- oF1_C[ if_C.type43, ysim ]
@@ -1377,6 +1466,13 @@ Fig. \ref{fig:XX15} shows observations and simulations of multiple variables, al
   boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="D_Csoil (kg ha-1 y-1)\nsimulated",
            col="cyan")
   
+  ysim    <- "Crunoff_fb"
+  ysim.12 <- oF1_C[ if_C.type12, ysim ] ; ysim.24 <- oF1_C[ if_C.type24, ysim ]
+  ysim.32 <- oF1_C[ if_C.type32, ysim ] ; ysim.43 <- oF1_C[ if_C.type43, ysim ]
+  ysim.   <- list( ysim.12, ysim.24, ysim.32, ysim.43 )
+  boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="C-runoff (kg ha-1 y-1)\nsimulated",
+           col="cyan")
+
   ysim    <- "NfixT_fb"
   ysim.12 <- oF1_C[ if_C.type12, ysim ] ; ysim.24 <- oF1_C[ if_C.type24, ysim ]
   ysim.32 <- oF1_C[ if_C.type32, ysim ] ; ysim.43 <- oF1_C[ if_C.type43, ysim ]
@@ -1391,11 +1487,11 @@ Fig. \ref{fig:XX15} shows observations and simulations of multiple variables, al
   boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="N-leaching (kg ha-1 y-1)\nsimulated",
            col="cyan")
   
-  ysim    <- "Crunoff_fb"
+  ysim    <- "Nemission_fb"
   ysim.12 <- oF1_C[ if_C.type12, ysim ] ; ysim.24 <- oF1_C[ if_C.type24, ysim ]
   ysim.32 <- oF1_C[ if_C.type32, ysim ] ; ysim.43 <- oF1_C[ if_C.type43, ysim ]
   ysim.   <- list( ysim.12, ysim.24, ysim.32, ysim.43 )
-  boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="C-runoff (kg ha-1 y-1)\nsimulated",
+  boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="N-emission (kg ha-1 y-1)\nsimulated",
            col="cyan")
 ```
 
@@ -1516,7 +1612,7 @@ Fig. \ref{fig:XX15} shows observations and simulations of multiple variables, al
 ```
 
 ```{r XX32obs, fig.height=5.5, fig.cap="\\label{fig:XX32obs}Observations for 4 farm types in Guatemala. Farm type codes ranging from 1 = very low to 4 = high: first digit is productivity, second is shade."}
-  par( mfrow=c(2,3), mar=c(4,4,3,1) )
+  par( mfrow=c(3,3), mar=c(4,4,3,1) )
 
   yobs    <- "Nfert"
   yobs.13 <- df_G.f[ if_G.type13, yobs ] ; yobs.24 <- df_G.f[ if_G.type24, yobs ]
@@ -1546,10 +1642,53 @@ Fig. \ref{fig:XX15} shows observations and simulations of multiple variables, al
   yobs.   <- list( yobs.13, yobs.24, yobs.33, yobs.43 )
   boxplot( yobs., names=c(1.3, 2.4, 3.3, 4.3), main="Altitude (m)",
            col="green")
+  
+  yobs    <- "slope"
+  yobs.13 <- df_G.f[ if_G.type13, yobs ] ; yobs.24 <- df_G.f[ if_G.type24, yobs ]
+  yobs.33 <- df_G.f[ if_G.type33, yobs ] ; yobs.43 <- df_G.f[ if_G.type43, yobs ]
+  yobs.   <- list( yobs.13, yobs.24, yobs.33, yobs.43 )
+  boxplot( yobs., names=c(1.3, 2.4, 3.3, 4.3), main="Slope (deg)",
+           col="green", ylim=c(0,30) )
+  
+  yobs.a  <- "WP" ; yobs.b  <- "FC"
+  yobs.13 <- df_G.f[ if_G.type13, yobs.b ] - df_G.f[ if_G.type13, yobs.a ]
+  yobs.24 <- df_G.f[ if_G.type24, yobs.b ] - df_G.f[ if_G.type24, yobs.a ]
+  yobs.33 <- df_G.f[ if_G.type33, yobs.b ] - df_G.f[ if_G.type33, yobs.a ]
+  yobs.43 <- df_G.f[ if_G.type43, yobs.b ] - df_G.f[ if_G.type43, yobs.a ]
+  yobs.   <- list( yobs.13, yobs.24, yobs.33, yobs.43 )
+  boxplot( yobs., names=c(1.3, 2.4, 3.3, 4.3), main="Water holding cap. (-)",
+           col="green")
+
+  yobs    <- c( "dens_Erythrina", "dens_Inga" )
+  yobs.13 <- rowSums( df_G.f[ if_G.type13, yobs ] )
+  yobs.24 <- rowSums( df_G.f[ if_G.type24, yobs ] )
+  yobs.33 <- rowSums( df_G.f[ if_G.type33, yobs ] )
+  yobs.43 <- rowSums( df_G.f[ if_G.type43, yobs ] )
+  yobs.   <- list( yobs.13, yobs.24, yobs.33, yobs.43 )
+  boxplot( yobs., names=c(1.3, 2.4, 3.3, 4.3), main="Service trees (ha-1)",
+           col="green", ylim=c(0,500) )
+  
+  yobs    <- c( "dens_Banana", "dens_Avocado" )
+  yobs.13 <- rowSums( df_G.f[ if_G.type13, yobs ] )
+  yobs.24 <- rowSums( df_G.f[ if_G.type24, yobs ] )
+  yobs.33 <- rowSums( df_G.f[ if_G.type33, yobs ] )
+  yobs.43 <- rowSums( df_G.f[ if_G.type43, yobs ] )
+  yobs.   <- list( yobs.13, yobs.24, yobs.33, yobs.43 )
+  boxplot( yobs., names=c(1.3, 2.4, 3.3, 4.3), main="Fruit trees (ha-1)",
+           col="green", ylim=c(0,500) )
+  
+  yobs    <- c( "dens_Grevillea", "dens_Cordia" )
+  yobs.13 <- rowSums( df_G.f[ if_G.type13, yobs ] )
+  yobs.24 <- rowSums( df_G.f[ if_G.type24, yobs ] )
+  yobs.33 <- rowSums( df_G.f[ if_G.type33, yobs ] )
+  yobs.43 <- rowSums( df_G.f[ if_G.type43, yobs ] )
+  yobs.   <- list( yobs.13, yobs.24, yobs.33, yobs.43 )
+  boxplot( yobs., names=c(1.3, 2.4, 3.3, 4.3), main="Timber trees (ha-1)",
+           col="green", ylim=c(0,500) )
 ```
 
-```{r XX32sim, fig.height=5.5, fig.cap="\\label{fig:XX32sim}Simulations for 4 farm types in Guatemala. Farm type codes ranging from 1 = very low to 4 = high: first digit is productivity, second is shade."}
-  par( mfrow=c(2,3), mar=c(4,4,3,1) )
+```{r XX32sim, fig.height=7.5, fig.cap="\\label{fig:XX32sim}Simulations for 4 farm types in Guatemala. Farm type codes ranging from 1 = very low to 4 = high: first digit is productivity, second is shade."}
+  par( mfrow=c(3,3), mar=c(4,4,3,1) )
 
   ysim    <- "Shade_fb"
   ysim.13 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
@@ -1565,6 +1704,27 @@ Fig. \ref{fig:XX15} shows observations and simulations of multiple variables, al
   boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="Yield (kg ha-1 y-1)\nsimulated",
            col="cyan")
   
+  ysim    <- "sd.harvDM_f_hay"
+  ysim.13 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
+  ysim.33 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
+  ysim.   <- list( ysim.13, ysim.24, ysim.33, ysim.43 )
+  boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="sd(yield) (kg ha-1 y-1)\nsimulated",
+           col="cyan")
+
+  ysim    <- "harvDMST_3_hay"
+  ysim.13 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
+  ysim.33 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
+  ysim.   <- list( ysim.13, ysim.24, ysim.33, ysim.43 )
+  boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="Timber (kg ha-1 y-1)\nsimulated",
+           col="cyan")
+
+  ysim    <- "harvCPT_f_hay"
+  ysim.13 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
+  ysim.33 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
+  ysim.   <- list( ysim.13, ysim.24, ysim.33, ysim.43 )
+  boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="Fruit (kg ha-1 y-1)\nsimulated",
+           col="cyan")
+
   ysim    <- "D_Csoil"
   ysim.13 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
   ysim.33 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
@@ -1572,6 +1732,13 @@ Fig. \ref{fig:XX15} shows observations and simulations of multiple variables, al
   boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="D_Csoil (kg ha-1 y-1)\nsimulated",
            col="cyan", ylim=c(-3000,3000))
   
+  ysim    <- "Crunoff_fb"
+  ysim.13 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
+  ysim.33 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
+  ysim.   <- list( ysim.13, ysim.24, ysim.33, ysim.43 )
+  boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="C-runoff (kg ha-1 y-1)\nsimulated",
+           col="cyan", ylim=c(0,1000))
+
   ysim    <- "NfixT_fb"
   ysim.12 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
   ysim.32 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
@@ -1586,12 +1753,12 @@ Fig. \ref{fig:XX15} shows observations and simulations of multiple variables, al
   boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="N-leaching (kg ha-1 y-1)\nsimulated",
            col="cyan", ylim=c(0,200))
   
-  ysim    <- "Crunoff_fb"
+  ysim    <- "Nemission_fb"
   ysim.13 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
   ysim.33 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
   ysim.   <- list( ysim.13, ysim.24, ysim.33, ysim.43 )
-  boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="C-runoff (kg ha-1 y-1)\nsimulated",
-           col="cyan", ylim=c(0,1000))
+  boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="N-emission (kg ha-1 y-1)\nsimulated",
+           col="cyan")
 ```
 
 ```{r XX32F1234, fig.height=7.5, fig.cap="\\label{fig:XX32F1234}Four different simulations (blue) for 4 farm types in Guatemala. Farm type codes ranging from 1 = very low to 4 = high: first digit is productivity, second is shade."}
