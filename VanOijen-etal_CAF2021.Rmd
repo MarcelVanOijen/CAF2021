@@ -29,6 +29,7 @@ bibliography: SEACAF.bib
 
 ```{r, include=FALSE}
   knitr::opts_chunk$set(echo=F,results="asis",warning=FALSE,message=FALSE)
+  library( tidyverse )
 ```
 
 $^1$ Independent researcher, Edinburgh, United Kingdom  
@@ -77,18 +78,352 @@ $^*$ Corresponding author: ORCID 0000-0003-4028-3626, VanOijenMarcel@gmail.com
 
 
 
+```{r}  
+  load( "df_C.f_2021-09-24.rda" )
+  load( "df_G.f_2021-09-24.rda" )
+  n_C.f <- dim(df_C.f)[1] ; n_G.f <- dim(df_G.f)[1]
+```
+
+```{r}
+  vars_Summary <- c(
+    "harvDM_f_hay"   , "sd.harvDM_f_hay", 
+    "harvDMST_3_hay" , "harvCPT_f_hay"  , "harvCST_f"   , "harvCST_3",
+    "D_Nsoil"        ,
+    "D_Csoil"        , "D_C"            , "D_CT"        , "D_Csys"     ,
+    "Shade_f"        , "Shade_fa"       , "Shade_fb"    ,
+    "Nemission_fb"   , "NfixT_fb"       , "Nleaching_fb", "Crunoff_fb" ,
+    "Csoil_fa"       , "Csoil_fb"       ,
+    "harvDM_f_ha1819", "harvDM_f_ha1920",
+    "fTranT_1a"      , "fTranT_1b"      , "fTranT_2a"   , "fTranT_2b"  ,
+    "fTranT_3a"      , "fTranT_3b"      , "fNgrowth_1a" , "fNgrowth_1b",
+    "fNgrowth_2a"    , "fNgrowth_2b"    , "fNgrowth_3a" , "fNgrowth_3b",
+    "H_1a"           , "H_1b"           , "H_2a"        , "H_2b"       ,
+    "H_3a"           , "H_3b"           , "CAtree_1a"   , "CAtree_1b"  ,
+    "CAtree_2a"      , "CAtree_2b"      , "CAtree_3a"   , "CAtree_3b"  ,
+    "treedens_1"     , "treedens_2"     , "treedens_3"  ,
+    "CST_3"
+  )
+```
+
+```{r}
+  outputSummary <- function( output ) {
+    idoy           <- which( outputNames=="doy" )
+
+    fOut           <- matrix( NA, nrow=1, ncol=length(vars_Summary) )
+    colnames(fOut) <- vars_Summary
+
+    iyear       <- which( outputNames=="year" )
+    idoy        <- which( outputNames=="doy" )
+    
+    ih_f_hay    <- which( outputNames=="harvDM_f_hay" ) # kg C ha-1 y-1
+    ihCPT_f     <- which( outputNames=="harvCPT_f"    ) # kg C m-2 d-1
+    ihCPT_2     <- which( outputNames=="harvCPT_t(2)" ) # kg C m-2 d-1
+    ihCST_f     <- which( outputNames=="harvCST_f"    ) # kg C m-2 d-1
+    ihCST_3     <- which( outputNames=="harvCST_t(3)" ) # kg C m-2 d-1
+    iNsoil_f    <- which( outputNames=="Nsoil_f"      ) # kg N m-2
+    iCsoil_f    <- which( outputNames=="Csoil_f"      ) # kg C m-2 
+    iC_f        <- which( outputNames=="C_f"          ) # kg C m-2
+    iCT_f       <- which( outputNames=="CT_f"         ) # kg C m-2
+
+    iShade_f    <- which( outputNames=="Shade_f"      ) # m2 m-2
+    
+    iNemission  <- which( outputNames=="Nemission_f"  ) # kg N m-2 d-1
+    iNfixT      <- which( outputNames=="NfixT_f"      ) # kg N m-2 d-1
+    iNleaching  <- which( outputNames=="Nleaching_f"  ) # kg N m-2 d-1
+    iCrunoff    <- which( outputNames=="Crunoff_f"    ) # kg C m-2 d-1
+    
+    idayH1      <- which( outputNames=="DayHarv(1)" )
+    idayH2      <- which( outputNames=="DayHarv(2)" )
+    ifTranT_1   <- which( outputNames=="fTranT_t(1)")
+    ifTranT_2   <- which( outputNames=="fTranT_t(2)")
+    ifTranT_3   <- which( outputNames=="fTranT_t(3)")
+    ifNgrwT_1   <- which( outputNames=="fNgrowth_t(1)")
+    ifNgrwT_2   <- which( outputNames=="fNgrowth_t(2)")
+    ifNgrwT_3   <- which( outputNames=="fNgrowth_t(3)")
+    ihT_1       <- which( outputNames=="h_t(1)")
+    ihT_2       <- which( outputNames=="h_t(2)")
+    ihT_3       <- which( outputNames=="h_t(3)")
+    iCAtreeT_1  <- which( outputNames=="CAtree_t(1)")
+    iCAtreeT_2  <- which( outputNames=="CAtree_t(2)")
+    iCAtreeT_3  <- which( outputNames=="CAtree_t(3)")
+    itreedens_1 <- which( outputNames=="treedens_t(1)")
+    itreedens_2 <- which( outputNames=="treedens_t(2)")
+    itreedens_3 <- which( outputNames=="treedens_t(3)")
+    iCST_3      <- which( outputNames=="CST_t(3)" )
+
+    c.DM  <- 1 / 0.47          # 'kg C'               -> 'kg DM'
+    NDAYS <- dim(output)[1]
+    c.ha  <- 1e4               # 'm-2'                -> 'ha-1'
+    c.hay <- 1e4 * 365 / NDAYS # 'm-2 in sim. period' -> 'ha-1 y-1'
+    d181  <- which( output[,idoy]==181 )
+    
+    T1 <- 0 ; if(output[1,itreedens_1]>0) T1 <- 1
+    T2 <- 0 ; if(output[1,itreedens_2]>0) T2 <- 1
+    T3 <- 0 ; if(output[1,itreedens_3]>0) T3 <- 1
+    
+           fOut[,"sd.harvDM_f_hay"] <- sd(output[d181 ,ih_f_hay] )
+           fOut[,"harvDM_f_hay"] <- mean( output[d181 ,ih_f_hay] )
+           fOut[,"harvCPT_f_hay"]<- sum ( output[     ,ihCPT_f ] ) * c.DM * c.hay
+           fOut[,"harvCST_f"]    <- sum ( output[     ,ihCST_f ] ) * c.DM * c.hay
+    if(T3) fOut[,"harvCST_3"]    <- sum ( output[     ,ihCST_3 ] ) * c.DM * c.hay
+    if(T3) fOut[,"CST_3"]        <-       output[NDAYS,iCST_3  ]   * c.DM * c.hay
+           
+           fOut[,"harvDMST_3_hay"] <- sum( fOut[,c("harvCST_3","CST_3")],na.rm=T )
+           
+           fOut[,"treedens_1"]   <-       output[NDAYS,itreedens_1]       * c.ha
+           fOut[,"treedens_2"]   <-       output[NDAYS,itreedens_2]       * c.ha
+           fOut[,"treedens_3"]   <-       output[NDAYS,itreedens_3]       * c.ha
+           
+    D_output         <- output[NDAYS,] - output[1,]
+    fOut[,"D_Nsoil"] <- D_output[iNsoil_f] * c.hay
+    fOut[,"D_Csoil"] <- D_output[iCsoil_f] * c.hay
+    fOut[,"D_C"    ] <- D_output[iC_f    ] * c.hay
+    fOut[,"D_CT"   ] <- D_output[iCT_f   ] * c.hay
+    fOut[,"D_Csys" ] <- fOut[,"D_Csoil"] + fOut[,"D_C"] + fOut[,"D_CT"]
+
+    outputFirstYears <- colMeans( output[ 1          :730  , ] )
+    outputFinalYears <- colMeans( output[ (NDAYS-730):NDAYS, ] )
+    
+    fOut[,"Shade_f"     ] <- mean( output          [,iShade_f] )
+    fOut[,"Shade_fa"    ] <- mean( outputFirstYears[ iShade_f] )
+    fOut[,"Shade_fb"    ] <- mean( outputFinalYears[ iShade_f] )
+    
+    fOut[,"Nemission_fb"] <- outputFinalYears[iNemission] * 1e4 * 365
+    fOut[,"NfixT_fb"    ] <- outputFinalYears[iNfixT    ] * 1e4 * 365
+    fOut[,"Nleaching_fb"] <- outputFinalYears[iNleaching] * 1e4 * 365
+    
+    fOut[,"Crunoff_fb"  ] <- outputFinalYears[iCrunoff  ] * 1e4 * 365
+    fOut[,"Csoil_fa"    ] <- outputFirstYears[iCsoil_f  ]
+    fOut[,"Csoil_fb"    ] <- outputFinalYears[iCsoil_f  ]
+
+    dHarv1819 <- which( (output[,iyear]==2019) & (output[,idoy]==181) )
+    dHarv1920 <- which( (output[,iyear]==2020) & (output[,idoy]==181) )
+    
+    fOut[,"harvDM_f_ha1819"] <- output[dHarv1819,ih_f_hay]
+    fOut[,"harvDM_f_ha1920"] <- output[dHarv1920,ih_f_hay]
+
+    if(T1) { fOut[,"fTranT_1a"  ] <- mean( outputFirstYears[ifTranT_1] )
+             fOut[,"fTranT_1b"  ] <- mean( outputFinalYears[ifTranT_1] )
+             fOut[,"fNgrowth_1a"] <- mean( outputFirstYears[ifNgrwT_1] )
+             fOut[,"fNgrowth_1b"] <- mean( outputFinalYears[ifNgrwT_1] )
+             fOut[,"H_1a"       ] <- mean( outputFirstYears[ihT_1] )
+             fOut[,"H_1b"       ] <- mean( outputFinalYears[ihT_1] )
+             fOut[,"CAtree_1a"  ] <- mean( outputFirstYears[iCAtreeT_1] )
+             fOut[,"CAtree_1b"  ] <- mean( outputFinalYears[iCAtreeT_1] )
+           }
+    if(T2) { fOut[,"fTranT_2a"  ] <- mean( outputFirstYears[ifTranT_2] )
+             fOut[,"fTranT_2b"  ] <- mean( outputFinalYears[ifTranT_2] )
+             fOut[,"fNgrowth_2a"] <- mean( outputFirstYears[ifNgrwT_2] )
+             fOut[,"fNgrowth_2b"] <- mean( outputFinalYears[ifNgrwT_2] )
+             fOut[,"H_2a"       ] <- mean( outputFirstYears[ihT_2] )
+             fOut[,"H_2b"       ] <- mean( outputFinalYears[ihT_2] )
+             fOut[,"CAtree_2a"  ] <- mean( outputFirstYears[iCAtreeT_2] )
+             fOut[,"CAtree_2b"  ] <- mean( outputFinalYears[iCAtreeT_2] )
+           }
+    if(T3) { fOut[,"fTranT_3a"  ] <- mean( outputFirstYears[ifTranT_3] )
+             fOut[,"fTranT_3b"  ] <- mean( outputFinalYears[ifTranT_3] )
+             fOut[,"fNgrowth_3a"] <- mean( outputFirstYears[ifNgrwT_3] )
+             fOut[,"fNgrowth_3b"] <- mean( outputFinalYears[ifNgrwT_3] )
+             fOut[,"H_3a"       ] <- mean( outputFirstYears[ihT_3] )
+             fOut[,"H_3b"       ] <- mean( outputFinalYears[ihT_3] )
+             fOut[,"CAtree_3a"  ] <- mean( outputFirstYears[iCAtreeT_3] )
+             fOut[,"CAtree_3b"  ] <- mean( outputFinalYears[iCAtreeT_3] )
+           }
+
+    return( fOut )
+  }
+```
+
+```{r list_outF_C, cache=T}
+  list_outF_C <- list_parF_C <- vector( "list", n_C.f )
+
+  for(fi in 1:n_C.f) {
+    file_init <- paste0( "initialisation/CG/inititialise_CAF2021_C_f", fi, ".R" )
+    source( file_init )
+    
+    nF_C                     <- 4
+    mat_parF                 <- matrix( NA, nF_C, 1+length(names_params) )
+    mat_outF                 <- matrix( NA, nF_C, 1+length(vars_Summary) )
+    colnames( mat_parF )     <- c( "FarmSetting", names_params )
+    colnames( mat_outF )     <- c( "FarmSetting", vars_Summary )
+    mat_parF[,"FarmSetting"] <- 1:nF_C
+    mat_outF[,"FarmSetting"] <- 1:nF_C
+    
+    for(iF in 1:nF_C) {
+      params.X         <- set_par("SHADETARGETMULT",0.1)
+      year             <- matrix_weather[,1]
+      doy              <- matrix_weather[,2]
+      iday.X           <- which( year==2019 & doy > 180 )
+      ivar.X           <- 8 # RAIN
+      matrix_weather.X <- matrix_weather
+      matrix_weather.X[ iday.X, ivar.X ] <-
+                          matrix_weather[ iday.X, ivar.X ] * 0.1
+      if(iF==1){ outF <- run_model( params        , matrix_weather,
+                                    calendar_fert , calendar_prunC,
+                                    calendar_prunT, calendar_thinT, NDAYS ) }
+      if(iF==2){ outF <- run_model( params        , matrix_weather.X,
+                                    calendar_fert , calendar_prunC,
+                                    calendar_prunT, calendar_thinT, NDAYS ) }
+      if(iF==3){ outF <- run_model( params.X      , matrix_weather,
+                                    calendar_fert , calendar_prunC,
+                                    calendar_prunT, calendar_thinT, NDAYS ) }
+      if(iF==4){ outF <- run_model( params.X      , matrix_weather.X,
+                                    calendar_fert , calendar_prunC,
+                                    calendar_prunT, calendar_thinT, NDAYS ) }
+      paramsUsed <- params
+      ipT1       <- which( endsWith(names_params,"(1)") ) 
+      ipT2       <- which( endsWith(names_params,"(2)") ) 
+      ipT3       <- which( endsWith(names_params,"(3)") )
+      dT1        <- params[ which(names_params=="TREEDENS0(1)") ]
+      dT2        <- params[ which(names_params=="TREEDENS0(2)") ]
+      dT3        <- params[ which(names_params=="TREEDENS0(3)") ]
+      if( dT1==0 ) paramsUsed[ipT1] <- NA
+      if( dT2==0 ) paramsUsed[ipT2] <- NA
+      if( dT3==0 ) paramsUsed[ipT3] <- NA
+      mat_parF[iF,1+(1:length(names_params))] <- paramsUsed
+      mat_outF[iF,1+(1:length(vars_Summary))] <- outputSummary( outF )
+    }
+    list_parF_C[[fi]] <- mat_parF
+    list_outF_C[[fi]] <- mat_outF
+  }
+```
+
+```{r list_outF_G, cache=T}
+  list_outF_G <- list_parF_G <- vector( "list", n_G.f )
+
+  for(fi in 1:n_G.f) {
+    file_init <- paste0( "initialisation/CG/inititialise_CAF2021_G_f", fi, ".R" )
+    source( file_init )
+    
+    nF_G                     <- 4
+    mat_parF                 <- matrix( NA, nF_G, 1+length(names_params) )
+    mat_outF                 <- matrix( NA, nF_G, 1+length(vars_Summary) )
+    colnames( mat_parF )     <- c( "FarmSetting", names_params )
+    colnames( mat_outF )     <- c( "FarmSetting", vars_Summary )
+    mat_parF[,"FarmSetting"] <- 1:nF_G
+    mat_outF[,"FarmSetting"] <- 1:nF_G
+    
+    for(iF in 1:nF_G) {
+      params.X         <- set_par("SHADETARGETMULT",0.1)
+      year             <- matrix_weather[,1]
+      doy              <- matrix_weather[,2]
+      iday.X           <- which( year==2019 & doy > 180 )
+      ivar.X           <- 8 # RAIN
+      matrix_weather.X <- matrix_weather
+      matrix_weather.X[ iday.X, ivar.X ] <-
+                          matrix_weather[ iday.X, ivar.X ] * 0.1
+      if(iF==1){ outF <- run_model( params        , matrix_weather,
+                                    calendar_fert , calendar_prunC,
+                                    calendar_prunT, calendar_thinT, NDAYS ) }
+      if(iF==2){ outF <- run_model( params        , matrix_weather.X,
+                                    calendar_fert , calendar_prunC,
+                                    calendar_prunT, calendar_thinT, NDAYS ) }
+      if(iF==3){ outF <- run_model( params.X      , matrix_weather,
+                                    calendar_fert , calendar_prunC,
+                                    calendar_prunT, calendar_thinT, NDAYS ) }
+      if(iF==4){ outF <- run_model( params.X      , matrix_weather.X,
+                                    calendar_fert , calendar_prunC,
+                                    calendar_prunT, calendar_thinT, NDAYS ) }
+      paramsUsed <- params
+      ipT1       <- which( endsWith(names_params,"(1)") ) 
+      ipT2       <- which( endsWith(names_params,"(2)") ) 
+      ipT3       <- which( endsWith(names_params,"(3)") )
+      dT1        <- params[ which(names_params=="TREEDENS0(1)") ]
+      dT2        <- params[ which(names_params=="TREEDENS0(2)") ]
+      dT3        <- params[ which(names_params=="TREEDENS0(3)") ]
+      if( dT1==0 ) paramsUsed[ipT1] <- NA
+      if( dT2==0 ) paramsUsed[ipT2] <- NA
+      if( dT3==0 ) paramsUsed[ipT3] <- NA
+      mat_parF[iF,1+(1:length(names_params))] <- paramsUsed
+      mat_outF[iF,1+(1:length(vars_Summary))] <- outputSummary( outF )
+    }
+    list_parF_G[[fi]] <- mat_parF
+    list_outF_G[[fi]] <- mat_outF
+  }
+```
+
+```{r}
+  df_C.f_sim <- df_C.f %>%
+    dplyr::select ( code ) %>%
+    arrange( code ) %>%
+    mutate ( parF = list_parF_C ) %>%
+    mutate ( outF = list_outF_C )
+
+  df_G.f_sim <- df_G.f %>%
+    dplyr::select ( code ) %>%
+    arrange( code ) %>%
+    mutate ( parF = list_parF_G ) %>%
+    mutate ( outF = list_outF_G )
+```
+
+```{r}
+  dfoutFSummary <- function( df=df_C.f_sim, Fi=1 ){
+    nf     <- dim( df )[1]
+    vnames <- colnames( df$outF[[1]] ) ; nv <- length(vnames)
+    matres <- matrix( NA, nf, nv ) ; colnames( matres) <- vnames
+    F.v    <- matres
+    for(fi in 1:nf){
+      F.v[fi,] <- df$outF[[fi]][Fi,]
+    }
+    return( F.v )
+  }
+
+  dfparFSummary <- function( df=df_C.f_sim, Fi=1 ){
+    nf     <- dim( df )[1]
+    vnames <- colnames( df$parF[[1]] ) ; nv <- length(vnames)
+    matres <- matrix( NA, nf, nv ) ; colnames( matres) <- vnames
+    F.v    <- matres
+    for(fi in 1:nf){
+      F.v[fi,] <- df$parF[[fi]][Fi,]
+    }
+    return( F.v )
+  }
+```
+
+```{r}
+  oF1_C <- dfoutFSummary( df_C.f_sim, Fi=1 )
+  oF2_C <- dfoutFSummary( df_C.f_sim, Fi=2 )
+  oF3_C <- dfoutFSummary( df_C.f_sim, Fi=3 )
+  oF4_C <- dfoutFSummary( df_C.f_sim, Fi=4 )
+  pF1_C <- dfparFSummary( df_C.f_sim, Fi=1 )
+
+  oF1_G <- dfoutFSummary( df_G.f_sim, Fi=1 )
+  oF2_G <- dfoutFSummary( df_G.f_sim, Fi=2 )
+  oF3_G <- dfoutFSummary( df_G.f_sim, Fi=3 )
+  oF4_G <- dfoutFSummary( df_G.f_sim, Fi=4 )
+  pF1_G <- dfparFSummary( df_G.f_sim, Fi=1 )
+```
+
+```{r}
+  if_C.type12 <- which(df_C.f$type=="P1_S2")
+  if_C.type24 <- which(df_C.f$type=="P2_S4")
+  if_C.type32 <- which(df_C.f$type=="P3_S2")
+  if_C.type43 <- which(df_C.f$type=="P4_S3")
+  
+  if_G.type13 <- which(df_G.f$type=="P1_S3")
+  if_G.type24 <- which(df_G.f$type=="P2_S4")
+  if_G.type33 <- which(df_G.f$type=="P3_S3")
+  if_G.type43 <- which(df_G.f$type=="P4_S3")
+```
+
+
+
 \clearpage
 
 # Introduction
 
+```{r Maps_CG, out.width="400px", fig.align="center", fig.cap="\\label{Maps_CG}Altitude maps for Costa Rica and Guatemala with locations of the SEACAF farms."}
+  knitr::include_graphics("images/Maps_CG.png")
+```
+
 - The goal of sustainable agriculture puts multiple demands on coffee agroforestry systems (CAF). The productivity of coffee plants and shade trees must be high while minimising negative impacts on the environment. In this paper, we refer to each form of productivity or environmental impact as an *ecosystem service* (ES). An important issue in the evaluation of CAF is that many ES are difficult to quantify, which hampers the choice of shade tree species and farm management.
 - This is a particular problem in Central America, where mountainous topography with young volcanic soils leads to strong spatial variation in weather patterns and soil fertility. Together with a wide variation in management choices, this has led to strong variability in productivity. It likely also caused strong variation in environmental ES, but not many data are available for these.
-- Here, we used a combination of data analysis and process-based modelling to quantify ES at coffee agroforestry farms: 89 farms in Costa Rica and 79 in Guatemala. 
-- The same farms were studied previously by Haggar et al. (2021), who showed ...
-- Measurements at these farms did not include ES related to carbon and nitrogen biogeochemistry. Here we estimated these ES using the new coffee agroforestry model CAF2021, which we introduce in this paper. The model differs from its predecessors CAF2007 and CAF2014 mainly in that it allows for more complex agroforestry systems with up to three different shade tree species.
-- Other models for coffee: ...
+- Here, we used a combination of data analysis and process-based modelling to quantify ES at coffee agroforestry farms: 89 farms in Costa Rica and 79 in Guatemala (Fig. \ref{fig:Maps_CG}).
+- The same farms were studied previously by @Haggar_2021_Shade, who showed ...
+- Measurements at these farms did not include ES related to carbon and nitrogen biogeochemistry. Here we estimated these ES using the new coffee agroforestry model CAF2021, which we introduce in this paper. The model differs from its predecessors CAF2007 [@VanOijen_2010_Coffee] and CAF2014 [@Rahn_2018_Exploring; @Ovalle-Rivera_2020_Assessing] mainly in that it allows for more complex agroforestry systems with up to three different shade tree species. The model simulates a wide range of ES: coffee yield, timber and fruit production by shade trees, soil loss by erosion, soil carbon sequestration, nitrogen fixation, loss of nitrogen in atmospheric emission and leaching.
+- Other process-based models of coffee agroforestry have been developed in recent years [@Charbonnier_2017_Increased; @Vezy_2019_DynACof]. These models focus on plant physiology, and they simulate agronomy and biogeochemistry in less detail than CAF2021, which makes them less suitable to assess a wide range of ES.
 - Details of the structure of CAF2021 are provided in the Materials and Methods section and online.
-- To calibrate the model, we used multivariate data from 32 different treatments applied in long-term field experiments in Costa Rica and Nicaragua. A subset of these data (10 treatments) was used earlier in the Bayesian calibration of CAF2014, a model that could not simulate experimental treatments with multiple shade tree species. Bayesian calibration has become a common method for model calibration and uncertainty quantification of process-based models (vO 2020). Here we use the same method of Bayesian model calibration by means of Markov chain Monte Carlo sampling that was used by Ovalle et al.
+- To calibrate the model, we used multivariate data from 32 different treatments applied in long-term field experiments in Costa Rica and Nicaragua. A subset of these data (10 treatments) was used earlier in the Bayesian calibration of CAF2014, a model that could not simulate experimental treatments with multiple shade tree species. Bayesian calibration has become a common method for model calibration and uncertainty quantification of process-based models [@VanOijen_2020_Bayesian]. Here we use the same method of Bayesian model calibration by means of Markov chain Monte Carlo sampling that was used by @Ovalle-Rivera_2020_Assessing.
 - Goal 1: Identify the drivers of observed differences in productivity between farms and farm types.
 - Goal 2: Assess the implications of aiming for any particular farm type for biogeochemistry-related ecosystem services and sustainability.
 - Goal 3: Assess CAF2021 as a tool for studying coffee agroforestry systems.
@@ -100,18 +435,181 @@ $^*$ Corresponding author: ORCID 0000-0003-4028-3626, VanOijenMarcel@gmail.com
 # Materials and methods
 
 
-## Data experiments T+M
+## Data experiments Turrialba and Masatepe
 
 - Locations, years, treatments, measurements.
 - See also Supplementary Information
 
 
-## Data farms C+G
+## Data farms Costa Rica and Guatemala
 - 89 farms in Costa Rica, 79 farms in Guatemala with sufficient information to run CAF20212.
-- We summarise farm properties using the typology of Haggar et al. (2021).
-- ENVIRONMENTAL TABLE: per country four farm types, so a table with 8 rows and as columns: n, averages of altitude, slope, temperature, rain, soil C, soil N, water-holding capacity
-  - State that water-holding capcity was derived from soil texture information using the pedotransfer function tested by Tomasella et al. (). We further assume that bottom soil layers contain SOM equivalent to 20% of top-soil SOM. Weather data (5 variables, only two summarised in the table): WorldClim plus country-wide 2019 anomalies for rain and temperature.
-- MANAGEMENT TABLE: as previous table but N-fertilisation and densities of 6 representative tree species.
+- Farm locations are shown in Fig. \ref{fig:Maps_CG}. We summarise farm properties using the typology of @Haggar_2021_Shade.
+
+- TABLE *Farms: environmental conditions*. Table with 8 rows (2 countries x 4 farm types) and as columns: n, averages of altitude, slope, temperature, rain, soil C, soil N, water-holding capacity.
+  - Weather data (5 variables, only two summarised in the table): WorldClim plus country-wide 2019 anomalies for rain and temperature. We extended WorldClim weather data files by two years (2019 and 2020). For 2019, we used the country-average monthly anomalies from weather stations of Icafe, IMN and Anacafe. For 2020, we used the WorldClim climatic average.
+  - Water-holding capcity was derived from soil texture information (bulk density, silt, clay) using a pedotransfer function tested for tropical soils [@Tomasella_2003_Comparison; @Tomasella_2004_Pedotransfer]. We further assume that bottom soil layers contain SOM equivalent to 20% of top-soil SOM.
+
+- TABLE *Farms: management and yield*. Lay-out as previous table but showing N-fertilisation rate, densities of 6 representative tree species, total shade, coffee yield.
+  - We capped reported farm fertilisation at 500 kg N ha-1 y-1.
+  - We used farm-specific tree density data, but simplified to six 'type'-species.
+  - Tree pruning is once per year (doy 140) and follows each farm's shade-target, except for Erythrina which follows a prescribed twice-yearly 90% pruning regime.
+  - Tree thinning is only applied to Cordia and follows a prescribed calendar.
+  - Pruned leaves and branches are removed from the field in Guatemala (except for Erythrina), but remain on the field in Costa Rica.
+  - We calculated dry coffee bean yield (the CAF2021 variable) as reported fresh yield divided by 3. The Nicaragua experiment had shown that the "factor de conversión de café cereza a café oro" was variable with an average of 7.74 [@Sepulveda_2016_Efecto]. A more common value may be 6. and if we further assume that 'oro' is half the value of dry yield, we arrive at the conversion factor of 3.
+  
+REPLACE FIGS \ref{fig:FarmObsC} and \ref{fig:FarmObsG} with these two tables.
+  
+```{r FarmObsC, fig.height=5.5, fig.cap="\\label{fig:FarmObsC}Observations for 4 farm types in Costa Rica. Farm type codes ranging from 1 = very low to 4 = high: first digit is productivity, second is shade."}
+  par( mfrow=c(3,3), mar=c(4,4,3,1) )
+
+  yobs    <- "Nfert"
+  yobs.12 <- df_C.f[ if_C.type12, yobs ] ; yobs.24 <- df_C.f[ if_C.type24, yobs ]
+  yobs.32 <- df_C.f[ if_C.type32, yobs ] ; yobs.43 <- df_C.f[ if_C.type43, yobs ]
+  yobs.   <- list( yobs.12, yobs.24, yobs.32, yobs.43 )
+  boxplot( yobs., names=c(1.2, 2.4, 3.2, 4.3), main="N-fert. (kg ha-1 y-1)",
+           col="green")
+  
+  yobs    <- "shade"
+  yobs.12 <- df_C.f[ if_C.type12, yobs ] ; yobs.24 <- df_C.f[ if_C.type24, yobs ]
+  yobs.32 <- df_C.f[ if_C.type32, yobs ] ; yobs.43 <- df_C.f[ if_C.type43, yobs ]
+  yobs.   <- list( yobs.12, yobs.24, yobs.32, yobs.43 )
+  boxplot( yobs., names=c(1.2, 2.4, 3.2, 4.3), main="Shade (-)",
+           col="green")
+  
+  yobs    <- c( "yield1819", "yield1920" ) 
+  yobs.12 <- df_C.f[ if_C.type12, yobs ] ; yobs.24 <- df_C.f[ if_C.type24, yobs ]
+  yobs.32 <- df_C.f[ if_C.type32, yobs ] ; yobs.43 <- df_C.f[ if_C.type43, yobs ]
+  yobs.   <- list( as.matrix(yobs.12), as.matrix(yobs.24),
+                   as.matrix(yobs.32), as.matrix(yobs.43) )
+  boxplot( yobs., names=c(1.2, 2.4, 3.2, 4.3), main="Yield (kg ha-1 y-1)",
+           col="green")
+  
+  yobs    <- "altitude"
+  yobs.12 <- df_C.f[ if_C.type12, yobs ] ; yobs.24 <- df_C.f[ if_C.type24, yobs ]
+  yobs.32 <- df_C.f[ if_C.type32, yobs ] ; yobs.43 <- df_C.f[ if_C.type43, yobs ]
+  yobs.   <- list( yobs.12, yobs.24, yobs.32, yobs.43 )
+  boxplot( yobs., names=c(1.2, 2.4, 3.2, 4.3), main="Altitude (m)",
+           col="green")
+  
+  yobs    <- "slope"
+  yobs.12 <- df_C.f[ if_C.type12, yobs ] ; yobs.24 <- df_C.f[ if_C.type24, yobs ]
+  yobs.32 <- df_C.f[ if_C.type32, yobs ] ; yobs.43 <- df_C.f[ if_C.type43, yobs ]
+  yobs.   <- list( yobs.12, yobs.24, yobs.32, yobs.43 )
+  boxplot( yobs., names=c(1.2, 2.4, 3.2, 4.3), main="Slope (deg)",
+           col="green", ylim=c(0,30) )
+  
+  yobs.a  <- "WP" ; yobs.b  <- "FC"
+  yobs.12 <- df_C.f[ if_C.type12, yobs.b ] - df_C.f[ if_C.type12, yobs.a ]
+  yobs.24 <- df_C.f[ if_C.type24, yobs.b ] - df_C.f[ if_C.type24, yobs.a ]
+  yobs.32 <- df_C.f[ if_C.type32, yobs.b ] - df_C.f[ if_C.type32, yobs.a ]
+  yobs.43 <- df_C.f[ if_C.type43, yobs.b ] - df_C.f[ if_C.type43, yobs.a ]
+  yobs.   <- list( yobs.12, yobs.24, yobs.32, yobs.43 )
+  boxplot( yobs., names=c(1.2, 2.4, 3.2, 4.3), main="Water holding cap. (-)",
+           col="green")
+
+  yobs    <- c( "dens_Erythrina", "dens_Inga" )
+  yobs.12 <- rowSums( df_C.f[ if_C.type12, yobs ] )
+  yobs.24 <- rowSums( df_C.f[ if_C.type24, yobs ] )
+  yobs.32 <- rowSums( df_C.f[ if_C.type32, yobs ] )
+  yobs.43 <- rowSums( df_C.f[ if_C.type43, yobs ] )
+  yobs.   <- list( yobs.12, yobs.24, yobs.32, yobs.43 )
+  boxplot( yobs., names=c(1.2, 2.4, 3.2, 4.3), main="Service trees (ha-1)",
+           col="green", ylim=c(0,500) )
+  
+  yobs    <- c( "dens_Banana", "dens_Avocado" )
+  yobs.12 <- rowSums( df_C.f[ if_C.type12, yobs ] )
+  yobs.24 <- rowSums( df_C.f[ if_C.type24, yobs ] )
+  yobs.32 <- rowSums( df_C.f[ if_C.type32, yobs ] )
+  yobs.43 <- rowSums( df_C.f[ if_C.type43, yobs ] )
+  yobs.   <- list( yobs.12, yobs.24, yobs.32, yobs.43 )
+  boxplot( yobs., names=c(1.2, 2.4, 3.2, 4.3), main="Fruit trees (ha-1)",
+           col="green", ylim=c(0,500) )
+  
+  yobs    <- c( "dens_Grevillea", "dens_Cordia" )
+  yobs.12 <- rowSums( df_C.f[ if_C.type12, yobs ] )
+  yobs.24 <- rowSums( df_C.f[ if_C.type24, yobs ] )
+  yobs.32 <- rowSums( df_C.f[ if_C.type32, yobs ] )
+  yobs.43 <- rowSums( df_C.f[ if_C.type43, yobs ] )
+  yobs.   <- list( yobs.12, yobs.24, yobs.32, yobs.43 )
+  boxplot( yobs., names=c(1.2, 2.4, 3.2, 4.3), main="Timber trees (ha-1)",
+           col="green", ylim=c(0,500) )
+```
+
+```{r FarmObsG, fig.height=5.5, fig.cap="\\label{fig:FarmObsG}Observations for 4 farm types in Guatemala. Farm type codes ranging from 1 = very low to 4 = high: first digit is productivity, second is shade."}
+  par( mfrow=c(3,3), mar=c(4,4,3,1) )
+
+  yobs    <- "Nfert"
+  yobs.13 <- df_G.f[ if_G.type13, yobs ] ; yobs.24 <- df_G.f[ if_G.type24, yobs ]
+  yobs.33 <- df_G.f[ if_G.type33, yobs ] ; yobs.43 <- df_G.f[ if_G.type43, yobs ]
+  yobs.   <- list( yobs.13, yobs.24, yobs.33, yobs.43 )
+  boxplot( yobs., names=c(1.3, 2.4, 3.3, 4.3), main="N-fert. (kg ha-1 y-1)",
+           col="green")
+  
+  yobs    <- "shade"
+  yobs.13 <- df_G.f[ if_G.type13, yobs ] ; yobs.24 <- df_G.f[ if_G.type24, yobs ]
+  yobs.33 <- df_G.f[ if_G.type33, yobs ] ; yobs.43 <- df_G.f[ if_G.type43, yobs ]
+  yobs.   <- list( yobs.13, yobs.24, yobs.33, yobs.43 )
+  boxplot( yobs., names=c(1.3, 2.4, 3.3, 4.3), main="Shade (-)",
+           col="green")
+  
+  yobs    <- c( "yield1819", "yield1920" ) 
+  yobs.13 <- df_G.f[ if_G.type13, yobs ] ; yobs.24 <- df_G.f[ if_G.type24, yobs ]
+  yobs.33 <- df_G.f[ if_G.type33, yobs ] ; yobs.43 <- df_G.f[ if_G.type43, yobs ]
+  yobs.   <- list( as.matrix(yobs.13), as.matrix(yobs.24),
+                   as.matrix(yobs.33), as.matrix(yobs.43) )
+  boxplot( yobs., names=c(1.3, 2.4, 3.3, 4.3), main="Yield (kg ha-1 y-1)",
+           col="green")
+  
+  yobs    <- "altitude"
+  yobs.13 <- df_G.f[ if_G.type13, yobs ] ; yobs.24 <- df_G.f[ if_G.type24, yobs ]
+  yobs.33 <- df_G.f[ if_G.type33, yobs ] ; yobs.43 <- df_G.f[ if_G.type43, yobs ]
+  yobs.   <- list( yobs.13, yobs.24, yobs.33, yobs.43 )
+  boxplot( yobs., names=c(1.3, 2.4, 3.3, 4.3), main="Altitude (m)",
+           col="green")
+  
+  yobs    <- "slope"
+  yobs.13 <- df_G.f[ if_G.type13, yobs ] ; yobs.24 <- df_G.f[ if_G.type24, yobs ]
+  yobs.33 <- df_G.f[ if_G.type33, yobs ] ; yobs.43 <- df_G.f[ if_G.type43, yobs ]
+  yobs.   <- list( yobs.13, yobs.24, yobs.33, yobs.43 )
+  boxplot( yobs., names=c(1.3, 2.4, 3.3, 4.3), main="Slope (deg)",
+           col="green", ylim=c(0,30) )
+  
+  yobs.a  <- "WP" ; yobs.b  <- "FC"
+  yobs.13 <- df_G.f[ if_G.type13, yobs.b ] - df_G.f[ if_G.type13, yobs.a ]
+  yobs.24 <- df_G.f[ if_G.type24, yobs.b ] - df_G.f[ if_G.type24, yobs.a ]
+  yobs.33 <- df_G.f[ if_G.type33, yobs.b ] - df_G.f[ if_G.type33, yobs.a ]
+  yobs.43 <- df_G.f[ if_G.type43, yobs.b ] - df_G.f[ if_G.type43, yobs.a ]
+  yobs.   <- list( yobs.13, yobs.24, yobs.33, yobs.43 )
+  boxplot( yobs., names=c(1.3, 2.4, 3.3, 4.3), main="Water holding cap. (-)",
+           col="green")
+
+  yobs    <- c( "dens_Erythrina", "dens_Inga" )
+  yobs.13 <- rowSums( df_G.f[ if_G.type13, yobs ] )
+  yobs.24 <- rowSums( df_G.f[ if_G.type24, yobs ] )
+  yobs.33 <- rowSums( df_G.f[ if_G.type33, yobs ] )
+  yobs.43 <- rowSums( df_G.f[ if_G.type43, yobs ] )
+  yobs.   <- list( yobs.13, yobs.24, yobs.33, yobs.43 )
+  boxplot( yobs., names=c(1.3, 2.4, 3.3, 4.3), main="Service trees (ha-1)",
+           col="green", ylim=c(0,500) )
+  
+  yobs    <- c( "dens_Banana", "dens_Avocado" )
+  yobs.13 <- rowSums( df_G.f[ if_G.type13, yobs ] )
+  yobs.24 <- rowSums( df_G.f[ if_G.type24, yobs ] )
+  yobs.33 <- rowSums( df_G.f[ if_G.type33, yobs ] )
+  yobs.43 <- rowSums( df_G.f[ if_G.type43, yobs ] )
+  yobs.   <- list( yobs.13, yobs.24, yobs.33, yobs.43 )
+  boxplot( yobs., names=c(1.3, 2.4, 3.3, 4.3), main="Fruit trees (ha-1)",
+           col="green", ylim=c(0,500) )
+  
+  yobs    <- c( "dens_Grevillea", "dens_Cordia" )
+  yobs.13 <- rowSums( df_G.f[ if_G.type13, yobs ] )
+  yobs.24 <- rowSums( df_G.f[ if_G.type24, yobs ] )
+  yobs.33 <- rowSums( df_G.f[ if_G.type33, yobs ] )
+  yobs.43 <- rowSums( df_G.f[ if_G.type43, yobs ] )
+  yobs.   <- list( yobs.13, yobs.24, yobs.33, yobs.43 )
+  boxplot( yobs., names=c(1.3, 2.4, 3.3, 4.3), main="Timber trees (ha-1)",
+           col="green", ylim=c(0,500) )
+```
 
 
 ## CAF2021 structure
@@ -119,7 +617,7 @@ $^*$ Corresponding author: ORCID 0000-0003-4028-3626, VanOijenMarcel@gmail.com
 CAF2021 is a process-based model for the biogeochemistry of coffee agrofrestry systems. We give a short description here. Full details on zenodo ...
 
 ### Similarity with earlier models
-- CAF2007 [@] and CAF2014 [@]
+- CAF2007 [@VanOijen_2010_Coffee] and CAF2014 [@Ovalle-Rivera_2020_Assessing].
 - Biogeochemical processes within soil, coffee plants, shade trees.
 - Inputs: Weather, latitude (to calculate day length), management (calendars for fertilisation, pruning and thinning calendars), parameter values for properties of soil, coffee and trees.
 - State variables: for C, N and water plus DVS.
@@ -132,28 +630,29 @@ CAF2021 is a process-based model for the biogeochemistry of coffee agrofrestry s
   - Tree height + crown area determines degree of overshadowing.
   - HMAX.
   - Options for shade-goal directed pruning and/or thinning.
-- Typical use-case: service tree + fruit tree + timber tree. See Supplementary information.
+- Typical use-case: service tree + fruit tree + timber tree. See Supplementary Information.
 
 
-## CAF2021 BC on data experiments T+M
-- 32 (18T+14M) treatments (in contrast to Ovalle with CAF2014 which was limited to treatments with no more than one tree species et al. 2020: 6+4)
-- New model, new treatments, therefore new BC.
+## CAF2021 Bayesian calibration on data experiments Turrialba and Masatepe
+- CAF2021 is a new model, capable of simulating complex agroforestry systems, and data for many of its parameters are not available. Hence we calibrated the model, using a Bayesian approach to allow uncertainty quantification. Two long-term experiments, in Turrialba (Costa Rica) and Masatepe (Nicaragua) were used for this purpose. The experiments are useful for calibration of a complex model because the measurements comprised a wide range of coffee, tree and soil variables. This reduces the risk of tuning the model to, say, coffee yield production, at the cost of poor simulation of other system processes.
+- 32 treatments were used to calibrate the model: 18 from the Turrialba experiment and 14 from Masatepe. Some of these data had been used for calibration of CAF2014 by @Ovalle-Rivera_2020_Assessing, but that model was limited to treatments with no more than one tree species, so only six of the treatments from Turrialba and four from Masatepe could be used.
 
 
-## CAF2021 application to farms C+G
+## CAF2021 application to farms Costa Rica and Guatemala
 - Input data as mentioned above
 - Parameters for 6 representative tree species
-- Erythrina + Inga: MAP parameter settings
+- Erythrina + Inga: Maximum A Posteriori (MAP) parameter settings
 - Banana + avocado: literature
-- Cordia: literature (including vO et al. 2010a and Edwin 2021)
-- Grevillea: literature (including Edwin 2021)
+- Cordia: literature [@VanOijen_2010_Coffeea; @Castellanos_2010_Estudio]
+- Grevillea: literature [@Castellanos_2010_Estudio]
 - Planting year but stands were mostly mature. We simulated 2005-2020 and mainly focused on results from the last two years.
 - Farm-specific weather, soils and management but no farm-specific parameter values.
-- Only differences C-G: (1) pruned branches removed in G but left on the field in C, (2) HMAX of some tree species differently managed.
+- Only differences between Costa Rica and Guatemala in model set-up : (1) pruned branches removed in Guatemala but left on the field in Costa Rica, (2) The height of some tree species was differently managed.
 
-### Additional sensitivity analysis
-- Parameter SA.
-- Assessment of yield and ES stability after a severe drought.
+### Sensitivity analyses
+- Parameter sensitivity analysis.
+- Shade sensitivity analysis.
+- Assessment of the stability of yield and other ES after a severe drought.
 
   
   
@@ -162,13 +661,165 @@ CAF2021 is a process-based model for the biogeochemistry of coffee agrofrestry s
 # Results
 
 
-## BC on data from Turrialba and Masatepe
+## Bayesian calibration on data from Turrialba and Masatepe
 
 - Results for coffee yields: calibrated model
 - Results for multiple variables
-  - UQ
+  - Uncertainty quantification
 
-## Examples of CAF2021 outputs for different farm types
+
+## CAF2021 outputs for four farm types in Costa Rica and Guatemala
+
+We show results for various ES in Figures \ref{fig:FarmSimC} (Costa Rica) and \ref{fig:FarmSimG} (Guatemala). For coffee, we show both absolute levels of yield as well as inter-annual variability, quantified as the standard deviation of annual bean yield over the the simulated years 2005-2020. Interannual variability is highest for the farm types with the highest absolute productivity, but the two variables are roughly proportional, indicating a constant coefficient of variation.
+
+```{r FarmSimC, fig.height=5.5, fig.cap="\\label{fig:FarmSimC}Simulations for 4 farm types in Costa Rica. Farm type codes ranging from 1 = very low to 4 = high: first digit is productivity, second is shade."}
+  par( mfrow=c(3,4), mar=c(4,3,3,1) )
+
+  ysim    <- "Shade_fb"
+  ysim.12 <- oF1_C[ if_C.type12, ysim ] ; ysim.24 <- oF1_C[ if_C.type24, ysim ]
+  ysim.32 <- oF1_C[ if_C.type32, ysim ] ; ysim.43 <- oF1_C[ if_C.type43, ysim ]
+  ysim.   <- list( ysim.12, ysim.24, ysim.32, ysim.43 )
+  boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="Shade (-)",
+           col="cyan")
+  
+  ysim    <- c( "harvDM_f_ha1819", "harvDM_f_ha1920" )
+  ysim.12 <- oF1_C[ if_C.type12, ysim ] ; ysim.24 <- oF1_C[ if_C.type24, ysim ]
+  ysim.32 <- oF1_C[ if_C.type32, ysim ] ; ysim.43 <- oF1_C[ if_C.type43, ysim ]
+  ysim.   <- list( ysim.12, ysim.24, ysim.32, ysim.43 )
+  boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="Yield (kg ha-1 y-1)",
+           col="cyan")
+  
+  ysim    <- "sd.harvDM_f_hay"
+  ysim.12 <- oF1_C[ if_C.type12, ysim ] ; ysim.24 <- oF1_C[ if_C.type24, ysim ]
+  ysim.32 <- oF1_C[ if_C.type32, ysim ] ; ysim.43 <- oF1_C[ if_C.type43, ysim ]
+  ysim.   <- list( ysim.12, ysim.24, ysim.32, ysim.43 )
+  boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="sd(yield) (kg ha-1 y-1)",
+           col="cyan")
+  
+  ysim    <- "harvDMST_3_hay"
+  ysim.12 <- oF1_C[ if_C.type12, ysim ] ; ysim.24 <- oF1_C[ if_C.type24, ysim ]
+  ysim.32 <- oF1_C[ if_C.type32, ysim ] ; ysim.43 <- oF1_C[ if_C.type43, ysim ]
+  ysim.   <- list( ysim.12, ysim.24, ysim.32, ysim.43 )
+  boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="Timber (kg ha-1 y-1)",
+           col="cyan")
+
+  ysim    <- "harvCPT_f_hay"
+  ysim.12 <- oF1_C[ if_C.type12, ysim ] ; ysim.24 <- oF1_C[ if_C.type24, ysim ]
+  ysim.32 <- oF1_C[ if_C.type32, ysim ] ; ysim.43 <- oF1_C[ if_C.type43, ysim ]
+  ysim.   <- list( ysim.12, ysim.24, ysim.32, ysim.43 )
+  boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="Fruit (kg ha-1 y-1)",
+           col="cyan")
+
+  ysim    <- "D_Csoil"
+  ysim.12 <- oF1_C[ if_C.type12, ysim ] ; ysim.24 <- oF1_C[ if_C.type24, ysim ]
+  ysim.32 <- oF1_C[ if_C.type32, ysim ] ; ysim.43 <- oF1_C[ if_C.type43, ysim ]
+  ysim.   <- list( ysim.12, ysim.24, ysim.32, ysim.43 )
+  boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="D_Csoil (kg ha-1 y-1)",
+           col="cyan")
+  
+  ysim    <- "Crunoff_fb"
+  ysim.12 <- oF1_C[ if_C.type12, ysim ] ; ysim.24 <- oF1_C[ if_C.type24, ysim ]
+  ysim.32 <- oF1_C[ if_C.type32, ysim ] ; ysim.43 <- oF1_C[ if_C.type43, ysim ]
+  ysim.   <- list( ysim.12, ysim.24, ysim.32, ysim.43 )
+  boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="C-runoff (kg ha-1 y-1)",
+           col="cyan")
+
+  ysim    <- "NfixT_fb"
+  ysim.12 <- oF1_C[ if_C.type12, ysim ] ; ysim.24 <- oF1_C[ if_C.type24, ysim ]
+  ysim.32 <- oF1_C[ if_C.type32, ysim ] ; ysim.43 <- oF1_C[ if_C.type43, ysim ]
+  ysim.   <- list( ysim.12, ysim.24, ysim.32, ysim.43 )
+  boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="N-fix. (kg ha-1 y-1)",
+           col="cyan")
+
+  ysim    <- "Nleaching_fb"
+  ysim.12 <- oF1_C[ if_C.type12, ysim ] ; ysim.24 <- oF1_C[ if_C.type24, ysim ]
+  ysim.32 <- oF1_C[ if_C.type32, ysim ] ; ysim.43 <- oF1_C[ if_C.type43, ysim ]
+  ysim.   <- list( ysim.12, ysim.24, ysim.32, ysim.43 )
+  boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="N-leaching (kg ha-1 y-1)",
+           col="cyan")
+  
+  ysim    <- "Nemission_fb"
+  ysim.12 <- oF1_C[ if_C.type12, ysim ] ; ysim.24 <- oF1_C[ if_C.type24, ysim ]
+  ysim.32 <- oF1_C[ if_C.type32, ysim ] ; ysim.43 <- oF1_C[ if_C.type43, ysim ]
+  ysim.   <- list( ysim.12, ysim.24, ysim.32, ysim.43 )
+  boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="N-emission (kg ha-1 y-1)",
+           col="cyan")
+```
+
+```{r FarmSimG, fig.height=5.5, fig.cap="\\label{fig:FarmSimG}Simulations for 4 farm types in Guatemala. Farm type codes ranging from 1 = very low to 4 = high: first digit is productivity, second is shade."}
+  par( mfrow=c(3,4), mar=c(4,3,3,1) )
+
+  ysim    <- "Shade_fb"
+  ysim.13 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
+  ysim.33 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
+  ysim.   <- list( ysim.13, ysim.24, ysim.33, ysim.43 )
+  boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="Shade (-)",
+           col="cyan")
+  
+  ysim    <- c( "harvDM_f_ha1819", "harvDM_f_ha1920" )
+  ysim.13 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
+  ysim.33 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
+  ysim.   <- list( ysim.13, ysim.24, ysim.33, ysim.43 )
+  boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="Yield (kg ha-1 y-1)",
+           col="cyan")
+  
+  ysim    <- "sd.harvDM_f_hay"
+  ysim.13 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
+  ysim.33 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
+  ysim.   <- list( ysim.13, ysim.24, ysim.33, ysim.43 )
+  boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="sd(yield) (kg ha-1 y-1)",
+           col="cyan")
+
+  ysim    <- "harvDMST_3_hay"
+  ysim.13 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
+  ysim.33 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
+  ysim.   <- list( ysim.13, ysim.24, ysim.33, ysim.43 )
+  boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="Timber (kg ha-1 y-1)",
+           col="cyan")
+
+  ysim    <- "harvCPT_f_hay"
+  ysim.13 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
+  ysim.33 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
+  ysim.   <- list( ysim.13, ysim.24, ysim.33, ysim.43 )
+  boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="Fruit (kg ha-1 y-1)",
+           col="cyan")
+
+  ysim    <- "D_Csoil"
+  ysim.13 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
+  ysim.33 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
+  ysim.   <- list( ysim.13, ysim.24, ysim.33, ysim.43 )
+  boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="D_Csoil (kg ha-1 y-1)",
+           col="cyan", ylim=c(-3000,3000))
+  
+  ysim    <- "Crunoff_fb"
+  ysim.13 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
+  ysim.33 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
+  ysim.   <- list( ysim.13, ysim.24, ysim.33, ysim.43 )
+  boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="C-runoff (kg ha-1 y-1)",
+           col="cyan", ylim=c(0,1000))
+
+  ysim    <- "NfixT_fb"
+  ysim.12 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
+  ysim.32 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
+  ysim.   <- list( ysim.12, ysim.24, ysim.32, ysim.43 )
+  boxplot( ysim., names=c(1.2, 2.4, 3.2, 4.3), main="N-fix. (kg ha-1 y-1)",
+           col="cyan")
+
+  ysim    <- "Nleaching_fb"
+  ysim.13 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
+  ysim.33 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
+  ysim.   <- list( ysim.13, ysim.24, ysim.33, ysim.43 )
+  boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="N-leaching (kg ha-1 y-1)",
+           col="cyan", ylim=c(0,200))
+  
+  ysim    <- "Nemission_fb"
+  ysim.13 <- oF1_G[ if_G.type13, ysim ] ; ysim.24 <- oF1_G[ if_G.type24, ysim ]
+  ysim.33 <- oF1_G[ if_G.type33, ysim ] ; ysim.43 <- oF1_G[ if_G.type43, ysim ]
+  ysim.   <- list( ysim.13, ysim.24, ysim.33, ysim.43 )
+  boxplot( ysim., names=c(1.3, 2.4, 3.3, 4.3), main="N-emission (kg ha-1 y-1)",
+           col="cyan")
+```
+
 
 
 
@@ -177,23 +828,24 @@ CAF2021 is a process-based model for the biogeochemistry of coffee agrofrestry s
 # Discussion
 
 
-## BC
+## Bayesian calibration
 
-- One (not 2 or 32) calibration for all treatments in Turrialba and  Masatepe simultaneously. Good posterior simulations despite having no treatment- or country-specific parameters. Coffee parameters universal, tree species assumed to have the same properties in both experiments. Only experiment-specific parameters: very small number of soil parameters. Any spatial variation within the experiments also ignored.
+- We carried out a single calibration, for all treatments in Turrialba and  Masatepe simultaneously, to derive generically applicable parameter estimates. Coffee parameters universal, tree species assumed to have the same properties in both experiments. Only experiment-specific parameters: very small number of soil parameters. Any spatial variation within the experiments also ignored.
+- Posterior simulations of model output variables were generally close to measurements, despite disallowing any treatment- or country-specific parameters. 
 - Turrialba experimental cross-validation: How well do yields in Block 1 predict those in Blocks 2 and 3?
-- UQ: only for parameters, not for model structure.
+- Note that our procedure quantifies the uncertainty associated with parameter values; model structural uncertainty is not assessed by the calibration.
 
 
 ## Farm simulations
-- Quality MAP (from T+M!) simulations to farms C+G, i.e. out-of-sample simulations.
-  - Parameter uncertainty not changed, but many additional sources of uncertainty, i.e. so parameter uncertainty only provides lower bound. The additional uncertainties are mainly farm input data uncertainties:
-    - Upscaling from top 26 to full soil column. Ignoring variation between farms.
-    - Start year 2005.
-    - Representativeness of the six tree species. Compare with number of tree species reported for each farm.
-    - Ignoring within-month weather variability. Note that WorldClim Turrialba weather data gave similarly good simulations as on-site weather station.
-- The model seems to be able to simulate a wide range of CAF systems. Despite much information being unavailable, and no farm-level model calibration, still good simulation of coffee yields in Costa Rica.
-- However, ES-estimation only preliminary.
-- Need for multivariate BC data, not just yield.
+- Quality of model simulations using the MAP parameter vector (derived by calibration on data from Turrialba and Masatepe) for farms in Costa Rica and Guatemala, i.e. out-of-sample simulations.
+- All parameter values for coffee and tree morphology and physiology were identical for all 168 farms (89 in Costa Rica and 79 in Guatemala). Any genetic differences between coffee- and tree-varieties were ignored. The only tree-parameter differences were the farm-specific initial densities of shade trees. Soil composition and water holding capacity did differ between farms based on the SEACAF farm inventory.
+- Parameter uncertainty not changed, but many additional sources of uncertainty, i.e. so parameter uncertainty only provides lower bound. The additional uncertainties are mainly farm input data uncertainties:
+  - Upscaling from top 26 cm. to full soil column. Ignoring variation between farms.
+  - Start year 2005.
+  - Representativeness of the six tree species. Compare with number of tree species reported for each farm.
+  - Ignoring within-month weather variability. Note that WorldClim Turrialba weather data gave similarly good simulations as on-site weather station.
+- The model seems to be able to simulate a wide range of CAF systems. Despite much information being unavailable, and no farm-level model calibration, still good simulation of coffee yields in Costa Rica, but high-productivity Guatemalan farms were not simulated accurately.
+- ES-estimation only preliminarym due to the limited database for model calibration and testing: there is a beed for multivariate calibration data, not just yield, and from locations differing in growing conditions.
 
 
 ## Farms ES-analysis: Differences between Costa Rica and Guatemala
@@ -215,7 +867,7 @@ CAF2021 is a process-based model for the biogeochemistry of coffee agrofrestry s
 - Shade can be managed in different ways. Farms can have low shade by (1) low planting density of trees, (2) high frequency and intensity of thinning, (3) high frequency and intensity of pruning. Compare these.
 
 
-## Sensitivity analysis
+## Sensitivity analyses
 - Shade trees may produce useful products and lead to increased carbon-sequestration, but they also have an impact on coffee growth. The presence of shade trees lowers temperature as well as the availability to coffee plants of light, water, and nitrogen. This competition for resources reduces coffee yields but bean quality may be enhanced. Shade may also have beneficial effects by supporting biodiversity and constraining some pests and diseases, but these regulating ES were not studied here and are not simulated by CAF2021.
 - Key question: Does shade lead to buffering against extreme climatic conditions? Is there a trade-off between average yield level and stability of yield? 
   - Answers can only be preliminary: no long-term reliable annual ecosystem services data, apart from the time series of coffee yield in the Turrialba and Masatepe experiments.
@@ -242,7 +894,7 @@ CAF2021 is a process-based model for the biogeochemistry of coffee agrofrestry s
   - Calibrated simulations using the MAP parameter value: mean, RMSE 
 
 ## Examples of output from CAF2021
-- Take a three-three system from C or G: Service-fruit-timber
+- Take a three-three system from Costa Rica and one from Guatemala: Service-fruit-timber
 - Figure with multiple time series
   - At(1:3)
   - Ac(1:6)
@@ -252,6 +904,22 @@ CAF2021 is a process-based model for the biogeochemistry of coffee agrofrestry s
   - Timber production
   - C-sequestration
   - N-leaching
+  
+```{r exC, fig.height=3, fig.cap="\\label{fig:exC}Example simulation: Costa Rica farm 89."}
+  plot_output( outF, vars= c( paste0("At(",1:3,")"),
+                              "harvDM_f_hay",
+                              paste0("h_t(",1:3,")"),
+                              "Shade_f",
+                              paste0("CAtree_t(",1:3,")")) )
+```
+
+```{r exG, fig.height=3, fig.cap="\\label{fig:exG}Example simulation: Guatemala farm 79."}
+  plot_output( outF, vars= c( paste0("At(",1:3,")"),
+                              "harvDM_f_hay",
+                              paste0("h_t(",1:3,")"),
+                              "Shade_f",
+                              paste0("CAtree_t(",1:3,")")) )
+```
 
 
 

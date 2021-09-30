@@ -6,10 +6,7 @@
   dyn.load( MODEL_dll )
   source('initialisation/initialise_CAF2021_general.R')
   
-# 2. CREATE EMPTY MATRIX y FOR MODEL OUTPUT ##
-  y <- matrix(0,NDAYS,NOUT)
-  
-# 3. COMMON SETTINGS for COSTA RICA & GUATEMALA ##
+# 2. COMMON SETTINGS for COSTA RICA & GUATEMALA ##
   year_start   <- as.integer(2005)
   doy_start    <- as.integer(214)
   NDAYS        <- as.integer(15*365)
@@ -30,6 +27,9 @@
   calendar_prunC[ 1:12, 1 ] <- 2009:2020
   calendar_prunC[ 1:12, 2 ] <- 59
   calendar_prunC[ 1:12, 3 ] <-  0.1
+  
+# 3. CREATE EMPTY MATRIX y FOR MODEL OUTPUT ##
+  y <- matrix(0,NDAYS,NOUT)
   
 # 4. FUNCTIONS FOR FARM- OR COUNTRY-SPECIFIC SETTINGS ##
   Tinventory_CG <- function( densE=0, densI=0, densB=0, densA=0,
@@ -167,4 +167,3 @@
       ct[3,1:nC,1] <- yC ; ct[3,1:nC,2] <- dC ; ct[3,1:nC,3] <- fC }
     return( ct )
   }
-  

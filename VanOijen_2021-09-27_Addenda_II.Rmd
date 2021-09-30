@@ -127,7 +127,7 @@ This means that all parameter values for coffee and tree morphology and physiolo
 
 # UQ
 
-```{r}
+```{r, eval=T}
   file_RData <- paste0( "BC/BC_RESULTS_Turrialba-Masatepe/BC_2021-09-17_6e4/",
                         "BC_Turrialba_Masatepe_06_45.RData" )
   load( file_RData )
@@ -373,11 +373,8 @@ This means that all parameter values for coffee and tree morphology and physiolo
 ```
 
 ```{r}
-  dir.init <- "initialisation/CG/"
-```
-
-```{r}
-  source('initialisation/initialise_CAF2021_general.R')
+  # source('initialisation/initialise_CAF2021_general.R')
+  source('initialisation/set_CAF2021_CG.R')
 
   Tnames_C <- Tdens_C <- NULL
   for(fi in 1:n_C.f) {
@@ -411,11 +408,6 @@ This means that all parameter values for coffee and tree morphology and physiolo
                 col.names=c("Costa Rica",paste0("T",1:3),paste0("T",1:3)) )
   knitr::kable( cbind( 1:n_G.f, Tnames_G, Tdens_G),
                 col.names=c("Guatemala" ,paste0("T",1:3),paste0("T",1:3)) )
-```
-
-```{r}
-  dir.init <- "initialisation/CG/"
-  dir.par  <- "parameters/"
 ```
 
 ```{r}
@@ -1421,8 +1413,8 @@ Fig. \ref{fig:XX15} shows observations and simulations of multiple variables, al
            col="green", ylim=c(0,500) )
 ```
 
-```{r XX31sim, fig.height=7.5, fig.cap="\\label{fig:XX31sim}Simulations for 4 farm types in Costa Rica. Farm type codes ranging from 1 = very low to 4 = high: first digit is productivity, second is shade."}
-  par( mfrow=c(3,3), mar=c(4,4,3,1) )
+```{r XX31sim, fig.height=5.5, fig.cap="\\label{fig:XX31sim}Simulations for 4 farm types in Costa Rica. Farm type codes ranging from 1 = very low to 4 = high: first digit is productivity, second is shade."}
+  par( mfrow=c(3,4), mar=c(4,4,3,1) )
 
   ysim    <- "Shade_fb"
   ysim.12 <- oF1_C[ if_C.type12, ysim ] ; ysim.24 <- oF1_C[ if_C.type24, ysim ]
