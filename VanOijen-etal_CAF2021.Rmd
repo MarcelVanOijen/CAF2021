@@ -888,12 +888,12 @@ We show results for various ES in Figures \ref{fig:FarmSimC} (Costa Rica) and \r
 
 # Supplementary information {-}
 
-## Data from long-term experiments used in Bayesian calibration
+## Data from long-term experiments used in Bayesian calibration {-}
 - In one table:
   - For all different measured variables: n, mean, standard deviation
   - Calibrated simulations using the MAP parameter value: mean, RMSE 
 
-## Examples of output from CAF2021
+## Examples of output from CAF2021 {-}
 - Take a three-three system from Costa Rica and one from Guatemala: Service-fruit-timber
 - Figure with multiple time series
   - At(1:3)
