@@ -8,7 +8,7 @@ author:
 - Rolando Cerda$^{4}$
 - Stefania Cerretelli$^{2}$
 - Erick López$^{5}$
-- Elias de Melo Virginio Filho$^{4}$
+- Elias de Melo$^{4}$
 - Alejandra Ospina$^{4}$
 date: '`r Sys.Date()`'
 output:

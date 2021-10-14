@@ -89,10 +89,11 @@ yUnits[[5]]  <- c( "(kgC m-2)", "(kgN m-2)" )
 yNames[[6]]  <- c( paste0("CST_t(",1:nt,")"), paste0("SAT_t(",1:nt,")") )
 yUnits[[6]]  <- c( rep("(kgC m-2)",nt)      , rep("(m2 m-2)",nt) )
 
-yNames[[7]]  <- c( "Nfert_f"   , "NfixT_f"    , "NsenprunT_f",
-                   "Nsenprun_f", "Nleaching_f", "Nemission_f",
-                   "Nrunoff_f" , "Nupt_f"     , "NuptT_f" )
-yUnits[[7]]  <- rep("(kgN m-2 d-1)",9)
+yNames[[7]]  <- c( "Nmineralisation_f", "Nfert_f"    , "NfixT_f",
+                   "NsenprunT_f"      , "Nsenprun_f" ,
+                   "Nleaching_f"      , "Nemission_f",
+                   "Nrunoff_f"        , "Nupt_f"     , "NuptT_f" )
+yUnits[[7]]  <- rep("(kgN m-2 d-1)",10)
                   
 yNames[[8]]  <- c( paste0("CLITT(",1:nc,")")    , paste0("NLITT(",1:nc,")"),
                    paste0("harvCST_t(",1:nt,")"), paste0("harvNST_t(",1:nt,")") )

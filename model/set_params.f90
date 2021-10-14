@@ -2,8 +2,7 @@ Subroutine set_params(pa)
 
 use declare_parameters
 implicit none
-! As long as the total number of parameters stays below 190, the next line need not be changed
-real pa(190)
+real pa(200)
 
 !! COFFEE
 ! Initial constants
@@ -93,7 +92,7 @@ CO2A       = pa( 73)
 !! LOCATION
 LAT        = pa( 74)
 
-!! MULTIPLIERS FOR SENSITIVITY ANALYSIS
+!! MULTIPLIERS AND ADDITIONS FOR SENSITIVITY ANALYSIS
 IOMULT     = pa( 75)
 NFERTMULT  = pa( 76)
 RAINMULT   = pa( 77)

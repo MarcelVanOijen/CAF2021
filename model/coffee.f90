@@ -11,7 +11,6 @@ implicit none
 real :: gCW(nc),gCP(nc),gCL(nc),gNL(nc),gCR(nc),gLAI(nc),gSINKP(nc)
 real :: dCL(nc),dCR(nc),dLAI(nc),dNL(nc),Nupt(nc)
 real :: prunLAI(nc),prunNL(nc),prunCL(nc),prunCW(nc),harvCP(nc),harvNP(nc)
-! real :: dSENSIT(nc),dDVS(nc),rDVS(nc),DayFl,DayHarv(nc)
 real :: dDVS(nc),rDVS(nc),DayFl,DayHarv(nc)
 real :: RAINdoy, SINKPMAXnew(nc)
 
@@ -83,7 +82,6 @@ Contains
   CCass  = LUECO2*0.001*(12./44.) * PARint * fTran
   gSHsource = CCass * YG
   ! Sink strength
-!  gSINKP   = (1 - exp(-KSINKPPAR * PARMA)) * DayFl * SINKPMAXnew * fTran * fNgrowth 
   gSINKP   = (1 - exp(-KSINKPPAR * PARMA)) * DayFl * SINKPMAXnew
   SINKSUM  = SINKL + SINKW + SINKR * (2-fTran) + SINKP * min(1.,2*DVS)
   FCL      = SINKL                 / SINKSUM
@@ -141,11 +139,9 @@ Contains
   prunNL  = prunFRC * NL  / DELT
   prunCL  = prunFRC * CL  / DELT
   prunCW  = prunFRC * CW  / DELT  
-!  where (DVS>=1.)
   where (DayHarv==1.)
     harvCP = CP / DELT
     harvNP = harvCP * NCP  
-!    adjCP  = 0.
   elsewhere
     harvCP = 0.
     harvNP = 0.

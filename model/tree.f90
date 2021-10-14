@@ -116,8 +116,6 @@ Contains
                    f3lo * SAT_t(1:ntlow) / max(1., sum(SAT_t))
   SAT_t(3)       = f3up * min(1., SAT_t(3)) + &
                    f3lo * SAT_t(3)       / max(1., sum(SAT_t))
-!  SAT_t(1:ntlow) = SAT_t(1:ntlow) / max(1., sum(SAT_t(1:ntlow))) ! sum(SAT_t(1:2)) <= 1
-!  SAT_t(3)       = min(1., SAT_t(3))                             ! SAT_t(3)) <= 1
 
   end Subroutine morphology  
 
