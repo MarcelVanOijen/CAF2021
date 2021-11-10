@@ -32,15 +32,17 @@ bibliography: [Avocado.bib,Banana.bib,SEACAF.bib]
 
 ```{r}
   # fileTM     <- "BC_Turrialba_Masatepe_09_08.RData"
-  filesTM <- file.info(list.files(pattern="^BC_Turrialba_Masatepe.*\\.RData$"))
-  filesTM <- filesTM[ with(filesTM,order(as.POSIXct(mtime))), ]
-  fileTM  <- tail( rownames(filesTM[1]), 1 )
+  fileTM  <- "BC/BC_RESULTS_Turrialba-Masatepe/BC_2021-09-17_6e4/BC_Turrialba_Masatepe_06_45.RData"
+  # filesTM <- file.info(list.files(pattern="^BC_Turrialba_Masatepe.*\\.RData$"))
+  # filesTM <- filesTM[ with(filesTM,order(as.POSIXct(mtime))), ]
+  # fileTM  <- tail( rownames(filesTM[1]), 1 )
   load( fileTM )
   
   # fileTM_MAP <- "CAF2021_parMAP_09_08.rds"
-  filesTM_MAP <- file.info(list.files(pattern="^CAF2021_parMAP.*\\.rds$"))
-  filesTM_MAP <- filesTM_MAP[ with(filesTM_MAP,order(as.POSIXct(mtime))), ]
-  fileTM_MAP  <- tail( rownames(filesTM_MAP[1]), 1 )
+  fileTM_MAP <- "BC/BC_RESULTS_Turrialba-Masatepe/BC_2021-09-17_6e4/CAF2021_parMAP_06_45.rds"
+  # filesTM_MAP <- file.info(list.files(pattern="^CAF2021_parMAP.*\\.rds$"))
+  # filesTM_MAP <- filesTM_MAP[ with(filesTM_MAP,order(as.POSIXct(mtime))), ]
+  # fileTM_MAP  <- tail( rownames(filesTM_MAP[1]), 1 )
   parMAP      <- readRDS( fileTM_MAP )
 
   # THE FOLLOWING LINES LOAD THE MAP FROM AN OLDER MODEL VERSION WITH
