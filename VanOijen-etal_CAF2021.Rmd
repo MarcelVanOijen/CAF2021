@@ -544,375 +544,6 @@ $^*$ Corresponding author: ORCID 0000-0003-4028-3626, VanOijenMarcel@gmail.com
                               "Fruit","dC","Crun","Nfix","Nlch","Nem")
 ```
 
-
-
-\clearpage
-
-# NOTES & IDEAS
-
-- Use EF in text? Do not compare with EF from mineral soils, but use EF = Nemission / (Nfert + Nmineralisation).
-- Lucie: information that Nfert stimulates soil Cseq, as CAF2021 shows as well. She has a reference to a meta-analysis for cover crops with/without tillage.
-- Lucie has data on mineralisation that do not explain the high yields at low Nfert in Guatemala P4S3, because she found low mineralisation rate in that farm type. [And she also found lower mineralisation in GTM than in CRI?]
-- Show whether obs. and sim. show the same response to temperature?
-- Maybe calculate coffee yield variability not for the whole time series 2005-2020 but skip the first 5 years when the coffee does not yet produce much.
-- C-stocks in trees: data will come soon!
-- Model does not simulate pests and diseases.
-- Model is also weak in phenology, especially the assumption that flowering all happens on a single day. And the model does not simulate any damaging effect from extremely high rainfall events after a prolonged dry period.
-- Rolando B. Cerda from CATIE mentioned Agroforesta [https://www.cirad.fr/en/worldwide/platforms-in-partnership/agroforesta], a platform that may support the CAF2021 training? 
-- See presentations SEACAF 2021-10-11 to 13 on https://drive.google.com/drive/folders/1jGC_9sS71R2V6USdZpApy5YrHA2sOT9e 
-- Because of lack of farm data (on other variables than coffee yield), comparison with the literature, for example for biogeochemistry, is important. 
-- https://link.springer.com/chapter/10.1007%2F978-3-030-67448-9_8. [@Korschens_2021_LongTerm] Lucie: "review of long term experiments worldwide, and it shows a positive effect of fertilisation on Corg"
-- https://www.cambridge.org/core/journals/journal-of-agricultural-science/article/effects-of-cropping-sequence-fertilization-and-straw-management-on-the-yield-stability-of-winter-wheat-19862017-in-the-broadbalk-wheat-experiment-rothamsted-uk/D34A0F1092487F93E2B33EA15CE67059. Lucie: "some examples in Rothamsted (broadbalk) since they have different mineral fertilizer regimes."
-- Other papers, probably on link Nfert-Cseq, emailed by Lucie: [@Virto_2012_Carbon; @Saffih-Hdadi_2008_Modeling; @Poeplau_2015_Carbon; @Mary_2020_Soil; @Li_2020_Residue; @Autret_2016_Alternative; @Triberti_2016_Longterm].
-- Some more browsing produced the following papers for coffee agroforestry biogeochemistry: [@Sauvadet_2019_Shade; @Iii_2017_Effects; @Lopez-Rodriguez__Contribution].
-- Lucie: for integration of SEACAF results, perhaps work similarly as [@Blaser_2018_Climatesmart]
-- Edwin mentioned the following two references on climate change in Guatemala: [@Espinoza_2019_Tendencias; @Insivumeh_2019_Proyecciones].
-- For runoff, maybe use: [@Arciniega-Esparza_2021_Remote; @Gomez-Delgado_2011_Modelling]
-
-
-
-\clearpage
-
-# Introduction
-
-```{r Maps_CG, out.width="400px", fig.align="center", fig.cap="\\label{Maps_CG}Altitude maps for Costa Rica and Guatemala with locations of the coffee farms."}
-  knitr::include_graphics("images/Maps_CG.png")
-```
-
-The goal of sustainable agriculture puts multiple demands on coffee agroforestry systems. The productivity of coffee plants and shade trees must be high while minimising negative impacts on the environment. We refer to each form of productivity or environmental impact as an *ecosystem service* (ES). An important issue in the evaluation of coffee agroforestry systems is that many ES are difficult to quantify, which hampers the choice of shade tree species and farm management. This is a particular problem in Central America, where mountainous topography with young volcanic soils leads to strong spatial variation in weather patterns and soil fertility. Together with a wide variation in management choices, this has led to strong variability in productivity. It likely also caused strong variation in environmental ES, but not many data are available for these.\
-    Here we used a combination of data analysis and process-based modelling to quantify ES at 89 coffee agroforestry farms in Costa Rica and 79 in Guatemala (Fig. \ref{fig:Maps_CG}). The same farms were studied previously by @Haggar_2021_Shade who found that coffee productivity has no simple relationship with shade. Low-productivity farms tended to have either low or high shade. The measurements at these farms did not include ES related to carbon and nitrogen biogeochemistry. Here we estimated these ES using the new coffee agroforestry model CAF2021, which we introduce in this paper. The model differs from its predecessors CAF2007 [@VanOijen_2010_Coffee] and CAF2014 [@Rahn_2018_Exploring; @Ovalle-Rivera_2020_Assessing] mainly in that it allows for more complex agroforestry systems with up to three different shade tree species. The model simulates a wide range of ES: coffee yield, timber and fruit production by shade trees, soil loss by erosion, soil carbon sequestration, nitrogen fixation, loss of nitrogen in atmospheric emission and leaching. Other process-based models of coffee agroforestry have been developed in recent years [@Charbonnier_2017_Increased; @Vezy_2019_DynACof]. These models focus on plant physiology, and they simulate agronomy and biogeochemistry in less detail than CAF2021, which makes them less suitable to assess a wide range of ES. Details of the structure of CAF2021 are provided in the Materials and Methods section and online.\
-    To calibrate CAF2021, we used multivariate data from 32 different treatments applied in long-term field experiments in Costa Rica and Nicaragua. A subset of these data (10 treatments) was used earlier in the Bayesian calibration of CAF2014, a model that could not simulate experimental treatments with multiple shade tree species. Bayesian calibration has become a common method for model calibration and uncertainty quantification of process-based models [@VanOijen_2020_Bayesian]. Here we use the same method of Bayesian model calibration by means of Markov chain Monte Carlo sampling that was used by @Ovalle-Rivera_2020_Assessing.\
-    The goals of this study are threefold:
-
-- 1: Identify the drivers of observed differences in productivity between farms and farm types.
-- 2: Assess the implications of aiming for any particular farm type for biogeochemistry-related ecosystem services and sustainability.
-- 3: Assess CAF2021 as a tool for studying coffee agroforestry systems.
-
-
-
-\clearpage
-
-# Materials and methods
-
-
-## Data from experiments at Turrialba and Masatepe
-
-For model calibration, we used data from two long-term coffee agroforestry experiments at Turrialba in Costa Rica and Masatepe in Nicaragua. The experiments differed in various respects: choice of coffee cultivar and shade tree species, shade management, fertiliser types and amounts, weather conditions and soil properties. In both experiments, four fertilisation regimes were combined with different choices of one or two shade tree species, selected from *Erythrina poeppigiana*, *Terminalia amazonia*, *Chloroleucon eurycyclum*, *Samanea saman*, *Tabebuia rosea*, *Simarouba glauca*, *Inga laurina*. Both experiments provided data on coffee, shade trees and soil, as reported by @Haggar_2011_Coffee, @Noponen_2012_Carbon, @Noponen_2013_Sink, @Sepulveda_2016_Efecto and @Ovalle-Rivera_2020_Assessing. We refer to these publications and to Supplementary Information (S2) for further details.
-
-
-## Data from farms Costa Rica and Guatemala
-
-```{r}
-  knitr::kable( table_CG.env, caption="Farms in Costa Rica and Guatemala: Environmental conditions." )
-
-  knitr::kable( table_CG.man, caption="Farms in Costa Rica and Guatemala: Management and coffee yield." )
-```
-
-- 89 farms in Costa Rica, 79 farms in Guatemala with sufficient information to run CAF20212.
-- Farm locations are shown in Fig. \ref{fig:Maps_CG}. We summarise farm properties using the typology of @Haggar_2021_Shade.
-- TABLE *Farms: environmental conditions*. Table with 8 rows (2 countries x 4 farm types) and as columns: n, averages of altitude, slope, temperature, rain, soil C, soil N, water-holding capacity.
-  - Weather data (5 variables, only two summarised in the table): WorldClim plus country-wide 2019 anomalies for rain and temperature. We extended WorldClim weather data files by two years (2019 and 2020). For 2019, we used the country-average monthly anomalies from weather stations of Icafe, IMN and Anacafe. For 2020, we used the WorldClim climatic average.
-  - Water-holding capcity was derived from soil texture information (bulk density, silt, clay) using a pedotransfer function tested for tropical soils [@Tomasella_2003_Comparison; @Tomasella_2004_Pedotransfer]. We further assume that bottom soil layers contain SOM equivalent to 20% of top-soil SOM.
-  
-- TABLE *Farms: management and yield*. Lay-out as previous table but showing N-fertilisation rate, densities of 6 representative tree species, total shade, coffee yield.
-  - We capped reported farm fertilisation at 500 kg N ha-1 y-1.
-  - We used farm-specific tree density data, but simplified to six 'type'-species.
-  - Tree pruning is once per year (doy 140) and follows each farm's shade-target, except for Erythrina which follows a prescribed twice-yearly 90% pruning regime.
-  - Tree thinning is only applied to Cordia and follows a prescribed calendar.
-  - Pruned leaves and branches are removed from the field in Guatemala (except for Erythrina), but remain on the field in Costa Rica.
-  - We calculated dry coffee bean yield (the CAF2021 variable) as reported fresh yield divided by 3. The Nicaragua experiment had shown that the "factor de conversión de café cereza a café oro" was variable with an average of 7.74 [@Sepulveda_2016_Efecto]. A more common value may be 6. and if we further assume that 'oro' is half the value of dry yield, we arrive at the conversion factor of 3.
-  
-
-## CAF2021 structure
-
-CAF2021 is a process-based model for the biogeochemistry of coffee agrofrestry systems. We give a short description here. Full details on zenodo ...
-
-### Similarity with earlier models
-- CAF2007 [@VanOijen_2010_Coffee] and CAF2014 [@Ovalle-Rivera_2020_Assessing].
-- Biogeochemical processes within soil, coffee plants, shade trees.
-- Inputs: Weather, latitude (to calculate day length), management (calendars for fertilisation, pruning and thinning calendars), parameter values for properties of soil, coffee and trees.
-- State variables: for C, N and water plus DVS.
-- Outputs: state variables and process rates including ecosystem (dis)services such as productivity of coffee and trees, N-leaching, N-emission, erosion in the form of soil organic matter loss (C & N) in run-off, C-sequestration in the soil.
-- Daily time step, FORTRAN but called from R.
-
-### New model structure
-  - 3 tree species. 2 of the 3 spp. have non-overlapping crown areas. Shaded area calculation using arrays.
-  - Fruit production.
-  - Tree height + crown area determines degree of overshadowing.
-  - HMAX.
-  - Options for shade-goal directed pruning and/or thinning.
-- Typical use-case: service tree + fruit tree + timber tree. See Supplementary Information.
-
-Some time series for selected output variables from CAF2021 are shown in the Supplementary Information.
-
-
-## Bayesian calibration of CAF2021
-We calibrated the parameters of CAF2021 using a Bayesian approach to allow for uncertainty quantification. Data from the two long-term experiments in Turrialba and Masatepe that we described above were used for this purpose. These measurements were suitable for calibration of a complex model such as CAF2021 because they comprised a wide range of coffee, tree and soil variables. This reduced the risk of tuning the model to one variable such as coffee yield production at the cost of poor simulation of other system processes.\
-    For the calibration of CAF2021, we used data from 18 Turrialba treatments and 14 Nicaragua treatments. Some of these data had been used for Bayesian calibration of the predecessor model CAF2014 by @Ovalle-Rivera_2020_Assessing, but that model was limited to treatments with no more than one tree species, so only six of the treatments from Turrialba and four from Masatepe could be used by them. In other respects we followed their implementation of Bayesian calibration.\
-    We carried out a single multi-site, multi-treatment Bayesian calibration of CAF2021, using Markov Chain Monte Carlo sampling (MCMC) with a chain length of 60,000. At each iteration of the chain the model was run for all 32 treatments, so a total of 1.92 million runs was carried out during the MCMC. The calibration provided samples from the posterior distribution for 65 of the model's parameters:
-
-- *universal* parameters (n=45) that were not allowed to vary between the treatments,
-- *site-specific* parameters (n=5) that were allowed to differ between Turrialba and Masatepe,
-- *tree-species specific* parameters (n=15).
-
-The universal parameters included all 23 calibrated coffee parameters, thus ignoring any differences between cultivars in Turrialba and Masatepe. Also treated as universal were 15 tree parameters and 7 soil parameters. The motivation for treating so many parameters as universal (which in reality may show variation) was to maintain a degree of universal applicability of the model, and to constrain the need for site- or tree-specific information in future applications of the model. The 5 site-specific parameters were soil parameters governing nitrogen leaching, organic matter composition and turnover. Making these parameters site-specific allowed simulation of the greater capacity of soils in Masatepe to stabilise organic matter and minerals [@Noponen_2012_Carbon]. The 15 tree-species specific parameters were predominantly parameters for carbon allocation and morphology. All parameters were a priori assigned wide beta probability distributions, reflecting large prior uncertainty about plausible parameter values for the largely new model CAF2021.
-
-
-## CAF2021 application to farms Costa Rica and Guatemala
-- Input data as mentioned above
-- Parameters for 6 representative tree species
-- Erythrina + Inga: Maximum A Posteriori (MAP) parameter settings
-- Banana + avocado: literature
-- Cordia: literature [@VanOijen_2010_Coffeea; @Castellanos_2010_Estudio]
-- Grevillea: literature [@Castellanos_2010_Estudio]
-- Planting year but stands were mostly mature. We simulated 2005-2020 and mainly focused on results from the last two years.
-- Farm-specific weather, soils and management but no farm-specific parameter values.
-- Only differences between Costa Rica and Guatemala in model set-up : (1) pruned branches removed in Guatemala but left on the field in Costa Rica, (2) The height of some tree species was differently managed.
-
-### Sensitivity analyses
-- Parameter sensitivity analysis.
-- Shade sensitivity analysis.
-- Assessment of the stability of yield and other ES after a severe drought.
-
-
-  
-\clearpage
-
-# Results
-
-
-## Bayesian calibration on data from experiments in Turrialba and Masatepe
-
-```{r, fig.height=3, fig.cap="\\label{fig:yObsSimTM}Observed vs. simulated coffee yields. Left: calibration experiments in Turrialba (n=18) and Masatepe (n=14). Middle: farms in Costa Rica (n=89). Right: farms in Guatemala (n=79)."}
-  par( mfrow=c(1,3), mar=c(2,2,2,2), pty="s" )
-
-  sim_T.min  <- min( y_T[,"Y.sim"] ) ; sim_M.min  <- min( y_M[,"Y.sim"] ) 
-  sim_T.max  <- max( y_T[,"Y.sim"] ) ; sim_M.max  <- max( y_M[,"Y.sim"] )
-  obs_T.max  <- max( y_T[,"Y.obs"] ) ; obs_M.max  <- max( y_M[,"Y.obs"] )
-  simobs.max <- max( sim_T.max, sim_M.max, obs_T.max, obs_M.max )
-  plot( y_T[,"Y.sim"], y_T[,"Y.obs"],
-        main="Coffee (kg DM ha-1 y-1)\nTurrialba, Masatepe",
-        xlab="Sim. yield (kg ha-1)", ylab="",
-        xlim=c(0,simobs.max), ylim=c(0,simobs.max),
-        cex.main=1, type="n", asp=1 )
-  text( y_T[,"Y.sim"], y_T[,"Y.obs"], labels=y_T[,"Site"], cex=0.8 )
-  y_T.lm <- lm(y_T[,"Y.obs"]~y_T[,"Y.sim"])
-  r2_T   <- signif( summary(y_T.lm)$r.squared, 2 )
-  clip( sim_T.min,sim_T.max,0,simobs.max )
-  abline( y_T.lm$coefficients[1], y_T.lm$coefficients[2] )
-  
-  points( y_M[,"Y.sim"], y_M[,"Y.obs"],
-          cex.main=1, type="n", asp=1 )
-  text( y_M[,"Y.sim"], y_M[,"Y.obs"], labels=y_M[,"Site"], cex=0.8, col="red" )
-  y_M.lm <- lm(y_M[,"Y.obs"]~y_M[,"Y.sim"])
-  r2_M   <- signif( summary(y_M.lm)$r.squared, 2 )
-  clip  ( sim_M.min,sim_M.max,0,simobs.max )
-  abline( y_M.lm$coefficients[1], y_M.lm$coefficients[2], col="red" )
-  
-  # abline(0,1,lty=2)
-  clip  ( -1e9,1e9,-1e9,1e9 )
-  legend( "bottomright",
-          legend=c(paste("T: r2= ",as.character(r2_T)),
-                   paste("M: r2= ",as.character(r2_M)) ),
-          col=c("black","red"), lty=c(1,1), cex=0.7 )
-
-  sim_C <- c( oF1_C[,"harvDM_f_ha1819"], oF1_C[,"harvDM_f_ha1920"] )
-  sim_G <- c( oF1_G[,"harvDM_f_ha1819"], oF1_G[,"harvDM_f_ha1920"] )
-  obs_C <- c( df_C.f$yield1819         , df_C.f$yield1920          )
-  obs_G <- c( df_G.f$yield1819         , df_G.f$yield1920          )
-  
-  sim_C.min  <- min( sim_C )          ; sim_G.min  <- min( sim_G ) 
-  sim_C.max  <- max( sim_C )          ; sim_G.max  <- max( sim_G )
-  obs_C.max  <- max( obs_C, na.rm=T ) ; obs_G.max  <- max( obs_G, na.rm=T )
-  simobs_C.max <- max( sim_C.max, obs_C.max )
-  simobs_G.max <- max( sim_G.max, obs_G.max )
-  
-  plot( sim_C, obs_C,
-        main="Coffee (kg DM ha-1 y-1)\nCosta Rica",
-        xlab="Sim. yield (kg ha-1)", ylab="",
-        xlim=c(0,simobs_C.max), ylim=c(0,simobs_C.max),
-        cex.main=1, asp=1 )
-  y_C.lm <- lm( obs_C ~ sim_C )
-  r2_C   <- signif( summary(y_C.lm)$r.squared, 2 )
-  clip( sim_C.min,sim_C.max,0,simobs_C.max )
-  abline( y_C.lm$coefficients[1], y_C.lm$coefficients[2] )
-  # abline(0,1,lty=2)
-  clip  ( -1e9,1e9,-1e9,1e9 )
-  legend( "topleft",
-          legend=paste("C: r2= ",as.character(r2_C)),
-          lty=1, cex=0.7 )
-
-  plot( sim_G, obs_G,
-        main="Coffee (kg DM ha-1 y-1)\nGuatemala",
-        xlab="Sim. yield (kg ha-1)", ylab="",
-        xlim=c(0,simobs_G.max), ylim=c(0,simobs_G.max),
-        cex.main=1, asp=1 )
-  y_G.lm <- lm( obs_G ~ sim_G )
-  r2_G   <- signif( summary(y_G.lm)$r.squared, 2 )
-  clip( sim_G.min,sim_G.max,0,simobs_G.max )
-  abline( y_G.lm$coefficients[1], y_G.lm$coefficients[2] )
-  # abline(0,1,lty=2)
-  clip  ( -1e9,1e9,-1e9,1e9 )
-  legend( "topleft",
-          legend=paste("G: r2= ",as.character(r2_G)),
-          lty=1, cex=0.7 )
-```
-
-Bayesian calibration generates a sample from the joint posterior probability distribution for all calibrated parameters. The MAP is the '*Maximum A Posteriori*' parameter vector, i.e. the model parameterisation that achieves the highest value for the product of prior (beta distributions for parameters) and likelihood (fit to data) [@Ovalle-Rivera_2020_Assessing; @VanOijen_2020_Bayesian]. The left panel of Fig. \ref{fig:yObsSimTM} shows observed coffee productivity in the 32 treatments against MAP-simulated yield. The yield values are averages over the years 2002-2017 for Turrialba and 2004-2013 for Masatepe. The model run with the MAP parameter vector accounts for 34% of observed variation in yield across the Turrialba treatments, and 66% of variation at Masatepe. Other measured variables were simulated with similar accuracy (see Supplementary Information).
-
-Posterior parameter uncertainty was small, with an average coefficient of variation of 5%. However, each model output depends on multiple parameters, and output uncertainty for individual variables (coffee yield, soil carbon sequestration, nitrogen leaching) was 30-36%. These are predictive uncertainties for model application to a single set of conditions and do not apply to trends across treatments.
-
-
-## CAF2021 outputs for farm types in Costa Rica and Guatemala
-
-```{r table.sim}  
-  knitr::kable( tableCG.sim, caption="Farms in Costa Rica and Guatemala: Simulations of shade (-), yield of coffee, timber and fruit (kg DM ha-1 y-1), soil carbon change and carbon-runoff (kg C ha-1 y-1), N-fixation, leaching and emission (kg N ha-1 y-1)." )
-```
-
-We show results for various ES in Figures \ref{fig:FarmSimNfert} (against level of N-fertilisation) and \ref{fig:FarmSimShade} (against shade level).
-
-```{r}
-  plotimpacts_CG <- function( FC=oF1_C, FG=oF1_G, xvar="Nfert",
-                              yvar="y.sim", yvar2=NULL,
-                              title="Yield", legpos="topleft", ... ){
-    xC <- df_C.f[,xvar] ; xG <- df_G.f[,xvar]
-    yC <- FC    [,yvar] ; yG <- FG    [,yvar]
-    nC <- dim(FC)[1]    ; nG <- dim(FG)[1]
-    if(!is.null(yvar2)) {
-      yC <- sapply(1:nC, function(i){
-        mean( FC[i,"harvDM_f_ha1819"], FC[i,"harvDM_f_ha1920"], na.rm=T ) } )
-      yG <- sapply(1:nG, function(i){
-        mean( FC[i,"harvDM_f_ha1819"], FC[i,"harvDM_f_ha1920"], na.rm=T ) } ) 
-    }
-    plot  ( xC, yC,
-      ylab="",
-      main=title,
-      pch=1,
-      xlim=c( min(xC,xG        ), max(xC,xG        )),
-      ylim=c( min(yC,yG,na.rm=T), max(yC,yG,na.rm=T)), ... )
-    points( xG, yG, pch=20, col="red"  )
-    
-    y.lm_C <- lm( yC ~ xC ) ; y.lm_G <- lm( yG ~ xG )
-    r2_C   <- round( summary(y.lm_C)$r.squared, 2 )
-    r2_G   <- round( summary(y.lm_G)$r.squared, 2 )
-    abline( y.lm_C$coefficients[1], y.lm_C$coefficients[2], col="black" )
-    abline( y.lm_G$coefficients[1], y.lm_G$coefficients[2], col="red" )
-    legend( legpos, title="r2",
-            legend=c( paste("C:",as.character(r2_C)),
-                      paste("G:",as.character(r2_G)) ),
-            col=c("black","red"), lty=c(1), cex=0.5, bg="transparent" )
-  }
-```
-
-```{r FarmSimNfert, fig.height=3.5, fig.cap="\\label{fig:FarmSimNfert}Simulations of ecosystem services at farms in Costa Rica (black) and Guatemala (red). All plots are against N-fertilisation level (kg N ha-1 y-1)."}
-  par( mfrow=c(2,4), mar=c(2,2,2,1), mgp=c(2,1,0) )
-
-  yv <- "harvDM_f_ha1819" ; yv2 <- "harvDM_f_ha1920"
-  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="Nfert", yvar=yv, yvar2=yv2,
-                   xlab="", xaxt="n", legpos="bottomright", title="Yield" )
-  yv <- "harvDMST_3_hay"
-  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="Nfert", yvar=yv,
-                   xlab="", xaxt="n", legpos="topright"   , title="Timber" )
-  yv <- "harvCPT_f_hay"
-  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="Nfert", yvar=yv,
-                   xlab="", xaxt="n", legpos="topleft"    , title="Fruit" )
-  yv <- "D_Csoil"
-  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="Nfert", yvar=yv,
-                   xlab="", xaxt="n", legpos="bottomright",title="C-change" )
-  yv <- "Crunoff_fb"
-  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="Nfert", yvar=yv,
-                   xlab="N-fert."   , legpos="topright"   , title="C-runoff" )
-  yv <- "NfixT_fb"
-  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="Nfert", yvar=yv,
-                   xlab="N-fert."   , legpos="topleft"    , title="N-fixation" )
-  yv <- "Nleaching_fb"
-  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="Nfert", yvar=yv,
-                   xlab="N-fert."   , legpos="topleft"    , title="N-leaching" )
-  yv <- "Nemission_fb"
-  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="Nfert", yvar=yv,
-                   xlab="N-fert."   , legpos="topleft"    , title="N-emission" )
-```
-
-```{r FarmSimShade, fig.height=3.5, fig.cap="\\label{fig:FarmSimShade}Simulations of ecosystem services at farms in Costa Rica (black) and Guatemala (red). All plots are against level of shading (-)."}
-  par( mfrow=c(2,4), mar=c(2,2,2,1), mgp=c(2,1,0) )
-
-  yv <- "harvDM_f_ha1819" ; yv2 <- "harvDM_f_ha1920"
-  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="shade", yvar=yv, yvar2=yv2,
-                   xlab="", xaxt="n", legpos="topleft", title="Yield" )
-  yv <- "harvDMST_3_hay"
-  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="shade", yvar=yv,
-                   xlab="", xaxt="n", legpos="topleft"    , title="Timber" )
-  yv <- "harvCPT_f_hay"
-  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="shade", yvar=yv,
-                   xlab="", xaxt="n", legpos="topright"   , title="Fruit" )
-  yv <- "D_Csoil"
-  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="shade", yvar=yv,
-                   xlab="", xaxt="n", legpos="bottomright",title="C-change" )
-  yv <- "Crunoff_fb"
-  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="shade", yvar=yv,
-                   xlab="N-fert."   , legpos="topleft"    , title="C-runoff" )
-  yv <- "NfixT_fb"
-  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="shade", yvar=yv,
-                   xlab="N-fert."   , legpos="topleft"    , title="N-fixation" )
-  yv <- "Nleaching_fb"
-  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="shade", yvar=yv,
-                   xlab="N-fert."   , legpos="topright"   , title="N-leaching" )
-  yv <- "Nemission_fb"
-  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="shade", yvar=yv,
-                   xlab="N-fert."   , legpos="topright"   , title="N-emission" )
-```
-
-
-
-\clearpage
-
-# Discussion
-
-
-## Bayesian calibration
-
-We carried out a single Bayesian calibration - for all treatments in Turrialba and  Masatepe simultaneously - to derive parameter estimates. All coffee parameters were treated as being universally applicable, and common tree species were also assumed to have the same properties in both experiments. The only experiment- (and thus country-) specific parameters in the calibration were five soil properties. Variation within experiments was ignored altogether. In reality, there may have been genetic and environmental variation in and between the experiments. Disregarding such plot and block effects may have hampered model fit but ensured that the model was not overfit to noise. Moreover, the calibration was simultaneously to measurements of multiple variables, so model outputs were not optimised for any single variable such as coffee yield. Despite all these restrictions, the calibrated model accounted for 34% of observed coffee yield variation between treatments at Turrialba and 66% at Masatepe. This compares favourably with linear regression of yield on fertilisation level in the experiments for which the $r^2$ was only 23%.
-
-These results suggest that the model can be a useful tool for analysing differences in system performance between different environmental conditions. However, the results do not suggest that the model is a good tool for forecasting the benefits of agroforestry at any individual site, as posterior output uncertainty (driven by posterior parameter uncertainty) was high at 30-36%. 
-
-
-## Farm simulations
-- Quality of model simulations using the MAP parameter vector (derived by calibration on data from Turrialba and Masatepe) for farms in Costa Rica and Guatemala, i.e. out-of-sample simulations.
-- All parameter values for coffee and tree morphology and physiology were identical for all 168 farms (89 in Costa Rica and 79 in Guatemala). Any genetic differences between coffee- and tree-varieties were ignored. The only tree-parameter differences were the farm-specific initial densities of shade trees. Soil composition and water holding capacity did differ between farms based on the SEACAF farm inventory.
-- Parameter uncertainty not changed, but many additional sources of uncertainty, i.e. so parameter uncertainty only provides lower bound. The additional uncertainties are mainly farm input data uncertainties:
-  - Upscaling from top 26 cm. to full soil column. Ignoring variation between farms.
-  - Start year 2005.
-  - Representativeness of the six tree species. Compare with number of tree species reported for each farm.
-  - Ignoring within-month weather variability. Note that WorldClim Turrialba weather data gave similarly good simulations as on-site weather station.
-- The model seems to be able to simulate a wide range of CAF systems. Despite much information being unavailable, and no farm-level model calibration, still good simulation of coffee yields in Costa Rica, but high-productivity Guatemalan farms were not simulated accurately.
-- ES-estimation only preliminarym due to the limited database for model calibration and testing: there is a beed for multivariate calibration data, not just yield, and from locations differing in growing conditions.
-
-
-## Farms ES-analysis: Differences between Costa Rica and Guatemala
-- ES & ecosystem disservices 
-- Lower Nfert in C leading to lower N-leaching. However, it also led to lower plant growth and thus lower carbon-addition to the system.
-- Simulated yield differences correlated with Nfert in both countries. This was consistent with observations in Costa Rica. However in Guatemala there were observations of high yield on farms with minimal Nfert, and the model cannot explain that. These poorer results for Guatemala remain to be explained. Three sources of error:
-  - Model structure
-  - Model input data
-  - Model parameterisation
-- Banana productivity persisted better in Costa Rica than in Guatemala.
-  - Banana is used more in Costa Rica than in Guatemala.
-  - Service trees in Costa Rica are mainly Erythrina which is pollarded frequently and intensively, thus allowing light to reach any fruit trees. The Inga in Guatemala are allowed to intercept more light.
-  - Banana is mainly used in young coffee agroforestry stands
-
-
-## Farms ES-analysis: Differences between farm types
-- The model points to inevitable trade-offs between productivity of coffee, productivity of trees and environmental ecosystem services.
-- The data suggest that some Guatemala farms manage to keep yields high despite low fertilisation. The modelling suggests that this can only be the case if either soils in Guatemala (which are not high in N) release their N more readily - which woould lead to fast loss of soil fertility - than Costa Rican soils or if local coffee and shade tree genotypes have higher NUE. Contribution from N-fixation seems small.
-- The farms differed in the amount of shade that was realised. Shade has multiple impacts on soil and  microclimate, and therefore affects not only coffee productivity but all ES. We studied the impacts of shade on the performance of the different systems in a separate model sensitivity analysis, to be discussed next.
-- Shade can be managed in different ways. Farms can have low shade by (1) low planting density of trees, (2) high frequency and intensity of thinning, (3) high frequency and intensity of pruning. Compare these.
-
-
-## Sensitivity analyses
-- Shade trees may produce useful products and lead to increased carbon-sequestration, but they also have an impact on coffee growth. The presence of shade trees lowers temperature as well as the availability to coffee plants of light, water, and nitrogen. This competition for resources reduces coffee yields but bean quality may be enhanced. Shade may also have beneficial effects by supporting biodiversity and constraining some pests and diseases, but these regulating ES were not studied here and are not simulated by CAF2021.
-- Key question: Does shade lead to buffering against extreme climatic conditions? Is there a trade-off between average yield level and stability of yield? 
-  - Answers can only be preliminary: no long-term reliable annual ecosystem services data, apart from the time series of coffee yield in the Turrialba and Masatepe experiments.
-
 ```{r}
   doF2_C   <- oF2_C - oF1_C ; doF2_C[ oF1_C==0 ] <- NA
   doF2_C.m <- doF2_C.s <- rep(NA,8)
@@ -1097,7 +728,316 @@ These results suggest that the model can be a useful tool for analysing differen
   doF4_G.s[8] <- sd   ( doF4_G[,yv][ipos] ) / abs( mean( oF1_G[,yv][ipos] ) )
 ```
 
-```{r dES, fig.height=6, out.width="100%", fig.cap="\\label{fig:dES}Changes in ecosystem services when fertilisation or shading is halved. 1:3 = yield of coffee, timber, fruit. 4:5 = loss of soil carbon overall and due to runoff. 6 = N-fixation. 7:8 = loss of N in leaching and emission. All changes are normalised to the country average."}
+
+
+\clearpage
+
+# NOTES & IDEAS
+
+- Use EF in text? Do not compare with EF from mineral soils, but use EF = Nemission / (Nfert + Nmineralisation).
+- Lucie: information that Nfert stimulates soil Cseq, as CAF2021 shows as well. She has a reference to a meta-analysis for cover crops with/without tillage.
+- Lucie has data on mineralisation that do not explain the high yields at low Nfert in Guatemala P4S3, because she found low mineralisation rate in that farm type. [And she also found lower mineralisation in GTM than in CRI?]
+- Show whether obs. and sim. show the same response to temperature?
+- Maybe calculate coffee yield variability not for the whole time series 2005-2020 but skip the first 5 years when the coffee does not yet produce much.
+- C-stocks in trees: data will come soon!
+- Model does not simulate pests and diseases.
+- Model is also weak in phenology, especially the assumption that flowering all happens on a single day. And the model does not simulate any damaging effect from extremely high rainfall events after a prolonged dry period.
+- Rolando B. Cerda from CATIE mentioned Agroforesta [https://www.cirad.fr/en/worldwide/platforms-in-partnership/agroforesta], a platform that may support the CAF2021 training? 
+- See presentations SEACAF 2021-10-11 to 13 on https://drive.google.com/drive/folders/1jGC_9sS71R2V6USdZpApy5YrHA2sOT9e 
+- Because of lack of farm data (on other variables than coffee yield), comparison with the literature, for example for biogeochemistry, is important. 
+- https://link.springer.com/chapter/10.1007%2F978-3-030-67448-9_8. [@Korschens_2021_LongTerm] Lucie: "review of long term experiments worldwide, and it shows a positive effect of fertilisation on Corg"
+- https://www.cambridge.org/core/journals/journal-of-agricultural-science/article/effects-of-cropping-sequence-fertilization-and-straw-management-on-the-yield-stability-of-winter-wheat-19862017-in-the-broadbalk-wheat-experiment-rothamsted-uk/D34A0F1092487F93E2B33EA15CE67059. Lucie: "some examples in Rothamsted (broadbalk) since they have different mineral fertilizer regimes."
+- Other papers, probably on link Nfert-Cseq, emailed by Lucie: [@Virto_2012_Carbon; @Saffih-Hdadi_2008_Modeling; @Poeplau_2015_Carbon; @Mary_2020_Soil; @Li_2020_Residue; @Autret_2016_Alternative; @Triberti_2016_Longterm].
+- Some more browsing produced the following papers for coffee agroforestry biogeochemistry: [@Sauvadet_2019_Shade; @Iii_2017_Effects; @Lopez-Rodriguez__Contribution].
+- Lucie: for integration of SEACAF results, perhaps work similarly as [@Blaser_2018_Climatesmart]
+- Edwin mentioned the following two references on climate change in Guatemala: [@Espinoza_2019_Tendencias; @Insivumeh_2019_Proyecciones].
+- For runoff, maybe use: [@Arciniega-Esparza_2021_Remote; @Gomez-Delgado_2011_Modelling]
+
+
+
+\clearpage
+
+# Introduction
+
+```{r Maps_CG, out.width="400px", fig.align="center", fig.cap="\\label{Maps_CG}Altitude maps for Costa Rica and Guatemala with locations of the coffee farms."}
+  knitr::include_graphics("images/Maps_CG.png")
+```
+
+The goal of sustainable agriculture puts multiple demands on coffee agroforestry systems. The productivity of coffee plants and shade trees must be high while minimising negative impacts on the environment. We refer to each form of productivity or environmental impact as an *ecosystem service* (ES). An important issue in the evaluation of coffee agroforestry systems is that many ES are difficult to quantify, which hampers the choice of shade tree species and farm management. This is a particular problem in Central America, where mountainous topography with young volcanic soils leads to strong spatial variation in weather patterns and soil fertility. Together with a wide variation in management choices, this has led to strong variability in productivity. It likely also caused strong variation in environmental ES, but not many data are available for these.\
+    Here we used a combination of data analysis and process-based modelling to quantify ES at 89 coffee agroforestry farms in Costa Rica and 79 in Guatemala (Fig. \ref{fig:Maps_CG}). The same farms were studied previously by @Haggar_2021_Shade who found that coffee productivity has no simple relationship with shade. Low-productivity farms tended to have either low or high shade. The measurements at these farms did not include ES related to carbon and nitrogen biogeochemistry. Here we estimated these ES using the new coffee agroforestry model CAF2021, which we introduce in this paper. The model differs from its predecessors CAF2007 [@VanOijen_2010_Coffee] and CAF2014 [@Rahn_2018_Exploring; @Ovalle-Rivera_2020_Assessing] mainly in that it allows for more complex agroforestry systems with up to three different shade tree species. The model simulates a wide range of ES: coffee yield, timber and fruit production by shade trees, soil loss by erosion, soil carbon sequestration, nitrogen fixation, loss of nitrogen in atmospheric emission and leaching. Other process-based models of coffee agroforestry have been developed in recent years [@Charbonnier_2017_Increased; @Vezy_2019_DynACof]. These models focus on plant physiology, and they simulate agronomy and biogeochemistry in less detail than CAF2021, which makes them less suitable to assess a wide range of ES. Details of the structure of CAF2021 are provided in the Materials and Methods section and online.\
+    To calibrate CAF2021, we used multivariate data from 32 different treatments applied in long-term field experiments in Costa Rica and Nicaragua. A subset of these data (10 treatments) was used earlier in the Bayesian calibration of CAF2014, a model that could not simulate experimental treatments with multiple shade tree species. Bayesian calibration has become a common method for model calibration and uncertainty quantification of process-based models [@VanOijen_2020_Bayesian]. Here we use the same method of Bayesian model calibration by means of Markov chain Monte Carlo sampling that was used by @Ovalle-Rivera_2020_Assessing.\
+    The goals of this study are threefold:
+
+- 1: Identify the drivers of observed differences in productivity between farms and farm types.
+- 2: Assess the implications of aiming for any particular farm type for biogeochemistry-related ecosystem services and sustainability.
+- 3: Assess CAF2021 as a tool for studying coffee agroforestry systems.
+
+
+
+\clearpage
+
+# Materials and methods
+
+
+## Data from experiments at Turrialba and Masatepe
+For model calibration, we used data from two long-term coffee agroforestry experiments at Turrialba in Costa Rica and Masatepe in Nicaragua. The experiments differed in various respects: choice of coffee cultivar and shade tree species, shade management, fertiliser types and amounts, weather conditions and soil properties. In both experiments, four fertilisation regimes were combined with different choices of one or two shade tree species, selected from *Erythrina poeppigiana*, *Terminalia amazonia*, *Chloroleucon eurycyclum*, *Samanea saman*, *Tabebuia rosea*, *Simarouba glauca*, *Inga laurina*. Both experiments provided data on coffee, shade trees and soil, as reported by @Haggar_2011_Coffee, @Noponen_2012_Carbon, @Noponen_2013_Sink, @Sepulveda_2016_Efecto and @Ovalle-Rivera_2020_Assessing. We refer to these publications and to the Supplementary Information (S2) for further details.
+
+
+## Data from farms in Costa Rica and Guatemala
+We used data from 89 coffee agroforestry farms in Costa Rica and from 79 farms in Guatemala. The data had been collected within project SEACAF [@Haggar_2021_Shade]. In the present study, these data are used for independent testing of CAF2021 without any farm-specific model calibration. The farm locations are shown in Fig. \ref{fig:Maps_CG}. 
+
+```{r}
+  knitr::kable( table_CG.env, caption="Environmental conditions at four farm types in Costa Rica and Guatemala. First digit of farm type indicates productivity, the second shading level, both from 1=low to 4=high. Variables: altitude (m), slope (degrees), rain (mm y-1), temperature (degrees C), soil water holding capcity (-), soil carbon and nitrogen (kg m-2). Within brackets: standard deviation across farms." )
+```
+
+The table above summarises the environmental conditions at the farms grouped according to the typology of @Haggar_2021_Shade. The table includes average temperature and precipitation, but for running CAF2021 full time series of daily weather from 2005 to 2020 were derived from the WorldClim database with additional information for recent years from weather stations run by Icafe and IMN in Costa Rica and by Anacafe in Guatemala. Soil water holding capacity was derived from soil texture information (bulk density, silt, clay) using a pedotransfer function tested for tropical soils [@Tomasella_2003_Comparison; @Tomasella_2004_Pedotransfer]. To calculate soil stocks of carbon and nitrogen from the SEACAF database values, we assumed that soil layers below 28 cm depth contained soil organic matter equivalent to 20% of the farm's top soil.
+
+```{r}
+  knitr::kable( table_CG.man, caption="Management and coffee yield at four farm types in Costa Rica and Guatemala. Variables: N-fertilisation rate (kg ha-1 y-1), density of shade trees (ha-1; E=Erythrina, I=Inga, B=Banana, A=Avocado, G=Grevillea, C=Cordia), overall shade level (-) and coffee yield 2018-2020 (kg DM ha-1 y-1). Within brackets: standard deviation." )
+```
+
+The second table with farm properties shows management choices for fertilisation and shading, and coffee yield. Some farms had reported implausibly high fertilisation rates which we capped at 500 kg N ha-1 y-1. We allocated farm-specific tree density data to the six type-species listed in the table. Tree pruning and thinning regimes were not reported but had to be specified for running CAF2021. Trees were assumed to be pruned once per year, targeting each farm's reported shade level, except for Erythrina which in Central America tends to follow a prescribed twice-yearly 90% pruning regime. Tree thinning was only applied to Cordia following a prescribed calendar. Pruned leaves and branches were removed from the field in Guatemala while remaining on the field in Costa Rica. Dry coffee bean yield was calculated as one third of reported fresh yield [@Sepulveda_2016_Efecto].
+
+
+## CAF2021 structure
+CAF2021 is a process-based model for the biogeochemistry of coffee agroforestry systems. We give a short description here, focusing on how the model differs from its predecessor models. The model and a user guide are freely available online (https...).
+
+CAF2021 simulates a coffee agroforestry system where the coffee plants are shaded by up to 3 tree species. The model allows for two lower-layer tree species, but no more than one upper-layer tree species. In typical use of the model the upper layer would be occupied by timber trees and the lower layer by service and fruit trees. The simulated tree species can have different initial planting densities and thinning regimes. The model simulates the biogeochemistry - flows of carbon, nitrogen and water - of the soil-coffee-trees system. State variables are pools of carbon, nitrogen and water as well as coffee developmental stage. Height and crown area growth are simulated for each of the tree species. The model uses a daily time step and therefore requires daily weather data (light, temperature, rain, wind, humidity) as input. Further required inputs are atmospheric [$CO_2$], soil properties (slope, water retention parameters, initial contents of C and N) and management calendars for fertilisation, pruning and thinning. The pruning and thinning calendars can be specified separately for each plant species.
+
+The outputs from the model are time series with daily values of state variables and processes including ecosystem services such as productivity of coffee and trees, N-leaching, N-emission, erosion in the form of soil organic matter loss (C & N) in run-off, C-sequestration in the soil.
+
+The model is implemented in FORTRAN but called from a user-interface written in R.
+
+CAF2021 differs from its predecessor models in the following respects:
+
+- There can be three tree species present rather than just one. All tree variables are implemented as dynamic arrays whose length equals the number of tree species. Users with experience in programming can therefore relatively easily extend the number of shade tree species beyond three.
+- Fruit production can be simulated.
+- Lower-layer trees do not overlap, so the number of ground-cover conditions (vertical vegetation profiles) in any simulated field is at most six: coffee shaded by (1) no trees, (2) service trees, (3) fruit trees, (4) timber trees, (5) service + timber trees, (6) fruit + timber trees. The model keeps track of the fractional ground area covered by each of these six categories (see Supplementary Information S1 for an example).
+- The relative heights, LAI values and light extinction coefficients of the two tree species within ground cover categories (5) and (6) determine their access to light.
+- Morphology is simulated using allometric equations but for each species a genetic or management-induced maximum height can be specified.
+- Shade management can be fully specified using calendars for dates and intensities of pruning and thinning. Alternatively, it may be simulated as being goal-directed toward a specified shade level.
+
+Time series for selected output variables from CAF2021 are shown in the Supplementary Information (S1 and S3).
+
+
+## Bayesian calibration of CAF2021
+We calibrated the parameters of CAF2021 using a Bayesian approach to allow for uncertainty quantification. Data from the two long-term experiments in Turrialba and Masatepe that we described above were used for this purpose. These measurements were suitable for calibration of a complex model such as CAF2021 because they comprised a wide range of coffee, tree and soil variables. This reduced the risk of tuning the model to one variable such as coffee yield production at the cost of poor simulation of other system processes.\
+    For the calibration of CAF2021, we used data from 18 Turrialba treatments and 14 Nicaragua treatments. Some of these data had been used for Bayesian calibration of the predecessor model CAF2014 by @Ovalle-Rivera_2020_Assessing, but that model was limited to treatments with no more than one tree species, so only six of the treatments from Turrialba and four from Masatepe could be used by them. In other respects we followed their implementation of Bayesian calibration.\
+    We carried out a single multi-site, multi-treatment Bayesian calibration of CAF2021, using Markov Chain Monte Carlo sampling (MCMC) with a chain length of 60,000. At each iteration of the chain the model was run for all 32 treatments, so a total of 1.92 million runs was carried out during the MCMC. The calibration provided samples from the posterior distribution for 65 of the model's parameters:
+
+- *universal* parameters (n=45) that were not allowed to vary between the treatments,
+- *site-specific* parameters (n=5) that were allowed to differ between Turrialba and Masatepe,
+- *tree-species specific* parameters (n=15).
+
+The universal parameters included all 23 calibrated coffee parameters, thus ignoring any differences between cultivars in Turrialba and Masatepe. Also treated as universal were 15 tree parameters and 7 soil parameters. The motivation for treating so many parameters as universal (which in reality may show variation) was to maintain a degree of universal applicability of the model, and to constrain the need for site- or tree-specific information in future applications of the model. The 5 site-specific parameters were soil parameters governing nitrogen leaching, organic matter composition and turnover. Making these parameters site-specific allowed simulation of the greater capacity of soils in Masatepe to stabilise organic matter and minerals [@Noponen_2012_Carbon]. The 15 tree-species specific parameters were predominantly parameters for carbon allocation and morphology. All parameters were a priori assigned wide beta probability distributions, reflecting large prior uncertainty about plausible parameter values for the largely new model CAF2021.
+
+
+## CAF2021 application to farms Costa Rica and Guatemala
+We used CAF2021 to simulate measured and unmeasured ecosystem services for each of the 168 farms in Costa Rica and Guatemala, using their environmental conditions (Table 1) and management choices (Table 2) as model inputs. All parameters for coffee and for Erythrina and Inga trees were left at the values determined by Bayesian calibration using data from the long-term experiments at Turrialba and Masatepe. Parameter values for tree species not present in the experiments were taken from the literature on banana [@Damour_2012_Simulation; @ChavesC._2009_Modeling; @VanDenBergh_2012_Climate; @Mustaffa_2012_Banana; @MartinezAcosta_2011_Dinamica; @Schaffer_1999_Atmospheric], avocado [@CIRAD_2019_Country; @Elzebroek_2008_Guide; @Monzon-Martinez_2019_Perfil], Grevillea [@Castellanos_2010_Estudio] and Cordia [@VanOijen_2010_Coffeea; @Castellanos_2010_Estudio].\
+    Planting dates were not recorded in the farms database but coffee stands were generally mature and we simulated the years 2005-2020 for each farm. The only differences between Costa Rica and Guatemala in our model set-up were conform local practice: (1) pruned branches were removed in Guatemala but left on the field in Costa Rica, (2) the height of some tree species was differently managed.
+
+
+### Analysis of sensitivity to management
+Besides the regular simulations for each farm, which used the observed and reported local conditions, we made two additional model runs to test farm sensitivity to management choices. In the first of these, we halved each farm's fertilisation rate. In the second, we halved tree densities and shade target.  
+
+
+  
+\clearpage
+
+# Results
+
+
+## Bayesian calibration on data from experiments in Turrialba and Masatepe
+
+```{r, fig.height=3, fig.cap="\\label{fig:yObsSimTM}Observed vs. simulated coffee yields. Left: calibration experiments in Turrialba (n=18) and Masatepe (n=14). Middle: farms in Costa Rica (n=89). Right: farms in Guatemala (n=79)."}
+  par( mfrow=c(1,3), mar=c(2,2,2,2), pty="s" )
+
+  sim_T.min  <- min( y_T[,"Y.sim"] ) ; sim_M.min  <- min( y_M[,"Y.sim"] ) 
+  sim_T.max  <- max( y_T[,"Y.sim"] ) ; sim_M.max  <- max( y_M[,"Y.sim"] )
+  obs_T.max  <- max( y_T[,"Y.obs"] ) ; obs_M.max  <- max( y_M[,"Y.obs"] )
+  simobs.max <- max( sim_T.max, sim_M.max, obs_T.max, obs_M.max )
+  plot( y_T[,"Y.sim"], y_T[,"Y.obs"],
+        main="Coffee (kg DM ha-1 y-1)\nTurrialba, Masatepe",
+        xlab="Sim. yield (kg ha-1)", ylab="",
+        xlim=c(0,simobs.max), ylim=c(0,simobs.max),
+        cex.main=1, type="n", asp=1 )
+  text( y_T[,"Y.sim"], y_T[,"Y.obs"], labels=y_T[,"Site"], cex=0.8 )
+  y_T.lm <- lm(y_T[,"Y.obs"]~y_T[,"Y.sim"])
+  r2_T   <- signif( summary(y_T.lm)$r.squared, 2 )
+  clip( sim_T.min,sim_T.max,0,simobs.max )
+  abline( y_T.lm$coefficients[1], y_T.lm$coefficients[2] )
+  
+  points( y_M[,"Y.sim"], y_M[,"Y.obs"],
+          cex.main=1, type="n", asp=1 )
+  text( y_M[,"Y.sim"], y_M[,"Y.obs"], labels=y_M[,"Site"], cex=0.8, col="red" )
+  y_M.lm <- lm(y_M[,"Y.obs"]~y_M[,"Y.sim"])
+  r2_M   <- signif( summary(y_M.lm)$r.squared, 2 )
+  clip  ( sim_M.min,sim_M.max,0,simobs.max )
+  abline( y_M.lm$coefficients[1], y_M.lm$coefficients[2], col="red" )
+  
+  # abline(0,1,lty=2)
+  clip  ( -1e9,1e9,-1e9,1e9 )
+  legend( "bottomright",
+          legend=c(paste("T: r2= ",as.character(r2_T)),
+                   paste("M: r2= ",as.character(r2_M)) ),
+          col=c("black","red"), lty=c(1,1), cex=0.7 )
+
+  sim_C <- c( oF1_C[,"harvDM_f_ha1819"], oF1_C[,"harvDM_f_ha1920"] )
+  sim_G <- c( oF1_G[,"harvDM_f_ha1819"], oF1_G[,"harvDM_f_ha1920"] )
+  obs_C <- c( df_C.f$yield1819         , df_C.f$yield1920          )
+  obs_G <- c( df_G.f$yield1819         , df_G.f$yield1920          )
+  
+  sim_C.min  <- min( sim_C )          ; sim_G.min  <- min( sim_G ) 
+  sim_C.max  <- max( sim_C )          ; sim_G.max  <- max( sim_G )
+  obs_C.max  <- max( obs_C, na.rm=T ) ; obs_G.max  <- max( obs_G, na.rm=T )
+  simobs_C.max <- max( sim_C.max, obs_C.max )
+  simobs_G.max <- max( sim_G.max, obs_G.max )
+  
+  plot( sim_C, obs_C,
+        main="Coffee (kg DM ha-1 y-1)\nCosta Rica",
+        xlab="Sim. yield (kg ha-1)", ylab="",
+        xlim=c(0,simobs_C.max), ylim=c(0,simobs_C.max),
+        cex.main=1, asp=1 )
+  y_C.lm <- lm( obs_C ~ sim_C )
+  r2_C   <- signif( summary(y_C.lm)$r.squared, 2 )
+  clip( sim_C.min,sim_C.max,0,simobs_C.max )
+  abline( y_C.lm$coefficients[1], y_C.lm$coefficients[2] )
+  # abline(0,1,lty=2)
+  clip  ( -1e9,1e9,-1e9,1e9 )
+  legend( "topleft",
+          legend=paste("C: r2= ",as.character(r2_C)),
+          lty=1, cex=0.7 )
+
+  plot( sim_G, obs_G,
+        main="Coffee (kg DM ha-1 y-1)\nGuatemala",
+        xlab="Sim. yield (kg ha-1)", ylab="",
+        xlim=c(0,simobs_G.max), ylim=c(0,simobs_G.max),
+        cex.main=1, asp=1 )
+  y_G.lm <- lm( obs_G ~ sim_G )
+  r2_G   <- signif( summary(y_G.lm)$r.squared, 2 )
+  clip( sim_G.min,sim_G.max,0,simobs_G.max )
+  abline( y_G.lm$coefficients[1], y_G.lm$coefficients[2] )
+  # abline(0,1,lty=2)
+  clip  ( -1e9,1e9,-1e9,1e9 )
+  legend( "topleft",
+          legend=paste("G: r2= ",as.character(r2_G)),
+          lty=1, cex=0.7 )
+```
+
+Bayesian calibration generates a sample from the joint posterior probability distribution for all calibrated parameters. The MAP is the '*Maximum A Posteriori*' parameter vector, i.e. the model parameterisation that achieves the highest value for the product of prior (beta distributions for parameters) and likelihood (fit to data) [@Ovalle-Rivera_2020_Assessing; @VanOijen_2020_Bayesian]. The left panel of Fig. \ref{fig:yObsSimTM} shows observed coffee productivity in the 32 treatments against MAP-simulated yield. The yield values are averages over the years 2002-2017 for Turrialba and 2004-2013 for Masatepe. The model run with the MAP parameter vector accounts for 34% of observed variation in yield across the Turrialba treatments, and 66% of variation at Masatepe. Other measured variables were simulated with similar accuracy (see Supplementary Information).
+
+Posterior parameter uncertainty was small, with an average coefficient of variation of 5%. However, each model output depends on multiple parameters, and output uncertainty for individual variables (coffee yield, soil carbon sequestration, nitrogen leaching) was 30-36%. These are predictive uncertainties for model application to a single set of conditions and do not apply to trends across treatments.
+
+
+## CAF2021 outputs for farm types in Costa Rica and Guatemala
+CAF2021 accounted for 36% of observed variation in coffee yields for the farms in Costa Rica (middle panel of Fig. \ref{fig:yObsSimTM}), which compares well with the variation accounted for in the Costa Rican long-term experiment at Turrialba (left panel), especially given the fact that the farm simulations were not calibrated. The results for the Guatemalan farms were less good, with only 15% of yield variation accounted for (right panel). 
+
+```{r table.sim}  
+  knitr::kable( tableCG.sim, caption="Farms in Costa Rica and Guatemala: Simulations of shade (-), yield of coffee, timber and fruit (kg DM ha-1 y-1), soil carbon change and carbon run-off (kg C ha-1 y-1), N-fixation, leaching and emission (kg N ha-1 y-1)." )
+```
+
+Table 3 summarises the farm simulations for coffee yield and seven other ecosystem services grouped by farm type conform @Haggar_2021_Shade. The model correctly identified farm types 1.2/3 and 2.4 as much lower-yielding in both countries than farm types 3.2/3 and 4.3 (Table 2). However, the model was unable to explain the very high yield difference that was observed between the two highest-yielding types in Guatemala, which were 2334 and 5433 kg ha-1 y-1 of bean dry matter for 3.3 and 4.3 respectively, whereas the simulations were 2963 and 2785 kg ha-1 y-1. The very similar yields in these simulations are consistent with these farm types having similar environmental conditions (Table 1), shading and fertilisation (Table 2).
+
+The CAF2021 simulations of Table 3 suggest that there were trade-offs between coffee yield and other ecosystem services. In Costa Rica, farm types with high coffee yield also had high fruit yields but produced less timber and had higher levels of nitrogen leaching and emission. In Guatemala, the trade-offs were less marked apart from high N-emission rates in high-yielding farm types. 
+
+To determine whether the trade-offs were driven by management choices we plotted the simulated ecosystem services at each farm against its level of N-fertilisation (Fig. \ref{fig:FarmSimNfert}) and shading (Fig. \ref{fig:FarmSimShade}). The results suggest that ecosystem services other than timber production were more strongly determined by level of fertilisation than by level of shading. Fertilisation had the expected effects of increasing leaching and emission but it also led to less erosion as measured by soil carbon loss in run-off. Coffee yields were more related to fertilisation level in Costa Rica than in Guatemala. This reflects the wider range and twice as high average level of fertilisation in Costa Rica (Table 2).
+
+```{r}
+  plotimpacts_CG <- function( FC=oF1_C, FG=oF1_G, xvar="Nfert",
+                              yvar="y.sim", yvar2=NULL,
+                              title="Yield", legpos="topleft", ... ){
+    xC <- df_C.f[,xvar] ; xG <- df_G.f[,xvar]
+    yC <- FC    [,yvar] ; yG <- FG    [,yvar]
+    nC <- dim(FC)[1]    ; nG <- dim(FG)[1]
+    if(!is.null(yvar2)) {
+      yC <- sapply(1:nC, function(i){
+        mean( FC[i,"harvDM_f_ha1819"], FC[i,"harvDM_f_ha1920"], na.rm=T ) } )
+      yG <- sapply(1:nG, function(i){
+        mean( FC[i,"harvDM_f_ha1819"], FC[i,"harvDM_f_ha1920"], na.rm=T ) } ) 
+    }
+    plot  ( xC, yC,
+      ylab="",
+      main=title,
+      pch=1,
+      xlim=c( min(xC,xG        ), max(xC,xG        )),
+      ylim=c( min(yC,yG,na.rm=T), max(yC,yG,na.rm=T)), ... )
+    points( xG, yG, pch=20, col="red"  )
+    
+    y.lm_C <- lm( yC ~ xC ) ; y.lm_G <- lm( yG ~ xG )
+    r2_C   <- round( summary(y.lm_C)$r.squared, 2 )
+    r2_G   <- round( summary(y.lm_G)$r.squared, 2 )
+    abline( y.lm_C$coefficients[1], y.lm_C$coefficients[2], col="black" )
+    abline( y.lm_G$coefficients[1], y.lm_G$coefficients[2], col="red" )
+    legend( legpos, title="r2",
+            legend=c( paste("C:",as.character(r2_C)),
+                      paste("G:",as.character(r2_G)) ),
+            col=c("black","red"), lty=c(1), cex=0.5, bg="transparent" )
+  }
+```
+
+```{r FarmSimNfert, fig.height=3.5, fig.cap="\\label{fig:FarmSimNfert}Simulations of ecosystem services at farms in Costa Rica (black) and Guatemala (red). All plots are against N-fertilisation level (kg N ha-1 y-1)."}
+  par( mfrow=c(2,4), mar=c(2,2,2,1), mgp=c(2,1,0) )
+
+  yv <- "harvDM_f_ha1819" ; yv2 <- "harvDM_f_ha1920"
+  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="Nfert", yvar=yv, yvar2=yv2,
+                   xlab="", xaxt="n", legpos="bottomright", title="Yield" )
+  yv <- "harvDMST_3_hay"
+  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="Nfert", yvar=yv,
+                   xlab="", xaxt="n", legpos="topright"   , title="Timber" )
+  yv <- "harvCPT_f_hay"
+  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="Nfert", yvar=yv,
+                   xlab="", xaxt="n", legpos="topleft"    , title="Fruit" )
+  yv <- "D_Csoil"
+  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="Nfert", yvar=yv,
+                   xlab="", xaxt="n", legpos="bottomright",title="C-change" )
+  yv <- "Crunoff_fb"
+  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="Nfert", yvar=yv,
+                   xlab="N-fert."   , legpos="topright"   , title="C-runoff" )
+  yv <- "NfixT_fb"
+  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="Nfert", yvar=yv,
+                   xlab="N-fert."   , legpos="topleft"    , title="N-fixation" )
+  yv <- "Nleaching_fb"
+  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="Nfert", yvar=yv,
+                   xlab="N-fert."   , legpos="topleft"    , title="N-leaching" )
+  yv <- "Nemission_fb"
+  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="Nfert", yvar=yv,
+                   xlab="N-fert."   , legpos="topleft"    , title="N-emission" )
+```
+
+```{r FarmSimShade, fig.height=3.5, fig.cap="\\label{fig:FarmSimShade}Simulations of ecosystem services at farms in Costa Rica (black) and Guatemala (red). All plots are against level of shading (-)."}
+  par( mfrow=c(2,4), mar=c(2,2,2,1), mgp=c(2,1,0) )
+
+  yv <- "harvDM_f_ha1819" ; yv2 <- "harvDM_f_ha1920"
+  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="shade", yvar=yv, yvar2=yv2,
+                   xlab="", xaxt="n", legpos="topleft", title="Yield" )
+  yv <- "harvDMST_3_hay"
+  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="shade", yvar=yv,
+                   xlab="", xaxt="n", legpos="topleft"    , title="Timber" )
+  yv <- "harvCPT_f_hay"
+  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="shade", yvar=yv,
+                   xlab="", xaxt="n", legpos="topright"   , title="Fruit" )
+  yv <- "D_Csoil"
+  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="shade", yvar=yv,
+                   xlab="", xaxt="n", legpos="bottomright",title="C-change" )
+  yv <- "Crunoff_fb"
+  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="shade", yvar=yv,
+                   xlab="N-fert."   , legpos="topleft"    , title="C-runoff" )
+  yv <- "NfixT_fb"
+  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="shade", yvar=yv,
+                   xlab="N-fert."   , legpos="topleft"    , title="N-fixation" )
+  yv <- "Nleaching_fb"
+  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="shade", yvar=yv,
+                   xlab="N-fert."   , legpos="topright"   , title="N-leaching" )
+  yv <- "Nemission_fb"
+  plotimpacts_CG( FC=oF1_C, FG=oF1_G, xvar="shade", yvar=yv,
+                   xlab="N-fert."   , legpos="topright"   , title="N-emission" )
+```
+
+
+## Sensitivity to management
+The analyses of Figures \ref{fig:FarmSimNfert} and \ref{fig:FarmSimShade} show generally fairly weak correlations of the driving variables with the ecosystem variables. This was partly because of confounding of the many environmental and management differences between the farms. To highlight the effects of fertilisation and shading, we therefore carried out a sensitivity analysis where for each farm all conditions were kept the same apart from halving either fertilisation or shading. The results of this analysis are shown in Fig. \ref{fig:dES}. This shows that halving fertilisation is expected to reduce coffee yields, carbon sequestration, N-leaching and emission, while increasing (in Costa Rica) erosion through run-off. Halving shading also increases run-off but otherwise has very different effects: it increases coffee yield and reduces ES closely associated with trees (production of timber and fruit, N-fixation).
+
+```{r dES, fig.height=5, fig.align="center", out.width="80%", fig.cap="\\label{fig:dES}Changes in ecosystem services when fertilisation or shading is halved. 1:3 = yield of coffee, timber, fruit; 4 = soil carbon sequestration; 5 = erosive soil carbon loss in run-off; 6 = N-fixation; 7:8 = loss of N in leaching and emission. All changes are normalised to the country average."}
   par( mfrow=c(2,1), mar=c(4,2,4,2) )
   names.dES <- c( 1:8, "", "", 1:8  )
 
@@ -1116,6 +1056,58 @@ These results suggest that the model can be a useful tool for analysing differen
            beside=T,
            names.arg=names.dES, cex.names=0.8 )
 ```
+
+
+
+\clearpage
+
+# Discussion
+
+
+## Bayesian calibration
+
+We carried out a single Bayesian calibration - for all treatments in Turrialba and  Masatepe simultaneously - to derive parameter estimates. All coffee parameters were treated as being universally applicable, and common tree species were also assumed to have the same properties in both experiments. The only experiment- (and thus country-) specific parameters in the calibration were five soil properties. Variation within experiments was ignored altogether. In reality, there may have been genetic and environmental variation in and between the experiments. Disregarding such plot and block effects may have hampered model fit but ensured that the model was not overfit to noise. Moreover, the calibration was simultaneously to measurements of multiple variables, so model outputs were not optimised for any single variable such as coffee yield. Despite all these restrictions, the calibrated model accounted for 34% of observed coffee yield variation between treatments at Turrialba and 66% at Masatepe. This compares favourably with linear regression of yield on fertilisation level in the experiments for which the $r^2$ was only 23%.
+
+These results suggest that the model can be a useful tool for analysing differences in system performance between different environmental conditions. However, the results do not suggest that the model is a good tool for forecasting the benefits of agroforestry at any individual site, as posterior output uncertainty (driven by posterior parameter uncertainty) was high at 30-36%. 
+
+
+## Farm simulations
+- Quality of model simulations using the MAP parameter vector (derived by calibration on data from Turrialba and Masatepe) for farms in Costa Rica and Guatemala, i.e. out-of-sample simulations.
+- All parameter values for coffee and tree morphology and physiology were identical for all 168 farms (89 in Costa Rica and 79 in Guatemala). Any genetic differences between coffee- and tree-varieties were ignored. The only tree-parameter differences were the farm-specific initial densities of shade trees. Soil composition and water holding capacity did differ between farms based on the SEACAF farm inventory.
+- Parameter uncertainty not changed, but many additional sources of uncertainty, i.e. so parameter uncertainty only provides lower bound. The additional uncertainties are mainly farm input data uncertainties:
+  - Upscaling from top 26 cm. to full soil column. Ignoring variation between farms.
+  - Start year 2005.
+  - Representativeness of the six tree species. Compare with number of tree species reported for each farm.
+  - Ignoring within-month weather variability. Note that WorldClim Turrialba weather data gave similarly good simulations as on-site weather station.
+- The model seems to be able to simulate a wide range of CAF systems. Despite much information being unavailable, and no farm-level model calibration, still good simulation of coffee yields in Costa Rica, but high-productivity Guatemalan farms were not simulated accurately.
+- ES-estimation only preliminary due to the limited database for model calibration and testing: there is a beed for multivariate calibration data, not just yield, and from locations differing in growing conditions.
+
+
+## Farms ES-analysis: Differences between Costa Rica and Guatemala
+- ES & ecosystem disservices 
+- Lower Nfert in C leading to lower N-leaching. However, it also led to lower plant growth and thus lower carbon-addition to the system.
+- Simulated yield differences correlated with Nfert in both countries. This was consistent with observations in Costa Rica. However in Guatemala there were observations of high yield on farms with minimal Nfert, and the model cannot explain that. These poorer results for Guatemala remain to be explained. Three sources of error:
+  - Model structure
+  - Model input data
+  - Model parameterisation
+- Banana productivity persisted better in Costa Rica than in Guatemala.
+  - Banana is used more in Costa Rica than in Guatemala.
+  - Service trees in Costa Rica are mainly Erythrina which is pollarded frequently and intensively, thus allowing light to reach any fruit trees. The Inga in Guatemala are allowed to intercept more light.
+  - Banana is mainly used in young coffee agroforestry stands
+
+
+## Farms ES-analysis: Differences between farm types
+- The model points to inevitable trade-offs between productivity of coffee, productivity of trees and environmental ecosystem services.
+- The data suggest that some Guatemala farms manage to keep yields high despite low fertilisation. The modelling suggests that this can only be the case if either soils in Guatemala (which are not high in N) release their N more readily - which woould lead to fast loss of soil fertility - than Costa Rican soils or if local coffee and shade tree genotypes have higher NUE. Contribution from N-fixation seems small.
+- The farms differed in the amount of shade that was realised. Shade has multiple impacts on soil and  microclimate, and therefore affects not only coffee productivity but all ES. We studied the impacts of shade on the performance of the different systems in a separate model sensitivity analysis, to be discussed next.
+- Shade can be managed in different ways. Farms can have low shade by (1) low planting density of trees, (2) high frequency and intensity of thinning, (3) high frequency and intensity of pruning. Compare these.
+
+
+## Sensitivity analyses
+- Shade trees may produce useful products and lead to increased carbon-sequestration, but they also have an impact on coffee growth. The presence of shade trees lowers temperature as well as the availability to coffee plants of light, water, and nitrogen. This competition for resources reduces coffee yields but bean quality may be enhanced. Shade may also have beneficial effects by supporting biodiversity and constraining some pests and diseases, but these regulating ES were not studied here and are not simulated by CAF2021.
+- Key question: Does shade lead to buffering against extreme climatic conditions? Is there a trade-off between average yield level and stability of yield? 
+  - Answers can only be preliminary: no long-term reliable annual ecosystem services data, apart from the time series of coffee yield in the Turrialba and Masatepe experiments.
+
 
 
 \clearpage
