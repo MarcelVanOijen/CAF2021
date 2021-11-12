@@ -1,0 +1,56 @@
+---
+title: 'Ecosystem services at coffee agroforestry farms in Central America: Estimation using CAF2021'
+subtitle: 'ALTERNATIVE TITLE: Impact of fertilisation and shading on ecosystem services and disservices at coffee agroforestry farms in Costa Rica and Guatemala: A modelling study using CAF2021'
+author:
+- Marcel van Oijen$^{1*}$
+- Jeremy Haggar$^{2}$
+- Mirna Barrios$^{3}$
+- Lucie Büchi$^{2}$
+- Rolando Cerda$^{4}$
+- Stefania Cerretelli$^{2}$
+- Erick López$^{5}$
+- Elias de Melo$^{4}$
+- Alejandra Ospina$^{4}$
+date: '`r Sys.Date()`'
+output:
+  pdf_document:
+    fig_crop: false
+    fig_caption: yes
+    keep_tex: no
+    number_sections: yes
+    toc: no
+  word_document:
+    reference_docx: word-styles-reference-01.docx
+  html_document: default
+fontsize: 11pt
+geometry: margin=1in
+csl: agroforestry-systems.csl
+bibliography: SEACAF.bib
+---
+
+```{r, include=FALSE}
+  knitr::opts_chunk$set(echo=F,results="asis",warning=FALSE,message=FALSE)
+  library( tidyverse )
+```
+
+# NOTES & IDEAS
+
+- Use EF in text? Do not compare with EF from mineral soils, but use EF = Nemission / (Nfert + Nmineralisation).
+- Lucie: information that Nfert stimulates soil Cseq, as CAF2021 shows as well. She has a reference to a meta-analysis for cover crops with/without tillage.
+- Lucie has data on mineralisation that do not explain the high yields at low Nfert in Guatemala P4S3, because she found low mineralisation rate in that farm type. [And she also found lower mineralisation in GTM than in CRI?]
+- Show whether obs. and sim. show the same response to temperature?
+- Maybe calculate coffee yield variability not for the whole time series 2005-2020 but skip the first 5 years when the coffee does not yet produce much.
+- C-stocks in trees: data will come soon!
+- Model is also weak in phenology, especially the assumption that flowering all happens on a single day. And the model does not simulate any damaging effect from extremely high rainfall events after a prolonged dry period.
+- Rolando B. Cerda from CATIE mentioned Agroforesta [https://www.cirad.fr/en/worldwide/platforms-in-partnership/agroforesta], a platform that may support the CAF2021 training? 
+- See presentations SEACAF 2021-10-11 to 13 on https://drive.google.com/drive/folders/1jGC_9sS71R2V6USdZpApy5YrHA2sOT9e 
+- Because of lack of farm data (on other variables than coffee yield), comparison with the literature, for example for biogeochemistry, is important. 
+- https://link.springer.com/chapter/10.1007%2F978-3-030-67448-9_8. [@Korschens_2021_LongTerm] Lucie: "review of long term experiments worldwide, and it shows a positive effect of fertilisation on Corg"
+- https://www.cambridge.org/core/journals/journal-of-agricultural-science/article/effects-of-cropping-sequence-fertilization-and-straw-management-on-the-yield-stability-of-winter-wheat-19862017-in-the-broadbalk-wheat-experiment-rothamsted-uk/D34A0F1092487F93E2B33EA15CE67059. Lucie: "some examples in Rothamsted (broadbalk) since they have different mineral fertilizer regimes."
+- Other papers, probably on link Nfert-Cseq, emailed by Lucie: [@Virto_2012_Carbon; @Saffih-Hdadi_2008_Modeling; @Poeplau_2015_Carbon; @Mary_2020_Soil; @Li_2020_Residue; @Autret_2016_Alternative; @Triberti_2016_Longterm].
+- Some more browsing produced the following papers for coffee agroforestry biogeochemistry: [@Sauvadet_2019_Shade; @Iii_2017_Effects; @Lopez-Rodriguez__Contribution].
+- Lucie: for integration of SEACAF results, perhaps work similarly as [@Blaser_2018_Climatesmart]
+- Edwin mentioned the following two references on climate change in Guatemala: [@Espinoza_2019_Tendencias; @Insivumeh_2019_Proyecciones].
+- For runoff, maybe use: [@Arciniega-Esparza_2021_Remote; @Gomez-Delgado_2011_Modelling]
+
+# References {-}
