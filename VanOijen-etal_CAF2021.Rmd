@@ -13,14 +13,14 @@ author:
 - Alejandra Ospina$^{4}$
 date: '`r Sys.Date()`'
 output:
+  word_document:
+    reference_docx: word-styles-reference-01.docx
   pdf_document:
     fig_crop: false
     fig_caption: yes
     keep_tex: no
     number_sections: yes
     toc: no
-  word_document:
-    reference_docx: word-styles-reference-01.docx
   html_document: default
 fontsize: 11pt
 geometry: margin=1in
@@ -1052,8 +1052,9 @@ After the Bayesian calibration on the data from the two experiments, no further 
 
 
 ## Analysis of ecosystem services
-Except for farm type 4.3, the observed and simulated coffee yields were higher in Costa Rica than in Guatemala, which matches the about twice as high fertilisation rates in Costa Rica (Tables 2 and 3). The simulations suggest that the higher fertilisation in Costa Rica also stimulated carbon sequestration, nitrogen leaching and emission (Fig. \ref{fig:FarmSimShade}). Other differences between the countries, such as production of more fruit but less timber in Costa Rica, were the result of different choices of shade tree species and planting density rather than differential impacts of fertilisation on tree species (Tables 2 and 3).\
-    The model points to inevitable trade-offs between productivity of coffee, productivity of trees and environmental ecosystem services. Changing the level of fertilisation or shading can benefit some ecosystem services but always to the detriment of others. This was apparent from the farm simulations shown in Figures \ref{fig:FarmSimNfert} and \ref{fig:FarmSimShade}, but was highlighted most clearly in the sensitivity analysis presented in Fig. \ref{fig:dES}. The benefits from fertilisation for yield and carbon sequestration must be balanced against the costs associated with increased nitrogen leaching and emission. Likewise the benefits for coffee yield of removing shading must be balanced against the associated losses in tree production (fruit, timber) and carbon sequestration as well as the reduced protection against erosion.\
+Except for farm type 4.3, the observed and simulated coffee yields were higher in Costa Rica than in Guatemala, which matches the about twice as high fertilisation rates in Costa Rica (Tables 2 and 3). The simulations suggest that the higher fertilisation in Costa Rica also stimulated carbon sequestration, nitrogen leaching and emission (Fig. \ref{fig:FarmSimShade}). A positive effect of fertilisation on carbon sequestration was also shown by @Korschens_2021_LongTerm, in their review of long-term experiments worldwide and in several empirical studies [@Virto_2012_Carbon; @Triberti_2016_Longterm].\
+    Other differences between the countries, such as production of more fruit but less timber in Costa Rica, were the result of different choices of shade tree species and planting density rather than differential impacts of fertilisation on tree species (Tables 2 and 3).\
+    The model points to inevitable trade-offs between productivity of coffee, productivity of trees and environmental ecosystem services. Changing the level of fertilisation or shading can benefit some ecosystem services but always to the detriment of others. This was apparent from the farm simulations shown in Figures \ref{fig:FarmSimNfert} and \ref{fig:FarmSimShade}, but was highlighted most clearly in the sensitivity analysis presented in Fig. \ref{fig:dES}. The benefits from fertilisation for yield and carbon sequestration must be balanced against the costs associated with increased nitrogen leaching and emission. Likewise the benefits for coffee yield of removing shading must be balanced against the associated losses in tree production (fruit, timber) and carbon sequestration as well as the reduced protection against erosion. Shading had only a minor impact on carbon sequestration in the simulations (Fig. \ref{fig:dES}), and the same was recently reported for the Turrialba experiment by @Sauvadet_2019_Shade. Protection against erosion by high canopy cover, as simulated here, has repeatedly been observed in coffee agroforestry systems [@Meylan_2017_Evaluating; @DeLeijster_2021_Ecosystem and references therein].\
     The focus of CAF2021 is on biogeochemistry, and the effects of fertilisation on processes in soils, coffee plants and trees are simulated in considerable detail. However, the effects of shading on the coffee agroforestry system are manifold and complex, and are not simulated fully by CAF2021. The model does account for shade trees lowering temperature below them (impacting coffee plant physiology) as well as competing with the coffee plants for light, water, and nitrogen. But the model does not represent other organisms and thus does not simulate how shade supports biodiversity and constrains pests and diseases. Decision support for such non-biogeochemical ecosystem services would thus require a different model.
 
 
