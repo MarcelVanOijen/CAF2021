@@ -24,3 +24,5 @@ gadm36_GTM_0_sp.rds
 initialisation/CG/
 data/CG/
 *_cache/
+*.rds
+coordinates_farms.txt
