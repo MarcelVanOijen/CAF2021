@@ -1,16 +1,21 @@
-## BC_CAF2021_MCMC_init_Turrialba_01_E_AC.R
+## BC_CAF2021_MCMC_init_Turrialba_01-15-19.R
 ## MvO, 2021-11-24
 
 ## FILE FOR PRIOR PARAMETER DISTRIBUTION
-   file_prior <- "parameters/parameters_BC_Turrialba_01_E_AC.txt"
+   file_prior <- "parameters/parameters_BC_Turrialba_01-15-19.txt"
 
 ## LIKELIHOOD FUNCTION ##
    source('BC/fLogL_Sivia.R')
 
 ## SETTINGS FOR THE DIFFERENT CALIBRATION SITES (at least one site)
-   sitesettings_filenames <-
-      "initialisation/initialise_CAF2021_Turrialba_01_E_AC.R"
-   sitedata_filenames     <- "data/data_Turrialba_01_E_AC.txt"
+   sitesettings_filenames <- c(
+      "initialisation/initialise_CAF2021_Turrialba_01_E_AC.R",
+      "initialisation/initialise_CAF2021_Turrialba_15_CE_AC.R",
+      "initialisation/initialise_CAF2021_Turrialba_19_PS_AC.R" )
+   sitedata_filenames     <- c(
+      "data/data_Turrialba_01_E_AC.txt",
+      "data/data_Turrialba_15_CE_AC.txt",
+      "data/data_Turrialba_19_PS_AC.txt" )
    nSites                 <- length(sitedata_filenames)
    sitelist               <- list() ; length(sitelist) <- nSites
 
