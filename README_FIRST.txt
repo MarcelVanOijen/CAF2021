@@ -5,9 +5,11 @@ QUICK START:
 (1) Install R on your computer.
 (2) Install RStudio on your computer.
 (3) Clone the CAF2021 directories to your computer.
-(4) Open the file "INTRODUCTION_EXAMPLES_CAF2021.R" in RStudio and execute the code examples.
+(4a) [Mac-users] If you are using a Mac computer, continue with (5).
+(4b) [Windows-users] If you are using a Windows computer, replace the included CAF2021.DLL file with a similarly named file copied from CAF2021_Win.DLL. [If you later want to revert to the Mac-version, you can restore the original CAF2021.DLL by copying from CAF2021_Mac.DLL.]
+(5) Open the file "INTRODUCTION_EXAMPLES_CAF2021.R" in RStudio and execute the code examples.
 OPTIONAL:
-(5) Install gfortran on your computer (if you plan to make changes to the core model structure)
+(6) Install gfortran on your computer (if you plan to make changes to the core model structure)
 
 FURTHER READING:
 - Ovalle-Rivera, O., Van Oijen, M., Läderach, P., Roupsard, O., de Melo, E., Barrios, M. & Rapidel, B. (2020). Assessing the accuracy and robustness of a process-based model for coffee agroforestry systems in Central America. Agroforestry Systems 94: 2033-2051.
